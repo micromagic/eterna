@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 代码表配置 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<!-- 读取代码的model -->
+			<model name="codeQuery" modelExportName="ajax.export">
+				<execute name="noParamQuery" generator="self.micromagic.app.NoParamQueryExecute" />
+			</model>
+
+			<query name="code.sex">
+				<prepared-sql>
+					select * from t_sex
+				</prepared-sql>
+				<readers>
+					<reader name="sexId" type="String" />
+					<reader name="sexName" type="String" />
+				</readers>
+			</query>
+
+			<query name="code.dept">
+				<prepared-sql>
+					select * from t_dept
+				</prepared-sql>
+				<readers>
+					<reader name="deptId" type="String" />
+					<reader name="deptName" type="String" />
+				</readers>
+			</query>
+
+		</objs>
+	</factory>
+</eterna-config>

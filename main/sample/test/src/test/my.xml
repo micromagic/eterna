@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- eterna 学习例子 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<query name="my.first.query">
+				<prepared-sql>
+					select id, name, age, birth, memo from my_table
+					#param(name1)[where id = ?]
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="String" />
+				</parameters>
+				<readers>
+					<reader name="id" type="String" caption="编号" />
+					<reader name="name" type="String" caption="姓名" />
+					<reader name="age" type="int" caption="年龄" />
+					<reader name="birth" type="Date" caption="生日" />
+					<reader name="memo" type="String" caption="备注" />
+				</readers>
+			</query>
+
+			<export name="my.first.export" path="${page.view}" viewName="my.first.view" />
+			<model name="my.first.model" modelExportName="my.first.export">
+				<query-execute queryName="my.first.query">
+					<param-bind src="request-parameter" names="id" />
+				</query-execute>
+				<trans-execute from="stack:pop" to="data:myFirst" />
+			</model>
+
+			<view name="my.first.view">
+				<component name="a1" type="a">
+					<component-param>text:"添加"</component-param>
+					<init-script>
+						webObj.attr("href", {$ef:getHeadURL}("my.edit.model"));
+					</init-script>
+				</component>
+				<replacement name="nbsp" baseComponentName="nbsp2" />
+				<component name="a2" type="a">
+					<component-param>text:"显示全部"</component-param>
+					<init-script>
+						webObj.attr("href", {$ef:getHeadURL}("my.first.model"));
+					</init-script>
+				</component>
+				<table-list name="myFirstTable" baseName="query:my.first.query"
+					dataName="myFirst">
+					<columns>
+						<column name="opt" srcName="id" caption="操作">
+							<component name="am" type="a">
+								<component-param>text:"修改"</component-param>
+								<init-script>
+									webObj.attr("href", {$ef:getHeadURL}("my.edit.model") + "&amp;"
+									+ jQuery.param({id:eg_temp.valueObj.value}));
+								</init-script>
+							</component>
+						</column>
+					</columns>
+				</table-list>
+			</view>
+
+			<export name="my.edit.export" path="${page.view}" viewName="my.modify.view" />
+			<model name="my.edit.model" modelExportName="my.edit.export">
+				<query-execute queryName="my.getData">
+					<param-bind src="request-parameter" names="id" />
+				</query-execute>
+				<trans-execute from="stack:pop" opt="getFirstRow" to="data:myData" />
+			</model>
+
+			<view name="my.modify.view" debug="0">
+				<component name="form" type="form">
+					<init-script>
+						webObj.attr("action", {$ef:getHeadURL}("do.modify.model"));
+					</init-script>
+					<table-form name="modifyTable" columns="20,30,20,30"
+						baseName="query:my.getData" dataName="myData">
+						<cells>
+							<cell name="age">
+								<replacement name="age_input" baseComponentName="text">
+									<events>
+										<event name="change">
+											var ageValue = event.data.webObj.val();
+											var birthObj = _eterna.getWebObj("birth");
+											var dateArr = birthObj.val().split("-");
+											if (dateArr.length == 3)
+											{
+												var tmpDate = new Date();
+												var nowYear = tmpDate.getFullYear();
+												tmpDate.setMonth(parseInt(dateArr[1], 10) - 1);
+												tmpDate.setDate(parseInt(dateArr[2], 10));
+												if (tmpDate > new Date())
+												{
+													nowYear -= 1;
+												}
+												tmpDate.setFullYear(nowYear - ageValue);
+												birthObj.val(tmpDate.getFullYear() + "-"
+														+ (tmpDate.getMonth() + 1) + "-" + tmpDate.getDate());
+											}
+										</event>
+									</events>
+								</replacement>
+							</cell>
+							<cell name="birth">
+								<replacement name="birth_input" baseComponentName="text_date">
+									<events>
+										<event name="change">
+											var ageObj = _eterna.getWebObj("age");
+											var dateArr = event.data.webObj.val().split("-");
+											if (dateArr.length == 3)
+											{
+												var tmpDate = new Date();
+												var nowYear = tmpDate.getFullYear();
+												tmpDate.setMonth(parseInt(dateArr[1], 10) - 1);
+												tmpDate.setDate(parseInt(dateArr[2], 10));
+												if (tmpDate > new Date())
+												{
+													nowYear -= 1;
+												}
+												ageObj.val(nowYear - parseInt(dateArr[0]));
+											}
+										</event>
+									</events>
+								</replacement>
+							</cell>
+						</cells>
+					</table-form>
+					<component name="center" type="center">
+						<component name="submit" type="input-submit" />
+					</component>
+				</component>
+			</view>
+
+			<query name="my.getData">
+				<prepared-sql>
+					select * from my_table
+					where id = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="String" />
+				</parameters>
+				<readers>
+					<reader name="id" type="String" caption="编号">
+						<attribute name="inputType" value="text" />
+					</reader>
+					<reader name="name" type="String" caption="姓名">
+						<attribute name="inputType" value="text" />
+					</reader>
+					<reader name="age" type="int" caption="年龄" />
+					<reader name="birth" type="Date" caption="生日" />
+					<reader name="memo" type="String" caption="备注">
+						<attribute name="inputType" value="text" />
+					</reader>
+				</readers>
+			</query>
+			<update name="my.first.insert">
+				<prepared-sql>
+					insert into my_table (id, name, age, birth, memo)
+					values (?, ?, ?, ?, ?)
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="String" />
+					<parameter name="name" type="String" />
+					<parameter name="age" type="int" />
+					<parameter name="birth" type="Date" />
+					<parameter name="memo" type="String" />
+				</parameters>
+			</update>
+			<update name="my.first.update">
+				<prepared-sql>
+					update my_table set name = ?, age = ?, birth = ?, memo = ?
+					where id = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="name" type="String" />
+					<parameter name="age" type="int" />
+					<parameter name="birth" type="Date" />
+					<parameter name="memo" type="String" />
+					<parameter name="id" type="String" />
+				</parameters>
+			</update>
+
+			<export name="go.first.model" modelName="my.first.model" />
+			<model name="do.modify.model" modelExportName="go.first.model">
+				<query-execute queryName="my.getData">
+					<param-bind src="request-parameter" names="id" />
+				</query-execute>
+				<trans-execute from="stack:pop" to="cache:0" />
+				<check-execute checkPattern="0;hasNext" trueModelName="update.data.model" falseModelName="insert.data.model" />
+			</model>
+			<model name="insert.data.model">
+				<update-execute updateName="my.first.insert">
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+			<model name="update.data.model">
+				<update-execute updateName="my.first.update">
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+
+			<!-- 查询 -->
+			<query name="test.searchQuery">
+				<prepared-sql>
+					select * from my_table
+					#sub[where $]
+				</prepared-sql>
+				<readers>
+					<reader name="id" type="String" caption="编号" />
+					<reader name="name" type="String" caption="姓名" />
+					<reader name="age" type="int" caption="年龄" />
+					<reader name="birth" type="Date" caption="生日">
+						<attribute name="beforeInit" value="checkResult = false;" />
+					</reader>
+					<reader name="memo" type="String" caption="备注">
+						<attribute name="beforeInit" value="checkResult = false;" />
+					</reader>
+				</readers>
+			</query>
+
+
+			<!-- 配置查询条件 -->
+			<search name="test.search" queryName="test.searchQuery"
+				conditionIndex="1" pageSize="5" searchManager="123">
+				<condition-propertys>
+					<condition-property name="age1" colName="age"
+						colType="double" caption="年龄(大于)" defaultBuilder="notBelow" />
+					<condition-property name="age2" colName="age"
+						colType="double" caption="年龄(小于)" defaultBuilder="notLarge" />
+					<condition-property name="name" colType="String"
+						caption="姓名" />
+					<condition-property name="birth" colType="Date"
+						caption="生日" inputType="text_date" />
+				</condition-propertys>
+			</search>
+
+			<!-- 配置查询业务及export -->
+			<export name="search.export" path="${page.view}" viewName="search.view" />
+			<model name="search.model" modelExportName="search.export">
+				<!-- 查询执行者 -->
+				<search-execute />
+			</model>
+
+			<!-- 配置查询的视图 -->
+			<view name="search.view">
+				<!-- 这里使用了一个定义好的typical-component，里面已经定义了分页的控制条等 -->
+				<replacement name="search_component" baseComponentName="search_component;conditions,list">
+					<before-init>
+						eg_temp.dataName = "queryResult";
+						{$dataV:eg_temp.dataName+'_modelName'} = "search.model";
+						{$dataV:eg_temp.dataName+'_searchName'} = "test.search";
+					</before-init>
+					<table-form name="conditions" columns="20,30,20,30" baseName="search:test.search" dataName="searchManager">
+						<cells cellOrder="title">
+							<cell name="title" titleSize="0" containerSize="-1"
+								comParam="attr:{align:'left'}">
+								<init-script>webObj.text("请输入查询条件");</init-script>
+							</cell>
+							<cell name="bottons" titleSize="0" containerSize="-1">
+								<component-param>attr:{align:"center"}</component-param>
+								<component name="queryBtn" type="input-submit">
+									<component-param>attr:{value:"查询"}</component-param>
+								</component>
+							</cell>
+						</cells>
+					</table-form>
+					<table-list name="list" baseName="query:test.searchQuery" dataName="queryResult">
+						<tr>
+							<before-init>
+								<!-- 只显示标题行，数据行，数据行之后的 -->
+								checkResult = eg_temp.rowType == "title" || eg_temp.rowType == "row" 
+										|| eg_temp.rowType == "afterRow";
+							</before-init>
+							<init-script>
+								<!-- 给当前行设上id，以便后面隐藏及显示时可以方便的找到 -->
+								{$parentScript}
+								if (eg_temp.rowType == "afterRow")
+								{
+									webObj.attr("id", "other_" + eg_temp.index);
+									webObj.hide();
+								}
+								else if (eg_temp.rowType == "row")
+								{
+									webObj.attr("id", "dataRow_" + eg_temp.index);
+								}
+							</init-script>
+							<component name="td" type="td">
+								<!-- 将背景色设为灰色，这样可以和其他行区别较明显 -->
+								<component-param>css:{"background-color":"#f8f8f8"}</component-param>
+								<before-init>
+									<!-- 当行状态为 数据行之后的(afterRow) 才显示此格 -->
+									checkResult = eg_temp.rowType == "afterRow";
+								</before-init>
+								<init-script>
+									<!-- eg_temp.columnCount 指当前表格的列数 -->
+									webObj.attr("colSpan", eg_temp.columnCount);
+								</init-script>
+								<table-form name="studInfo" columns="10,30,10,50" dataName="queryResult">
+									<component-param>css:{width:"100%"}</component-param>
+									<cells>
+										<!-- 将needIndex设为true，表示是多行结果集，需要根据当前所在的数据行(eg_temp.index)，来读取数据 -->
+										<cell name="name" srcName="name" caption="姓名" needIndex="true" />
+										<cell name="birth" srcName="birth" caption="生日" needIndex="true" />
+										<!-- 将containerSize设为3，表示这个单元的数据格要占用3格 -->
+										<cell name="memo" srcName="memo" caption="备注" needIndex="true" containerSize="3" />
+									</cells>
+								</table-form>
+							</component>
+						</tr>
+						<columns columnOrder="opts">
+							<!--用于展开显示或折叠显示的操作列 -->
+							<column name="opts" width="20">
+								<component-param>attr:{align:"center"}</component-param>
+								<before-init>checkResult = true;</before-init>
+								<!--点击后所在行展开显示或折叠显示 -->
+								<component name="opt" type="span">
+									<component-param>text:"+ 展开",css:{cursor:"pointer"}</component-param>
+									<events>
+										<event name="click">
+											var obj = event.data.webObj;
+											if (obj.text() == "+ 展开")
+											{
+												obj.text("- 折叠");
+												_eterna.getWebObj("other_" + event.data.egTemp.index).show();
+											}
+											else
+											{
+												obj.text("+ 展开");
+												_eterna.getWebObj("other_" + event.data.egTemp.index).hide();
+											}
+										</event>
+									</events>
+								</component>
+							</column>
+						</columns>
+					</table-list>
+				</replacement>
+			</view>
+			
+			
+			<!-- 列表的纵向单元格合并的例子   -->
+			<model name="cm" modelExportName="cm.export" transactionType="notNeed"/>
+			<export name="cm.export" path="${page.view}" viewName="cm.view"/>
+			
+			<view name="cm.view">
+			   <before-init>
+			      var d = {rowCount:20,rows:[],names:{col1:1,col2:2,col3:3,col4:4,col5:5,col6:6,col7:7,col8:8,col9:9,id:10}};
+			      d.rows.push(["a1","b1","c1","d1","e1","f1","g1","h1","i1",1]);
+			      d.rows.push(["a1","b1","c1","d1","e1","f1","g1","h1","i1",2]);
+			      d.rows.push(["a2","b1","c1","d1","e1","f1","g1","h1","i1",3]);
+			      d.rows.push(["a2","b2","c1","d2","e1","f1","g1","h1","i1",4]);
+			      d.rows.push(["a2","b2","c2","d2","e1","f1","g1","h1","i1",5]);
+			      d.rows.push(["a2","b2","c2","d2","e2","f1","g1","h1","i1",6]);
+			      d.rows.push(["a2","b2","c3","d2","e2","f1","g1","h1","i1",7]);
+			      d.rows.push(["a2","b2","c3","d3","e2","f1","g1","h1","i1",8]);
+			      d.rows.push(["a3","b2","c3","d3","e2","f1","g1","h1","i1",9]);
+			      d.rows.push(["a3","b2","c3","d3","e2","f1","g1","h1","i1",10]);
+			      d.rows.push(["a3","b3","c3","d4","e2","f2","g1","h1","i1",11]);
+			      d.rows.push(["a3","b3","c3","d4","e3","f2","g1","h1","i1",12]);
+			      d.rows.push(["a3","b3","c4","d4","e3","f2","g1","h1","i1",13]);
+			      d.rows.push(["a5","b3","c4","d5","e3","f2","g1","h1","i1",14]);
+			      d.rows.push(["a5","b3","c4","d5","e3","f2","g1","h1","i1",15]);
+			      d.rows.push(["a5","b4","c4","d5","e3","f2","g1","h1","i1",16]);
+			      d.rows.push(["a5","b4","c4","d6","e4","f2","g1","h1","i1",17]);
+			      d.rows.push(["a5","b5","c4","d6","e5","f2","g1","h1","i1",18]);
+			      d.rows.push(["a5","b5","c4","d7","e5","f2","g1","h1","i1",19]);
+			      d.rows.push(["a6","b5","c5","d7","e5","f2","g1","h1","i1",20]);
+			      {$data:testData} = d;
+			   </before-init>
+			   <table-list name="t" dataName="testData">
+			      <before-init>{$ef:cm_initColumnMergeInfo}();</before-init>
+			      <columns>
+			         <column name="$typical" srcName="$sameAsName">
+			            <before-init>checkResult = {$ef:cm_checkSameValue}(objConfig);</before-init>
+			            <init-script>{$ef:cm_storeCurrentTdObj}(objConfig, webObj);</init-script>
+			         </column>
+			         <column name="id" beforeInit="" initScript=""/>
+			         <column name="col1"/>
+			         <column name="col2" initParam="parentMerge:'col1'"/>
+			         <column name="col3" initParam="parentMerge:'col2'"/>
+			         <column name="col4"/>
+			         <column name="col5"/>
+			         <column name="col6" initParam="parentMerge:'col3'"/>
+			         <column name="col7"/>
+			         <column name="col8" initParam="parentMerge:'col4'"/>
+			         <column name="col9" initParam="parentMerge:'col5'"/>
+			      </columns>
+			   </table-list>
+			</view>
+
+		</objs>
+	</factory>
+</eterna-config>
+
+

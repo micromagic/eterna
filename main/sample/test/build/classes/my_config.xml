@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 项目相关的配置 -->
+<eterna-config>
+	<factory>
+
+		<objs>
+
+			<function name="getHeadURL" param="modelName, dataType"><![CDATA[
+				var urlHead;
+				if ({$data:servletPath} != null)
+				{
+					urlHead = {$data:root} + {$data:servletPath} + "?";
+				}
+				else
+				{
+					urlHead = "?";
+				}
+				if (urlHead != null)
+				{
+					var param;
+					if (dataType != null)
+					{
+					  if (typeof dataType == "string")
+                  {
+							param = {};
+					  		param[EG_DATA_TYPE] = dataType;
+                  }
+                  else
+                  {
+                     if (dataType.___dataType != null)
+                     {
+                     	param = dataType.param;
+					  			param[EG_DATA_TYPE] = dataType.___dataType;
+                     }
+                     else
+                     {
+                     	param = dataType;
+                     }
+                  }
+					}
+					else
+					{
+						param = {};
+					}
+					param[{$data:modelNameTag}] = modelName;
+					urlHead = urlHead + jQuery.param(param);
+				}
+				return urlHead;
+			]]></function>
+
+			<!-- 获得图片的url -->
+			<function name="getImgPath" param="imgName"><![CDATA[
+				return {$data:root} + "/res/images/" + imgName;
+			]]></function>
+
+			<!-- 默认的错误页面 -->
+			<export name="error" errorExport="true" path="/error.jsp" />
+			<!-- ajax返回页面 -->
+			<export name="ajax.export" path="${page.view}" viewName="ajax.view" />
+			<view name="ajax.view" defaultDataType="data"/>
+
+		</objs>
+
+		<attributes>
+
+			<attribute name="defaultErrorExport" value="error" />
+
+			<attribute name="view.global.setting" value="$useBodyText">
+				span:{css:{fontFamily:"Arial, Helvetica, sans-serif"}},
+				form:{attr:{method:"post"},css:{margin:'0px'}},
+				table:{attr:{border:0,cellPadding:0,cellSpacing:0}},
+				td:{attr:{noWrap:true}},
+				tableForm:{attr:{width:"98%",border:0,cellPadding:0,cellSpacing:0},className:"t_table"},
+				tableForm_tr:{className:"tr_fld_v"},
+				tableForm_title:{attr:{align:"center",noWrap:true},className:"td_fld_title"},
+				tableForm_container:{className:"t_td"},
+				tableList:{attr:{width:"100%",border:0,cellPadding:0,cellSpacing:0},className:"t_table",caculateWidth_fix:0},
+				tableList_tr:{},
+				tableList_title:{attr:{noWrap:true},className:"t_head"},
+				tableList_container:{attr:{noWrap:true},className:"t_td"},
+				imgRoot:"/res/images"
+			</attribute>
+
+		</attributes>
+
+	</factory>
+</eterna-config>

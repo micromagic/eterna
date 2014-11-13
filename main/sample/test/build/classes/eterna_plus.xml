@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!--
+一些附加方法及组件
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<!--
+			文本列表控件
+			-->
+
+			<!-- 显示文本列表的基本界面 -->
+			<model name="text_list_show" modelExportName="text_list_show.export" transactionType="notNeed"/>
+			<export name="text_list_show.export" path="${page.sub}"/>
+
+			<!-- 带列表的文本输入控件 -->
+			<typical-replacement name="text_list" baseComponentName="text">
+				<init-script><![CDATA[
+					{$parentScript}
+					var listFrame = jQuery("#text_list_data_frame");
+					if (listFrame.size() == 0)
+					{
+						jQuery("body").append("<iframe id='text_list_data_frame' name='text_list_data_frame' scrolling='no'></iframe>");
+						listFrame = jQuery("#text_list_data_frame");
+						listFrame.css("width", "230px");
+						listFrame.css("height", "20px");
+						listFrame.css("position", "absolute");
+						listFrame.hide();
+						listFrame.attr("src", {$ef:getHeadURL}("text_list_show"));
+					}
+					webObj.attr("autocomplete", "off");
+					if (eg_cache.textListProps == null)
+					{
+						eg_cache.textListProps = {
+							listFrame:null,
+							showWindow:null,
+							loading:0,
+							textObj:null,
+							active:false,
+							textFocused:false,
+							oldHeight:-1,
+							hasSelected:false,
+							selectedData:null
+						};
+						eg_cache.textListProps.listFrame = listFrame;
+						eg_cache.textListProps.showWindow = text_list_data_frame;
+					}
+					webObj.data("loadModel", eg_temp.param.loadModel);
+					if (eg_temp.param.listDataName == null)
+					{
+						eg_temp.param.listDataName = "listData";
+					}
+					webObj.data("listDataName", eg_temp.param.listDataName);
+					if (eg_temp.param.frameWidth != null)
+					{
+						webObj.data("frameWidth", eg_temp.param.frameWidth);
+					}
+					if (eg_temp.param.frameRefreshRate != null)
+					{
+						var rate = parseInt(eg_temp.param.frameRefreshRate);
+						if (!isNaN(rate))
+						{
+							webObj.data("frameRefreshRate", rate);
+						}
+					}
+				]]></init-script>
+				<events>
+					<event name="dblclick">
+						{$ef:loadTextListData}(webObj);
+					</event>
+					<event name="keydown">
+						if (event.keyCode == 27) // ESC
+						{
+							eg_cache.textListProps.textFocused = false;
+							event.preventDefault();
+							return false;
+						}
+						else if (event.keyCode == 38 || event.keyCode == 40) // 38上 40下
+						{
+							var optName = event.keyCode == 38 ? "upSelected" : "downSelected";
+							if (eg_cache.textListProps.showWindow.triggerEvent != null)
+							{
+								eg_cache.textListProps.showWindow.triggerEvent(optName);
+							}
+							// Chrome会在按上下时将光标移到最前或最后
+							event.preventDefault();
+							return false;
+						}
+					</event>
+					<event name="keypress">
+						if (event.keyCode == 13) // 回车
+						{
+							if (eg_cache.textListProps.active)
+							{
+								eg_cache.textListProps.hasSelected = true;
+								eg_cache.textListProps.active = false;
+							}
+							else
+							{
+								{$ef:loadTextListData}(webObj);
+							}
+							event.preventDefault();
+							return false;
+						}
+						else if (event.keyCode == 27) // ESC
+						{
+							event.preventDefault();
+							return false;
+						}
+					</event>
+					<event name="keyup">
+						if (event.keyCode == 13) // 回车
+						{
+							event.preventDefault();
+							return false;
+						}
+						else if (event.keyCode == 27) // ESC
+						{
+							event.preventDefault();
+							return false;
+						}
+						var v1 = webObj.val();
+						var v2 = webObj.data("oldValue");
+						if (v1 != v2)
+						{
+							webObj.data("oldValue", v1);
+							{$ef:loadTextListData}(webObj);
+						}
+					</event>
+					<event name="focus">
+						if (eg_cache.textListProps.textObj == webObj)
+						{
+							eg_cache.textListProps.textFocused = true;
+						}
+					</event>
+					<event name="blur">
+						eg_cache.textListProps.textFocused = false;
+					</event>
+					<event name="selected">
+						if (eg_temp.param.listSrcName != null)
+						{
+							var theData = eg_cache.textListProps.selectedData.valueData;
+							var theValue = {$ef:getData_value}(theData,
+									eg_temp.param.listSrcName, eg_cache.textListProps.selectedData.selectedIndex);
+							if (theValue != null)
+							{
+								webObj.val(theValue);
+								webObj.data("oldValue", theValue);
+								webObj.change();
+							}
+						}
+					</event>
+				</events>
+			</typical-replacement>
+
+			<!-- 要求对文本列表进行数据载入 -->
+			<function name="loadTextListData" param="theObj">
+				if (!eg_cache.textListProps.loading)
+				{
+					if (!eg_cache.textListProps.active)
+					{
+						setTimeout({$ef:supervisionTextList}, 500);
+					}
+				}
+				eg_cache.textListProps.loading = 1;
+				eg_cache.textListProps.textObj = theObj;
+				eg_cache.textListProps.textFocused = true;
+				theObj.trigger("list");
+			</function>
+			<!-- 监控文本列表, 控制列表窗口的显示/关闭/高度等 -->
+			<function name="supervisionTextList"><![CDATA[
+				if (eg_cache.textListProps.loading)
+				{
+					if (eg_cache.textListProps.loading >= 2)
+					{
+						eg_cache.textListProps.loading = 0;
+						var textObj = eg_cache.textListProps.textObj;
+						if (textObj != null)
+						{
+							if (eg_cache.textListProps.showWindow.loadView != null)
+							{
+								var url = {$ef:getHeadURL}(textObj.data("loadModel"), EG_DATA_TYPE_ALL);
+								var params = {$ef:createTextListParam}(textObj);
+								eg_cache.textListProps.showWindow.loadView(url, params);
+							}
+						}
+						eg_cache.textListProps.active = true;
+					}
+					else
+					{
+						eg_cache.textListProps.loading++;
+						setTimeout({$ef:supervisionTextList}, 500);
+						return;
+					}
+				}
+				if (eg_cache.textListProps.active)
+				{
+					if (eg_cache.textListProps.showWindow.getPrintDivHeight != null)
+					{
+						var height = eg_cache.textListProps.showWindow.getPrintDivHeight();
+						if (height != -1)
+						{
+							var textObj = eg_cache.textListProps.textObj;
+							var pos = textObj.position();
+							var listFrame = eg_cache.textListProps.listFrame;
+							var tmpTop = (pos.top + textObj.outerHeight()) + "px";
+							var tmpLeft = pos.left + "px";
+							var tmpWidth;
+							if (textObj.data("frameWidth") == null)
+							{
+								tmpWidth = textObj.outerWidth() + "px";
+							}
+							else
+							{
+								tmpWidth = textObj.data("frameWidth");
+							}
+							if (eg_cache.textListProps.oldHeight != height || tmpTop != listFrame.css("top")
+									|| tmpLeft != listFrame.css("left") || tmpWidth != listFrame.css("width"))
+							{
+								listFrame.css("top", tmpTop);
+								listFrame.css("left", tmpLeft);
+								listFrame.css("height", (height + 20) + "px");
+								listFrame.css("width", tmpWidth);
+								eg_cache.textListProps.oldHeight = height;
+								listFrame.show();
+							}
+						}
+					}
+					if (!eg_cache.textListProps.textFocused && !eg_cache.textListProps.showWindow.windowFocused)
+					{
+						eg_cache.textListProps.active = false;
+					}
+					if (eg_cache.textListProps.showWindow.hasSelected)
+					{
+						if (eg_cache.textListProps.showWindow.nowIndex != -1)
+						{
+							eg_cache.textListProps.hasSelected = true;
+							eg_cache.textListProps.active = false;
+						}
+					}
+					if (eg_cache.textListProps.textObj.data("frameRefreshRate") == null)
+					{
+						setTimeout({$ef:supervisionTextList}, 50);
+					}
+					else
+					{
+						var rate = eg_cache.textListProps.textObj.data("frameRefreshRate");
+						setTimeout({$ef:supervisionTextList}, rate);
+					}
+				}
+				else
+				{
+					{$ef:setTextListSelected}();
+					eg_cache.textListProps.showWindow.windowFocused = false;
+					eg_cache.textListProps.showWindow.hasSelected = false;
+					eg_cache.textListProps.showWindow.nowIndex = -1;
+					eg_cache.textListProps.listFrame.hide();
+				}
+			]]></function>
+			<!-- 生成读取列表数据时需要的参数 -->
+			<function name="createTextListParam" param="theObj"><![CDATA[
+				var egParam = theObj.data("egTemp").param;
+				var result = {};
+				if (egParam.listSrcName != null)
+				{
+					result[egParam.listSrcName] = theObj.val();
+				}
+				if (egParam.linkObjNames != null)
+				{
+					for (var i = 0; i < egParam.linkObjNames.length; i++)
+					{
+						var name = egParam.linkObjNames[i];
+						var tmpI = name.indexOf("=");
+						if (tmpI != -1)
+						{
+							result[name.substring(0, tmpI)] = name.substring(tmpI + 1);
+							continue;
+						}
+						var obj = _eterna.getWebObj(name);
+						if (obj.size() == 1)
+						{
+							if (obj.val() != "")
+							{
+								result[name] = obj.val();
+							}
+						}
+						else if (obj.size() > 1)
+						{
+							var list = obj;
+							var arr = [];
+							for (var j = 0; j < list.size(); j++)
+							{
+								obj = list.eq(j);
+								if (obj.prop("checked"))
+								{
+									arr.push(obj.val());
+								}
+							}
+							if (arr.length > 0)
+							{
+								result[name] = arr;
+							}
+						}
+					}
+				}
+				return result;
+			]]></function>
+			<!-- 设置文本列表有值选中 -->
+			<function name="setTextListSelected"><![CDATA[
+				if (eg_cache.textListProps.hasSelected && eg_cache.textListProps.showWindow.nowIndex != -1)
+				{
+					if (eg_cache.textListProps.showWindow.eternaData != null)
+					{
+						var tmpRecords = eg_cache.textListProps.showWindow.{$data:};
+						var dataName = eg_cache.textListProps.textObj.data("listDataName");
+						if (tmpRecords != null && tmpRecords[dataName] != null)
+						{
+							eg_cache.textListProps.selectedData = {
+								valueData:tmpRecords[dataName],
+								selectedIndex:eg_cache.textListProps.showWindow.nowIndex
+							};
+							eg_cache.textListProps.textObj.trigger("selected");
+						}
+					}
+				}
+				eg_cache.textListProps.loading = 0;
+				eg_cache.textListProps.textObj = null;
+				eg_cache.textListProps.active = false;
+				eg_cache.textListProps.textFocused = false;
+				eg_cache.textListProps.oldHeight = -1;
+				eg_cache.textListProps.hasSelected = false;
+				eg_cache.textListProps.selectedData = null;
+				if (eg_cache.textListProps.showWindow.clearView != null)
+				{
+					eg_cache.textListProps.showWindow.clearView();
+				}
+			]]></function>
+
+			<!-- 列表窗口界面的模板 -->
+			<typical-component name="text_list_view_template" type="none">
+				<component name="listTable" type="none"/>
+				<component name="eventListener" type="div">
+					<init-script>
+						eventListener = webObj;
+						eterna_addWillInitObj(webObj);
+					</init-script>
+					<events>
+						<event name="willInit">
+							if (nowIndex == -1)
+							{
+								nowIndex = 0;
+							}
+							else
+							{
+								var tmpObj = _eterna.getWebObj("row_" + nowIndex);
+								if (tmpObj.size() == 0)
+								{
+									nowIndex = 0;
+								}
+							}
+							{$ef:setSelectedRow}();
+						</event>
+						<event name="upSelected"><![CDATA[
+							if (nowIndex > 0)
+							{
+								nowIndex--;
+								{$ef:setSelectedRow}();
+							}
+						]]></event>
+						<event name="downSelected"><![CDATA[
+							if (_eterna.getWebObj("row_" + (nowIndex + 1)).size() > 0)
+							{
+								nowIndex++;
+								{$ef:setSelectedRow}();
+							}
+						]]></event>
+					</events>
+				</component>
+			</typical-component>
+			<!-- 列表窗口中表格里tr的模板 -->
+			<typical-component name="text_list_listTable_tr" type="tr" ignoreGlobal="true" comParam="css:{cursor:'pointer'}">
+				<before-init>checkResult = eg_temp.rowType == "row";</before-init>
+				<init-script>
+					webObj.attr("id", "row_" + eg_temp.index);
+				</init-script>
+				<events>
+					<event name="click">
+						hasSelected = true;
+						nowIndex = eg_temp.index;
+						{$ef:setSelectedRow}();
+					</event>
+					<event name="mouseover">
+						if (eg_temp.rowType == "row")
+						{
+							webObj.addClass("text_list_hiliterows");
+						}
+					</event>
+					<event name="mouseout">
+						if (eg_temp.rowType == "row")
+						{
+							webObj.removeClass("text_list_hiliterows");
+						}
+					</event>
+				</events>
+			</typical-component>
+
+			<!-- 设置当前选中的行, 并取消原来选中的行 -->
+			<function name="setSelectedRow"><![CDATA[
+				var tmpObj;
+				if ({$data:oldIndex} != null)
+				{
+					tmpObj = _eterna.getWebObj("row_" + {$data:oldIndex});
+					if (tmpObj.size() > 0)
+					{
+						tmpObj.removeClass("text_list_selectedrows");
+					}
+				}
+				{$data:oldIndex} = nowIndex;
+				tmpObj = _eterna.getWebObj("row_" + nowIndex);
+				if (tmpObj.size() > 0)
+				{
+					tmpObj.addClass("text_list_selectedrows");
+				}
+				else
+				{
+					nowIndex = -1;
+				}
+			]]></function>
+
+			<!--
+			用于生成text_list列表的通用视图,
+			必须将数据集名称设为: "listData",
+			显示列的名称必须为: "name"
+			-->
+			<view name="text_list_common.view">
+				<replacement name="t" baseComponentName="text_list_view_template">
+					<table-list name="listTable" dataName="listData" ignoreGlobal="true">
+						<component-param>attr:{border:0,cellPadding:1,cellSpacing:0,width:'100%'}</component-param>
+						<tr name="tableList_TR.text_list_listTable_tr" comParam="css:{cursor:'pointer'}"/>
+						<columns>
+							<column name="name" srcName="name" ignoreGlobal="true" comParam="attr:{noWrap:true}"/>
+						</columns>
+					</table-list>
+				</replacement>
+			</view>
+
+
+			<!-- 根据字符数限制显示文字的控件 -->
+			<typical-component name="limit_span" type="span">
+				<init-script><![CDATA[
+					var param = _eterna.egTempParam();
+					if (eg_temp.valueObj == null || !eg_temp.valueObj.exists)
+					{
+						if (!param.onlyEmpty)
+						{
+							webObj.html("&nbsp");
+						}
+					}
+					var value = eg_temp.valueObj.value;
+					if (value == null || value == "")
+					{
+						if (!param.onlyEmpty)
+						{
+							webObj.html("&nbsp");
+						}
+					}
+					else
+					{
+						var maxLength = param.maxLength;
+						var beginLength = maxLength;
+						var endLength = 0;
+						if (maxLength == null)
+						{
+							beginLength = param.beginLength;
+							if (beginLength == null) beginLength = 0;
+							endLength = param.endLength;
+							if (endLength == null) endLength = 0;
+							maxLength = beginLength + endLength;
+						}
+						var pos1 = {$ef:parseLimitLocation}(value, maxLength);
+						if (pos1 != -1)
+						{
+							if (endLength == 0)
+							{
+								webObj.text(value.substring(0, pos1) + "...");
+							}
+							else
+							{
+								pos1 = {$ef:parseLimitLocation}(value, beginLength);
+								var pos2 = {$ef:parseLimitLocation}(value, endLength, true);
+								var tmpStr = value.substring(0, pos1) + "..." + value.substring(pos2);
+								webObj.text(tmpStr);
+							}
+							webObj.attr("title", value);
+							webObj.css("cursor", "pointer");
+						}
+						else
+						{
+							webObj.text(value);
+						}
+					}
+				]]></init-script>
+			</typical-component>
+			<function name="parseLimitLocation" param="str, limit, reverse"><![CDATA[
+				var maxCount = limit * 2;
+				var count = 0;
+				if (reverse)
+				{
+					for (var i = str.length - 1; i >= 0; i--)
+					{
+						if (str.charCodeAt(i) >= 128)
+						{
+							count += 2;
+						}
+						else
+						{
+							count += 1;
+						}
+						if (count >= maxCount)
+						{
+							return count > maxCount ? i + 1 : i;
+						}
+					}
+				}
+				else
+				{
+					for (var i = 0; i < str.length; i++)
+					{
+						if (str.charCodeAt(i) >= 128)
+						{
+							count += 2;
+						}
+						else
+						{
+							count += 1;
+						}
+						if (count > maxCount)
+						{
+							if (i > 1 && str.charCodeAt(i - 1) < 128)
+							{
+								return i - 2;
+							}
+							return i - 1;
+						}
+					}
+				}
+				return -1;
+			]]></function>
+
+			<!-- 根据限制将字符串截断的方法 -->
+			<function name="getLimitedString" param="str, beginLength, endLength"><![CDATA[
+				if (str == null || str == "")
+				{
+					return "";
+				}
+				beginLength = parseInt(beginLength);
+				beginLength = isNaN(beginLength) ? 0 : beginLength;
+				endLength = parseInt(endLength);
+				endLength = isNaN(endLength) ? 0 : endLength;
+				var maxLength = beginLength + endLength;
+				var pos1 = {$ef:parseLimitLocation}(str, maxLength);
+				if (pos1 != -1)
+				{
+					if (endLength == 0)
+					{
+						return str.substring(0, pos1) + "...";
+					}
+					else
+					{
+						pos1 = {$ef:parseLimitLocation}(str, beginLength);
+						var pos2 = {$ef:parseLimitLocation}(str, endLength, true);
+						var tmpStr = str.substring(0, pos1) + "..." + str.substring(pos2);
+						return tmpStr;
+					}
+				}
+				else
+				{
+					return str;
+				}
+			]]></function>
+
+
+		</objs>
+	</factory>
+</eterna-config>

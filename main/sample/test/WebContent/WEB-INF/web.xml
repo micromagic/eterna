@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>test</display-name>
+
+	<servlet>
+		<servlet-name>test</servlet-name>
+		<servlet-class>test.Test</servlet-class>
+		<init-param>
+			<param-name>initFiles</param-name>
+			<param-value>
+				cp:test/index.xml;cp:test/sample.xml;cp:test/test.xml;cp:test/my.xml;
+				cp:test/excel.xml;cp:test/codeManage.xml;cp:test/exp.xml;cp:test/autoAJAX.xml;
+			</param-value>
+		</init-param>
+		<init-param>
+			<param-name>defaultModel</param-name>
+			<param-value>index</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet>
+		<servlet-name>testCheck</servlet-name>
+		<servlet-class>test.Test</servlet-class>
+		<init-param>
+			<param-name>initFiles</param-name>
+			<param-value>cp:test/check.xml;</param-value>
+		</init-param>
+		<init-param>
+			<param-name>defaultModel</param-name>
+			<param-value>check</param-value>
+		</init-param>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>testCheck</servlet-name>
+		<url-pattern>/testCheck.do</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>test</servlet-name>
+		<url-pattern>/test.do</url-pattern>
+	</servlet-mapping>
+
+	<jsp-config>
+		<taglib>
+			<taglib-uri>http://code.google.com/p/eterna</taglib-uri>
+			<taglib-location>/WEB-INF/tld/eterna.tld</taglib-location>
+		</taglib>
+	</jsp-config>
+
+</web-app>

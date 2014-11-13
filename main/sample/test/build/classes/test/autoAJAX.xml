@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 自动ajax的例子 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<model name="autoAJAX" transactionType="notNeed" modelExportName="autoAJAX.export" />
+			<export name="autoAJAX.export" path="${page.view}" viewName="autoAJAX.view" />
+			<view name="autoAJAX.view">
+				<replacement name="1" baseComponentName="ajax_div" comParam="css:{float:'left',width:'30%'}">
+					<before-init>
+						eg_temp.tempData = {URL:{$data:root} + "/autoAJAX/first.jsp"};
+					</before-init>
+				</replacement>
+				<replacement name="2" baseComponentName="ajax_div" comParam="css:{float:'left',width:'60%'}">
+					<before-init>
+						eg_temp.tempData = {URL:{$ef:getHeadURL}("list")};
+					</before-init>
+				</replacement>
+				<replacement name="3" baseComponentName="ajax_div" comParam="css:{float:'left',width:'90%'}">
+					<before-init>
+						eg_temp.tempData = {URL:{$data:root} + "/autoAJAX/second.jsp"};
+					</before-init>
+				</replacement>
+			</view>
+
+			<!-- 自动ajax的操作单元，包括一个地址输入框、go按钮、显示区域 -->
+			<typical-component name="ajax_div" type="div">
+				<before-init>
+					_eterna.egTempData(true);
+				</before-init>
+				<component name="url" type="input-text" comParam="css:{width:'80%'}">
+					<init-script>
+						eg_temp.tempData.urlObj = webObj;
+						if (eg_temp.tempData.URL != null)
+						{
+							webObj.val(eg_temp.tempData.URL);
+						}
+					</init-script>
+				</component>
+				<component name="b" type="input-button" comParam="objValue:'go'">
+					<events>
+						<event name="click">
+							var urlObj = eg_temp.tempData.urlObj;
+							var url = urlObj.val();
+							if (url == "")
+							{
+								return;
+							}
+							var pObj = webObj.next();
+							var theEterna = pObj.data(EG_BINDED_ETERNA);
+							if (theEterna == null)
+							{
+								theEterna = ef_loadEterna(url, null, pObj);
+								{$ef:addLocationListener}(theEterna, urlObj);
+							}
+							else
+							{
+								theEterna.doVisit(url);
+							}
+						</event>
+					</events>
+				</component>
+				<component name="ajax_area" type="div">
+					<init-script>
+						if (eg_temp.tempData.URL != null)
+						{
+							var theEterna = ef_loadEterna(eg_temp.tempData.URL, null, webObj);
+							{$ef:addLocationListener}(theEterna, eg_temp.tempData.urlObj);
+						}
+					</init-script>
+				</component>
+			</typical-component>
+
+			<!-- 添加地址监听的方法 -->
+			<function name="addLocationListener" param="theEterna, urlObj">
+				var l = function(e, oldURL, url)
+				{
+					l._theObj.val(url == null ? "" : url);
+				};
+				l._theObj = urlObj;
+				theEterna.addLocationListener(l);
+				urlObj.val(theEterna.cache.currentURL);
+			</function>
+
+		</objs>
+	</factory>
+</eterna-config>

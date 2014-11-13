@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!--
+标签页界面
+-->
+<eterna-config>
+	<factory>
+
+		<objs>
+
+			<!-- 标签条 -->
+			<typical-component name="tab_component" type="div">
+				<events>
+					<event name="tabChange"><![CDATA[
+						var id = webObj.attr("id");
+						if (id != null && id != "" && _eterna.cache.saveTabStatus)
+						{
+							_eterna.cache["savedTabIndex_" + id] = webObj.data("selectedIndex");
+						}
+						event.stopPropagation();
+					]]></event>
+					<event name="setTab"><![CDATA[
+						webObj.data("tabIndexSetted", 0);
+						var index = parseInt(webObj.data("tabIndex"));
+						if (!isNaN(index))
+						{
+							var tabArea = _eterna.queryWebObj(".eternaTabBox", webObj);
+							var tabs = _eterna.queryWebObj("li", tabArea.eq(0));
+							if (index >= 0 && index <= tabs.size())
+							{
+								tabs.eq(index).trigger("setTab");
+								webObj.data("tabIndexSetted", 1);
+							}
+						}
+						event.stopPropagation();
+					]]></event>
+				</events>
+				<component name="style" type="none">
+					<init-script><![CDATA[
+						{$ef:addGlobeStyle}("_eterna_tabStyle_initialized",
+								{$typical:eternaTabStyle}.bodyString);
+					]]></init-script>
+				</component>
+				<component name="box_area" type="div" comParam="className:'eternaTabBox'">
+					<component name="tabs" type="ul">
+						<component-param>css:{position:"absolute","text-indent":"0px"}</component-param>
+						<component name="loop" type="loop">
+							<component name="opt" type="li">
+								<init-script>
+									webObj.data("index", eg_temp.index);
+									var theText;
+									if (typeof {$dataV:eg_temp.dataName}.rowCount == "number")
+									{
+										theText = {$ef:getData_value}(eg_temp.dataName, "tab", eg_temp.index);
+									}
+									else if (_eterna.isArray({$dataV:eg_temp.dataName}))
+									{
+										var el = {$dataV:eg_temp.dataName}[eg_temp.index];
+										if (typeof el == "string")
+										{
+											theText = el;
+										}
+										else
+										{
+											theText = el.tab;
+										}
+									}
+									else
+									{
+										theText = "tab" + eg_temp.index;
+									}
+									webObj.text(theText);
+									if (eg_temp.param != null)
+									{
+										if (eg_temp.param.clickOff) webObj.data("clickOff", 1);
+										if (eg_temp.param.hoverOn) webObj.data("hoverOn", 1);
+									}
+									if (eg_temp.index == 0)
+									{
+										webObj.addClass("hover");
+										webObj.data("selected", 1);
+										eterna_addWillInitObj(webObj);
+									}
+								</init-script>
+								<events>
+									<event name="willInit"><![CDATA[
+										var contentObjs = webObj.parent().parent().next().children();
+										for (var i = 1; i < contentObjs.size(); i++)
+										{
+											contentObjs.eq(i).hide();
+										}
+										var tabObj = webObj.parent().parent().parent();
+										tabObj.data("oldSelectedIndex", -1);
+										var id = tabObj.attr("id");
+										var useCache = false;
+										if (id != null && id != "" && _eterna.cache.saveTabStatus)
+										{
+											tabObj.data("tabIndex", _eterna.cache["savedTabIndex_" + id]);
+											tabObj.trigger("setTab");
+										}
+										if (!tabObj.data("tabIndexSetted"))
+										{
+											tabObj.data("selectedIndex", 0);
+											tabObj.trigger("tabChange");
+										}
+										event.stopPropagation();
+									]]></event>
+									<event name="click"><![CDATA[
+										if (!webObj.data("clickOff")) webObj.trigger("setTab");
+										event.stopPropagation();
+									]]></event>
+									<event name="mouseover"><![CDATA[
+										if (webObj.data("hoverOn")) webObj.trigger("setTab");
+										event.stopPropagation();
+									]]></event>
+									<event name="setTab"><![CDATA[
+										if (webObj.data("selected") != 1)
+										{
+											var tabObj = webObj.parent().parent().parent();
+											var tabObjs = webObj.parent().children();
+											var contentObjs = webObj.parent().parent().next().children();
+											for (var i = 0; i < tabObjs.size(); i++)
+											{
+												if (tabObjs.eq(i).data("selected"))
+												{
+													tabObj.data("oldSelectedIndex", i);
+													contentObjs.eq(i).hide();
+													tabObjs.eq(i).removeClass("hover");
+													tabObjs.eq(i).data("selected", 0);
+													break;
+												}
+											}
+											webObj.addClass("hover");
+											webObj.data("selected", 1);
+											contentObjs.eq(webObj.data("index")).show();
+											tabObj.data("selectedIndex", webObj.data("index"));
+											tabObj.trigger("tabChange");
+										}
+										event.stopPropagation();
+									]]></event>
+								</events>
+							</component>
+						</component>
+					</component>
+				</component>
+				<component name="content_area" type="div" comParam="className:'eternaTabContent',css:{'padding-top':'3px'}">
+					<component name="loop" type="loop">
+						<component name="content" type="div" comParam="text:'[script]:\'content\' + eg_temp.index'"/>
+					</component>
+				</component>
+			</typical-component>
+
+			<typical-component name="eternaTabStyle" type="div" generator="self.micromagic.util.AttributeComponent"
+					attributes="attrName=_eterna_tabStyle;autoSet=false;bindRes=bgColor:white;"/>
+
+		</objs>
+
+		<attributes>
+			<attribute name="_eterna_tabStyle" value="$useBodyText"><![CDATA[
+				.eternaFrame .eternaTabBox {
+					width:100%;
+					height:21px;
+					line-height:20px;
+					font-size:12px;
+					font-family:"宋体", Arial, Helvetica, sans-serif;
+					color::#224499;
+					border-bottom:1px solid #87AFDA;
+				}
+				.eternaFrame .eternaTabBox ul{
+					margin:0px;
+					padding:0px;
+				}
+				.eternaFrame .eternaTabBox li{
+					float:left;
+					height:20px;
+					display:block;
+					cursor:pointer;
+					text-align:center;
+					color:#20449A;
+					padding:1px 12px;
+				}
+				.eternaFrame .eternaTabBox li.hover{
+					background-color:${bgColor};
+					padding:0 12px;
+					color:#000000;
+					height:21px;
+					line-height:20px;
+					font-weight:bold;
+					border-top:1px solid #87AFDA;
+					border-left:1px solid #87AFDA;
+					border-right:1px solid #87AFDA;
+				}
+			]]></attribute>
+		</attributes>
+
+	</factory>
+</eterna-config>

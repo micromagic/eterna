@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 
+	代码表的管理
+	相关表有：
+	create table t_code1 
+	(
+		id1 integer,
+		codeValue1 varchar(30),
+		listIndex1 integer
+	) 
+	create table t_code2 
+	(
+		id2 integer,
+		codeValue2 varchar(30),
+		listIndex2 integer
+	)
+	
+	此例子为span_modifiable控件的使用样例（tool/spanModifable.xml）
+	以及如何对相似的管理内容进行编写
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<model name="codeManage.index" modelExportName="codeManage.export" transactionType="notNeed" />
+			<export name="codeManage.export" path="${page.view}" viewName="codeManage.view" />
+			<export name="codeManage.goto.index" modelName="codeManage.list" redirect="true" />
+			<view name="codeManage.view">
+				<component name="menu" type="div">
+					<component name="1" type="a" comParam="text:'代码表1'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("codeManage.list", {codeType:'c1'}));</init-script>
+					</component>
+					<component name="2" type="a" comParam="text:'代码表2',css:{'margin-left':'12px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("codeManage.list", {codeType:'c2'}));</init-script>
+					</component>
+				</component>
+				<component name="main" type="div" comParam="css:{width:'500px'}">
+					<before-init>checkResult = {$data:codeType} != null;</before-init>
+					<component name="title" type="h1">
+						<init-script>webObj.text({$data:codeCaption} + "代码表管理");</init-script>
+					</component>
+					<component name="br" type="br" />
+					<replacement name="toolbar" baseComponentName="toolbar_component">
+						<before-init>
+							{$parentScript}
+							btns.push({name:'添加',img:'add.gif',model:'codeManage.add',params:{codeType:{$data:codeType}}});
+						</before-init>
+					</replacement>
+					<table-list name="codeList" dataName="codeList" baseName="query:codeManage.list.query" 
+						comParam="attr:{id:'codeTable'}">
+						<columns>
+							<column name="opt" srcName="id" caption="操作">
+								<component name="1" type="a" comParam="text:'删除'">
+									<init-script>
+										var params = {
+											id:eg_temp.valueObj.value,
+											codeType:{$data:codeType}
+										};
+										webObj.attr("href", {$ef:getHeadURL}("codeManage.delete", params));
+									</init-script>
+								</component>
+							</column>
+						</columns>
+					</table-list>
+				</component>
+				<component name="sample" type="none">
+					<before-init>checkResult = {$data:codeType} == null;</before-init>
+					<component name="title" type="h1" comParam="text:'span_modifiable样例'" />
+					<component name="t" type="table" comParam="attr:{border:1,cellPadding:5},css:{'font-size':'16px'}">
+						<component name="loop" type="loop">
+							<before-init>
+								eg_temp.dataName = "row_count";
+								{$dataV:eg_temp.dataName} = 8;
+							</before-init>
+							<component name="tr" type="tr">
+								<init-script>webObj.attr("id", "s_tr_" + eg_temp.index);</init-script>
+								<component name="td1" type="td">
+									<replacement name="1" baseComponentName="span_modifiable_sample">
+										<before-init>
+											var tdName = "td1";
+											{$parentScript}
+											tempData.objGroupId = "td1";
+											tempData.containerId = "s_tr_" + eg_temp.index;
+										</before-init>
+									</replacement>
+								</component>
+								<component name="td2" type="td">
+									<replacement name="2" baseComponentName="span_modifiable_sample">
+										<before-init>
+											var tdName = "td2";
+											{$parentScript}
+											tempData.focusGroupId = "f2";
+											tempData.canDrag = 0;
+										</before-init>
+									</replacement>
+								</component>
+								<component name="td3" type="td">
+									<init-script>webObj.attr("id", "s_td3_" + eg_temp.index);</init-script>
+									<replacement name="3" baseComponentName="span_modifiable_sample">
+										<before-init>
+											var tdName = "td3";
+											{$parentScript}
+											tempData.focusGroupId = "f2";
+											tempData.objGroupId = "tr_" + eg_temp.index;
+											tempData.containerId = "s_td3_" + eg_temp.index;
+										</before-init>
+									</replacement>
+								</component>
+								<component name="td4" type="td">
+									<init-script>webObj.attr("id", "s_td4_" + eg_temp.index);</init-script>
+									<replacement name="4" baseComponentName="span_modifiable_sample">
+										<before-init>
+											var tdName = "td4";
+											{$parentScript}
+											tempData.focusGroupId = "f2";
+											tempData.objGroupId = "tr_" + eg_temp.index;
+											tempData.containerId = "s_td4_" + eg_temp.index;
+										</before-init>
+									</replacement>
+								</component>
+								<component name="td5" type="td">
+									<init-script>webObj.attr("id", "s_td5_" + eg_temp.index);</init-script>
+									<replacement name="5" baseComponentName="span_modifiable_sample">
+										<before-init>
+											var tdName = "td5";
+											{$parentScript}
+											tempData.focusGroupId = "f2";
+											tempData.objGroupId = "tr_" + eg_temp.index;
+											tempData.containerId = "s_td5_" + eg_temp.index;
+										</before-init>
+									</replacement>
+								</component>
+							</component>
+						</component>
+					</component>
+					<component name="msg" type="div" comParam="attr:{id:'msgArea'}" />
+				</component>
+			</view>
+			<typical-replacement name="span_modifiable_sample" baseComponentName="span_modifiable"
+				comParam="css:{cursor:'pointer'}">
+				<before-init>
+					var tempData = _eterna.egTempData(true);
+					tempData.canDrag = 1;  
+					tempData.ID = tdName + "_" + eg_temp.index;
+					tempData.value = tempData.ID;
+				</before-init>
+				<events>
+					<event name="beginModify">
+						_eterna.getWebObj("msgArea").text(webObj.data("ID") + " 开始修改");
+					</event>
+					<event name="endModify">
+						if (webObj.data("value") == "error")
+						{
+							webObj.data("valid", 0);
+							_eterna.getWebObj("msgArea").text(webObj.data("ID") + " 值不合法");
+						}
+						else
+						{
+							_eterna.getWebObj("msgArea").text(webObj.data("ID") + " 修改完成");
+						}
+					</event>
+					<event name="beginDrag">
+						_eterna.getWebObj("msgArea").text(webObj.data("ID") + " 开始拖动");
+					</event>
+					<event name="endDrag">
+						_eterna.getWebObj("msgArea").text(webObj.data("ID") + " 拖动完成");
+					</event>
+				</events>
+			</typical-replacement>
+			
+			<!-- 查询出所有的代码记录（排序值小于等于0的表示已删除的） -->
+			<model name="codeManage.list" modelExportName="codeManage.export">
+				<trans-execute from="RP:codeType" opt="getFirstString" to="data:codeType" />
+				<model-execute modelName="codeManage.typeParse" />
+				<query-execute queryName="codeManage.list.query">
+					<param-bind src="cache:1" subSQL="true" names="table:1,index:2,index:3" />
+				</query-execute>
+				<trans-execute from="cache:1" opt="getMapValue:caption" to="data:codeCaption" />
+				<trans-execute from="stack" to="data:codeList" />
+			</model>
+			<query name="codeManage.list.query">
+				<prepared-sql>
+					select * from #sub
+					where #sub &gt; 0
+					order by #sub
+				</prepared-sql>
+				<readers>
+					<reader name="id" colIndex="1" type="int" caption="编号" width="25" />
+					<reader name="value" colIndex="2" type="String" caption="[script]:{$data:codeCaption}">
+						<attribute name="inputType" value="value_manage_component" />
+					</reader>
+				</readers>
+			</query>
+
+			<!-- 添加一条代码记录 -->
+			<model name="codeManage.add" modelExportName="codeManage.goto.index">
+				<trans-execute from="RP:codeType" opt="getFirstString" to="data:codeType" />
+				<model-execute modelName="codeManage.typeParse" />
+				<!-- 获取当前代码主键的最大值 -->
+				<query-execute queryName="codeManage.getMaxId.query">
+					<param-bind src="cache:1" subSQL="true" names="table:2,id:1" />
+				</query-execute>
+				<trans-execute from="stack" opt="getFirstRow" to="cache:2" />
+				<!-- 将此最大值+1 -->
+				<execute name="nextId" generator="self.micromagic.dc.JavaCodeExecute">
+					<attribute name="code" value="$useBodyText">
+						ResultRow row = (ResultRow) data.caches[2];
+						if (row == null)
+						{
+							data.caches[2] = Utility.INTEGER_1;
+						}
+						else
+						{
+							data.caches[2] = new Integer(row.getInt(1) + 1);
+						}
+						return null;
+					</attribute>
+					<attribute name="throwCompileError" value="true" />
+				</execute>
+				<update-execute updateName="codeManage.add.update">
+					<param-bind src="cache:1" subSQL="true" names="table:1,id:2,value:3,index:4" />
+					<param-bind src="cache:2" names="id,value,index" />
+				</update-execute>
+			</model>
+			<query name="codeManage.getMaxId.query">
+				<prepared-sql>
+					select max(#sub) from #sub
+				</prepared-sql>
+				<readers>
+					<reader name="max" colIndex="1" type="int" />
+				</readers>
+			</query>
+			<update name="codeManage.add.update">
+				<prepared-sql>
+					insert into #sub (#sub, #sub, #sub) values (?, ?, ?)
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="int" />
+					<parameter name="value" type="String" />
+					<parameter name="index" type="int" />
+				</parameters>
+			</update>
+			
+			<!-- 删除某个代码，将排序值设为-1 -->
+			<model name="codeManage.delete" modelExportName="codeManage.goto.index">
+				<trans-execute from="RP:codeType" opt="getFirstString" to="data:codeType" />
+				<model-execute modelName="codeManage.typeParse" />
+				<update-execute updateName="codeManage.delete.update">
+					<param-bind src="cache:1" subSQL="true" names="table:1,id:3,index:2" />
+					<param-bind src="RP" names="id" />
+				</update-execute>
+			</model>
+			<update name="codeManage.delete.update">
+				<prepared-sql>
+					update #sub set #sub = -1 where #sub = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="int" />
+				</parameters>
+			</update>
+			
+			<!-- 修改代码表中代码的值 -->
+			<model name="codeManage.modify">
+				<model-execute modelName="codeManage.typeParse" />
+				<update-execute updateName="codeManage.modify.update">
+					<param-bind src="cache:1" subSQL="true" names="table:1,id:3,value:2" />
+					<param-bind src="RP" names="ID:id,value" />
+				</update-execute>
+			</model>
+			<update name="codeManage.modify.update">
+				<prepared-sql>
+					update #sub set #sub = ? where #sub = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="value" type="String" />
+					<parameter name="id" type="int" />
+				</parameters>
+			</update>
+			
+			<!-- 对代码表中代码的顺序进行排序 -->
+			<model name="codeManage.order" modelExportName="ajax.export">
+				<model-execute modelName="codeManage.typeParse" />
+				<update-execute updateName="codeManage.order.update">
+					<param-bind src="cache:1" subSQL="true" names="table:1,id:3,index:2" />
+					<param-bind src="RP" names="ID:id,INDEX:index" loop="true" />
+				</update-execute>
+				<query-execute queryName="codeManage.list.query">
+					<param-bind src="cache:1" subSQL="true" names="table:1,index:2,index:3" />
+				</query-execute>
+				<trans-execute from="stack" to="data:codeList" />
+			</model>
+			<update name="codeManage.order.update">
+				<prepared-sql>
+					update #sub set #sub = ? where #sub = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="index" type="int" />
+					<parameter name="id" type="int" />
+				</parameters>
+			</update>
+			
+			<!-- 用于管理代码值的控件 -->
+			<typical-replacement name="value_manage_component" baseComponentName="span_modifiable"
+				comParam="css:{cursor:'pointer'}">
+				<before-init>
+					var tempData = _eterna.egTempData(true);
+					tempData.canDrag = 1;  // 可拖动
+					tempData.color = "blue";  // 修改时字的颜色为蓝色
+					tempData.bgColor = "gray";  // 拖动时背景为灰色
+					tempData.objGroupId = "codeValues";  // 分组的名称，只能在相同的分组间拖动
+					tempData.params = {codeType:{$data:codeType}};  // 修改及拖动提交时需要传递的参数
+					tempData.ID = {$ef:findData_value}("id");  // 当前的id值
+					tempData.modelName = "codeManage.modify";  // 值修改后提交的model
+					tempData.orderModelName = "codeManage.order";  // 拖动后提交的model
+					tempData.orderReloadObjs = ["codeTable"];  // 拖动提交后需要重载的对象
+					tempData.orderReloadDatas = ["codeList"];  // 拖动提交后需要更新的数据集
+					if (eg_temp.valueObj.exists)
+					{
+						tempData.value = eg_temp.valueObj.value;  // span中显示的值
+					}
+				</before-init>
+			</typical-replacement>
+			
+			<!-- 获取某个代码表的相关信息，如：表名，列名等 -->
+			<model name="codeManage.typeParse">				
+				<execute name="parse" generator="self.micromagic.dc.JavaCodeExecute">
+					<attribute name="code" value="$useBodyText">
+						String type = data.getRequestParameter("codeType");
+						Map param = new HashMap();
+						if ("c1".equals(type))
+						{
+							param.put("table", "t_code1");
+							param.put("id", "id1");
+							param.put("value", "codeValue1");
+							param.put("index", "listIndex1");
+							param.put("caption", "专业");
+							data.caches[1] = param;
+						}
+						else if ("c2".equals(type))
+						{
+							param.put("table", "t_code2");
+							param.put("id", "id2");
+							param.put("value", "codeValue2");
+							param.put("index", "listIndex2");
+							param.put("caption", "院系");
+							data.caches[1] = param;
+						}
+						else
+						{
+							throw new ConfigurationException("Error type:" + type + ".");
+						}
+						return null;
+					</attribute>
+					<attribute name="imports" value="self.micromagic.eterna.digester" />
+					<attribute name="throwCompileError" value="true" />
+				</execute>
+			</model>
+			
+		</objs>
+	</factory>
+</eterna-config>

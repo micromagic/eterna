@@ -1,0 +1,180 @@
+@charset "utf-8";
+/* css定义 */
+
+.eternaFrame span, .eternaFrame a {
+	font-size: 12px;
+}
+
+.eternaFrame .td_fld_title
+{
+	text-align: right;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-right-color: #63A6D6;
+	border-bottom-color: #63A6D6;
+	padding: 2px;
+	background-color: #EEEEF9;
+}
+
+.eternaFrame .t_td {
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-right-color: #63A6D6;
+	border-bottom-color: #63A6D6;
+	padding: 2px;
+}
+.eternaFrame .t_td a {
+	color: #0000FF;
+}
+
+.eternaFrame .t_table {
+	border-top-width: 1px;
+	border-left-width: 1px;
+	border-top-style: solid;
+	border-left-style: solid;
+	border-top-color: #63A6D6;
+	border-left-color: #63A6D6;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	line-height: 16pt;
+}
+.eternaFrame .alternaterows {
+	background-color: #F0EFE8;
+}
+.eternaFrame .rows {
+	background-color: white;
+}
+.eternaFrame .hiliterows {
+	background-color: #CCCCCC;
+	color: white;
+}
+.eternaFrame .selectrows {
+	background-color: #999999;
+	color: white;
+}
+
+.eternaFrame .t_head {
+	background-image: url(images/tableheadnew1.gif);
+	height: 26px;
+	text-align: center;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-right-color: #63A6D6;
+	border-bottom-color: #63A6D6;
+	border-left-width: 1px;
+	border-left-color: #FFFFFF;
+	border-left-style: solid;
+}
+.eternaFrame .t_head a {
+	vertical-align: middle;
+	color: #000000;
+	text-decoration: none;
+}
+
+/* 翻页的按钮 begin */
+
+.eternaFrame .buttonPrev {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/prev.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonNext {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/next.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonLast {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/last.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonFirst {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/first.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonDisabledPrev {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/disable_prev.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonDisabledNext {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/disable_next.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonDisabledLast {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/disable_last.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+.eternaFrame .buttonDisabledFirst {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 12px;
+	width: 12px;
+	background-image: url(images/disable_first.gif);
+	border: 0px none;
+	background-repeat: no-repeat;
+	background-color: transparent;
+	background-position: center center;
+	cursor: hand
+}
+
+/* 翻页的按钮 end */
+

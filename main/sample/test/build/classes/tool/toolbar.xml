@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!--
+工具条控件
+-->
+<eterna-config>
+	<factory>
+
+		<objs>
+
+
+			<!--
+				在具体的替换节点中, 需要在before-init中需要向btns数组中添加
+				配置的JSON对象，格式如下：
+				{
+					confirmMsg		 如果设置的话将会弹出提示信息，点击确定的话才会继续执行
+					name:				显示的名称
+					img:				 图片文件名
+					model:			  点击后调用的model的名称
+					params:			 调用model时传递的参数
+					newWindowName	 是否是在新窗口显示
+					newWindowParam	新窗口的控制参数
+					click:			  类型为方法，执行自己定义的代码，只有在model未设置时才有效
+				}
+				代码样例：
+				btns.push({...});
+				另外, 如果需要进行纵向布局, 可以通过如下代码设置:
+				tmpData.verticalLayout = 1;
+			-->
+			<typical-component name="toolbar_component" type="div">
+				<component-param>className:"eterna_toolbar",attr:{align:"left"},css:{"padding-top":"8px"}</component-param>
+				<before-init>
+					var tmpData = _eterna.egTempData(true);
+					tmpData.verticalLayout = 0;
+					if (tmpData.primitiveDataName == null)
+					{
+						tmpData.primitiveDataName = eg_temp.dataName;
+					}
+					eg_temp.dataName = "toolbar";
+					var btns = [];
+					{$dataV:eg_temp.dataName} = btns;
+				</before-init>
+				<component name="loop" type="loop">
+					<component name="btn" type="div">
+						<component-param>className:"toolbutton",css:{height:"20px",cursor:"pointer"}</component-param>
+						<init-script>
+							webObj.data("btnConfig", {$dataV:eg_temp.dataName}[eg_temp.index]);
+							if (!eg_temp.tempData.verticalLayout)
+							{
+								webObj.css("float", "left");
+							}
+						</init-script>
+						<events>
+							<event name="click">
+								var btnConfig = webObj.data("btnConfig");
+								{$ef:toolbar_buttonClick}(btnConfig, event);
+							</event>
+							<event name="mouseover">
+								webObj.removeClass("toolbutton");
+								webObj.addClass("toolbutton_over");
+							</event>
+							<event name="mouseout">
+								webObj.removeClass("toolbutton_over");
+								webObj.addClass("toolbutton");
+							</event>
+						</events>
+						<component name="img" type="img">
+							<component-param>attr:{border:0,align:"absMiddle",hspace:1}</component-param>
+							<init-script>
+								webObj.attr("title", {$dataV:eg_temp.dataName}[eg_temp.index].name);
+								webObj.attr("src", {$ef:getImgPath}({$dataV:eg_temp.dataName}[eg_temp.index].img));
+							</init-script>
+						</component>
+						<replacement name="nbsp" baseComponentName="nbsp"/>
+						<component name="a" type="a">
+							<component-param>text:"[script]:{$dataV:eg_temp.dataName}[eg_temp.index].name"</component-param>
+						</component>
+					</component>
+					<component name="split" type="div">
+						<component-param>className:"LL",text:"|",css:{height:"20px",float:'left'}</component-param>
+						<before-init><![CDATA[
+							checkResult = !eg_temp.tempData.verticalLayout 
+									&& eg_temp.index < {$dataV:eg_temp.dataName}.length - 1;
+						]]></before-init>
+					</component>
+				</component>
+				<component name="div" type="div" comParam="css:{clear:'both'}"/>
+				<component name="style" type="none">
+					<init-script><![CDATA[
+						{$ef:addGlobeStyle}("_eterna_toolbarStyle_initialized",
+								{$typical:eternaToolbarStyle}.bodyString);
+					]]></init-script>
+				</component>
+			</typical-component>
+			<function name="toolbar_buttonClick" param="btnConfig, event">
+				if (btnConfig.model != null)
+				{
+					if (btnConfig.confirmMsg != null)
+					{
+						if (!confirm(btnConfig.confirmMsg))
+						{
+							return;
+						}
+					}
+					var optURL = btnConfig.params == null ? {$ef:getHeadURL}(btnConfig.model)
+							: {$ef:getHeadURL}(btnConfig.model, btnConfig.params);
+					if (btnConfig.newWindowName == null)
+					{
+						{$ef:doVisit}(optURL);
+					}
+					else
+					{
+						if (btnConfig.newWindowParam == null)
+						{
+							_eterna.openWindow(optURL, btnConfig.newWindowName);
+						}
+						else
+						{
+							_eterna.openWindow(optURL, btnConfig.newWindowName, btnConfig.newWindowParam);
+						}
+					}
+				}
+				else if (btnConfig.click != null)
+				{
+					btnConfig.click(event, btnConfig);
+				}
+			</function>
+
+			<typical-component name="eternaToolbarStyle" type="div" generator="self.micromagic.util.AttributeComponent"
+					attributes="attrName=_eterna_toolbarStyle;autoSet=false;"/>
+
+		</objs>
+
+		<attributes>
+			<attribute name="_eterna_toolbarStyle" value="$useBodyText"><![CDATA[
+				.eternaFrame .eterna_toolbar span {
+					height:20px;
+					white-space:nowrap;
+				}
+				.eternaFrame .eterna_toolbar .toolbutton {
+					padding-top:1px;
+					padding-bottom:2px;
+					padding-left:4px;
+					padding-right:4px;
+				}
+				.eternaFrame .eterna_toolbar .toolbutton_over {
+					background-color:#E9F2F8;
+					border:1px solid #336699;
+					padding-top:1px;
+					padding-left:3px;
+					padding-right:3px;
+				}
+				.eternaFrame .eterna_toolbar .LL {
+					padding-left:1px;
+				}
+			]]></attribute>
+		</attributes>
+
+	</factory>
+</eterna-config>

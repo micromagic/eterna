@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 例子2 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<export name="exp_mutiSelect.start" path="${page.view}" viewName="exp_mutiSelect.start" />
+			<model name="exp_mutiSelect.start" modelExportName="exp_mutiSelect.start">
+			</model>
+			<view name="exp_mutiSelect.start">
+				<before-init>
+					<!-- 初始化选中的值存放的对象 -->
+					{$data:mutiSelectTest} = {};
+				</before-init>
+				<component name="textarea" type="textarea">
+					<component-param>attr:{id:"selectedValue"}</component-param>
+				</component>
+				<component name="hidden" type="input-hidden">
+					<component-param>attr:{id:"selectedId"}</component-param>
+				</component>
+				<component name="button" type="input-button">
+					<component-param>objValue:"选择"</component-param>
+					<events>
+						<event name="click">
+							_eterna.openWindow({$ef:getHeadURL}("exp_mutiSelect"),
+									"exp_mutiSelect", "scrollbars=yes,resizable=yes");
+						</event>
+					</events>
+				</component>
+				<component name="button" type="input-button">
+					<component-param>objValue:"显示选择的编号"</component-param>
+					<events>
+						<event name="click">
+							alert(_eterna.getWebObj("selectedId").val());
+						</event>
+					</events>
+				</component>
+			</view>
+
+			<!-- 点击选择按钮后执行的方法, 将值放入父窗口的数据对象中 -->
+			<function name="select" param="selected_data, idValue, textValue, text_id, text_value, eventdata"><![CDATA[
+				if(eventdata.webObj.val() == "选择")
+				{
+					eg_cache.parentEterna.{$dataV:selected_data}[idValue] = textValue;
+					eventdata.webObj.val("取消");
+					eventdata.webObj.css("color", "red");
+				}
+				else
+				{
+					eg_cache.parentEterna.{$dataV:selected_data} = {$ef:deleteData_attr}(
+							eg_cache.parentEterna.{$dataV:selected_data}, idValue, eg_cache.parentEterna);
+					eventdata.webObj.val("选择");
+					eventdata.webObj.css("color", "");
+				}
+				{$ef:parseData_map}(eg_cache.parentEterna.{$dataV:selected_data},
+						eg_cache.parentEterna.getWebObj(text_id), eg_cache.parentEterna.getWebObj(text_value), "; ");
+			]]></function>
+
+			<!-- 初始化时执行的方法, 将值放入父窗口的数据对象中 -->
+			<function name="check_select" param="selected_data, col_id, webObj"><![CDATA[
+				if(eg_cache.parentEterna.{$dataV:selected_data}[{$ef:getData_value}(eg_temp.dataName, col_id, eg_temp.index)] != null)
+				{
+					webObj.val("取消");
+					webObj.css("color", "red");
+				}
+				else
+				{
+					webObj.val("选择");
+				}
+			]]></function>
+
+			<!-- 查询 -->
+			<query name="mutiSelect.query">
+				<prepared-sql>
+					select * from my_table
+					#sub[where $]
+				</prepared-sql>
+				<readers>
+					<reader name="id" type="String" caption="编号" />
+					<reader name="name" type="String" caption="姓名" />
+					<reader name="age" type="int" caption="年龄" />
+					<reader name="birth" type="Date" caption="生日" />
+					<reader name="memo" type="String" caption="备注" />
+				</readers>
+			</query>
+
+			<!-- 配置查询条件 -->
+			<search name="mutiSelect.search" queryName="mutiSelect.query" conditionIndex="1" pageSize="5">
+				<condition-propertys>
+					<condition-property name="age1" colName="age" colType="int" inputType="text_withCheck"
+						caption="年龄(大于)" defaultBuilder="notBelow">
+						<attribute name="initParam" value="checks:[{type:'number'}]" />
+					</condition-property>
+					<condition-property name="age2" colName="age" colType="int" inputType="text_withCheck"
+						caption="年龄(小于)" defaultBuilder="notLarge">
+						<attribute name="initParam" value="checks:[{type:'number'}]" />
+					</condition-property>
+					<condition-property name="name" colType="String" caption="姓名" />
+					<condition-property name="birth" colType="Date" caption="生日" inputType="text_date" />
+				</condition-propertys>
+			</search>
+
+			<export name="exp_mutiSelect" path="${page.view}" viewName="exp_mutiSelect" />
+			<model name="exp_mutiSelect" modelExportName="exp_mutiSelect">
+				<!-- 查询执行者 -->
+				<search-execute />
+				<!-- 设置延迟初始化, 因为这里要等待父窗口设置属性 -->
+				<trans-execute from="value:1" to="data:delayInit" />
+			</model>
+
+			<view name="exp_mutiSelect" debug="0">
+				<replacement name="search_component" baseComponentName="search_component;conditions,list">
+					<before-init>
+						eg_temp.dataName = "queryResult";
+						{$dataV:eg_temp.dataName+'_modelName'} = "exp_mutiSelect";
+						{$dataV:eg_temp.dataName+'_searchName'} = "mutiSelect.search";
+					</before-init>
+					<table-form name="conditions" columns="20,30,20,30" baseName="search:mutiSelect.search" dataName="searchManager">
+						<cells cellOrder="title">
+							<cell name="title" titleSize="0" containerSize="-1"
+								comParam="attr:{align:'left'}">
+								<init-script>webObj.text("请输入查询条件");</init-script>
+							</cell>
+							<cell name="bottons" titleSize="0" containerSize="-1">
+								<component-param>attr:{align:"center"}</component-param>
+								<component name="queryBtn" type="input-submit">
+									<component-param>attr:{value:"查询"},className:"button-2"</component-param>
+								</component>
+							</cell>
+						</cells>
+					</table-form>
+					<table-list name="list" baseName="query:mutiSelect.query" percentWidth="false" caculateWidth="true" dataName="queryResult">
+						<columns columnOrder="opt">
+							<column name="opt" srcName="id" width="60" caption="操作">
+								<!-- 设置需合并的标题头，如果中间有空开的层，用{none:true} -->
+								<component-param>attr:{align:"center"}</component-param>
+								<title-param>upTitles:[{none:true},{caption:"查询结果",colSpan:6}]</title-param>
+								<component name="button" type="input-button">
+									<component-param>className:"button-2s"</component-param>
+									<init-script>
+										{$ef:check_select}("mutiSelectTest", "id", webObj);
+									</init-script>
+									<events>
+										<event name="click">
+											{$ef:select}("mutiSelectTest", eg_temp.valueObj.value,
+													{$ef:getData_value}(eg_temp.dataName, "name", eg_temp.index)
+															+ ":" + {$ef:getData_value}(eg_temp.dataName, "age", eg_temp.index),
+													"selectedId", "selectedValue", event.data);
+										</event>
+									</events>
+								</component>
+							</column>
+							<column name="age">
+								<!-- 这里是设置标题列的合并 -->
+								<title-param>upTitles:[{caption:"其他信息",colSpan:3}]</title-param>
+							</column>
+						</columns>
+					</table-list>
+				</replacement>
+			</view>
+
+		</objs>
+	</factory>
+</eterna-config>

@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 另一种查询界面 1 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<!-- 翻页控制条 -->
+			<typical-component name="pagetool_component" type="table">
+				<before-init>
+					checkResult = {$dataV:eg_temp.dataName} != null;
+				</before-init>
+				<component name="tr" type="tr">
+					<component name="td" type="td" comParam="attr:{align:'center'}">
+						<!-- 第一页 -->
+						<component name="first" type="image">
+							<init-script>
+								webObj.attr("src", {$ef:getImgPath}("/first.gif"));
+								webObj.attr("border", 0);
+								if ({$dataV:eg_temp.dataName}.pageNum == 0)
+								{
+									webObj.attr("disabled", true);
+								}
+								else
+								{
+									webObj.attr("cursor", "pointer");
+								}
+							</init-script>
+							<events>
+								<event name="click">
+									{$ef:doPageChanged}(0, 1, {$dataV:eg_temp.dataName}.pageSize, eg_temp.dataName);
+								</event>
+							</events>
+						</component>
+						<replacement name="nbsp" baseComponentName="nbsp" />
+						<!-- 上一页 -->
+						<component name="pre" type="image">
+							<init-script>
+								webObj.attr("src", {$ef:getImgPath}("/prev.gif"));
+								webObj.attr("border", 0);
+								if ({$dataV:eg_temp.dataName}.pageNum == 0)
+								{
+									webObj.attr("disabled", true);
+								}
+								else
+								{
+									webObj.attr("cursor", "pointer");
+								}
+							</init-script>
+							<events>
+								<event name="click">
+									{$ef:doPageChanged}(-1, 0, 0, eg_temp.dataName);
+								</event>
+							</events>
+						</component>
+
+						<replacement name="nbsp2" baseComponentName="nbsp2" />
+						<replacement name="nbsp2" baseComponentName="nbsp2" />
+						<replacement name="pageInfo" baseComponentName="pagetool_component_pageInfo" />
+						<replacement name="nbsp2" baseComponentName="nbsp2" />
+						<replacement name="nbsp2" baseComponentName="nbsp2" />
+
+						<!-- 下一页 -->
+						<component name="next" type="image">
+							<init-script>
+								webObj.attr("src", {$ef:getImgPath}("/next.gif"));
+								webObj.attr("border", 0);
+								if ({$dataV:eg_temp.dataName}.hasNextPage)
+								{
+									webObj.attr("cursor", "pointer");
+								}
+								else
+								{
+									webObj.attr("disabled", true);
+								}
+							</init-script>
+							<events>
+								<event name="click">
+									{$ef:doPageChanged}(1, 0, 0, eg_temp.dataName);
+								</event>
+							</events>
+						</component>
+						<replacement name="nbsp" baseComponentName="nbsp" />
+						<!-- 最后页 -->
+						<component name="last" type="image">
+							<init-script><![CDATA[
+								webObj.attr("src", {$ef:getImgPath}("/last.gif"));
+								webObj.attr("border", 0);
+								if ({$dataV:eg_temp.dataName}.hasNextPage && {$dataV:eg_temp.dataName}.totalCount != null)
+								{
+									webObj.attr("cursor", "pointer");
+								}
+								else
+								{
+									webObj.attr("disabled", true);
+								}
+							]]></init-script>
+							<events>
+								<event name="click">
+									var pageCount = {$dataV:eg_temp.dataName}.pageCount;
+									{$ef:doPageChanged}(0, pageCount,
+									{$dataV:eg_temp.dataName}.pageSize, eg_temp.dataName);
+								</event>
+							</events>
+						</component>
+					</component>
+				</component>
+			</typical-component>
+			<!-- 页面的信息 -->
+			<typical-component name="pagetool_component_pageInfo"
+				type="none">
+				<before-init>
+					checkResult = {$dataV:eg_temp.dataName}.totalCount != null;
+					if (checkResult)
+					{
+						var totalCount = {$dataV:eg_temp.dataName}.totalCount;
+						var pageSize = {$dataV:eg_temp.dataName}.pageSize;
+						var pageCount;
+						if ((totalCount % pageSize) == 0)
+						{
+							pageCount = parseInt(totalCount / pageSize);
+						}
+						else
+						{
+							pageCount = parseInt(totalCount / pageSize) + 1;
+						}
+						{$dataV:eg_temp.dataName}.pageCount = pageCount;
+					}
+				</before-init>
+				<component name="label1" type="span">
+					<init-script>webObj.text("共有(");</init-script>
+				</component>
+				<component name="label2" type="span">
+					<init-script>webObj.text({$dataV:eg_temp.dataName}.totalCount);</init-script>
+				</component>
+				<component name="label3" type="span">
+					<init-script>webObj.text(")项，");</init-script>
+				</component>
+				<component name="label4" type="span" comParam="css:{color:'red'}">
+					<init-script>webObj.text({$dataV:eg_temp.dataName}.pageNum + 1);</init-script>
+				</component>
+				<component name="label5" type="span">
+					<init-script>webObj.text("/");</init-script>
+				</component>
+				<component name="label6" type="span">
+					<init-script>webObj.text({$dataV:eg_temp.dataName}.pageCount);</init-script>
+				</component>
+				<replacement name="nbsp" baseComponentName="nbsp" />
+				<component name="label7" type="span">
+					<init-script>webObj.text("页");</init-script>
+				</component>
+				<replacement name="nbsp" baseComponentName="nbsp" />
+				<replacement name="nbsp2" baseComponentName="nbsp2" />
+				<component name="select" type="select">
+					<init-script><![CDATA[
+						for (var i = 0; i < {$dataV:eg_temp.dataName}.pageCount; i++)
+						{
+							var option = jQuery("<option/>");
+							option.attr("value", i + "");
+							option.text((i + 1) + "");
+							webObj.append(option);
+						}
+						webObj.val({$dataV:eg_temp.dataName}.pageNum + "");
+					]]></init-script>
+					<events>
+						<event name="change">
+							{$ef:doPageChanged}(0, parseInt(webObj.val()) + 1,
+							{$dataV:eg_temp.dataName}.pageSize, eg_temp.dataName);
+						</event>
+					</events>
+				</component>
+			</typical-component>
+
+
+			<!--
+				在具体的替换节点中, 需要在before-init中设置以下3个值
+				eg_temp.dataName  数据集的名称
+				{$dataV:eg_temp.dataName+'_modelName'}	查询提交的model的名称
+				{$dataV:eg_temp.dataName+'_searchName'}  查询使用的search的名称
+			-->
+			<typical-component name="search_component" type="none">
+				<before-init>
+					eg_temp.dataName = "queryResult";
+					{$dataV:eg_temp.dataName+'_modelName'} = "index";
+					<!-- {$dataV:eg_temp.dataName+'_searchName'} = "test"; -->
+				</before-init>
+				<component name="search" type="form">
+					<component-param>attr:{method:"post"}</component-param>
+					<init-script><![CDATA[
+						webObj.attr("action", {$ef:getHeadURL}({$dataV:eg_temp.dataName+'_modelName'}));
+					]]></init-script>
+					<events>
+						<event name="submit">
+							var theResult = {$ef:checkForm}(webObj);
+							if (theResult)
+							{
+								{$ef:triggerEvents}(webObj, "modify");
+							}
+							return theResult;
+						</event>
+					</events>
+					<component name="searchName" type="input-hidden">
+						<component-param>objName:"searchName",objValue:"[script]:{$dataV:eg_temp.dataName+'_searchName'}"</component-param>
+					</component>
+					<replacement name="searchSetting" baseComponentName="search_hidden_input"></replacement>
+					<component name="conditions" type="none" />
+				</component>
+				<component name="showList" type="none">
+					<before-init>
+						checkResult = {$dataV:eg_temp.dataName} != null;
+					</before-init>
+					<component name="br" type="br" />
+					<component name="list" type="none" />
+					<replacement name="page" baseComponentName="pagetool_component" />
+					<replacement name="search_page_tool_3" baseComponentName="search_page_form" />
+					<component name="toolbar" type="none" />
+				</component>
+			</typical-component>
+
+		</objs>
+	</factory>
+</eterna-config>

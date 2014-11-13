@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 另一种查询界面 2 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<typical-component name="search_page_tool" type="none">
+				<component name="label1" type="span">
+					<init-script>webObj.text("您目前在第 ");</init-script>
+				</component>
+				<component name="label2" type="span">
+					<component-param>css:{color:"red"}</component-param>
+					<init-script>webObj.text(({$dataV:eg_temp.dataName}.pageNum + 1) + "");</init-script>
+				</component>
+				<component name="label3" type="span">
+					<init-script>webObj.text(" 页");</init-script>
+				</component>
+				<component name="label_group" type="none">
+					<before-init>
+						checkResult = {$dataV:eg_temp.dataName}.totalCount != null;
+						if (checkResult)
+						{
+							var totalCount = {$dataV:eg_temp.dataName}.totalCount;
+							var pageSize = {$dataV:eg_temp.dataName}.pageSize;
+							var pageCount;
+							if ((totalCount % pageSize) == 0)
+							{
+								pageCount = parseInt(totalCount / pageSize);
+							}
+							else
+							{
+								pageCount = parseInt(totalCount / pageSize) + 1;
+							}
+							{$dataV:eg_temp.dataName}.pageCount = pageCount;
+						}
+					</before-init>
+					<component name="label4" type="span">
+						<init-script>webObj.text("，共 ");</init-script>
+					</component>
+					<component name="label5" type="span">
+						<component-param>css:{color:"red"}</component-param>
+						<init-script>webObj.text({$dataV:eg_temp.dataName}.pageCount + "");</init-script>
+					</component>
+					<component name="label6" type="span">
+						<init-script>webObj.text(" 页，共 ");</init-script>
+					</component>
+					<component name="label7" type="span">
+						<component-param>css:{color:"red"}</component-param>
+						<init-script>webObj.text({$dataV:eg_temp.dataName}.totalCount + "");</init-script>
+					</component>
+					<component name="label8" type="span">
+						<init-script><![CDATA[webObj.html(" 条 &nbsp; ");]]></init-script>
+					</component>
+				</component>
+				<component name="preImg" type="img">
+					<component-param>
+						attr:{alt:"上一页",border:0},css:{cursor:'pointer'}
+					</component-param>
+					<before-init>checkResult = {$dataV:eg_temp.dataName}.pageNum &gt; 0;</before-init>
+					<init-script>webObj.attr("src", {$ef:getImgPath}("/button_previous.gif"));</init-script>
+					<events>
+						<event name="click">
+							{$ef:doPageChanged}(-1, 0, 0, eg_temp.dataName);
+						</event>
+					</events>
+				</component>
+				<component name="nextImg" type="img">
+					<component-param>
+						attr:{alt:"下一页",border:0},css:{cursor:'pointer'}
+					</component-param>
+					<before-init>checkResult = {$dataV:eg_temp.dataName}.hasNextPage;</before-init>
+					<init-script>webObj.attr("src",
+						{$ef:getImgPath}("/button_next.gif"));</init-script>
+					<events>
+						<event name="click">
+							{$ef:doPageChanged}(1, 0, 0, eg_temp.dataName);
+						</event>
+					</events>
+				</component>
+			</typical-component>
+
+			<typical-component name="search_page_tool_all" type="none">
+				<replacement name="begins" baseComponentName="search_page_tool" />
+				<component name="label11" type="span">
+					<init-script><![CDATA[webObj.html(" &nbsp; 跳转至第 ");]]></init-script>
+				</component>
+				<component name="theNum" type="input-text">
+					<component-param>
+						attr:{maxlength:3},css:{width:"20px"},objName:"theNum",
+						objValue:"[script]:({$dataV:eg_temp.dataName}.pageNum + 1)"
+					</component-param>
+					<init-script>webObj.attr("id", {$dataV:eg_temp.dataName} + "_num");</init-script>
+				</component>
+				<component name="label12" type="span">
+					<init-script>webObj.text(" 页 每页显示 ");</init-script>
+				</component>
+				<component name="theSize" type="input-text">
+					<component-param>
+						attr:{size:3,maxlength:3},css:{width:"20px"},objName:"theSize",
+						objValue:"[script]:{$dataV:eg_temp.dataName}.pageSize"
+					</component-param>
+					<init-script>webObj.attr("id", {$dataV:eg_temp.dataName} + "_size");</init-script>
+				</component>
+				<component name="label13" type="span">
+					<init-script><![CDATA[webObj.html(" 条 &nbsp; ");]]></init-script>
+				</component>
+				<component name="theSize" type="input-button">
+					<component-param>objValue:"GO"</component-param>
+					<events>
+						<event name="click">
+							{$ef:doPageChanged}(0, _eterna.getWebObj({$dataV:eg_temp.dataName} + "_num").val(),
+							_eterna.getWebObj({$dataV:eg_temp.dataName} + "_size").val(),
+							eg_temp.dataName);
+						</event>
+					</events>
+				</component>
+			</typical-component>
+
+
+			<!--
+				在具体的替换节点中, 需要在before-init中设置以下3个值
+				eg_temp.dataName  数据集的名称
+				{$dataV:eg_temp.dataName+'_modelName'}	查询提交的model的名称
+				{$dataV:eg_temp.dataName+'_searchName'}  查询使用的search的名称
+			-->
+			<typical-component name="search_component" type="none">
+				<before-init>
+					eg_temp.dataName = "queryResult";
+					{$dataV:eg_temp.dataName+'_modelName'} = "index";
+					<!-- {$dataV:eg_temp.dataName+'_searchName'} = "test"; -->
+				</before-init>
+				<component name="search" type="form">
+					<component-param>attr:{method:"post"}</component-param>
+					<init-script><![CDATA[
+						webObj.attr("action", {$ef:getHeadURL}({$dataV:eg_temp.dataName+'_modelName'}));
+					]]></init-script>
+					<events>
+						<event name="submit">
+							var theResult = {$ef:checkForm}(webObj);
+							if (theResult)
+							{
+								{$ef:triggerEvents}(webObj, "modify");
+							}
+							return theResult;
+						</event>
+					</events>
+					<component name="searchName" type="input-hidden">
+						<component-param>objName:"searchName",objValue:"[script]:{$dataV:eg_temp.dataName+'_searchName'}"</component-param>
+					</component>
+					<replacement name="searchSetting" baseComponentName="search_hidden_input"></replacement>
+					<component name="conditions" type="none" />
+				</component>
+				<component name="showList" type="none">
+					<before-init>
+						checkResult = {$dataV:eg_temp.dataName} != null;
+					</before-init>
+					<component name="br" type="br" />
+					<replacement name="search_page_tool_1" baseComponentName="search_page_tool_all" />
+					<component name="list" type="none" />
+					<replacement name="search_page_tool_2" baseComponentName="search_page_tool" />
+					<replacement name="search_page_tool_3" baseComponentName="search_page_form" />
+					<component name="toolbar" type="none" />
+				</component>
+			</typical-component>
+
+		</objs>
+	</factory>
+</eterna-config>

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN" "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<taglib id="eterna">
+	<tlib-version>1.1</tlib-version>
+	<jsp-version>1.2</jsp-version>
+	<short-name>eterna</short-name>
+	<uri>http://code.google.com/p/eterna</uri>
+	<display-name>Eterna Tag Library</display-name>
+	<description>eterna框架的标签库定义</description>
+	<tag>
+		<name>def</name>
+		<tag-class>self.micromagic.eterna.tag.EternaDefine</tag-class>
+		<body-content>JSP</body-content>
+		<description>在页面中定义一个eterna对象</description>
+		<attribute>
+			<name>name</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>定义的eterna对象的名称, 在script脚本中可以通过此名字来访问</description>
+		</attribute>
+		<attribute>
+			<name>instanceName</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				使用的工厂实例(self.micromagic.eterna.digester.FactoryManager.Instance)的名称.
+			</description>
+		</attribute>
+		<attribute>
+			<name>modelName</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>定义对象前需要执行的model</description>
+		</attribute>
+		<attribute>
+			<name>param</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				执行model需要的参数, 类型必须为实现了java.util.Map接口的对象, 此对象需要能够
+				在PageContext中被找到, 如果没有则使用request中的参数.
+			</description>
+		</attribute>
+		<attribute>
+			<name>viewName</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				定义的eterna对象所使用的界面, 如果没有指定, 则会使用model执行完后, export中
+				指定的视图.
+			</description>
+		</attribute>
+		<attribute>
+			<name>data</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				定义eterna对象所需要的额外数据, 类型必须为实现了java.util.Map接口的对象, 如果
+				没有指定, 则只会使用model执行完后所产生的数据集. 此对象需要能够在PageContext
+				中被找到.
+			</description>
+		</attribute>
+		<attribute>
+			<name>parentElement</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				在哪个父节点元素下生成eterna界面, 如果没有指定的话, 则不会自动生成界面.
+			</description>
+		</attribute>
+		<attribute>
+			<name>suffixId</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				区分多个同名控件时使用的后缀标识.
+				注: 如果设置了此标签, 他将会和parentElement共同构成查找的名称.
+			</description>
+		</attribute>
+		<attribute>
+			<name>useAJAX</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
+			<description>
+				是否将生成的界面中, 所有默认的页面跳转方式改为ajax请求.
+			</description>
+		</attribute>
+		<attribute>
+			<name>scatterFlag</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				如果父节点元素是个模板, 则要加上此标记标明, 它的值就是查找模板元素的标签名.
+				如:
+				设为  id		那就是查找 id=? 的模板
+				设为  swapId  那就是查找 swapId=? 的模板
+			</description>
+		</attribute>
+		<example><![CDATA[
+			<e:def name="tmp" viewName="sample.view">
+				<div id="testDiv"></div>
+				<script language="javascript">
+					// 调用getData_value方法
+					var value = tmp.callFunction("getData_value", "testData", "col1", 12);
+					// 生成samle控件放到 id为"test"的节点中
+					var newObj = tmp.newComponent("sample", "testDiv");
+				</script>
+			</e:def>
+		]]></example>
+	</tag>
+	<tag>
+		<name>init</name>
+		<tag-class>self.micromagic.eterna.tag.EternaInit</tag-class>
+		<body-content>JSP</body-content>
+		<description>在页面中初始化Eterna对象</description>
+		<attribute>
+			<name>view</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				查找界面对象的名称, 此对象需要能够在PageContext中被找到.
+				默认值为: WebApp.VIEW_TAG
+			</description>
+		</attribute>
+		<attribute>
+			<name>appData</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				查找AppData对象的名称, 此对象需要能够在PageContext中被找到.
+				默认值为: WebApp.APPDATA_TAG
+			</description>
+		</attribute>
+		<attribute>
+			<name>printHTML</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>int</type>
+			<description>
+				是否要输出基本的html代码, 如果不为0且当前的数据类型为ViewAdapter.DATA_TYPE_WEB
+				时, 则会输出html的基本代码.
+				各代码的意义如下:
+				0	 不输出html代码
+				1	 仅输出eterna容器对象的div代码
+				2	 输出完整的html页面代码
+			</description>
+		</attribute>
+		<attribute>
+			<name>charset</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				当printHTML设为2时, 此值才有效, 用于设置页面的编码格式.
+				默认值为UTF-8.
+			</description>
+		</attribute>
+		<attribute>
+			<name>docType</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description><![CDATA[
+				当printHTML设为2时, 此值才有效, 用于设置页面的文档类型.
+				默认值为
+				<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+				      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+			]]></description>
+		</attribute>
+		<attribute>
+			<name>divClass</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				当printHTML设为1或2时, 此值才有效, 用于设置eterna容器对象的class.
+			</description>
+		</attribute>
+		<attribute>
+			<name>parentElement</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				在哪个父节点元素下生成eterna界面, 如果没有指定的话, 则不会自动生成界面.
+			</description>
+		</attribute>
+		<attribute>
+			<name>suffixId</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				区分多个同名控件时使用的后缀标识.
+				注: 如果设置了此标签, 他将会和parentElement共同构成查找的名称.
+			</description>
+		</attribute>
+		<attribute>
+			<name>useAJAX</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
+			<description>
+				是否将生成的界面中, 所有默认的页面跳转方式改为ajax请求.
+			</description>
+		</attribute>
+		<attribute>
+			<name>scatterFlag</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				如果父节点元素是个模板, 则要加上此标记标明, 它的值就是查找模板元素的标签名.
+				如:
+				设为  id		那就是查找 id=? 的模板
+				设为  swapId  那就是查找 swapId=? 的模板
+			</description>
+		</attribute>
+		<example><![CDATA[
+			<e:init parentElement="testDiv" suffixId="_1" printHTML="1">
+				<e:res url="/eterna.js"/>
+			</e:init>
+		]]></example>
+	</tag>
+	<tag>
+		<name>res</name>
+		<tag-class>self.micromagic.eterna.tag.EternaRes</tag-class>
+		<body-content>empty</body-content>
+		<description>在页面中动态加载需要的资源文件</description>
+		<attribute>
+			<name>url</name>
+			<required>true</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				资源文件的路径, 注: 如果是以"/"起始的路径, 不需要加上下文路径.
+			</description>
+		</attribute>
+		<attribute>
+			<name>jsResource</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<type>boolean</type>
+			<description>
+				是否为js资源, 默认为true, 如果设为false表示为css资源.
+			</description>
+		</attribute>
+		<attribute>
+			<name>scriptParam</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>
+				jsResource为true时才有效, 以json格式设置, 参数有:
+				alwaysExecute   设为ture表示每次都要执行script代码
+            async           设为true表示采用异步加载的方式
+			</description>
+		</attribute>
+		<attribute>
+			<name>charset</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>设置资源的编码格式</description>
+		</attribute>
+		<example><![CDATA[
+			普通例子
+			<e:res url="/eterna.js"/>
+			设置scriptParam的例子
+			<e:res url="/eterna.js" scriptParam="{alwaysExecute:true,async:true}"/>
+		]]></example>
+	</tag>
+</taglib>

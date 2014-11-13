@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 读取excel的例子 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<model name="importStart" positions="servlet,portletAction,portletRender"
+				transactionType="notNeed" modelExportName="import.export">
+			</model>
+			<export name="import.export" path="${page.view}" viewName="import.view" errorExport="true" />
+
+			<model name="uploadTest" positions="servlet,portletAction" modelExportName="import.export">
+				<execute name="getFile" generator="self.micromagic.app.UploadExecute">
+					<!-- 要读取的参数的名称, 用","分隔 -->
+					<attribute name="storeNames" value="testFile" />
+					<!-- 
+					其他的参数 字符集 
+					<attribute name="charset" value="UTF-8" />
+					-->
+				</execute>
+				<trans-execute from="stack" to="cache:0" />
+				<trans-execute from="cache:0" opt="getMapValue:testFile" to="cache:1" />
+				<execute name="read" generator="self.micromagic.app.ReadExcelExecute">
+					<!-- excel文件所在的cache索引号 -->
+					<attribute name="cacheIndex" value="1" />
+					<!-- 配置读取excel文件中哪些列的设置 -->
+					<attribute name="readerManagerName" value="testReaders" />
+					<!-- 
+					其他的参数 标题行数
+					<attribute name="titleRowCount" value="1" />
+					如果有出错的行, 出错行的集合设置在data中的名称
+					<attribute name="errorRows_name" value="errorRows" />
+					如果有出错的行, 出错行的出错说明设置在data中的名称 类型为map, 
+					键值为: "[出错集合中的序号]:[列名]", value值为: 错误信息
+					<attribute name="errorRowFlags_name" value="errorRowFlags" />
+					要读取的excel中sheet的索引值
+					<attribute name="sheetIndex" value="0" />
+					是否忽略全空行
+					<attribute name="skipEmptyRow" value="true" /> 
+					是否需要行号的索引列
+					<attribute name="needRowIndex" value="true" />
+					-->
+				</execute>
+				<trans-execute from="stack" to="data:result" />
+			</model>
+
+			<!-- 判断当前单元格是否有出错信息，有则设置成黄色并在悬停提示里显示错误信息 -->
+			<function name="checkTD" param="webObj">
+				if (!{$data:needCheck})
+				{
+					return;
+				}
+				var tmp = {$data:errorRowFlags}[eg_temp.index + ":" + eg_temp.name];
+				if (tmp != null)
+				{
+					webObj.css("background-color", "yellow");
+					webObj.attr("title", tmp);
+				}
+			</function>
+
+			<!-- 定义一个reader manager，指明要读取的excel表中的索引 -->
+			<reader-manager name="testReaders">
+				<reader name="test0" colIndex="1" type="int" caption="序号">
+					<attribute name="initScript" value="{$ef:checkTD}(webObj);" />
+				</reader>
+				<reader name="test1" colIndex="2" type="String" caption="字符型" />
+				<reader name="test2" colIndex="3" type="int" caption="整型">
+					<attribute name="initScript" value="{$ef:checkTD}(webObj);" />
+				</reader>
+				<reader name="test3" colIndex="4" type="Date" caption="日期">
+					<attribute name="initScript" value="{$ef:checkTD}(webObj);" />
+				</reader>
+				<reader name="test5" colIndex="5" type="double" caption="浮点型">
+					<attribute name="initScript" value="{$ef:checkTD}(webObj);" />
+				</reader>
+			</reader-manager>
+
+			<view name="import.view">
+				<component name="search" type="form">
+					<component-param>prop:{encoding:"multipart/form-data"}</component-param>
+					<init-script><![CDATA[
+						webObj.attr("action", {$ef:getHeadURL}("uploadTest"));
+					]]></init-script>
+					<table-form name="conditions" columns="20,30,20,30">
+						<cells cellOrder="title">
+							<cell name="title" titleSize="0" containerSize="-1" comParam="attr:{align:'left'}">
+								<component-param>className:"thead"</component-param>
+								<init-script>webObj.text("excel文件导入");</init-script>
+							</cell>
+							<cell name="browse" titleSize="1" containerSize="3" caption="请选择要导入的文件：">
+								<component name="file" type="input-file">
+									<component-param>objName:"testFile"</component-param>
+								</component>
+							</cell>
+							<cell name="bottons" titleSize="0" containerSize="-1">
+								<component-param>attr:{align:"center"}</component-param>
+								<component name="submit" type="input-submit">
+									<component-param>attr:{value:"导入"},className:"button-2"</component-param>
+								</component>
+							</cell>
+						</cells>
+					</table-form>
+				</component>
+				<component name="br" type="br" />
+				<component name="none" type="none">
+					<before-init>
+						checkResult = {$data:errorRows} != null;
+						{$data:needCheck} = true;
+					</before-init>
+					<table-list name="data" baseName="reader:testReaders" dataName="errorRows">
+						<columns columnOrder="rowIndex">
+							<column name="rowIndex" srcName="rowIndex" />
+						</columns>
+					</table-list>
+				</component>
+				<component name="br" type="br" />
+				<component name="none" type="none">
+					<before-init>
+						checkResult = {$data:result} != null;
+						{$data:needCheck} = false;
+					</before-init>
+					<table-list name="data" baseName="reader:testReaders" dataName="result">
+						<columns columnOrder="rowIndex">
+							<column name="rowIndex" srcName="rowIndex" />
+						</columns>
+					</table-list>
+				</component>
+			</view>
+
+		</objs>
+	</factory>
+</eterna-config>

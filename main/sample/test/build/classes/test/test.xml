@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 例子 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<export name="first.export" path="${page.view}" viewName="first.view" />
+			<model name="first" transactionType="notNeed" modelExportName="first.export" />
+			<view name="first.view" debug="0">
+				<component name="text" type="span">
+					<component-param>text:"micromagic"</component-param>
+				</component>
+			</view>
+
+
+			<export name="second.export" path="${page.view}" viewName="second.view" />
+			<model name="second" transactionType="notNeed" modelExportName="second.export" />
+			<view name="second.view">
+				<component name="test" type="form">
+					<component name="text" type="span">
+						<component-param>text:"text field:"</component-param>
+					</component>
+					<component name="text" type="input-text" />
+					<component name="br" type="br" />
+					<component name="text" type="span">
+						<component-param>text:"check box:"</component-param>
+					</component>
+					<component name="checkbox" type="input-checkbox" />
+					<component name="br" type="br" />
+					<component name="text" type="span">
+						<component-param>text:"select field:"</component-param>
+					</component>
+					<component name="select" type="select">
+						<component name="1" type="option">
+							<component-param>objValue:"1",text:"one"</component-param>
+						</component>
+						<component name="2" type="option">
+							<component-param>objValue:"2",text:"two"</component-param>
+						</component>
+						<component name="3" type="option">
+							<component-param>objValue:"3",text:"three"</component-param>
+						</component>
+					</component>
+				</component>
+			</view>
+
+
+			<typical-component name="testForm" type="form">
+				<component name="text" type="span">
+					<component-param>text:"text field:"</component-param>
+				</component>
+				<component name="text" type="input-text" />
+				<component name="br" type="br" />
+				<component name="text" type="span">
+					<component-param>text:"check box:"</component-param>
+				</component>
+				<component name="checkbox" type="input-checkbox" />
+				<component name="br" type="br" />
+				<component name="text" type="span">
+					<component-param>text:"select field:"</component-param>
+				</component>
+				<component name="select" type="select">
+					<component name="1" type="option">
+						<component-param>objValue:"1",text:"one"</component-param>
+					</component>
+					<component name="2" type="option">
+						<component-param>objValue:"2",text:"two"</component-param>
+					</component>
+					<component name="3" type="option">
+						<component-param>objValue:"3",text:"three"</component-param>
+					</component>
+				</component>
+				<component name="br" type="br" />
+				<component name="sexLable" type="span">
+					<component-param>text:"sex:"</component-param>
+				</component>
+				<component name="sex" type="input-text" />
+			</typical-component>
+
+
+			<export name="third.export" path="${page.view}" viewName="third.view" />
+			<model name="third" transactionType="notNeed" modelExportName="third.export" />
+			<view name="third.view">
+				<replacement name="test" baseComponentName="testForm" />
+			</view>
+
+
+			<export name="forth.export" path="${page.view}" viewName="forth.view" />
+			<model name="forth" transactionType="notNeed" modelExportName="forth.export" />
+			<view name="forth.view">
+				<replacement name="test" baseComponentName="testForm">
+					<init-script>
+						webObj.attr("action", {$ef:getHeadURL}("fifth"));
+					</init-script>
+					<component name="sex" type="select">
+						<component name="1" type="option">
+							<component-param>value:"1",text:"male"</component-param>
+						</component>
+						<component name="2" type="option">
+							<component-param>value:"2",text:"female"</component-param>
+						</component>
+					</component>
+				</replacement>
+			</view>
+
+
+			<export name="fifth.export" path="${page.view}" viewName="fifth.view" />
+			<model name="fifth" transactionType="notNeed" modelExportName="fifth.export">
+				<trans-execute from="request-parameter:sex" to="data:sex" opt="getFirstString" mustExist="false" />
+				<trans-execute from="request-parameter:text" to="data:text" opt="getFirstString" mustExist="false" />
+				<trans-execute from="request-parameter:date" to="data:date" opt="getFirstString" mustExist="false" />
+				<trans-execute from="value:,abc123" to="data:testValue" />
+			</model>
+			<view name="fifth.view">
+				<component name="test" type="form">
+					<init-script>
+						webObj.attr("action", {$ef:getHeadURL}("fifth"));
+					</init-script>
+					<component name="sexLable" type="span">
+						<component-param>text:"sex:"</component-param>
+					</component>
+					<component name="sex" type="select">
+						<component-param>objName:"sex"</component-param>
+						<init-script>webObj.val({$data:sex});</init-script>
+						<component name="0" type="option">
+							<component-param>objValue:"0",text:"---"</component-param>
+						</component>
+						<component name="1" type="option">
+							<component-param>objValue:"1",text:"male"</component-param>
+						</component>
+						<component name="2" type="option">
+							<component-param>objValue:"2",text:"female"</component-param>
+						</component>
+					</component>
+					<component name="br" type="br" />
+					<component name="textLable" type="span">
+						<component-param>text:"text:"</component-param>
+					</component>
+					<component name="text" type="input-text">
+						<component-param>
+							objName:"text",css:{width:"50%"},
+							objValue:"[script]:({$data:text} != null ? {$data:text} : '') + {$data:testValue}"
+						</component-param>
+					</component>
+					<component name="br" type="br" />
+					<component name="textLable" type="span">
+						<component-param>text:"date:"</component-param>
+					</component>
+					<component name="text" type="input-text">
+						<component-param>
+							objName:"date",css:{width:"200px"}
+						</component-param>
+						<events>
+							<event name="focus">WdatePicker();</event>
+						</events>
+					</component>
+					<component name="dateShow" type="span">
+						<component-param>text:"[script]:{$data:date}"</component-param>
+					</component>
+					<component name="br" type="br" />
+					<component name="submit" type="input-submit" />
+				</component>
+			</view>
+
+
+			<!--
+			下面这部分为做一个简单的增加删除功能的例子
+			请自己建表 TestTable，有3列
+			id 字符串
+			value 字符串
+			doubleValue 带小数的数值型
+			下面是针对oracle数据库的建表语句
+			create table TestTable (
+				id varchar2(10),
+				stringValue varchar2(100),
+				doubleValue number(15,5)
+			);
+			-->
+
+			<!-- 对double型以保留2位小数的形式格式化输出 -->
+			<format name="twoNumber" type="Number" pattern="#,##0.00" />
+
+
+			<!-- 查询 -->
+			<query name="test.query">
+				<prepared-sql>
+					select id, stringValue, doubleValue from TestTable
+				</prepared-sql>
+				<readers>
+					<reader name="id" type="String" caption="编号" />
+					<reader name="stringValue" type="String" caption="值1" />
+					<reader name="doubleValue" type="double" caption="值2" format="twoNumber" />
+				</readers>
+			</query>
+
+			<!-- 插入 -->
+			<update name="test.insert">
+				<prepared-sql>
+					insert into TestTable (id, stringValue, doubleValue) values (?, ?, ?)
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="String" />
+					<parameter name="stringValue" type="String" />
+					<parameter name="doubleValue" type="double" />
+				</parameters>
+			</update>
+
+			<!-- 删除 -->
+			<update name="test.delete">
+				<prepared-sql>
+					delete from TestTable where id = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="String" />
+				</parameters>
+			</update>
+
+			<export name="exp.export" path="${page.view}" viewName="exp.view" />
+			<model name="exp" modelExportName="exp.export">
+				<!-- 查询执行者，调用查询 -->
+				<query-execute queryName="test.query" />
+				<!-- 将查询结果以exp为名称，放入数据数据区 -->
+				<trans-execute from="stack:pop" to="data:exp" />
+			</model>
+			<view name="exp.view" debug="0">
+				<table-list name="expList" baseName="query:test.query" dataName="exp">
+					<component-param>attr:{border:1,width:"60%"}</component-param>
+					<columns>
+						<column name="opt" srcName="id" caption="操作">
+							<component name="del" type="a">
+								<component-param>attr:{href:"javascript:"},text:"删除"</component-param>
+								<init-script><![CDATA[
+									var url = {$ef:getHeadURL}("exp_del") + "&" + jQuery.param({id:eg_temp.valueObj.value});
+									webObj.attr("href", url);
+								]]></init-script>
+							</component>
+						</column>
+					</columns>
+				</table-list>
+
+				<component name="testEXP" type="form">
+					<init-script>
+						webObj.attr("action", {$ef:getHeadURL}("exp_add"));
+					</init-script>
+					<component name="lable" type="span">
+						<component-param>text:"编号:"</component-param>
+					</component>
+					<component name="text" type="input-text">
+						<component-param>objName:"id"</component-param>
+					</component>
+					<component name="br" type="br" />
+					<component name="lable" type="span">
+						<component-param>text:"值1:"</component-param>
+					</component>
+					<component name="text" type="input-text">
+						<component-param>objName:"stringValue"</component-param>
+					</component>
+					<component name="br" type="br" />
+					<component name="lable" type="span">
+						<component-param>text:"值2:"</component-param>
+					</component>
+					<component name="text" type="input-text">
+						<component-param>objName:"doubleValue"</component-param>
+					</component>
+					<component name="br" type="br" />
+					<component name="submit" type="input-submit">
+						<component-param>objValue:"添加"</component-param>
+					</component>
+				</component>
+			</view>
+
+			<export name="exp_modified.export" modelName="exp" />
+			<model name="exp_add" modelExportName="exp_modified.export">
+				<!-- 更新执行者，调用[插入] -->
+				<update-execute updateName="test.insert">
+					<!-- 参数绑定，参数来源为request的parameter，对应的名称为[插入]的参数列表（parameters） -->
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+			<model name="exp_del" modelExportName="exp_modified.export">
+				<!-- 更新执行者，调用[删除] -->
+				<update-execute updateName="test.delete">
+					<!-- 参数绑定，参数来源为request的parameter，对应的名称为[删除]的参数列表（parameters） -->
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+
+			<!-- 查询 -->
+			<query name="exp_search.query">
+				<prepared-sql>
+					select id, stringValue, doubleValue from TestTable #sub[where $]
+				</prepared-sql>
+				<readers>
+					<reader name="id" type="String" caption="编号" />
+					<reader name="stringValue" type="String" caption="值1" />
+					<reader name="doubleValue" type="double" caption="值2" format="twoNumber" />
+				</readers>
+			</query>
+			<query name="exp_search.query.count">
+				<prepared-sql>
+					select count(*) from TestTable #sub[where $]
+				</prepared-sql>
+				<readers>
+					<reader name="count" colIndex="1" type="int" />
+				</readers>
+			</query>
+
+			<!-- 配置查询条件 -->
+			<search name="exp_search" queryName="exp_search.query" conditionIndex="1" pageSize="5"
+				searchManager="exp_sm" countType="search:exp_search.count,count">
+				<condition-propertys>
+					<condition-property name="doubleValue1" colName="doubleValue" colType="double" caption="值2(大于)" defaultBuilder="notBelow" />
+					<condition-property name="doubleValue2" colName="doubleValue" colType="double" caption="值2(小于)" defaultBuilder="notLarge" />
+					<condition-property name="stringValue" colName="stringValue" colType="String" caption="值1" />
+				</condition-propertys>
+			</search>
+			<search name="exp_search.count" queryName="exp_search.query.count" conditionIndex="1"
+				pageSize="5" searchManager="exp_sm">
+				<condition-propertys parent="exp_search" />
+			</search>
+
+			<!-- 配置查询业务及export -->
+			<export name="exp_search.export" path="${page.view}" viewName="exp_search.view" />
+			<model name="exp_search.model" modelExportName="exp_search.export">
+				<!-- 查询执行者 -->
+				<search-execute />
+			</model>
+
+			<!-- 配置查询的视图 -->
+			<view name="exp_search.view">
+				<!-- 这里使用了一个定义好的typical-component，里面已经定义了分页的控制条等 -->
+				<replacement name="search_component" baseComponentName="search_component">
+					<before-init>
+						eg_temp.dataName = "queryResult";
+						{$dataV:eg_temp.dataName+'_modelName'} = "exp_search.model";
+						{$dataV:eg_temp.dataName+'_searchName'} = "exp_search";
+					</before-init>
+					<replacement name="search">
+						<table-form name="conditions" columns="20,30,20,30" baseName="search:exp_search" dataName="searchManager">
+							<cells cellOrder="title">
+								<cell name="title" titleSize="0" containerSize="-1" comParam="attr:{align:'left'}">
+									<init-script>webObj.text("请输入查询条件");</init-script>
+								</cell>
+								<cell name="bottons" titleSize="0" containerSize="-1">
+									<component-param>attr:{align:"center"}</component-param>
+									<component name="queryBtn" type="input-submit">
+										<component-param>attr:{value:"查询"}</component-param>
+									</component>
+								</cell>
+							</cells>
+						</table-form>
+					</replacement>
+					<replacement name="showList">
+						<table-list name="list" baseName="query:exp_search.query" dataName="queryResult" />
+					</replacement>
+				</replacement>
+			</view>
+
+		</objs>
+	</factory>
+</eterna-config>

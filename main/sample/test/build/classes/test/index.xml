@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 导航页-->
+<eterna-config>
+	<factory>
+		<objs>
+			
+			<export name="index.export" path="${page.view}" viewName="index.view" />
+			<model name="index" modelExportName="index.export" transactionType="notNeed" />
+			<view name="index.view">
+				<component name="top" type="div" comParam="css:{height:'32px'}" />
+				<component name="1" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="s" type="span" comParam="text:'简单的页面样例：'" />
+					<component name="a" type="a" comParam="text:'一',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("first"));</init-script>
+					</component>
+					<component name="a" type="a" comParam="text:'二',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("second"));</init-script>
+					</component>
+					<component name="a" type="a" comParam="text:'三',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("third"));</init-script>
+					</component>
+					<component name="a" type="a" comParam="text:'四',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("forth"));</init-script>
+					</component>
+					<component name="a" type="a" comParam="text:'五',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("fifth"));</init-script>
+					</component>
+				</component>
+				<component name="2" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="s" type="span" comParam="text:'简单的数据库操作样例，对应表TestTable：'" />
+					<component name="a" type="a" comParam="text:'CRUD',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("exp"));</init-script>
+					</component>
+					<component name="a" type="a" comParam="text:'查询条件及分页',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("exp_search.model"));</init-script>
+					</component>
+				</component>
+				<component name="3" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="a" type="a" comParam="text:'查询+多选+列表的复合标题样例，对应表my_table'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("exp_mutiSelect.start"));</init-script>
+					</component>
+				</component>
+				<component name="4" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="a" type="a" comParam="text:'excel导入样例，不导入数据库，仅显示excel中的数据'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("importStart"));</init-script>
+					</component>
+				</component>
+				<component name="5" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="s" type="span" comParam="text:'第二个数据库操作样例，对应表my_table：'" />
+					<component name="a" type="a" comParam="text:'CRUD+年龄和出生日期的匹配校验',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("my.first.model"));</init-script>
+					</component>
+					<component name="a" type="a" comParam="text:'查询+分页+折叠表格',css:{'margin-left':'5px'}">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("search.model"));</init-script>
+					</component>
+				</component>
+				<component name="6" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="a" type="a" comParam="text:'列表中单元格纵向合并的样例'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("cm"));</init-script>
+					</component>
+				</component>
+				<component name="6" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="a" type="a" comParam="text:'一个完整的CRUD操作的样例，对应表：t_student，t_sex，t_dept。名称查询条件会有补完提示，姓名及部门列可排序。'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("list"));</init-script>
+					</component>
+				</component>
+				<component name="7" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="a" type="a" comParam="text:'代码表管理的样例，对应表：t_code1，t_code2。如何使用span_modifiable控件，及相似的管理内容编写。'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("codeManage.index"));</init-script>
+					</component>
+				</component>
+				<component name="8" type="div" comParam="css:{'margin-top':'5px'}">
+					<component name="a" type="a" comParam="text:'自动ajax的样例，可在各个地址栏里输入上面各个例子中的地址看效果。'">
+						<init-script>webObj.attr("href", {$ef:getHeadURL}("autoAJAX"));</init-script>
+					</component>
+				</component>
+			</view>
+
+		</objs>
+	</factory>
+</eterna-config>

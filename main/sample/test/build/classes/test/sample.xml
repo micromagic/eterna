@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 例子 -->
+<eterna-config>
+	<factory>
+
+		<objs>
+
+			<view name="textList.view">
+				<replacement name="t" baseComponentName="text_list_view_template">
+					<table-list name="listTable" baseName="query:textList.query" dataName="listData" ignoreGlobal="true">
+						<component-param>attr:{border:0,cellPadding:1,cellSpacing:0,width:'100%'}</component-param>
+						<tr name="tableList_TR.text_list_listTable_tr" comParam="css:{cursor:'pointer'}" />
+						<columns>
+							<column name="$typical" ignoreGlobal="true" comParam="attr:{noWrap:true}" />
+						</columns>
+					</table-list>
+				</replacement>
+			</view>
+			<export name="textList1.export" viewName="textList.view" path="${page.view}" />
+			<export name="textList2.export" viewName="text_list_common.view" path="${page.view}" />
+			<model name="textList.model" modelExportName="textList1.export">
+				<query-execute queryName="textList.query" count="15">
+					<param-bind src="request-parameter" names="name,name:spellName" />
+				</query-execute>
+				<trans-execute from="stack" to="data:listData" />
+			</model>
+			<query name="textList.query">
+				<prepared-sql>
+					select u.id, u.name, u.spellName, s.sexName, d.deptName
+					#const(fromPart)
+					where u.spellName like ? or name like ?
+				</prepared-sql>
+				<parameters>
+               <parameter name="spellName" type="String" vpcName="str_begin.vpc" />
+               <parameter name="name" type="String" vpcName="str_begin.vpc" />
+				</parameters>
+				<readers>
+					<reader name="id" type="int" visible="false" />
+					<reader name="name" type="String" />
+					<reader name="spellName" type="String" />
+					<reader name="sexName" type="String" />
+					<reader name="deptName" type="String" />
+				</readers>
+			</query>
+
+			<!-- 查询语句中from部分的sql -->
+			<constant name="fromPart" value="$useBodyText">
+				from t_student u
+				left join t_sex s on s.sexId = u.sex
+				left join t_dept d on d.deptId = u.dept
+			</constant>
+
+			<export name="list.export" viewName="list.view" path="${page.view}" />
+			<model name="list" modelExportName="list.export">
+				<search-execute searchName="list.search" queryResultName="listInfo" />
+			</model>
+			<view name="list.view">
+				<before-init>
+					// 这里初始化页面中全局的宽度等级分隔
+					{$ef:rwd_widthLevel}([700, 390]);
+				</before-init>
+				<replacement name="search" baseComponentName="search_component;toolbar,conditions,list">
+					<before-init>
+						eg_temp.dataName = "listInfo";
+						{$dataV:eg_temp.dataName + "_modelName"} = "list";
+						{$dataV:eg_temp.dataName + "_searchName"} = "list.search";
+					</before-init>
+					<replacement name="toolbar" baseComponentName="toolbar_component">
+						<before-init><![CDATA[
+							{$parentScript}				
+							// 这里初始化页工具条专用的宽度等级分隔			
+							eg_temp.widthLevel = {$ef:rwd_widthLevel}([350]);
+							if (eg_temp.widthLevel > 1)
+							{
+								tmpData.verticalLayout = 1;
+							}
+							btns.push({name:'添加',img:'add.gif',model:'get',params:{type:'add'}});
+							btns.push({name:'导入',img:'input.gif',click:function(){alert("导入暂未实现!");}});
+							btns.push({name:'导出',img:'output.gif',click:function(){alert("导出暂未实现!");}});
+							btns.push({name:'反选',img:'select.gif',click:function(){alert("反选暂未实现!");}});
+						]]></before-init>
+						<events>
+							<event name="widthChange">{$ef:rwd_checkWidthLevel}(webObj);</event>
+						</events>
+					</replacement>
+					<table-form name="conditions" columns="10,23,10,23,10,24" baseName="search:list.search" dataName="searchManager">
+						<before-init><![CDATA[
+							eg_temp.widthLevel = {$ef:rwd_widthLevel}();
+							if (eg_temp.widthLevel < 2)
+							{
+								configData.columns = [10, 23, 10, 23, 10, 24];
+							}
+							else if (eg_temp.widthLevel < 3)
+							{
+								configData.columns = [20, 30, 20, 30];
+							}
+							else
+							{
+								configData.columns = [40, 60];
+							}
+						]]></before-init>
+						<events>
+							<event name="widthChange">{$ef:rwd_checkWidthLevel}(webObj);</event>
+						</events>
+						<cells cellOrder="title">
+							<cell name="title" caption="学生信息查询" titleSize="-1" containerSize="0" titleParam="css:{'text-align':'left'}" />
+							<cell name="submit" titleSize="0" containerSize="-1" typicalComponentName="buttons" initParam="queryBtn:1" />
+						</cells>
+					</table-form>
+					<table-list name="list" baseName="query:list.query" dataName="listInfo">
+						<before-init>
+							eg_temp.widthLevel = {$ef:rwd_widthLevel}();
+						</before-init>
+						<events>
+							<event name="widthChange">{$ef:rwd_checkWidthLevel}(webObj);</event>
+						</events>
+						<!-- 这里使用为RWD定制的tr及td -->
+						<tr name="tableList_TR.RWD_TR">
+							<replacement name="td" baseComponentName="RWD_TD;extInfo">
+								<table-form name="extInfo" columns="10,30,10,50" baseName="query:list.query" dataName="listInfo">
+									<component-param>css:{width:"100%"}</component-param>
+									<before-init><![CDATA[
+										if (eg_temp.widthLevel < 3)
+										{
+											configData.columns = [20, 30, 20, 30];
+										}
+										else
+										{
+											configData.columns = [40, 60];
+										}
+									]]></before-init>
+									<cells>
+										<cell name="$typical" needIndex="true">
+											<before-init>checkResult = {$ef:rwd_getCheckResult}();</before-init>
+										</cell>
+									</cells>
+								</table-form>
+							</replacement>							
+						</tr>
+						<columns columnOrder="opt0">
+							<column name="$typical">
+								<before-init>checkResult = {$ef:rwd_getCheckResult}();</before-init>
+							</column>
+							<column name="opt0" caption="*" srcName="id" typicalComponentName="RWD_EXT_OPT">
+								<before-init>checkResult = eg_temp.widthLevel &gt; 1;</before-init>
+							</column>
+							<column name="opt" caption="操作" srcName="id" typicalComponentName="common_list_operator" />
+						</columns>
+					</table-list>
+				</replacement>
+			</view>
+
+			<query name="list.query" orderIndex="2">
+				<prepared-sql>
+					select u.*, s.sexName, d.deptName
+					#const(fromPart)
+					#sub[where $]
+					order by #sub[$,] id desc
+				</prepared-sql>
+				<readers>
+					<reader name="id" type="int" />
+					<reader name="name" caption="[script]:{$ef:createSearchOrderTitle}(valueObj, {$caption:name})" type="String" />
+					<reader name="spellName" type="String">
+						<attribute name="initParam" value="needWidthLevel:2" />
+					</reader>
+					<reader name="sexName" type="String" />
+					<reader name="deptName" caption="[script]:{$ef:createSearchOrderTitle}(valueObj, {$caption:dept})" type="String">
+						<attribute name="initParam" value="orderName:'dept',needWidthLevel:2" />
+					</reader>
+					<reader name="age" type="int">
+						<attribute name="initParam" value="needWidthLevel:2" />
+					</reader>
+					<reader name="comeDate" type="Date">
+						<attribute name="initParam" value="needWidthLevel:1" />
+					</reader>
+					<reader name="grade" type="int">
+						<attribute name="initParam" value="needWidthLevel:1" />
+					</reader>
+					<reader name="email" type="String">
+						<attribute name="initParam" value="needWidthLevel:1" />
+					</reader>
+					<reader name="dept" type="String" visible="false" orderName="u.dept" />
+				</readers>
+			</query>
+			<search name="list.search" queryName="list.query" pageSize="5">
+				<condition-propertys>
+					<condition-property name="name" colType="String" inputType="text_list">
+						<attribute name="initParam" value="loadModel:'textList.model',listDataName:'listData',listSrcName:'name',hint:'可输入姓名或拼音'" />
+					</condition-property>
+					<condition-property name="sex" colType="String" inputType="select">
+						<attribute name="initParam" value="optionsList:'code.sex'" />
+					</condition-property>
+					<condition-property name="age" colType="int" inputType="text_range" defaultBuilder="notBelow" />
+					<condition-property name="age2" colName="age" colType="int" visible="false" defaultBuilder="notLarge" />
+					<condition-property name="dept" colType="String" inputType="select">
+						<attribute name="initParam" value="optionsList:'code.dept'" />
+					</condition-property>
+					<condition-property name="comeDate" colType="Date" inputType="text_date_range" defaultBuilder="notBelow" />
+					<condition-property name="comeDate2" colName="comeDate" colType="Date" visible="false" defaultBuilder="notLarge" />
+					<condition-property name="grade" colType="int" inputType="select_year" />
+				</condition-propertys>
+			</search>
+
+			<export name="detail.export" viewName="detail.view" path="${page.view}" />
+			<model name="get" modelExportName="detail.export">
+				<trans-execute from="request-parameter:type" to="data:type" opt="getFirstString" />
+				<query-execute queryName="get.query">
+					<param-bind src="request-parameter" names="id" />
+				</query-execute>
+				<trans-execute from="stack" to="data:studentInfo" opt="getFirstRow" />
+			</model>
+			<view name="detail.view">
+				<before-init>{$ef:rwd_widthLevel}([500]);</before-init>
+				<replacement name="form" baseComponentName="form_template">
+					<before-init>
+						{$parentScript}
+						eg_temp.dataName = "studentInfo";
+						var type = {$data:type};
+						if (type == "add")
+						{
+							eg_temp.tempData.title = "学生信息添加";
+							eg_temp.tempData.modelName = "add";
+						}
+						else if (type == "modify")
+						{
+							eg_temp.tempData.title = "学生信息修改";
+							eg_temp.tempData.modelName = "modify";
+							eg_temp.tempData.keyList.push("id");
+						}
+						else
+						{
+							eg_temp.tempData.modelName = "delete";
+							{$data:onlyView} = 1;
+						}
+					</before-init>
+					<table-form name="form_body" columns="20,30,20,30" baseName="query:get.query" dataName="studentInfo">
+						<before-init><![CDATA[
+							eg_temp.widthLevel = {$ef:rwd_widthLevel}();
+							if (eg_temp.widthLevel < 2)
+							{
+								configData.columns = [20, 30, 20, 30];
+							}
+							else
+							{
+								configData.columns = [40, 60];
+							}
+						]]></before-init>
+						<events>
+							<event name="widthChange">{$ef:rwd_checkWidthLevel}(webObj);</event>
+						</events>
+						<cells cellOrder="title">
+							<cell name="title" caption="[script]:eg_temp.tempData.title" 
+								titleSize="-1" containerSize="0" titleParam="css:{'text-align':'left'}" />
+							<cell name="submit" titleSize="0" containerSize="-1" typicalComponentName="buttons" initParam="returnBtn:1,returnModel:'list'" />
+						</cells>
+					</table-form>
+				</replacement>
+			</view>
+
+			<query name="get.query">
+				<prepared-sql>
+					select u.*, s.sexName as sex_show, d.deptName as dept_show
+					#const(fromPart)
+					where id = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="int" />
+				</parameters>
+				<readers>
+					<reader name="id" type="int" />
+					<reader name="name" type="String">
+						<attribute name="inputType" value="text_label" />
+						<attribute name="initParam" value="checks:[{type:'notEmpty'}]" />
+					</reader>
+					<reader name="spellName" type="String">
+						<attribute name="inputType" value="text_label" />
+					</reader>
+					<reader name="sex" type="String">
+						<attribute name="inputType" value="select_label" />
+						<attribute name="initParam"
+							value="optionsList:'code.sex',checks:[{type:'notEmpty'}]" />
+					</reader>
+					<reader name="sex_show" type="String" visible="false" />
+					<reader name="dept" type="String">
+						<attribute name="inputType" value="select_label" />
+						<attribute name="initParam"
+							value="optionsList:'code.dept',checks:[{type:'notEmpty'}]" />
+					</reader>
+					<reader name="dept_show" type="String" visible="false" />
+					<reader name="age" type="int">
+						<attribute name="inputType" value="text_label" />
+						<attribute name="initParam"
+							value="checks:[{type:'notEmpty'},{type:'number',range:[20,50],pattern:[2]}]" />
+					</reader>
+					<reader name="grade" type="int">
+						<attribute name="inputType" value="select_year_label" />
+					</reader>
+					<reader name="comeDate" type="Date">
+						<attribute name="inputType" value="text_date_label" />
+						<attribute name="initParam" value="checks:[{type:'notEmpty'}]" />
+					</reader>
+					<reader name="email" type="String">
+						<attribute name="inputType" value="text_label" />
+						<attribute name="initParam" value="checks:[{type:'email'}]" />
+					</reader>
+				</readers>
+			</query>
+
+			<export name="go.list.export" modelName="list" redirect="true" />
+			<model name="add" modelExportName="go.list.export">
+				<update-execute updateName="add.update">
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+			<model name="modify" modelExportName="go.list.export">
+				<update-execute updateName="modify.update">
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+			<model name="delete" modelExportName="go.list.export">
+				<update-execute updateName="delete.update">
+					<param-bind src="request-parameter" />
+				</update-execute>
+			</model>
+
+			<parameter-group name="updateParam">
+				<parameter name="name" type="String" />
+				<parameter name="spellName" type="String" />
+				<parameter name="sex" type="String" />
+				<parameter name="dept" type="String" />
+				<parameter name="email" type="String" />
+				<parameter name="age" type="int" />
+				<parameter name="grade" type="int" />
+				<parameter name="comeDate" type="Date" />
+			</parameter-group>
+
+			<update name="add.update">
+				<prepared-sql>
+					insert into t_student (id, #auto[insertN,1,-1])
+					values (nvl((select max(id) from t_student), 0) + 1, #auto[insertV,1,-1])
+				</prepared-sql>
+				<parameters>
+					<parameter-ref groupName="updateParam" />
+				</parameters>
+			</update>
+			<update name="modify.update">
+				<prepared-sql>
+					update t_student set #auto[update,1,-2]
+					where id = ?
+				</prepared-sql>
+				<parameters>
+					<parameter-ref groupName="updateParam" />
+					<parameter name="id" type="int" />
+				</parameters>
+			</update>
+			<update name="delete.update">
+				<prepared-sql>
+					delete from t_student where id = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="id" type="int" />
+				</parameters>
+			</update>
+			
+			<!-- 为自适应网页设计定制的TR -->
+			<typical-replacement name="RWD_TR" baseComponentName="table-list.tr">
+				<before-init><![CDATA[
+					checkResult = eg_temp.rowType == "title" || eg_temp.rowType == "row" 
+							|| (eg_temp.rowType == "afterRow" && eg_temp.widthLevel > 1);
+					eg_temp.extInfo = checkResult && eg_temp.rowType == "afterRow" 
+				]]></before-init>
+				<init-script>
+					{$parentScript}
+					if (eg_temp.rowType == "afterRow")
+					{
+						webObj.attr("id", "other_" + eg_temp.index);
+						webObj.hide();
+					}
+					else if (eg_temp.rowType == "row")
+					{
+						webObj.attr("id", "dataRow_" + eg_temp.index);
+					}
+				</init-script>				
+			</typical-replacement>
+			<!-- 为自适应网页设计定制的TD, 用于显示从列表中移除的列 -->
+			<typical-component name="RWD_TD" type="td">
+				<component-param>css:{"background-color":"#f8f8f8"}</component-param>
+				<before-init>
+					checkResult = eg_temp.rowType == "afterRow";
+				</before-init>
+				<init-script>
+					webObj.attr("colSpan", eg_temp.columnCount);
+				</init-script>
+				<component name="extInfo" type="none" />
+			</typical-component>
+			
+			<!-- 为自适应网页设计定制的操作按钮, 用于折叠及显示从列表中移除的列 -->
+			<typical-component name="RWD_EXT_OPT" type="span">
+				<component-param>text:"+",css:{cursor:"pointer"}</component-param>
+				<events>
+					<event name="click">
+						if (webObj.text() == "+")
+						{
+							webObj.text("-");
+							_eterna.getWebObj("other_" + eg_temp.index).show();
+						}
+						else
+						{
+							webObj.text("+");
+							_eterna.getWebObj("other_" + eg_temp.index).hide();
+						}
+					</event>
+				</events>
+			</typical-component>
+			
+		</objs>
+
+		<attributes>
+
+			<attribute name="caption.translate" value="$useBodyText">
+				id=编号;
+				name=姓名;
+				spellName=姓名拼音;
+				sex=性别;
+				sexName=性别;
+				dept=部门;
+				deptName=部门;
+				age=年龄;
+				comeDate=入学日期;
+				grade=年级;
+				email=邮箱;
+			</attribute>
+
+		</attributes>
+
+	</factory>
+</eterna-config>

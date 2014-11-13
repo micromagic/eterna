@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!--
+可编辑的文本
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<!--
+			可编辑的span文本控件
+			need tempData:
+			ID, canDrag, color, bgColor, editBorder,
+			tableName, idName, params, value, values, 
+			modelName, reloadObjs, reloadDatas,
+			orderModelName, orderReloadObjs, orderReloadDatas,
+			containerId, objGroupId, focusGroupId, [and others...]
+			-->
+			<typical-component name="span_modifiable" type="span">
+				<init-script>
+					var tempData = _eterna.egTempData();
+					if (tempData.value == "" || tempData.value == null)
+					{
+						webObj.text("_");
+					}
+					else
+					{
+						webObj.text(tempData.value);
+					}
+					webObj.data("spanMobjId", {$ef:getSpanModifableObjId}());
+					if (tempData.ID != null)
+					{
+						var tmpId = "spanM_" + tempData.ID;
+						if (tempData.objGroupId != null)
+						{
+							tmpId = "spanM_" + tempData.objGroupId + "_" + tempData.ID;
+						}
+						webObj.attr("id", tmpId);
+					}
+					if (tempData.objGroupId != null)
+					{
+						webObj.attr("spanMobjGroupId", tempData.objGroupId);
+						if (tempData.focusGroupId == null)
+						{
+							webObj.attr("spanMfocusGroupId", tempData.objGroupId);
+						}
+					}
+					if (tempData.focusGroupId != null)
+					{
+						webObj.attr("spanMfocusGroupId", tempData.focusGroupId);
+					}
+					webObj.data("cursor", webObj.css("cursor"));
+					for (key in tempData)
+					{
+						webObj.data(key, tempData[key]);
+					}
+					webObj.data("objMoved", 0);
+				</init-script>
+				<events>
+					<event name="click"><![CDATA[
+						if (!webObj.data("clickOff"))
+						{
+							webObj.trigger("startEdit");
+						}
+					]]></event>
+					<event name="startEdit"><![CDATA[
+						if ({$data:___locked})
+						{
+							return;
+						}
+						{$ef:spanM_beginModify}(webObj);
+					]]></event>
+					<event name="mousedown"><![CDATA[
+						if (webObj.data("beginModify") || {$data:___locked})
+						{
+							return;
+						}
+						if (!{$data:___inDrag} && webObj.data("canDrag") == 1)
+						{
+							// 针对各浏览器禁用文本选择的设置
+							_eterna.rootWebObj.bind("mousemove", {$ef:spanM_dragMove});
+							_eterna.rootWebObj.bind("mouseup", {$ef:spanM_dragUp});
+							_eterna.rootWebObj.bind("selectstart", {$ef:spanM_dragSelectStart});
+							_eterna.rootWebObj.attr("unselectable", "off");
+							_eterna.rootWebObj.css("MozUserSelect", "none");
+							_eterna.rootWebObj.css("WebkitUserSelect", "none");
+							{$data:___inDrag} = 1;
+							{$data:___spanM_selected} = webObj;
+
+							var gId = {$data:___spanM_selected}.attr("spanMobjGroupId");
+							_eterna.queryWebObj("span[spanMobjGroupId=" + gId + "]").data("dragGroup", 1);
+						}
+					]]></event>
+					<event name="mousemove">
+						if (webObj.data("beginModify") || {$data:___locked})
+						{
+							return;
+						}
+						{$ef:spanM_dragMove}(event, webObj);
+						event.stopPropagation();
+						return false;
+					</event>
+					<event name="mouseup"><![CDATA[
+						if ({$data:___inDrag} && !{$data:___locked})
+						{
+							if (webObj.data("spanMobjId") != {$data:___spanM_selected}.data("spanMobjId")
+									&& webObj.data("dragGroup") == 1)
+							{
+								var obj1 = {$data:___spanM_selected}.data("containerId") != null ?
+										_eterna.getWebObj({$data:___spanM_selected}.data("containerId")) : {$data:___spanM_selected};
+								var obj2 = webObj.data("containerId") != null ?
+										_eterna.getWebObj(webObj.data("containerId")) : webObj;
+								var objId1 = {$data:___spanM_selected}.data("spanMobjId");
+								var objId2 = webObj.data("spanMobjId");
+								var gId = {$data:___spanM_selected}.attr("spanMobjGroupId");
+								var gObjs = _eterna.queryWebObj("span[spanMobjGroupId=" + gId + "]");
+								var len = gObjs.size();
+								for (var i = 0; i < len; i++)
+								{
+									if (objId2 == gObjs.eq(i).data("spanMobjId"))
+									{
+										obj2.before(obj1);
+										break;
+									}
+									else if (objId1 == gObjs.eq(i).data("spanMobjId"))
+									{
+										obj2.after(obj1);
+										break;
+									}
+								}
+								{$data:___spanM_selected}.data("objMoved", 1);
+								var p = {$ef:spanM_orderItems}({$data:___spanM_selected}, webObj);
+								{$ef:spanM_dragUp}();
+								{$data:___spanM_selected}.data("objMoved", 0);
+								if (p != null)
+								{
+									{$ef:reload}(p[0], p[1], p[2], p[3]);
+								}
+								event.stopPropagation();
+							}
+						}
+					]]></event>
+				</events>
+			</typical-component>
+
+
+			<!-- 可修改的文本开始修改的处理 -->
+			<function name="spanM_beginModify" param="spanObj"><![CDATA[
+				if (spanObj.data("beginModify"))
+				{
+					return;
+				}
+				var textObj = jQuery('<input type="text">');
+				textObj.css("color", spanObj.css("color"));
+				textObj.css("font", spanObj.css("font"));
+				textObj.width(spanObj.outerWidth() + 2);
+				textObj.css({"padding":"0px","margin":"0px"});
+				textObj.css("background-color", "transparent");
+				textObj.css({"border-top":"0px","border-left":"0px","border-right":"0px"});
+				if (spanObj.data("border") != null)
+				{
+					textObj.css("border-bottom", spanObj.data("border"));
+				}
+				else
+				{
+					textObj.css("border-bottom", "0px");
+				}
+				{$ef:spanM_copyFont}(spanObj, textObj);
+				if (spanObj.data("color") != null)
+				{
+					textObj.css("color", spanObj.data("color"));
+				}
+				textObj.val(spanObj.data("value"));
+				spanObj.text("");
+				spanObj.append(textObj);
+				textObj.bind("blur", {spanObj:spanObj,textObj:textObj}, function(event){{$ef:spanM_endModify}(event.data.spanObj, event.data.textObj);});
+				textObj.bind("keyup", {spanObj:spanObj,textObj:textObj}, function(event){{$ef:spanM_resetTextLength}(event, event.data.spanObj, event.data.textObj);});
+				textObj.bind("keydown", {spanObj:spanObj,textObj:textObj}, function(event){return {$ef:spanM_checkKeyDown}(event, event.data.spanObj, event.data.textObj);});
+				textObj.focus();
+				textObj.select();
+				spanObj.data("beginModify", 1);
+				spanObj.data("editObj", textObj);
+				spanObj.trigger("beginModify");
+			]]></function>
+
+			<!-- 检查是否按了tab键 -->
+			<function name="spanM_checkKeyDown" param="event, spanObj, textObj">
+				if (event.keyCode == 9)  // tab
+				{
+					return false;
+				}
+				return true;
+			</function>
+
+			<function name="spanM_moveToNextObj" param="spanObj"><![CDATA[
+				var fId = spanObj.attr("spanMfocusGroupId");
+				if (fId == null)
+				{
+					return;
+				}
+				var nextObj = null;
+				var fObjs = _eterna.queryWebObj("span[spanMfocusGroupId=" + fId + "]");
+				var len = fObjs.size() - 1;
+				var nowId = spanObj.data("spanMobjId");
+				for (var i = 0; i < len; i++)
+				{
+					if (nowId == fObjs.eq(i).data("spanMobjId"))
+					{
+						nextObj = fObjs.eq(i + 1);
+						break;
+					}
+				}
+				if (nextObj != null)
+				{
+					nextObj.trigger("startEdit");
+				}
+			]]></function>
+
+			<!-- 可修改的文本 修改时重设宽度 -->
+			<function name="spanM_resetTextLength" param="event, spanObj, textObj"><![CDATA[
+				if (event.keyCode == 27) //ESC
+				{
+					textObj.val(spanObj.data("value"));
+				}
+				else if (event.keyCode == 9)  // tab
+				{
+					textObj.data("needToNext", 1);
+					textObj.blur();
+				}
+				else if (event.keyCode == 13) // 回车
+				{
+					textObj.data("needToNext", 1);
+					textObj.blur();
+				}
+				else if (event.keyCode != 20 && event.keyCode != 136 && event.keyCode != 137 // 3Lock
+						&& !(event.keyCode >= 37 && event.keyCode <= 40)) // 左上右下
+				{
+					var tObj = jQuery('<span></span>');
+					_eterna.rootWebObj.append(tObj);
+					{$ef:spanM_copyFont}(textObj, tObj);
+					tObj.text(textObj.val());
+					textObj.width(tObj.outerWidth() + 2);
+					tObj.remove();
+				}
+			]]></function>
+
+			<!-- 可修改的文本 修改完毕的处理 -->
+			<function name="spanM_endModify" param="spanObj, textObj"><![CDATA[
+				var needToNext = textObj.data("needToNext");
+				var newValue = textObj.val();
+				var oldValue = spanObj.data("value");
+				spanObj.data("value", newValue);
+				spanObj.data("oldValue", oldValue);
+				spanObj.data("valueChanged", newValue != oldValue);
+				spanObj.data("valid", 1);
+				spanObj.trigger("endModify");
+				var canModifyValue = spanObj.data("valid");
+				spanObj.removeData("oldValue");
+				spanObj.removeData("valueChanged");
+				spanObj.removeData("valid");
+				spanObj.removeData("editObj");
+				if (!canModifyValue)
+				{
+					spanObj.data("value", oldValue);
+					if (oldValue == null || oldValue == "")
+					{
+						spanObj.text("_");
+					}
+					else
+					{
+						spanObj.text(oldValue);
+					}
+					spanObj.data("beginModify", 0);
+					return;
+				}
+				if (newValue != oldValue)
+				{
+					spanObj.data("value", textObj.val());
+					if (spanObj.data("modelName") != null)
+					{
+						var params = spanObj.data("params");
+						if (params != null)
+						{
+							params = _eterna.cloneJSON(params);
+						}
+						else
+						{
+							params = {};
+						}
+						if (spanObj.data("ID") != null)
+						{
+							params.ID = spanObj.data("ID");
+						}
+						params.value = textObj.val();
+						{$ef:reload}(params, spanObj.data("modelName"), spanObj.data("reloadObjs"),
+								spanObj.data("reloadDatas"));
+					}
+				}
+				if (textObj.val() == "")
+				{
+					spanObj.text("_");
+				}
+				else
+				{
+					spanObj.text(textObj.val());
+				}
+				spanObj.data("beginModify", 0);
+				if (needToNext)
+				{
+					{$ef:spanM_moveToNextObj}(spanObj);
+				}
+			]]></function>
+
+			<!-- 处理可修改的文本控件拖动时的效果 -->
+			<function name="spanM_dragMove" param="event, spanObj"><![CDATA[
+				if ({$data:___inDrag})
+				{
+					if (spanObj != null && spanObj.data("dragGroup"))
+					{
+						spanObj.css("cursor", "crosshair");
+					}
+					var divObj = {$data:___spanM_movedDiv};
+					if (divObj == null)
+					{
+						_eterna.rootWebObj.css("cursor", "move");
+						divObj = jQuery("<div style='border:solid 1px;position:absolute;'></div>");
+						var tObj = {$data:___spanM_selected};
+						if (tObj.data("bgColor") != null)
+						{
+							divObj.css("background-color", tObj.data("bgColor"));
+						}
+						else
+						{
+							divObj.css("background-color", "white");
+						}
+						_eterna.rootWebObj.append(divObj);
+						{$ef:spanM_copyFont}(tObj, divObj);
+						divObj.text(tObj.data("value"));
+						{$data:___spanM_movedDiv} = divObj;
+						tObj.trigger("beginDrag");
+					}
+					//divObj.text("X:" + event.clientX + " Y:" + event.clientY);
+					divObj.css("left", jQuery(document).scrollLeft() + event.clientX + 2);
+					divObj.css("top", jQuery(document).scrollTop() + event.clientY + 2);
+				}
+			]]></function>
+
+			<!-- 处理可修改的文本控件拖动结束的效果 -->
+			<function name="spanM_dragUp"><![CDATA[
+				if ({$data:___inDrag})
+				{
+					_eterna.rootWebObj.css("cursor", "auto");
+					// 针对各浏览器禁用文本选择的设置
+					_eterna.rootWebObj.unbind("mousemove", {$ef:spanM_dragMove});
+					_eterna.rootWebObj.unbind("mouseup", {$ef:spanM_dragUp});
+					_eterna.rootWebObj.unbind("selectstart", {$ef:spanM_dragSelectStart});
+					_eterna.rootWebObj.attr("unselectable", "on");
+					_eterna.rootWebObj.css("MozUserSelect", "");
+					_eterna.rootWebObj.css("WebkitUserSelect", "");
+					{$data:___inDrag} = 0;
+					var divObj = {$data:___spanM_movedDiv};
+					if (divObj != null)
+					{
+						divObj.remove();
+						{$data:___spanM_movedDiv} = null;
+					}
+
+					var gId = {$data:___spanM_selected}.attr("spanMobjGroupId");
+					var gObjs = _eterna.queryWebObj("span[spanMobjGroupId=" + gId + "]");
+					var len = gObjs.size();
+					for (var i = 0; i < len; i++)
+					{
+						var thisObj = gObjs.eq(i);
+						thisObj.data("dragGroup", 0);
+						thisObj.css("cursor", thisObj.data("cursor"));
+					}
+					{$data:___spanM_selected}.trigger("endDrag");
+				}
+			]]></function>
+
+			<!-- 处理单元的排序 -->
+			<function name="spanM_orderItems" param="theObj, targetObj"><![CDATA[
+				var params = theObj.data("params");
+				if (params != null)
+				{
+					params = _eterna.cloneJSON(params);
+				}
+				else
+				{
+					params = {};
+				}
+				if (theObj.data("tableName") != null)
+				{
+					params.tableName = webObj.data("tableName");
+				}
+				if (theObj.data("idName") != null)
+				{
+					params.idName = theObj.data("idName");
+				}
+				var gId = theObj.attr("spanMobjGroupId");
+				var gObjs = _eterna.queryWebObj("span[spanMobjGroupId=" + gId + "]");
+				params.ID = [];
+				params.INDEX = [];
+				var len = gObjs.size();
+				for (var i = 0; i < len; i++)
+				{
+					params.ID.push(gObjs.eq(i).data("ID"));
+					params.INDEX.push(i + 1);
+				}
+				theObj.data("targetObj", targetObj);
+				theObj.trigger("moving");
+				theObj.removeData("targetObj");
+				if (theObj.data("orderModelName") != null)
+				{
+					return [params, theObj.data("orderModelName"), theObj.data("orderReloadObjs"),
+							theObj.data("orderReloadDatas")];
+				}
+				return null;
+			]]></function>
+
+
+			<function name="spanM_copyFont" param="srcObj, destObj">
+				destObj.css("color", srcObj.css("color"));
+				destObj.css("font-style", srcObj.css("font-style"));
+				destObj.css("font-variant", srcObj.css("font-variant"));
+				destObj.css("font-weight", srcObj.css("font-weight"));
+				destObj.css("font-size", srcObj.css("font-size"));
+				destObj.css("line-height", srcObj.css("line-height"));
+				destObj.css("font-family", srcObj.css("font-family"));
+			</function>
+
+			<function name="spanM_dragSelectStart" param="event">
+				return false;
+			</function>
+
+			<function name="getSpanModifableObjId">
+				if ({$data:___spanM_objId} == null)
+				{
+					{$data:___spanM_objId} = 1;
+				}
+				else
+				{
+					{$data:___spanM_objId} += 1;
+				}
+				return {$data:___spanM_objId};
+			</function>
+
+		</objs>
+	</factory>
+</eterna-config>

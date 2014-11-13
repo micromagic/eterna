@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 例子 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<view name="tmp.view">
+				<view-res>
+					{$ef:test.fn}
+					{$typical:tmp.table}
+				</view-res>
+			</view>
+			<!-- 测试方法 -->
+			<function name="test.fn" param="srcName">
+				alert({$ef:getData_value}("tableData", srcName));
+			</function>
+			<!-- 测试表格 -->
+			<typical-component name="tmp.table" type="div" comParam="attr:{id:'tTable'}">
+				<component name="c" type="center" comParam="text:'测试表格'" />
+				<table-form name="t" columns="20,30,20,30" dataName="tableData" comParam="attr:{border:1}">
+					<cells>
+						<cell name="name" srcName="name" caption="姓名" />
+						<cell name="sex" srcName="sex" caption="性别" />
+						<cell name="addr" srcName="address" caption="家庭住址" containerSize="-2" typicalComponentName="text" />
+						<cell name="birth" srcName="birth" caption="出生日期" typicalComponentName="text_date" />
+					</cells>
+				</table-form>
+			</typical-component>
+
+		</objs>
+	</factory>
+</eterna-config>

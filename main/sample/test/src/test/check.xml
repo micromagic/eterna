@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+
+<!-- 校验的例子 -->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<export name="check.export" path="${page.view}" viewName="check.view" />
+			<model name="check" modelExportName="check.export" transactionType="notNeed">
+			</model>
+
+			<view name="check.view" debug="0">
+				<component name="form" type="form">
+					<init-script>
+						webObj.attr("action", {$ef:getHeadURL}("check"));
+					</init-script>
+					<events>
+						<event name="submit">
+							return {$ef:checkForm}(webObj);
+						</event>
+					</events>
+					<table-form name="checkTable" columns="35,65">
+						<cells>
+							<cell name="num1" caption="数字检查1">
+								<replacement name="textNumberCheck"
+									baseComponentName="text">
+									<events>
+										<event name="check"><![CDATA[
+											var theValue = webObj.val();
+											if (theValue == "")
+											{
+												{$ef:setError}(webObj, true, "请您输入数字!");
+												{$data:___checkResult}.msg.push(eg_temp.caption + ":请您输入数字!");
+												{$data:___checkResult}.pass = false;
+											}
+											else
+											{
+												var numCheck = new RegExp("^([0-9]{0,20}(\\x2E[0-9]{1,10})?)$", "g");
+												if (!numCheck.test(theValue))
+												{
+													{$ef:setError}(webObj, true, "请您输入正确格式的数字!");
+													{$data:___checkResult}.msg.push(eg_temp.caption + ":请您输入正确格式的数字!");
+													{$data:___checkResult}.pass = false;
+												}
+												else
+												{
+													{$ef:setError}(webObj, false, "");
+												}
+											}
+										]]></event>
+									</events>
+								</replacement>
+							</cell>
+							<cell name="num2" caption="数字检查2">
+								<replacement name="textNumberCheck"
+									baseComponentName="text">
+									<events>
+										<event name="check"><![CDATA[
+											var theValue = webObj.val();
+											if (theValue == "")
+											{
+												{$ef:setError}(webObj, true, "请您输入数字!");
+												{$data:___checkResult}.msg.push(eg_temp.caption + ":请您输入数字!");
+												{$data:___checkResult}.pass = false;
+											}
+											else
+											{
+												var numCheck = new RegExp("^([0-9]{0,20}(\\x2E[0-9]{1,10})?)$", "g");
+												if (!numCheck.test(theValue))
+												{
+													{$ef:setError}(webObj, true, "请您输入正确格式的数字!");
+													{$data:___checkResult}.msg.push(eg_temp.caption + ":请您输入正确格式的数字!");
+													{$data:___checkResult}.pass = false;
+												}
+												else
+												{
+													{$ef:setError}(webObj, false, "");
+												}
+											}
+										]]></event>
+										<event name="change">
+											{$data:___checkResult} = {pass:true,msg:[]};
+											webObj.trigger("check");
+										</event>
+									</events>
+								</replacement>
+							</cell>
+							<cell name="num3" caption="数字检查3">
+								<replacement name="check_num" baseComponentName="textCheckNumber">
+									<replacement name="numCheckText">
+										<events>
+											<event name="change">
+												{$data:___checkResult} = {pass:true,msg:[]};
+												webObj.trigger("check");
+											</event>
+										</events>
+									</replacement>
+								</replacement>
+							</cell>
+						</cells>
+					</table-form>
+					<component name="center" type="center">
+						<component name="submit" type="input-submit" />
+					</component>
+				</component>
+			</view>
+
+			<typical-component name="textCheckNumber" type="none">
+				<before-init>
+					eg_temp.param.textWidth = "50%";
+				</before-init>
+				<replacement name="numCheckText" baseComponentName="text">
+					<events>
+						<event name="check"><![CDATA[
+							var theValue = webObj.val();
+							if (theValue == "")
+							{
+								{$ef:setError}(webObj, true, "请您输入数字!");
+								{$data:___checkResult}.msg.push(eg_temp.caption + ":请您输入数字!");
+								{$data:___checkResult}.pass = false;
+							}
+							else
+							{
+								var numCheck = new RegExp("^([0-9]{0,20}(\\x2E[0-9]{1,10})?)$", "g");
+								if (!numCheck.test(theValue))
+								{
+									{$ef:setError}(webObj, true, "请您输入正确格式的数字!");
+									{$data:___checkResult}.msg.push(eg_temp.caption + ":请您输入正确格式的数字!");
+									{$data:___checkResult}.pass = false;
+								}
+								else
+								{
+									{$ef:setError}(webObj, false, "");
+								}
+							}
+						]]></event>
+					</events>
+				</replacement>
+				<component name="span" type="span" comParam="css:{color:'red'}">
+					<init-script><![CDATA[
+						webObj.attr("id", eg_temp.name + "_errMsg");
+					]]></init-script>
+				</component>
+			</typical-component>
+
+			<function name="setError" param="webObj, hasError, errMsg"><![CDATA[
+				if (hasError)
+				{
+					if (!{$data:___checkResult}.focused)
+					{
+						webObj.focus();
+						{$data:___checkResult}.focused = true;
+					}
+					webObj.css("background-color", "yellow");
+					webObj.attr("title", errMsg);
+					// 显示提示信息
+					var msgSpan = _eterna.getWebObj(eg_temp.name + "_errMsg");
+					msgSpan.text(errMsg);
+				}
+				else
+				{
+					webObj.css("background-color", "");
+					webObj.attr("title", "");
+					var msgSpan = _eterna.getWebObj(eg_temp.name + "_errMsg");
+					msgSpan.text("");
+				}
+			]]></function>
+
+		</objs>
+	</factory>
+</eterna-config>
