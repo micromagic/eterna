@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!--
+	eterna框架的一些基本定义
+	如: 一些基本的 大于 小于 的builder, 包含的vpc 等
+
+	@author micromagic@sina.com
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<query name="eterna.search.get.search_setting">
+				<prepared-sql>
+					SELECT settingIndex, settingXML
+					FROM eterna_search_setting
+					WHERE username = ? AND searchName = ? AND saveId = ?
+					ORDER BY settingIndex
+				</prepared-sql>
+				<readers>
+					<reader name="settingIndex" colName="settingIndex" type="int"/>
+					<reader name="settingXML" colName="settingXML" type="String"/>
+				</readers>
+				<parameters>
+					<parameter name="username" type="String"/>
+					<parameter name="searchName" type="String"/>
+					<parameter name="saveId" type="String"/>
+				</parameters>
+			</query>
+
+			<update name="eterna.search.delete.search_setting">
+				<prepared-sql>
+					DELETE FROM eterna_search_setting
+					WHERE username = ? AND searchName = ? AND saveId = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="username" type="String"/>
+					<parameter name="searchName" type="String"/>
+					<parameter name="saveId" type="String"/>
+				</parameters>
+			</update>
+
+			<update name="eterna.search.insert.search_setting">
+				<prepared-sql>
+					INSERT INTO eterna_search_setting
+					(username, searchName, saveId, settingIndex, settingXML)
+					VALUES (?, ?, ?, ?, ?)
+				</prepared-sql>
+				<parameters>
+					<parameter name="username" type="String"/>
+					<parameter name="searchName" type="String"/>
+					<parameter name="saveId" type="String"/>
+					<parameter name="settingIndex" type="int"/>
+					<parameter name="settingXML" type="String"/>
+				</parameters>
+			</update>
+
+			<vpc name="str_begin.vpc">
+				<attribute name="stringFormat" value="$%"/>
+			</vpc>
+			<vpc name="str_end.vpc">
+				<attribute name="stringFormat" value="%$"/>
+			</vpc>
+			<vpc name="str_include.vpc">
+				<attribute name="stringFormat" value="%$%"/>
+			</vpc>
+
+			<builder name="isNull" operator="isNull" caption="为空"/>
+			<builder name="notNull" operator="notNull" caption="不为空"/>
+			<builder name="checkNull" operator="checkNull" caption="是否为空"/>
+
+			<builder name="equal" operator="equal" caption="等于"/>
+			<builder name="notEqual" operator="notEqual" caption="不等于"/>
+
+			<builder name="include" operator="include"  caption="包含"/>
+			<builder name="beginWith" operator="beginWith" caption="以..开始"/>
+			<builder name="endWith" operator="endWith" caption="以..结束"/>
+			<builder name="match" operator="match"  caption="匹配"/>
+
+			<builder name="large" operator="large" caption="大于"/>
+			<builder name="below" operator="below" caption="小于"/>
+			<builder name="notBelow" operator="notBelow" caption="大于等于"/>
+			<builder name="notLarge" operator="notLarge" caption="小于等于"/>
+
+			<builder-list name="cbl_String">
+				<builder-name name="include"/>
+				<builder-name name="equal"/>
+				<builder-name name="notEqual"/>
+				<builder-name name="beginWith"/>
+				<builder-name name="endWith"/>
+			</builder-list>
+			<builder-list name="cbl_Other">
+				<builder-name name="equal"/>
+				<builder-name name="notEqual"/>
+				<builder-name name="large"/>
+				<builder-name name="below"/>
+				<builder-name name="notBelow"/>
+				<builder-name name="notLarge"/>
+			</builder-list>
+			<builder-list name="cbl_List">
+				<builder-name name="equal"/>
+				<builder-name name="notEqual"/>
+			</builder-list>
+			<builder-list name="cbl_List_order">
+				<builder-name name="equal"/>
+				<builder-name name="notEqual"/>
+				<builder-name name="large"/>
+				<builder-name name="below"/>
+				<builder-name name="notBelow"/>
+				<builder-name name="notLarge"/>
+			</builder-list>
+
+			<data-printer name="dataPrinter" generator="self.micromagic.eterna.view.impl.DataPrinterImpl"/>
+
+			<!-- 给标签库使用的默认空界面 -->
+			<view name="empty.view"/>
+
+		</objs>
+	</factory>
+</eterna-config>

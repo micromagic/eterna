@@ -1,0 +1,2720 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE eterna-config PUBLIC "eterna" "http://eterna.googlecode.com/files/eterna_1_5.dtd">
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!--
+	一些公用方法及组件
+	使用时需要定义getHeadURL方法, 用于生成访问的地址头, 例子如下:
+	<function name="getHeadURL" param="modelName, dataType"><![CDATA[
+		var urlHead = "";
+		if ({$data:servletPath} != null)
+		{
+			urlHead = {$data:root} + {$data:servletPath} + "?";
+		}
+		else
+		{
+			urlHead = "?";
+		}
+		if (urlHead != null)
+		{
+			urlHead = urlHead + {$data:modelNameTag} + "=" + modelName;
+			if (dataType != null)
+			{
+				urlHead = urlHead + "&" + EG_DATA_TYPE + "=" + dataType;
+			}
+		}
+		return urlHead;
+	]]></function>
+
+	@author micromagic@sina.com
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<function name="getHeadURL">
+				return "?";
+			</function>
+
+			<!--
+			一些常用的format及builder
+			-->
+
+			<format name="currency" type="Number" pattern="#0.00"/>
+			<format name="currency2" type="Number" pattern="#,##0.00"/>
+			<format name="ratio.format" type="Number" pattern="0.#####"/>
+			<format name="boolean.format" type="boolean" pattern="是:否"/>
+			<format name="date.format" type="Date" pattern="yyyy-MM-dd"/>
+			<format name="datetime.format" type="Date" pattern="yyyy-MM-dd HH:mm:ss"/>
+
+			<builder name="util.IN" operator="IN" caption="存在"
+					generator="self.micromagic.util.InConditionBuilder">
+				<attribute name="seperate" value=",，;；"/>
+			</builder>
+			<builder name="util.Save" operator="none" caption="保存"
+					generator="self.micromagic.util.TemplateConditionBuilder"/>
+
+			<builder-list name="util.cbl_IN">
+				<builder-name name="util.IN"/>
+			</builder-list>
+			<builder-list name="util.cbl_Save">
+				<builder-name name="util.Save"/>
+			</builder-list>
+
+
+			<!--
+			一些基本的方法等
+			-->
+
+			<typical-component name="nbsp" type="span">
+				<component-param><![CDATA[html:"&nbsp;"]]></component-param>
+			</typical-component>
+			<typical-component name="nbsp2" type="span">
+				<component-param><![CDATA[html:"&nbsp; "]]></component-param>
+			</typical-component>
+
+			<!-- 对checkbos反选或全选 -->
+			<function name="invertSelect" param="objs, container, selectAll">
+				if (typeof container == "boolean")
+				{
+					selectAll = container;
+					container = null;
+				}
+				if (objs == null)
+				{
+					return;
+				}
+				var list;
+				if (typeof objs == 'string')
+				{
+					list = _eterna.getWebObj(objs, container);
+				}
+				else
+				{
+					list = objs;
+				}
+				if (selectAll)
+				{
+					list.each(function (){this.checked = true;});
+				}
+				else
+				{
+					list.each(function (){this.checked = !this.checked;});
+				}
+			</function>
+
+			<!-- 判断是否有选中 -->
+			<function name="checkSelected" param="id, msg, container, returnSelected">
+				if (typeof container == "boolean")
+				{
+					returnSelected = container;
+					container = null;
+				}
+				if (id == null)
+				{
+					return returnSelected ? null : false;
+				}
+				var idObj = _eterna.checkIdValid(id);
+				var list = _eterna.queryWebObj(idObj.idStr + ":checked", container);
+				if (list.size() == 0)
+				{
+					alert(msg == null ? {$res:needSelected}() : msg);
+					return returnSelected ? null : false;
+				}
+				return returnSelected ? list : true;
+			</function>
+			<resource name="needSelected">请先选择！</resource>
+
+			<!-- 检查表单, 触发表单中每个控件的check事件 -->
+			<function name="checkForm" param="formObj"><![CDATA[
+				{$data:___checkResult} = {pass:true,msg:[]};
+				{$ef:triggerEvents}(formObj, "check");
+				if (!{$data:___checkResult}.pass)
+				{
+					if ({$data:___checkResult}.msg.length > 0)
+					{
+						var str = "";
+						for (var i = 0; i < {$data:___checkResult}.msg.length; i++)
+						{
+							str += {$data:___checkResult}.msg[i] + "\n";
+						}
+						alert(str);
+					}
+					else
+					{
+						alert({$res:checkFormError}());
+					}
+				}
+				return {$data:___checkResult}.pass;
+			]]></function>
+			<resource name="checkFormError">表单填写有错误, 请检查！</resource>
+			<!-- 触发某个节点下所有控件的[eventName]事件 -->
+			<function name="triggerEvents" param="rootObj, eventName"><![CDATA[
+				var oldEventName = eg_cache.eventName;
+				eg_cache.eventName = eventName;
+				jQuery("*", rootObj).each(function (){
+					var theObj = jQuery(this);
+					var theEvents = theObj.data("events");
+					if (theEvents != null && theEvents[eg_cache.eventName] != null)
+					{
+						theObj.trigger(eg_cache.eventName);
+					}
+				});
+				eg_cache.eventName = oldEventName;
+			]]></function>
+
+			<!-- 对指定对象下的子节点进行替换 -->
+			<function name="swapAttributeComponentSubs" param="theObj, configData, swapFlag"><![CDATA[
+				if (configData.subs != null)
+				{
+					_eterna.swapComponent(theObj, configData.subs, swapFlag);
+				}
+			]]></function>
+
+			<!-- 删除json对象中的某个属性 -->
+			<function name="deleteData_attr" param="data, name">
+				if (data == null)
+				{
+					return null;
+				}
+				delete data[name];
+				return data;
+			</function>
+
+			<!-- 解析map对象, 生成带分隔符的字符串放到指定对象中 -->
+			<function name="parseData_map" param="data, keyObj, valueObj, seprate">
+				if (seprate == null)
+				{
+					seprate = ", ";
+				}
+				if (data == null)
+				{
+					return;
+				}
+
+				var start = true;
+				var keyStr = "";
+				var valueStr = "";
+				for(var key in data)
+				{
+					if (!start)
+					{
+						keyStr += jQuery.trim(seprate);
+						valueStr += seprate;
+					}
+					start = false;
+					keyStr += key;
+					valueStr += data[key];
+				}
+
+				if (keyObj != null)
+				{
+					keyObj.val(keyStr);
+				}
+				if (valueObj != null)
+				{
+					valueObj.val(valueStr);
+				}
+			</function>
+
+			<!-- 解析map对象, 生成多个hidden对象 -->
+			<function name="parseData_map_toObj" param="data, name, parentObj, noClear"><![CDATA[
+				if (data == null)
+				{
+					return;
+				}
+				if (!noClear)
+				{
+					parentObj.html("");
+				}
+
+				for(var key in data)
+				{
+					var tmpObj = jQuery("<input name='" + name + "' type='hidden'/>");
+					tmpObj.val(key);
+					parentObj.append(tmpObj);
+				}
+			]]></function>
+
+			<!-- 根据数据(两个字符串或一维数组, 第一个为key第二个为value), 生成map对象 -->
+			<function name="createData_map2" param="value1, value2, param1, param2">
+				if (value1 == null || value2 == null)
+				{
+					return;
+				}
+				var seprate = param1 ? param1 : ",";
+				var trimValues = param2 ? param2 : true;
+				var arr1;
+				var arr2;
+
+				if (typeof value1 == "string")
+				{
+					arr1 = value1.split(seprate);
+				}
+				else if (value1.length != null)
+				{
+					arr1 = value1;
+				}
+				if (typeof value2 == "string")
+				{
+					arr2 = value2.split(seprate);
+				}
+				else if (value2.length != null)
+				{
+					arr2 = value2;
+				}
+				if (arr2.length != arr1.length)
+				{
+					return;
+				}
+
+				var result = {};
+				<![CDATA[
+				for (var i = 0; i < arr1.length; i++)
+				{
+					if (trimValues && typeof arr1[i] == "string" && typeof arr2[i] == "string")
+					{
+						result[jQuery.trim(arr1[i])] = jQuery.trim(arr2[i]);
+					}
+					else
+					{
+						result[arr1[i]] = arr2[i];
+					}
+				}
+				]]>
+				return result;
+			</function>
+
+			<!-- 更具数据(二维数组, 一维数组, 字符串), 生成map对象 -->
+			<function name="createData_map" param="value, param1, param2">
+				if (value == null)
+				{
+					return;
+				}
+				var arrayType = 0; // 1: 单列，2：双列
+				var seprate = ",";
+				var trimValues = false;
+				var idIndex = 0;
+				var valueIndex = 1;
+				var arr;
+
+				if (typeof value == "string")
+				{
+					<!--
+					如果是string类型, 则
+					param1 为分隔符     默认为","
+					param2 为是否需trim 默认为false
+					-->
+					if (param1 != null)
+					{
+						seprate = param1;
+					}
+					if (param2 != null)
+					{
+						trimValues = param2;
+					}
+					arr = value.split(param1);
+					arrayType = 1;
+				}
+				else
+				{
+					if (value.length != null)
+					{
+						if (value.length > 0)
+						{
+							arr = value;
+							trimValues = false;
+							<![CDATA[
+							if (typeof value[0] != "string" && value[0].length != null)
+							]]>
+							{
+								<!--
+								如果是二维数组类型, 则
+								param1 为id列的索引值     默认为 0
+								param2 为value列的索引值  默认为 1
+								-->
+								if (param1 != null)
+								{
+									idIndex = param1;
+								}
+								if (param2 != null)
+								{
+									valueIndex = param2;
+								}
+								arrayType = 2;
+							}
+							else
+							{
+								<!--
+								如果是一维数组类型, 则忽略其他参数
+								param1 为是否需trim 默认为false
+								-->
+								if (param1 != null)
+								{
+									trimValues = param1;
+								}
+								arrayType = 1;
+							}
+						}
+					}
+				}
+				var result = {};
+				<![CDATA[
+				if (arrayType == 1)
+				{
+					if (eterna_debug >= ED_HIGHER)
+					{
+						if (arr.length % 2 != 0)
+						{
+							alert("createData_map error single array length:" + arr.length);
+						}
+					}
+					for (var i = 0; i + 1 < arr.length; i += 2)
+					{
+						if (trimValues && typeof arr[i + 1] == "string" && typeof arr[i] == "string")
+						{
+							result[jQuery.trim(arr[i])] = jQuery.trim(arr[i + 1]);
+						}
+						else
+						{
+							result[arr[i]] = arr[i + 1];
+						}
+					}
+				}
+				else if (arrayType == 2)
+				{
+					for (var i = 0; i < arr.length; i++)
+					{
+						result[arr[i][idIndex]] = arr[i][valueIndex];
+					}
+				}
+				]]>
+				return result;
+			</function>
+
+			<!-- 读取结果集中的值 -->
+			<function name="getData_value" param="dataName, srcName, index">
+				var valueObj = _eterna.getValue_fromRecords(dataName, srcName, index);
+				if (valueObj.exists)
+				{
+					return valueObj.value;
+				}
+				return null;
+			</function>
+
+			<!-- 智能的读取结果集中的值 -->
+			<function name="findData_value" param="dataName, srcName, index"><![CDATA[
+				if (dataName === undefined && srcName === undefined && index === undefined)
+				{
+					dataName = eg_temp.dataName;
+					srcName = eg_temp.srcName;
+					index = eg_temp.index;
+				}
+				else if (srcName === undefined && index === undefined)
+				{
+					if (typeof dataName == "number")
+					{
+						index = dataName;
+						srcName = eg_temp.srcName;
+					}
+					else
+					{
+						srcName = dataName;
+						index = eg_temp.index;
+					}
+					dataName = eg_temp.dataName;
+				}
+				else if (index === undefined)
+				{
+					if (typeof srcName == "number" || srcName == null)
+					{
+						index = srcName;
+						srcName = dataName;
+						dataName = eg_temp.dataName;
+					}
+					else
+					{
+						index = eg_temp.index;
+					}
+				}
+				var valueObj = _eterna.getValue_fromRecords(dataName, srcName, index);
+				if (valueObj.exists)
+				{
+					return valueObj.value;
+				}
+				return null;
+			]]></function>
+
+			<!-- 读取多行结果集中的一行, 并以单行结果集的形式返回 -->
+			<function name="getData_row" param="dataName, index"><![CDATA[
+				var tmpData;
+				if (typeof dataName == "object")
+				{
+					tmpData = dataName;
+				}
+				else
+				{
+					tmpData = {$dataV:dataName};
+				}
+				if (tmpData == null)
+				{
+					return null;
+				}
+				if (typeof tmpData.rowCount == "number")
+				{
+					if (index < tmpData.rowCount)
+					{
+						var r = {};
+						for (var key in tmpData.names)
+						{
+							r[key] = tmpData.rows[index][tmpData.names[key] - 1];
+						}
+						return r;
+					}
+					else
+					{
+						return null;
+					}
+				}
+				else if (typeof tmpData.length == "number")
+				{
+					if (index < tmpData.length)
+					{
+						return tmpData[index];
+					}
+					else
+					{
+						return null;
+					}
+				}
+				else
+				{
+					return null;
+				}
+			]]></function>
+
+			<!-- 智能的读取读取多行结果集中的一行 -->
+			<function name="findData_row" param="dataName, index"><![CDATA[
+				if (dataName === undefined && index === undefined)
+				{
+					dataName = eg_temp.dataName;
+					index = eg_temp.index;
+				}
+				else if (index === undefined)
+				{
+					if (typeof dataName == "number")
+					{
+						index = dataName;
+						dataName = eg_temp.dataName;
+					}
+					else
+					{
+						index = eg_temp.index;
+					}
+				}
+				return {$ef:getData_row}(dataName, index);
+			]]></function>
+
+			<!-- 更新结果集中的值 -->
+			<function name="setData_value" param="dataName, srcName, index, value"><![CDATA[
+				if (dataName == null)
+				{
+					return null;
+				}
+
+				var valueData = null;
+				if (typeof dataName == "object")
+				{
+					var valueObj = dataName;
+					dataName = valueObj.dataName;
+					if (typeof srcName != "undefined")
+					{
+						value = valueObj.value = srcName;
+						valueObj.exists = value != null;
+					}
+					else
+					{
+						value = valueObj.exists ? valueObj.value : null;
+					}
+					srcName = valueObj.srcName;
+					index = valueObj.index;
+					valueData = valueObj.valueData;
+				}
+
+				var oldValue = null;
+				if ((dataName != null || valueData != null) && srcName != null)
+				{
+					var tmpData = valueData != null ? valueData : {$dataV:dataName};
+					if (tmpData != null)
+					{
+						if (index != null)
+						{
+							if (typeof tmpData.rowCount == "number")
+							{
+								oldValue = tmpData.rows[index][tmpData.names[srcName] - 1];
+								tmpData.rows[index][tmpData.names[srcName] - 1] = value;
+							}
+							else
+							{
+								oldValue = tmpData[index][srcName];
+								tmpData[index][srcName] = value;
+							}
+						}
+						else
+						{
+							oldValue = tmpData[srcName];
+							tmpData[srcName] = value;
+						}
+					}
+					else if (index == null)
+					{
+						{$dataV:dataName} = {};
+						tmpData = {$dataV:dataName};
+						tmpData[srcName] = value;
+					}
+				}
+				return oldValue;
+			]]></function>
+
+
+			<!--
+			一些基本的输入控件
+			-->
+
+			<!-- 获取控件中的值 -->
+			<function name="getWebObjValue" param="theObj">
+				if (typeof theObj == "string")
+				{
+					theObj = _eterna.getWebObj(theObj);
+				}
+				if (theObj.data("hasHint"))
+				{
+					return theObj.data("value");
+				}
+				else
+				{
+					return theObj.val();
+				}
+			</function>
+			<!-- 设置控件中的值 -->
+			<function name="setWebObjValue" param="theObj, value"><![CDATA[
+				if (typeof theObj == "string")
+				{
+					theObj = _eterna.getWebObj(theObj);
+				}
+				if (theObj.data("hasHint"))
+				{
+					theObj.data("value", value);
+					theObj.val(value);
+					if (!theObj.data("hasFocus") && value == "")
+					{
+						theObj.css("color", "gray");
+						theObj.val(eg_temp.param.hint);
+					}
+				}
+				else
+				{
+					theObj.val(value);
+				}
+			]]></function>
+
+			<!-- 检查是否需要默认的宽度设置 -->
+			<function name="checkNeedDefaultWidth" param="objConfig">
+				if (objConfig.css != null)
+				{
+					if (objConfig.css.width != null)
+					{
+						return false;
+					}
+				}
+				return true;
+			</function>
+			<resource name="component_defaultWidth">98%</resource>
+
+			<typical-component name="text" type="input-text">
+				<init-script><![CDATA[
+					var needDefaultWidth = {$ef:checkNeedDefaultWidth}(objConfig);
+					if (eg_temp.param != null && eg_temp.param.textWidth != null)
+					{
+						webObj.css("width", eg_temp.param.textWidth);
+						needDefaultWidth = false;
+					}
+					var oldId = webObj.attr("id");
+					if (eg_temp.name != null && (oldId == null || oldId == ""))
+					{
+						webObj.attr("id", eg_temp.name);
+					}
+					if (eg_temp.valueObj != null && eg_temp.valueObj.exists)
+					{
+						webObj.val(eg_temp.valueObj.value);
+					}
+					if (needDefaultWidth)
+					{
+						webObj.css("width", {$res:component_defaultWidth}());
+					}
+					if (eg_temp.param != null && eg_temp.param.hint != null)
+					{
+						webObj.data("hasHint", 1);
+						webObj.data("oldColor", webObj.css("color"));
+						webObj.data("value", webObj.val());
+						if (webObj.val() == "")
+						{
+							webObj.val(eg_temp.param.hint);
+							webObj.css("color", "gray");
+						}
+					}
+				]]></init-script>
+				<events>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, {$ef:getWebObjValue}(webObj));</event>
+					<event name="focus">
+						if (webObj.data("hasHint"))
+						{
+							webObj.data("hasFocus", 1);
+							webObj.val(webObj.data("value"));
+							webObj.css("color", webObj.data("oldColor"));
+						}
+					</event>
+					<event name="blur">
+						if (webObj.data("hasHint"))
+						{
+							webObj.data("hasFocus", 0);
+							var v = webObj.val();
+							webObj.data("value", v);
+							if (v == "")
+							{
+								webObj.css("color", "gray");
+								webObj.val(eg_temp.param.hint);
+							}
+						}
+					</event>
+					<event name="change"><![CDATA[
+						if (webObj.data("hasHint") && !webObj.data("hasFocus"))
+						{
+							var v = webObj.val();
+							webObj.data("value", v);
+							if (v == "")
+							{
+								webObj.css("color", "gray");
+								webObj.val(eg_temp.param.hint);
+							}
+							else
+							{
+								webObj.css("color", webObj.data("oldColor"));
+							}
+						}
+					]]></event>
+					<event name="keyup"><![CDATA[
+						if (webObj.data("hasHint"))
+						{
+							var v = webObj.val();
+							webObj.data("value", v);
+						}
+					]]></event>
+					<event name="modify">
+						if (webObj.data("hasHint"))
+						{
+							webObj.val(webObj.data("value"));
+						}
+					</event>
+				</events>
+			</typical-component>
+
+			<typical-component name="password" type="input-password">
+				<init-script><![CDATA[
+					var needDefaultWidth = {$ef:checkNeedDefaultWidth}(objConfig);
+					if (eg_temp.param != null && eg_temp.param.textWidth != null)
+					{
+						webObj.css("width", eg_temp.param.textWidth);
+						needDefaultWidth = false;
+					}
+					var oldId = webObj.attr("id");
+					if (eg_temp.name != null && (oldId == null || oldId == ""))
+					{
+						webObj.attr("id", eg_temp.name);
+					}
+					if (needDefaultWidth)
+					{
+						webObj.css("width", {$res:component_defaultWidth}());
+					}
+				]]></init-script>
+				<events>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, {$ef:getWebObjValue}(webObj));</event>
+				</events>
+			</typical-component>
+
+			<typical-replacement name="text_date" baseComponentName="text">
+				<init-script><![CDATA[
+					{$parentScript}
+					var param = eg_temp.param;
+				]]></init-script>
+				<events>
+					<event name="focus">
+						if (webObj.data("dealCheck.inCheck"))
+						{
+							// 检查dealCheck.inCheck标记, 如果已经在检查了则直接退出, 否则会造成死机等问题
+							return;
+						}
+						var param = eg_temp.param;
+						if (param == null || param.dateParam == null)
+						{
+							WdatePicker({oncleared:function(dp){jQuery(this).change();},onpicked:function(dp){jQuery(this).change();}});
+						}
+						else
+						{
+							var tmp = webObj.data("dateParam");
+							if (tmp == null)
+							{
+								tmp = _eterna.cloneJSON(param.dateParam);
+								tmp.oncleared = function(dp){jQuery(this).change();};
+								tmp.onpicked = function(dp){jQuery(this).change();};
+								webObj.data("dateParam", tmp);
+							}
+							WdatePicker(tmp);
+						}
+					</event>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, {$ef:getWebObjValue}(webObj));</event>
+				</events>
+			</typical-replacement>
+
+			<typical-component name="textarea" type="textarea">
+				<init-script><![CDATA[
+					var needDefaultWidth = {$ef:checkNeedDefaultWidth}(objConfig);
+					if (eg_temp.param != null)
+					{
+						if (eg_temp.param.textWidth != null)
+						{
+							webObj.css("width", eg_temp.param.textWidth);
+							needDefaultWidth = false;
+						}
+						if (eg_temp.param.textHeight != null)
+						{
+							webObj.css("height", eg_temp.param.textHeight);
+						}
+						else
+						{
+							webObj.css("height", "36px");
+						}
+					}
+					var oldId = webObj.attr("id");
+					if (eg_temp.name != null && (oldId == null || oldId == ""))
+					{
+						webObj.attr("id", eg_temp.name);
+					}
+					if (needDefaultWidth)
+					{
+						webObj.css("width", {$res:component_defaultWidth}());
+					}
+					eterna_addWillInitObj(webObj);
+					if (eg_temp.param != null && eg_temp.param.hint != null)
+					{
+						webObj.data("hasHint", 1);
+						webObj.data("oldColor", webObj.css("color"));
+					}
+				]]></init-script>
+				<events>
+					<event name="willInit"><![CDATA[
+						// 这里再延迟100毫秒设置val, 因为IE8下立刻设置宽度还是会被撑大
+						var initTimer = function () {
+							initTimer.theObj.trigger("willInit_plus");
+						}
+						initTimer.theObj = webObj;
+						setTimeout(initTimer, 100);
+					]]></event>
+					<event name="willInit_plus"><![CDATA[
+						if (eg_temp.valueObj != null && eg_temp.valueObj.exists)
+						{
+							webObj.val(eg_temp.valueObj.value);
+						}
+						webObj.data("value", webObj.val());
+						if (webObj.val() == "" && webObj.data("hasHint"))
+						{
+							webObj.val(eg_temp.param.hint);
+							webObj.css("color", "gray");
+						}
+					]]></event>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, {$ef:getWebObjValue}(webObj));</event>
+					<event name="focus">
+						if (webObj.data("hasHint"))
+						{
+							webObj.data("hasFocus", 1);
+							webObj.val(webObj.data("value"));
+							webObj.css("color", webObj.data("oldColor"));
+						}
+					</event>
+					<event name="blur">
+						if (webObj.data("hasHint"))
+						{
+							webObj.data("hasFocus", 0);
+							var v = webObj.val();
+							webObj.data("value", v);
+							if (v == "")
+							{
+								webObj.css("color", "gray");
+								webObj.val(eg_temp.param.hint);
+							}
+						}
+					</event>
+					<event name="change"><![CDATA[
+						if (webObj.data("hasHint") && !webObj.data("hasFocus"))
+						{
+							var v = webObj.val();
+							webObj.data("value", v);
+							if (v == "")
+							{
+								webObj.css("color", "gray");
+								webObj.val(eg_temp.param.hint);
+							}
+						}
+					]]></event>
+					<event name="keyup"><![CDATA[
+						if (webObj.data("hasHint"))
+						{
+							var v = webObj.val();
+							webObj.data("value", v);
+						}
+					]]></event>
+					<event name="modify">
+						if (webObj.data("hasHint"))
+						{
+							webObj.val(webObj.data("value"));
+						}
+					</event>
+				</events>
+			</typical-component>
+
+			<!-- 检查选择项的数据是否存在, 是否需要加载, true表示加载完成, 可以继续 -->
+			<function name="select_options_data_check" param="theObj"><![CDATA[
+				var optionsCache = {$data:___optionsCache};
+				if (optionsCache == null)
+				{
+					optionsCache = {initDataFlag:{},waitObjs:{}};
+					{$data:___optionsCache} = optionsCache;
+				}
+				if (eg_temp.param != null && eg_temp.param.optionsList != null)
+				{
+					var optionsName = eg_temp.param.optionsList;
+					if ({$dataV:optionsName} == null)
+					{
+						var flag = optionsCache.initDataFlag[optionsName];
+						var synLoad = eg_temp.param.optionsSynLoad == null ? false : eg_temp.param.optionsSynLoad;
+						if (flag == null || synLoad)
+						{
+							var queryNameTag = "queryName";
+							if (eg_temp.param.queryNameTag != null)
+							{
+								queryNameTag = eg_temp.param.queryNameTag;
+							}
+							var params = {};
+							params[queryNameTag] = optionsName;
+							var queryModel = "codeQuery";
+							if (eg_temp.param.queryModel != null)
+							{
+								queryModel = eg_temp.param.queryModel;
+							}
+							if (synLoad)
+							{
+								// 如果是同步载入, 则直接加载
+								{$ef:reload}(params, queryModel, [], [optionsName]);
+								if ({$dataV:optionsName} != null)
+								{
+									return true;
+								}
+								else
+								{
+									{$ef:select_options_data_check_addFlag}(theObj, optionsName, 1);
+									return false;
+								}
+							}
+							else
+							{
+								// 如果未初始化, 则设上等待初始化标记, 并进行异步载入
+								optionsCache.initDataFlag[optionsName] = "wait";
+								var recallFn = function () {
+									// 重载前加上是本控件发起初始化的标志
+									var tmpData = recallFn.theObj.data("egTemp").tempData;
+									if (tmpData == null)
+									{
+										 recallFn.theObj.data("egTemp").tempData = {optionsInitObj:1};
+									}
+									else
+									{
+										tmpData.optionsInitObj = 1;
+									}
+									recallFn._eterna.reloadWebObj(recallFn.theObj);
+								};
+								recallFn._eterna = _eterna;
+								recallFn.theObj = theObj;
+								// 这里通过recall来重载, 因为失败后不会触发控件的重载
+								{$ef:reload}(params, queryModel, [], [optionsName], true, recallFn);
+								{$ef:select_options_data_check_addFlag}(theObj, optionsName, 0);
+								return false;
+							}
+						}
+						else if (flag == "wait")
+						{
+							if (eg_temp.tempData != null && eg_temp.tempData.optionsInitObj == 1)
+							{
+								// 如果是此对象发起的载入, 则要设上失败标记, 并唤醒等待的对象
+								optionsCache.initDataFlag[optionsName] = "error";
+								{$ef:select_options_data_check_addFlag}(theObj, optionsName, 1);
+								var waitObjs = optionsCache.waitObjs[optionsName];
+								if (waitObjs != null)
+								{
+									optionsCache.waitObjs[optionsName] = null;
+									for (var i = 0; i < waitObjs.length; i++)
+									{
+										_eterna.reloadWebObj(waitObjs[i]);
+									}
+								}
+							}
+							else
+							{
+								// 如果不是此对象发起的载入, 则进行等待, 并加入等待列表
+								{$ef:select_options_data_check_addFlag}(theObj, optionsName, 0);
+								if (optionsCache.waitObjs[optionsName] == null)
+								{
+									optionsCache.waitObjs[optionsName] = [theObj];
+								}
+								else
+								{
+									optionsCache.waitObjs[optionsName].push(theObj);
+								}
+							}
+							return false;
+						}
+						else if (flag == "error")
+						{
+							// 如果发生错误, 则要设上失败标记
+							{$ef:select_options_data_check_addFlag}(theObj, optionsName, 1);
+							return false;
+						}
+					}
+					else if (eg_temp.tempData != null && eg_temp.tempData.optionsInitObj == 1)
+					{
+						optionsCache.initDataFlag[optionsName] = "success";
+						// 如果是此对象发起的载入, 则要唤醒等待的对象
+						var waitObjs = optionsCache.waitObjs[optionsName];
+						if (waitObjs != null)
+						{
+							optionsCache.waitObjs[optionsName] = null;
+							for (var i = 0; i < waitObjs.length; i++)
+							{
+								_eterna.reloadWebObj(waitObjs[i]);
+							}
+						}
+					}
+				}
+				return true;
+			]]></function>
+			<!-- 检查选择项的数据时, 添加状态标记 -->
+			<function name="select_options_data_check_addFlag" param="theObj, dataName, type"><![CDATA[
+				var option = jQuery("<option/>");
+				option.text(type == 0 ? "loading..." : "error");
+				theObj.append(option);
+				if (type != 0)
+				{
+					var msgObj = jQuery("<center/>");
+					var cName = eg_temp.caption == null ? "" : eg_temp.caption;
+					if (eg_temp.index != null && eg_temp.rowNum != null)
+					{
+						cName += "(" + eg_temp.rowNum + ")";
+					}
+					msgObj.text({$res:select_options_data_check_errMsg}(cName, dataName));
+					if (_eterna.rootWebObj != null)
+					{
+						_eterna.rootWebObj.prepend(msgObj);
+					}
+					else
+					{
+						jQuery("body").prepend(msgObj);
+					}
+					if (_eterna.cache.optionsDataCheckMsgList == null)
+					{
+						_eterna.cache.optionsDataCheckMsgList = [];
+						msgObj.fadeOut(5000, {$ef:select_options_data_check_msgEnd});
+					}
+					else
+					{
+						_eterna.cache.optionsDataCheckMsgList.push(msgObj);
+						msgObj.hide();
+					}
+				}
+			]]></function>
+			<function name="select_options_data_check_msgEnd">
+				jQuery(this).remove();
+				if (_eterna.cache.optionsDataCheckMsgList != null)
+				{
+					if (_eterna.cache.optionsDataCheckMsgList.length == 0)
+					{
+						_eterna.cache.optionsDataCheckMsgList = null;
+					}
+					else
+					{
+						var tmpObj = _eterna.cache.optionsDataCheckMsgList.pop();
+						tmpObj.show();
+						tmpObj.fadeOut(5000, {$ef:select_options_data_check_msgEnd});
+					}
+				}
+			</function>
+			<resource name="select_options_data_check_errMsg">
+				在加载{0}选项时发生错误，需要的数据集名称为{1}，您可尝试按[F5]刷新页面或联系开发人员解决此问题。
+			</resource>
+
+			<typical-component name="select" type="select">
+				<init-script><![CDATA[
+					var needDefaultWidth = {$ef:checkNeedDefaultWidth}(objConfig);
+					var oldId = webObj.attr("id");
+					if (eg_temp.name != null && (oldId == null || oldId == ""))
+					{
+						webObj.attr("id", eg_temp.name);
+					}
+					if (eg_temp.param != null && eg_temp.param.selectWidth != null)
+					{
+						needDefaultWidth = false;
+						webObj.css("width", eg_temp.param.selectWidth);
+					}
+					if (needDefaultWidth)
+					{
+						webObj.css("width", {$res:component_defaultWidth}());
+					}
+
+					if ({$ef:select_options_data_check}(webObj))
+					{
+						{$ef:select_options_init_fn}(webObj);
+					}
+				]]></init-script>
+				<events>
+					<event name="change"><![CDATA[
+						if (eg_temp.param != null && eg_temp.param.subSelectId != null)
+						{
+							_eterna.reloadWebObj(eg_temp.param.subSelectId);
+						}
+					]]></event>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, webObj.val());</event>
+				</events>
+			</typical-component>
+			<!-- 下拉选择控件选项及选择值的控件 -->
+			<function name="select_options_init_fn" param="webObj"><![CDATA[
+				var selectDefault = eterna_select_default_value;
+				if (eg_temp.param != null && eg_temp.param.selectDefault != null)
+				{
+					selectDefault = eg_temp.param.selectDefault;
+				}
+				for (var i = 0; i < selectDefault.length; i++)
+				{
+					var option = jQuery("<option/>");
+					option.attr("value", selectDefault[i][0]);
+					option.text(selectDefault[i][1]);
+					webObj.append(option);
+				}
+
+				if (eg_temp.param != null && eg_temp.param.optionsList != null)
+				{
+					if ({$dataV:eg_temp.param.optionsList} != null)
+					{
+						var rows = {$dataV:eg_temp.param.optionsList}.rows;
+						for (var i = 0; i < rows.length; i++)
+						{
+							var option = jQuery("<option/>");
+							option.attr("value", rows[i][0]);
+							option.text(rows[i][1]);
+							webObj.append(option);
+						}
+					}
+				}
+				if (eg_temp.valueObj != null && eg_temp.valueObj.exists)
+				{
+					webObj.val(eg_temp.valueObj.value);
+				}
+				else if (eg_temp.dataName == null || {$dataV:eg_temp.dataName} == null)
+				{
+					if (eg_temp.param != null)
+					{
+						if (eg_temp.param.defaultValueTag != null && {$dataV:eg_temp.param.defaultValueTag} != null)
+						{
+							webObj.val({$dataV:eg_temp.param.defaultValueTag});
+						}
+						else if (eg_temp.param.defaultValue != null)
+						{
+							webObj.val(eg_temp.param.defaultValue);
+						}
+					}
+				}
+				else
+				{
+					webObj.val("");
+				}
+			]]></function>
+
+			<typical-component name="select_sub" type="select">
+				<init-script><![CDATA[
+					var needDefaultWidth = {$ef:checkNeedDefaultWidth}(objConfig);
+					var oldId = webObj.attr("id");
+					if (eg_temp.name != null && (oldId == null || oldId == ""))
+					{
+						webObj.attr("id", eg_temp.name);
+					}
+					if (eg_temp.param != null && eg_temp.param.selectWidth != null)
+					{
+						needDefaultWidth = false;
+						webObj.css("width", eg_temp.param.selectWidth);
+					}
+					if (needDefaultWidth)
+					{
+						webObj.css("width", {$res:component_defaultWidth}());
+					}
+
+					if ({$ef:select_options_data_check}(webObj))
+					{
+						eterna_addWillInitObj(webObj);
+					}
+				]]></init-script>
+				<events>
+					<event name="willInit"><![CDATA[
+						var selectDefault = eterna_select_default_value;
+						if (eg_temp.param != null && eg_temp.param.selectDefault != null)
+						{
+							selectDefault = eg_temp.param.selectDefault;
+						}
+						for (var i = 0; i < selectDefault.length; i++)
+						{
+							var option = jQuery("<option/>");
+							option.attr("value", selectDefault[i][0]);
+							option.text(selectDefault[i][1]);
+							webObj.append(option);
+						}
+
+						if (eg_temp.param != null && eg_temp.param.optionsList != null)
+						{
+							var pId = {$ef:getWebObjValue}(eg_temp.param.parentSelectId);
+							if ({$dataV:eg_temp.param.optionsList} != null)
+							{
+								var rows = {$dataV:eg_temp.param.optionsList}.rows;
+								for (var i = 0; i < rows.length; i++)
+								{
+									if (pId == rows[i][0])
+									{
+										var option = jQuery("<option/>");
+										option.attr("value", rows[i][1]);
+										option.text(rows[i][2]);
+										webObj.append(option);
+									}
+								}
+							}
+						}
+						var tmpValue = "";
+						if (eg_temp.valueObj != null && eg_temp.valueObj.exists)
+						{
+							tmpValue = eg_temp.valueObj.value;
+						}
+						else if (eg_temp.dataName == null || {$dataV:eg_temp.dataName} == null)
+						{
+							if (eg_temp.param != null)
+							{
+								if (eg_temp.param.defaultValueTag != null && {$dataV:eg_temp.param.defaultValueTag} != null)
+								{
+									tmpValue = {$dataV:eg_temp.param.defaultValueTag};
+								}
+								else if (eg_temp.param.defaultValue != null)
+								{
+									tmpValue = eg_temp.param.defaultValue;
+								}
+							}
+						}
+						if (tmpValue != "")
+						{
+							if (_eterna.queryWebObj("[value='" + ef_toScriptString(tmpValue) + "']", webObj).size() == 0)
+							{
+								tmpValue = "";
+							}
+						}
+						if (tmpValue != "")
+						{
+							webObj.val(tmpValue);
+						}
+					]]></event>
+					<event name="change"><![CDATA[
+						if (eg_temp.param != null && eg_temp.param.subSelectId != null)
+						{
+							_eterna.reloadWebObj(eg_temp.param.subSelectId);
+						}
+					]]></event>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, webObj.val());</event>
+				</events>
+			</typical-component>
+
+			<typical-component name="select_year" type="select">
+				<init-script><![CDATA[
+					var needDefaultWidth = {$ef:checkNeedDefaultWidth}(objConfig);
+					var oldId = webObj.attr("id");
+					if (eg_temp.name != null && (oldId == null || oldId == ""))
+					{
+						webObj.attr("id", eg_temp.name);
+					}
+
+					var selectDefault = eterna_select_default_value;
+					var nowYearTag = "year";
+					var endYearOff = 2;
+					var beginYearOff = -6;
+					if (eg_temp.param != null)
+					{
+						if (eg_temp.param.selectDefault != null)
+						{
+							selectDefault = eg_temp.param.selectDefault;
+						}
+						if (eg_temp.param.selectWidth != null)
+						{
+							needDefaultWidth = false;
+							webObj.css("width", eg_temp.param.selectWidth);
+						}
+						if (eg_temp.param.nowYearTag != null)
+						{
+							nowYearTag = eg_temp.param.nowYearTag;
+						}
+						else if (eg_temp.param.defaultValueTag != null)
+						{
+							nowYearTag = eg_temp.param.defaultValueTag;
+						}
+						if (eg_temp.param.endYearOff != null)
+						{
+							endYearOff = eg_temp.param.endYearOff;
+						}
+						if (eg_temp.param.beginYearOff != null)
+						{
+							beginYearOff = eg_temp.param.beginYearOff;
+						}
+					}
+					for (var i = 0; i < selectDefault.length; i++)
+					{
+						var option = jQuery("<option/>");
+						option.attr("value", selectDefault[i][0]);
+						option.text(selectDefault[i][1]);
+						webObj.append(option);
+					}
+
+					var nowYear = {$dataV:nowYearTag};
+					if (nowYear == null)
+					{
+						var now = new Date();
+						nowYear = now.getFullYear();
+					}
+					if (nowYear != null)
+					{
+						if (typeof nowYear != "number")
+						{
+							nowYear = parseInt(nowYear);
+						}
+						if (typeof endYearOff != "number")
+						{
+							endYearOff = parseInt(endYearOff);
+						}
+						if (typeof beginYearOff != "number")
+						{
+							beginYearOff = parseInt(beginYearOff);
+						}
+						for (var i = nowYear + endYearOff; i >= nowYear + beginYearOff; i--)
+						{
+							var option = jQuery("<option/>");
+							option.attr("value", i + "");
+							option.text(i + "");
+							webObj.append(option);
+						}
+					}
+
+					var theValue = "";
+					if (eg_temp.valueObj != null && eg_temp.valueObj.exists)
+					{
+						theValue = eg_temp.valueObj.value;
+					}
+					else if ({$dataV:eg_temp.dataName} == null && eg_temp.param != null)
+					{
+						if (eg_temp.param.defaultValueTag != null && {$dataV:eg_temp.param.defaultValueTag} != null)
+						{
+							theValue = {$dataV:eg_temp.param.defaultValueTag};
+						}
+						else if (eg_temp.param.defaultValue != null)
+						{
+							theValue = eg_temp.param.defaultValue;
+						}
+					}
+					if (theValue != "")
+					{
+						if (_eterna.queryWebObj("[value='" + ef_toScriptString(theValue) + "']", webObj).size() == 0)
+						{
+							var option = jQuery("<option/>");
+							option.attr("value", theValue);
+							option.text(theValue);
+							webObj.append(option);
+						}
+					}
+					webObj.val(theValue);
+
+					if (needDefaultWidth)
+					{
+						webObj.css("width", {$res:component_defaultWidth}());
+					}
+				]]></init-script>
+				<events>
+					<event name="save">{$ef:setData_value}(eg_temp.valueObj, webObj.val());</event>
+				</events>
+			</typical-component>
+
+
+			<!--
+			查询用的基本控件
+			-->
+
+			<typical-component name="search_hidden_input" type="none">
+				<component name="queryType" type="input-hidden">
+					<component-param>
+						objName:"[script]:{$dataV:EG_SMA}.queryTypeTag",
+						objValue:"[script]:{$dataV:EG_SMA}.queryTypeReset"
+					</component-param>
+				</component>
+				<component name="pageNum" type="input-hidden">
+					<component-param>
+						objName:"[script]:{$dataV:EG_SMA}.pageNumTag",
+						objValue:"0"
+					</component-param>
+				</component>
+			</typical-component>
+
+			<function name="doPageChanged" param="changeNum, newPage, pageSize, dataName"><![CDATA[
+				if ({$data:___pageChanged} == null || !{$data:___pageChanged})
+				{
+					{$data:___pageChanged} = 1;
+				}
+				else
+				{
+					return;
+				}
+
+				var theForm = jQuery("#" + (dataName != null ? dataName : "") + "_pageManagerForm", _eterna.rootWebObj);
+				if (changeNum == 0)
+				{
+					jQuery("#" + {$dataV:EG_SMA}.pageNumTag, theForm).val(newPage - 1);
+					jQuery("#" + {$dataV:EG_SMA}.pageSizeTag, theForm).val(
+							pageSize < 1 ? 1 : pageSize > 300 ? 300 : pageSize);
+				}
+				else
+				{
+					jQuery("#" + {$dataV:EG_SMA}.pageNumTag, theForm).val(changeNum + {$dataV:dataName}.pageNum);
+				}
+				if ((eterna_debug & ED_SHOW_OTHERS) != 0)
+				{
+					alert("searchURL:" + theForm.attr("action"));
+				}
+				theForm.submit();
+			]]></function>
+
+			<typical-component name="search_page_form" type="none">
+				<before-init>
+					if ({$dataV:eg_temp.dataName + '_modelName'} == null)
+					{
+						{$dataV:eg_temp.dataName + '_modelName'} = "index";
+					}
+				</before-init>
+				<component name="search" type="form">
+					<component-param>objName:"[script]:(eg_temp.dataName != null ? eg_temp.dataName : '') + '_pageManagerForm'"</component-param>
+					<init-script><![CDATA[
+						webObj.attr("action", {$ef:getHeadURL}({$dataV:eg_temp.dataName + '_modelName'}));
+						webObj.attr("id", webObj.attr("name"));
+					]]></init-script>
+					<component name="otherParam" type="none"/>
+					<component name="pageNum" type="input-hidden">
+						<component-param>objName:"[script]:{$dataV:EG_SMA}.pageNumTag"</component-param>
+						<init-script>webObj.attr("id", {$dataV:EG_SMA}.pageNumTag);</init-script>
+					</component>
+					<component name="pageSize" type="input-hidden">
+						<component-param>objName:"[script]:{$dataV:EG_SMA}.pageSizeTag"</component-param>
+						<init-script>webObj.attr("id", {$dataV:EG_SMA}.pageSizeTag);</init-script>
+					</component>
+					<component name="searchName" type="input-hidden">
+						<component-param>attr:{id:"searchName"},objName:"searchName",objValue:"[script]:{$dataV:eg_temp.dataName+'_searchName'}"</component-param>
+					</component>
+					<component name="otherParam" type="none"/>
+				</component>
+			</typical-component>
+
+
+			<!--
+			ajax的调用
+			-->
+
+			<!-- 重载完毕后执行的操作 -->
+			<function name="afterReload" param="tmpData, objs, datas"><![CDATA[
+				if (tmpData != null)
+				{
+					if (typeof objs == "string" && objs == "reloadView")
+					{
+						_eterna.changeEternaData(tmpData);
+						eg_temp = {};
+						_eterna.reInit();
+					}
+					else
+					{
+						if ({$dataV:EG_SMA} == null && tmpData.{$tmpDataV:EG_SMA} != null)
+						{
+							{$dataV:EG_SMA} = tmpData.{$tmpDataV:EG_SMA};
+						}
+						if (datas != null)
+						{
+							for (var i = 0; i < datas.length; i++)
+							{
+								// 将JSON对象的数据传递给eternaData
+								{$dataV:datas[i]} = tmpData.{$tmpDataV:datas[i]};
+							}
+						}
+						if (objs != null)
+						{
+							for (var i = 0; i < objs.length; i++)
+							{
+								// 重载相应的控件
+								_eterna.reloadWebObj(objs[i]);
+							}
+						}
+					}
+					if (tmpData.{$tmpData:msg} != null) alert(tmpData.{$tmpData:msg});
+					{$data:___pageChanged} = 0;
+				}
+				else
+				{
+					//alert("数据提交过程中发生错误, 请重试或与管理员联系");
+				}
+			]]></function>
+
+			<!--
+				重载控件的函数
+				formObj: 要提交数据的表单对象或JSON对象
+				modelName: 处理数据的model的名称
+				objs:	需要重载的对象, 一个数组, 每个元素可以是对象的名称也可以是对象
+				datas:  需要更新的数据集的名称, 一个数组
+				async:  是否以异步的方式提交, 默认为false
+				recall: 重载完成后调用的回调函数
+			-->
+			<function name="reload" param="formObj, modelName, objs, datas, async, recall"><![CDATA[
+				var url = {$ef:getHeadURL}(modelName, EG_DATA_TYPE_DATA);
+				if (typeof objs == "string" && objs == "reloadView")
+				{
+					_eterna.closeAllWindow();
+					url = {$ef:getHeadURL}(modelName, EG_DATA_TYPE_ALL);
+				}
+				// 执行指定的model操作，获取JSON对象
+				if (async)
+				{
+					var returnFn = function (data, textStatus)
+					{
+						{$ef:afterReload}(data, returnFn.objs, returnFn.datas);
+					}
+					returnFn.objs = objs;
+					returnFn.datas = datas;
+					returnFn.recall = recall;
+					if (formObj == null)
+					{
+						formObj = "POST";
+					}
+					_eterna.getRemoteJSON(url, formObj, true, returnFn, recall);
+				}
+				else
+				{
+					var tmpData;
+					if (recall == null)
+					{
+						tmpData = formObj == null ? _eterna.getRemoteJSON(url)
+								: _eterna.getRemoteJSON(url, formObj);
+					}
+					else
+					{
+						tmpData = _eterna.getRemoteJSON(url, formObj, false, null, recall);
+					}
+					{$ef:afterReload}(tmpData, objs, datas);
+				}
+				_eterna.cache.textData = null;
+			]]></function>
+
+			<!--
+				通过ajax获取数据并更新整个区域
+				url: 获取数据的地址
+				param: 传递的参数
+			-->
+			<function name="ajaxVisit" param="url, param">
+				_eterna.ajaxVisit(url, param);
+			</function>
+
+			<!--
+			一些公用控件
+			-->
+
+			<typical-component name="buttons" type="div" comParam="attr:{align:'center'}">
+				<component name="submit" type="input-submit" comParam="objName:'',objValue:'[script]:{$res:button_submit}()'">
+					<before-init><![CDATA[
+						checkResult = !{$data:onlyView} && (eg_temp.param == null || !eg_temp.param.noSubmit);
+					]]></before-init>
+					<init-script><![CDATA[
+						if (eg_temp.param != null)
+						{
+							if (eg_temp.param.queryBtn)
+							{
+								webObj.val({$res:button_query}());
+							}
+							else if (eg_temp.param.saveBtn)
+							{
+								webObj.val({$res:button_save}());
+							}
+						}
+					]]></init-script>
+				</component>
+				<component name="otherButtons" type="none"/>
+				<component name="return" type="input-button" comParam="objName:'',objValue:'[script]:{$res:button_return}()',css:{'margin-left':'8px'}">
+					<before-init><![CDATA[
+						checkResult = eg_temp.param != null && eg_temp.param.returnBtn;
+					]]></before-init>
+					<events>
+						<event name="click"><![CDATA[
+							if (eg_temp.param != null)
+							{
+								if (eg_temp.param.returnModel != null)
+								{
+									var returnURL = {$ef:getHeadURL}(eg_temp.param.returnModel);
+									if (eg_temp.param.returnParams != null)
+									{
+										returnURL += "&" + jQuery.param(eg_temp.param.returnParams);
+									}
+									{$ef:doVisit}(returnURL);
+								}
+								else if (eg_temp.param.returnURL != null)
+								{
+									{$ef:doVisit}(eg_temp.param.returnURL);
+								}
+								else
+								{
+									history.back();
+								}
+							}
+							else
+							{
+								history.back();
+							}
+						]]></event>
+					</events>
+				</component>
+				<component name="close" type="input-button" comParam="objName:'',objValue:'[script]:{$res:button_close}()',css:{'margin-left':'8px'}">
+					<before-init><![CDATA[
+						checkResult = eg_temp.param != null && eg_temp.param.closeBtn;
+					]]></before-init>
+					<events>
+						<event name="click">
+							window.close();
+						</event>
+					</events>
+				</component>
+			</typical-component>
+			<typical-component name="list_operator" type="none">
+				<before-init>
+					eg_temp.dataName = "list_options";
+					var links = [];
+					{$dataV:eg_temp.dataName} = links;
+				</before-init>
+				<component name="loop" type="loop">
+					<component name="a" type="a" comParam="css:{'margin-right':'8px'}">
+						<init-script><![CDATA[
+							var linkConfig = {$dataV:eg_temp.dataName}[eg_temp.index];
+							webObj.text(linkConfig.name);
+							var optURL = {$ef:getHeadURL}(linkConfig.model);
+							if (linkConfig.params != null)
+							{
+								optURL += "&" + jQuery.param(linkConfig.params);
+							}
+							webObj.attr("href", optURL);
+							if (linkConfig.confirmMsg != null)
+							{
+								webObj.data("confirmMsg", linkConfig.confirmMsg);
+							}
+						]]></init-script>
+						<events>
+							<event name="click">
+								if (webObj.data("confirmMsg") != null)
+								{
+									return confirm(webObj.data("confirmMsg"));
+								}
+								else
+								{
+									return true;
+								}
+							</event>
+						</events>
+					</component>
+				</component>
+			</typical-component>
+			<typical-replacement name="common_list_operator" baseComponentName="list_operator">
+				<before-init>
+					{$parentScript}
+					var showModel = "get";
+					var deleteModel = "delete";
+					var keyName = "id";
+					if (eg_temp.param != null)
+					{
+						if (eg_temp.param.showModel != null)
+						{
+							showModel = eg_temp.param.showModel;
+						}
+						if (eg_temp.param.deleteModel != null)
+						{
+							deleteModel = eg_temp.param.deleteModel;
+						}
+						if (eg_temp.param.keyName != null)
+						{
+							keyName = eg_temp.param.keyName;
+						}
+					}
+
+					var tmpParams = {type:'modify'};
+					tmpParams[keyName] = eg_temp.valueObj.value;
+					links.push({name:{$res:button_modify}(),model:showModel,params:tmpParams});
+					tmpParams = {type:'view'};
+					tmpParams[keyName] = eg_temp.valueObj.value;
+					links.push({name:{$res:button_view}(),model:showModel,params:tmpParams});
+					tmpParams = {};
+					tmpParams[keyName] = eg_temp.valueObj.value;
+					links.push({name:{$res:button_delete}(),model:deleteModel,params:tmpParams,confirmMsg:{$res:button_delete_confirm}()});
+				</before-init>
+			</typical-replacement>
+			<resource name="button_submit">提交</resource>
+			<resource name="button_query">查询</resource>
+			<resource name="button_save">保存</resource>
+			<resource name="button_return">返回</resource>
+			<resource name="button_close">关闭</resource>
+			<resource name="button_modify">修改</resource>
+			<resource name="button_view">查看</resource>
+			<resource name="button_delete">删除</resource>
+			<resource name="button_delete_confirm">您确定要删除这条记录吗？</resource>
+
+			<!--
+				在具体的替换节点中, 需要在before-init里
+				先设置 {$parentScript} 引用before-init中的代码
+				在 eg_temp.dataName 中指定使用的数据集名称
+			-->
+			<typical-component name="form_template" type="form">
+				<before-init>
+					eg_temp.tempData = {};
+					eg_temp.tempData.title = "";
+					eg_temp.tempData.keyList = [];
+					eg_temp.tempData.oldSelectDefault = eterna_select_default_value;
+					eterna_select_default_value = [['',{$res:please_select}()]];
+				</before-init>
+				<init-script>
+					if (eg_temp.tempData.modelName != null)
+					{
+						webObj.attr("action", {$ef:getHeadURL}(eg_temp.tempData.modelName));
+					}
+					eterna_select_default_value = eg_temp.tempData.oldSelectDefault;
+					if (eg_temp.tempData.useAJAX == null)
+					{
+						eg_temp.tempData.useAJAX = _eterna.cache.useAJAX;
+					}
+				</init-script>
+				<events>
+					<event name="submit">
+						try
+						{
+							var theResult = {$ef:checkForm}(webObj);
+							if (theResult)
+							{
+								{$ef:triggerEvents}(webObj, "modify");
+							}
+							return theResult;
+						}
+						catch (ex)
+						{
+							alert({$res:form_submit_error}());
+							return false;
+						}
+					</event>
+				</events>
+				<component name="keys" type="loop">
+					<before-init>
+						if (eg_temp.tempData.keyList.length == 0)
+						{
+							checkResult = false;
+						}
+						else
+						{
+							eg_temp.tempData.dataName = eg_temp.dataName;
+							{$data:keyList} = eg_temp.tempData.keyList;
+							eg_temp.dataName = "keyList";
+						}
+					</before-init>
+					<component name="key" type="input-hidden" comParam="objName:'[script]:{$dataV:eg_temp.dataName}[eg_temp.index]'">
+						<init-script>
+							webObj.val({$ef:getData_value}(eg_temp.tempData.dataName, {$dataV:eg_temp.dataName}[eg_temp.index]));
+						</init-script>
+					</component>
+				</component>
+				<component name="form_body" type="none"/>
+			</typical-component>
+			<resource name="please_select">-请选择-</resource>
+			<resource name="form_submit_error">表单提交过程中发生错误！</resource>
+
+			<!-- 超链接控件的模板
+			<typical-component name="a" type="a">
+				<events>
+					<event name="click"><![CDATA[
+						webObj.data("clickParam", null);
+						webObj.data("doClick", 1);
+						webObj.trigger("preClick");
+						if (webObj.data("doClick"))
+						{
+							var url = webObj.attr("href");
+							if (url == null || url == "")
+							{
+								return false;
+							}
+							if (_eterna.cache.useAJAX)
+							{
+								var param = webObj.data("clickParam");
+								{$ef:ajaxVisit}(url, param);
+								return false;
+							}
+							else
+							{
+								return true;
+							}
+						}
+					]]></event>
+				</events>
+			</typical-component>
+			 -->
+
+			<!-- 继承模板的超链接控件的模板
+			<typical-component name="inheritA" type="inherit">
+				<events>
+					<event name="click"><![CDATA[
+						webObj.data("clickParam", null);
+						webObj.data("doClick", 1);
+						webObj.trigger("preClick");
+						if (webObj.data("doClick"))
+						{
+							var url = webObj.attr("href");
+							if (url == null || url == "")
+							{
+								return false;
+							}
+							if (_eterna.cache.useAJAX)
+							{
+								var param = webObj.data("clickParam");
+								{$ef:ajaxVisit}(url, param);
+								return false;
+							}
+							else
+							{
+								return true;
+							}
+						}
+					]]></event>
+				</events>
+			</typical-component>
+			-->
+
+			<!--
+				执行一次页面访问, 会根据_eterna.cache.useAJAX的设置, 进行页面跳转或ajax方式访问
+				url: 访问的地址
+			-->
+			<function name="doVisit" param="url">
+				_eterna.doVisit(url);
+			</function>
+
+			<!--
+			带检查的控件
+			-->
+
+			<!-- 执行控件检查 -->
+			<function name="dealCheck" param="theObj, event"><![CDATA[
+				if (theObj.data("dealCheck.inCheck"))
+				{
+					// 检查dealCheck.inCheck标记, 如果已经在检查了则直接退出
+					return true;
+				}
+				theObj.data("dealCheck.inCheck", true);
+				try
+				{
+					var arr = [];
+					if (eg_temp.param != null && eg_temp.param.checks != null)
+					{
+						arr = eg_temp.param.checks;
+					}
+					else
+					{
+						return true;
+					}
+					for (var i = 0; i < arr.length; i++)
+					{
+						if (arr[i].type == "notEmpty")
+						{
+							if ({$ef:getWebObjValue}(theObj) == "")
+							{
+								{$ef:setCheckMsg}(theObj, arr[i], {$res:check_mustInput}());
+								return false;
+							}
+						}
+						else if (arr[i].type == "number")
+						{
+							if (!{$ef:dealCheck_number}(theObj, arr[i], event))
+							{
+								return false;
+							}
+						}
+						else if (arr[i].type == "length")
+						{
+							if (!{$ef:dealCheck_length}(theObj, arr[i], event))
+							{
+								return false;
+							}
+						}
+						else if (arr[i].type == "email")
+						{
+							if ({$ef:getWebObjValue}(theObj) != "")
+							{
+								var emailCheck = new RegExp("^(\\w|\\x2E)+@\\w+\\x2E(\\w|\\x2E)+$");
+								if (!emailCheck.test({$ef:getWebObjValue}(theObj)))
+								{
+									{$ef:setCheckMsg}(theObj, arr[i], {$res:check_emailError}());
+									return false;
+								}
+							}
+						}
+						else if (arr[i].type == "special")
+						{
+							if (!arr[i].checkFn(theObj, arr[i], event))
+							{
+								return false;
+							}
+						}
+					}
+					if (eg_temp.param.hideCheckResult)
+					{
+						theObj.css("color", "");
+						theObj.attr("title", "");
+					}
+					else
+					{
+						var noteObj = theObj.next();
+						if (noteObj.size() > 0 && noteObj.data("dealCheck.note"))
+						{
+							noteObj.hide();
+						}
+					}
+					return true;
+				}
+				finally
+				{
+					theObj.removeData("dealCheck.inCheck");
+					event.stopPropagation();
+				}
+			]]></function>
+			<resource name="check_mustInput">此输入项必须填写！</resource>
+			<resource name="check_emailError">电子邮件格式不正确！</resource>
+
+			<!-- 执行控件检查, 长度检查 -->
+			<function name="dealCheck_length" param="theObj, checkConfig, event"><![CDATA[
+				var minLength;
+				var maxLength;
+				var otherCharSize;
+				if (theObj.data("dealCheck_length.initialized"))
+				{
+					minLength = theObj.data("dealCheck_length.minLength");
+					maxLength = theObj.data("dealCheck_length.maxLength");
+					otherCharSize = theObj.data("dealCheck_length.otherCharSize");
+				}
+				else
+				{
+					theObj.data("dealCheck_length.initialized", 1);
+					if (checkConfig.range != null)
+					{
+						minLength = checkConfig.range[0] + "";
+						minLength = parseInt(minLength);
+						if (isNaN(minLength)) minLength = null;
+						if (checkConfig.range.length > 1)
+						{
+							maxLength = checkConfig.range[1] + "";
+							maxLength = parseInt(maxLength);
+							if (isNaN(maxLength)) maxLength = null;
+						}
+						else
+						{
+							maxLength = minLength;
+							minLength = null;
+						}
+					}
+					theObj.data("dealCheck_length.minLength", minLength);
+					theObj.data("dealCheck_length.maxLength", maxLength);
+					otherCharSize = parseInt(checkConfig.otherCharSize);
+					if (isNaN(otherCharSize)) otherCharSize = 3;
+					theObj.data("dealCheck_length.otherCharSize", otherCharSize);
+				}
+
+				var count = {$ef:dealCheck_getStrLength}({$ef:getWebObjValue}(theObj), otherCharSize);
+				if (minLength != null && count < minLength)
+				{
+					var msg = {$res:check_lengthMin}(minLength, parseInt(minLength / otherCharSize));
+					{$ef:setCheckMsg}(theObj, checkConfig, msg);
+					return false;
+				}
+				if (maxLength != null && count > maxLength)
+				{
+					var msg = {$res:check_lengthMax}(maxLength, parseInt(maxLength / otherCharSize));
+					{$ef:setCheckMsg}(theObj, checkConfig, msg);
+					return false;
+				}
+				return true
+			]]></function>
+			<resource name="check_lengthMin">长度不能小于{0}个字母, 或{1}个其他字符！</resource>
+			<resource name="check_lengthMax">长度不能大于{0}个字母, 或{1}个其他字符！</resource>
+			<function name="dealCheck_getStrLength" param="str, otherCharSize"><![CDATA[
+				var count = 0;
+				for (var i = 0; i < str.length; i++)
+				{
+					if (str.charCodeAt(i) >= 128)
+					{
+						count += otherCharSize;
+					}
+					else
+					{
+						count += 1;
+					}
+				}
+				return count;
+			]]></function>
+
+			<!-- 执行控件检查, 数字检查 -->
+			<function name="dealCheck_number" param="theObj, checkConfig, event"><![CDATA[
+				var patternCheck;
+				var rangeCheck;
+				if (theObj.data("dealCheck_number.initialized"))
+				{
+					patternCheck = theObj.data("dealCheck_number.patternCheck");
+					rangeCheck = theObj.data("dealCheck_number.rangeCheck");
+				}
+				else
+				{
+					theObj.data("dealCheck_number.initialized", 1);
+
+					var integerSize = 20;
+					var decimalSize = 10;
+					if (checkConfig.pattern != null)
+					{
+						integerSize = parseInt(checkConfig.pattern[0]);
+						if (isNaN(integerSize)) integerSize = 20;
+						if (checkConfig.pattern.length > 1)
+						{
+							decimalSize = parseInt(checkConfig.pattern[1]);
+							if (isNaN(decimalSize)) decimalSize = 10;
+						}
+					}
+					if (integerSize == 0)
+					{
+						patternCheck = new RegExp("^-?0\\x2E\\d{1," + decimalSize + "}$");
+					}
+					else if (decimalSize == 0)
+					{
+						patternCheck = new RegExp("^-?\\d{1," + integerSize + "}$");
+					}
+					else
+					{
+						patternCheck = new RegExp("^-?\\d{1," + integerSize + "}(\\x2E\\d{1," + decimalSize + "})?$");
+					}
+					theObj.data("dealCheck_number.patternCheck", patternCheck);
+
+					var rangeBegin = null;
+					var rangeBeginInclude = true;
+					var rangeEnd = null;
+					var rangeEndInclude = true;
+					if (checkConfig.range != null)
+					{
+						rangeBegin = checkConfig.range[0] + "";
+						if (rangeBegin.indexOf("*") == 0)
+						{
+							rangeBeginInclude = false;
+							rangeBegin = parseFloat(rangeBegin.substring(1));
+						}
+						else
+						{
+							rangeBegin = parseFloat(rangeBegin);
+						}
+						if (isNaN(rangeBegin)) rangeBegin = null;
+						if (checkConfig.range.length > 1)
+						{
+							rangeEnd = checkConfig.range[1] + "";
+							if (rangeEnd.indexOf("*") == 0)
+							{
+								rangeEndInclude = false;
+								rangeEnd = parseFloat(rangeEnd.substring(1));
+							}
+							else
+							{
+								rangeEnd = parseFloat(rangeEnd);
+							}
+							if (isNaN(rangeEnd)) rangeEnd = null;
+						}
+					}
+					if (rangeBegin != null || rangeEnd != null)
+					{
+						rangeCheck = {
+							begin:rangeBegin,end:rangeEnd,
+							beginInclude:rangeBeginInclude,endInclude:rangeEndInclude
+						};
+						theObj.data("dealCheck_number.rangeCheck", rangeCheck);
+					}
+				}
+
+				if ({$ef:getWebObjValue}(theObj) != "")
+				{
+					if (patternCheck != null)
+					{
+						if (!patternCheck.test({$ef:getWebObjValue}(theObj)))
+						{
+							{$ef:setCheckMsg}(theObj, checkConfig, {$res:check_numberError}());
+							return false;
+						}
+					}
+					if (rangeCheck != null)
+					{
+						var numVal = parseFloat({$ef:getWebObjValue}(theObj));
+						var canPass = true;
+						if (rangeCheck.begin != null)
+						{
+							if (rangeCheck.beginInclude)
+							{
+								canPass = numVal >= rangeCheck.begin;
+							}
+							else
+							{
+								canPass = numVal > rangeCheck.begin;
+							}
+						}
+						if (canPass && rangeCheck.end != null)
+						{
+							if (rangeCheck.endInclude)
+							{
+								canPass = numVal <= rangeCheck.end;
+							}
+							else
+							{
+								canPass = numVal < rangeCheck.end;
+							}
+						}
+						if (!canPass)
+						{
+							var bStr, eStr
+							if (rangeCheck.begin != null)
+							{
+								bStr = (rangeCheck.beginInclude ? "[" : "(") + rangeCheck.begin;
+							}
+							else
+							{
+								bStr = "[all";
+							}
+							if (rangeCheck.end != null)
+							{
+								eStr = rangeCheck.end + (rangeCheck.endInclude ? "]" : ")");
+							}
+							else
+							{
+								eStr = "all]";
+							}
+							{$ef:setCheckMsg}(theObj, checkConfig, {$res:check_numberRange}(bStr, eStr));
+							return false;
+						}
+					}
+				}
+				return true;
+			]]></function>
+			<resource name="check_numberError">数字格式不正确！</resource>
+			<resource name="check_numberRange">数字范围必须在{0},{1}！</resource>
+
+			<!-- 检测并设置控件检查信息 -->
+			<function name="setCheckMsg" param="theObj, checkConfig, msg"><![CDATA[
+				var thisMsg = checkConfig == null ? msg
+						: checkConfig.errorMsg != null ? checkConfig.errorMsg : msg;
+				if (eg_temp.param != null && eg_temp.param.hideCheckResult)
+				{
+					theObj.css("color", "red");
+					theObj.attr("title", thisMsg);
+				}
+				else
+				{
+					var noteObj = theObj.next();
+					if (noteObj.size() > 0 && noteObj.data("dealCheck.note"))
+					{
+						noteObj.text(thisMsg);
+						noteObj.show();
+					}
+				}
+				if ({$data:___checkResult} != null)
+				{
+					if ({$data:___checkResult}.pass)
+					{
+						theObj.focus();
+					}
+					{$data:___checkResult}.pass = false;
+					if (eg_temp.caption != null)
+					{
+						{$data:___checkResult}.msg.push(eg_temp.caption + " " + thisMsg);
+					}
+					else
+					{
+						{$data:___checkResult}.msg.push(thisMsg);
+					}
+				}
+			]]></function>
+
+			<typical-component name="check_result_note" type="div" comParam="css:{color:'red'}">
+				<before-init><![CDATA[
+					if (eg_temp.param != null && eg_temp.param.hideCheckResult)
+					{
+						checkResult = false;
+					}
+				]]></before-init>
+				<init-script>
+					webObj.attr("id", eg_temp.name + "_note");
+					webObj.data("dealCheck.note", 1);
+					webObj.hide();
+				</init-script>
+			</typical-component>
+
+
+			<!--
+			带检查的控件
+			-->
+
+			<typical-component name="text_withCheck" type="none">
+				<replacement name="text" baseComponentName="text">
+					<events>
+						<event name="check">
+							{$ef:dealCheck}(webObj, event);
+						</event>
+						<event name="keyup">webObj.trigger("check");</event>
+						<event name="change">webObj.trigger("check");</event>
+					</events>
+				</replacement>
+				<replacement name="note" baseComponentName="check_result_note"/>
+			</typical-component>
+
+			<typical-component name="password_withCheck" type="none">
+				<replacement name="password" baseComponentName="password">
+					<events>
+						<event name="check">
+							{$ef:dealCheck}(webObj, event);
+						</event>
+						<event name="keyup">webObj.trigger("check");</event>
+						<event name="change">webObj.trigger("check");</event>
+					</events>
+				</replacement>
+				<replacement name="note" baseComponentName="check_result_note"/>
+			</typical-component>
+
+			<typical-component name="text_date_withCheck" type="none">
+				<replacement name="text" baseComponentName="text_date">
+					<events>
+						<event name="check">
+							{$ef:dealCheck}(webObj, event);
+						</event>
+						<event name="keyup">webObj.trigger("check");</event>
+						<event name="change">webObj.trigger("check");</event>
+					</events>
+				</replacement>
+				<replacement name="note" baseComponentName="check_result_note"/>
+			</typical-component>
+
+			<typical-component name="textarea_withCheck" type="none">
+				<replacement name="textarea" baseComponentName="textarea">
+					<events>
+						<event name="check">
+							{$ef:dealCheck}(webObj, event);
+						</event>
+						<event name="keyup">webObj.trigger("check");</event>
+						<event name="change">webObj.trigger("check");</event>
+					</events>
+				</replacement>
+				<replacement name="note" baseComponentName="check_result_note"/>
+			</typical-component>
+
+			<typical-component name="select_withCheck" type="none">
+				<replacement name="select" baseComponentName="select">
+					<events>
+						<event name="check">
+							{$ef:dealCheck}(webObj, event);
+						</event>
+						<event name="change">webObj.trigger("check");</event>
+					</events>
+				</replacement>
+				<replacement name="note" baseComponentName="check_result_note"/>
+			</typical-component>
+
+			<typical-component name="select_year_withCheck" type="none">
+				<replacement name="select" baseComponentName="select_year">
+					<events>
+						<event name="check">
+							{$ef:dealCheck}(webObj, event);
+						</event>
+						<event name="change">webObj.trigger("check");</event>
+					</events>
+				</replacement>
+				<replacement name="note" baseComponentName="check_result_note"/>
+			</typical-component>
+
+
+			<!--
+			带只显示、检查的控件
+			-->
+
+			<function name="label_checkOnlyView" param=""><![CDATA[
+				if ({$data:onlyView})
+				{
+					if (eg_temp.param != null && eg_temp.param.mustEdit)
+					{
+						return false;
+					}
+					return true;
+				}
+				else
+				{
+					if (eg_temp.param != null && eg_temp.param.onlyView)
+					{
+						return true;
+					}
+					return false;
+				}
+			]]></function>
+
+			<typical-component name="text_label" type="none">
+				<component name="span" type="span">
+					<before-init><![CDATA[
+						checkResult = {$ef:label_checkOnlyView}();
+					]]></before-init>
+					<init-script><![CDATA[
+						if (eg_temp.valueObj.exists && eg_temp.valueObj.value != null && eg_temp.valueObj.value != "")
+						{
+							webObj.text(eg_temp.valueObj.value);
+						}
+						else
+						{
+							webObj.html("&nbsp;");
+						}
+					]]></init-script>
+				</component>
+				<replacement name="text" baseComponentName="text_withCheck">
+					<before-init>
+						checkResult = !{$ef:label_checkOnlyView}();
+					</before-init>
+				</replacement>
+			</typical-component>
+
+			<typical-component name="text_date_label" type="none">
+				<component name="span" type="span">
+					<before-init><![CDATA[
+						checkResult = {$ef:label_checkOnlyView}();
+					]]></before-init>
+					<init-script><![CDATA[
+						var value = {$ef:getData_value}(eg_temp.dataName, eg_temp.srcName + "_show");
+						if (value != null && value != "")
+						{
+							webObj.text(value);
+						}
+						else
+						{
+							if (eg_temp.valueObj.exists && eg_temp.valueObj.value != null && eg_temp.valueObj.value != "")
+							{
+								webObj.text(eg_temp.valueObj.value);
+							}
+							else
+							{
+								webObj.html("&nbsp;");
+							}
+						}
+					]]></init-script>
+				</component>
+				<replacement name="text" baseComponentName="text_date_withCheck">
+					<before-init>
+						checkResult = !{$ef:label_checkOnlyView}();
+					</before-init>
+				</replacement>
+			</typical-component>
+
+			<typical-component name="textarea_label" type="none">
+				<replacement name="div" baseComponentName="textarea_show">
+					<before-init><![CDATA[
+						checkResult = {$ef:label_checkOnlyView}();
+					]]></before-init>
+				</replacement>
+				<replacement name="text" baseComponentName="textarea_withCheck">
+					<before-init>
+						checkResult = !{$ef:label_checkOnlyView}();
+					</before-init>
+				</replacement>
+			</typical-component>
+
+			<typical-component name="textarea_show" type="div">
+				<init-script><![CDATA[
+					if (eg_temp.valueObj.exists && eg_temp.valueObj.value != null && eg_temp.valueObj.value != "")
+					{
+						if (eg_temp.valueObj.html)
+						{
+							webObj.html(eg_temp.valueObj.value);
+						}
+						else
+						{
+							webObj.css("white-space", "normal");
+							webObj.css("font-family", "宋体");
+							var str = eg_temp.valueObj.value;
+							var tmpBegin = 0;
+							var tmpSpan = jQuery("<span/>");
+							var resultStr = "";
+							for (var i = 0; i < str.length; i++)
+							{
+								if (str.charAt(i) == '\n')
+								{
+									tmpSpan.text(str.substring(tmpBegin, i + 1));
+									resultStr += tmpSpan.html();
+									tmpBegin = i + 1;
+									var pObj = jQuery("<p style=\"margin:0;padding:0\"/>");
+									pObj.html(jQuery.trim(resultStr) == "" ? "&nbsp;" : resultStr);
+									webObj.append(pObj);
+									resultStr = "";
+								}
+								else if (str.charAt(i) == '\t' || str.charAt(i) == ' ')
+								{
+									if (tmpBegin < i)
+									{
+										tmpSpan.text(str.substring(tmpBegin, i));
+										resultStr += tmpSpan.html();
+									}
+									tmpBegin = i + 1;
+									resultStr += "&nbsp;";
+								}
+							}
+							if (tmpBegin < str.length)
+							{
+								tmpSpan.text(str.substring(tmpBegin, str.length));
+								resultStr += tmpSpan.html();
+								var pObj = jQuery("<p style=\"margin:0;padding:0\"/>");
+								pObj.html(jQuery.trim(resultStr) == "" ? "&nbsp;" : resultStr);
+								webObj.append(pObj);
+							}
+							tmpSpan.remove();
+						}
+					}
+					else
+					{
+						webObj.html("&nbsp;");
+					}
+				]]></init-script>
+			</typical-component>
+
+			<typical-component name="select_label" type="none">
+				<component name="span" type="span">
+					<before-init><![CDATA[
+						checkResult = {$ef:label_checkOnlyView}();
+					]]></before-init>
+					<init-script><![CDATA[
+						var value = {$ef:getData_value}(eg_temp.dataName, eg_temp.srcName + "_show");
+						if (value != null && value != "")
+						{
+							webObj.text(value);
+						}
+						else
+						{
+							webObj.html("&nbsp;");
+						}
+					]]></init-script>
+				</component>
+				<replacement name="select" baseComponentName="select_withCheck">
+					<before-init>
+						checkResult = !{$ef:label_checkOnlyView}();
+					</before-init>
+				</replacement>
+			</typical-component>
+
+			<typical-component name="select_year_label" type="none">
+				<component name="span" type="span">
+					<before-init><![CDATA[
+						checkResult = {$ef:label_checkOnlyView}();
+					]]></before-init>
+					<init-script><![CDATA[
+						var value = {$ef:getData_value}(eg_temp.dataName, eg_temp.srcName + "_show");
+						if (value != null && value != "")
+						{
+							webObj.text(value);
+						}
+						else
+						{
+							if (eg_temp.valueObj.exists && eg_temp.valueObj.value != null && eg_temp.valueObj.value != "")
+							{
+								webObj.text(eg_temp.valueObj.value);
+							}
+							else
+							{
+								webObj.html("&nbsp;");
+							}
+						}
+					]]></init-script>
+				</component>
+				<replacement name="select" baseComponentName="select_year_withCheck">
+					<before-init>
+						checkResult = !{$ef:label_checkOnlyView}();
+					</before-init>
+				</replacement>
+			</typical-component>
+
+
+			<!--
+			范围控件
+			-->
+
+			<typical-component name="text_range" type="none">
+				<before-init>
+					var param = _eterna.egTempParam();
+					param.hideCheckResult = 1;
+					if (param.textWidth == null)
+					{
+						param.textWidth = "44%";
+					}
+					param.oldName = eg_temp.name;
+					param.oldSrcName = eg_temp.srcName;
+				</before-init>
+				<replacement name="minValue" baseComponentName="text_withCheck"/>
+				<component name="link" type="span" comParam="text:'--'"/>
+				<component name="none" type="none">
+					<before-init>
+						eg_temp.name = eg_temp.param.oldName + "2";
+						eg_temp.srcName = eg_temp.param.oldSrcName + "2";
+						eg_temp.valueObj = _eterna.getValue_fromRecords(
+								eg_temp.dataName, eg_temp.srcName, eg_temp.index);
+					</before-init>
+					<replacement name="maxValue" baseComponentName="text_withCheck"/>
+				</component>
+			</typical-component>
+
+			<typical-component name="text_date_range" type="none">
+				<before-init>
+					var param = _eterna.egTempParam();
+					param.hideCheckResult = 1;
+					if (param.textWidth == null)
+					{
+						param.textWidth = "44%";
+					}
+					param.oldName = eg_temp.name;
+					param.oldSrcName = eg_temp.srcName;
+				</before-init>
+				<replacement name="minValue" baseComponentName="text_date_withCheck"/>
+				<component name="link" type="span" comParam="text:'--'"/>
+				<component name="none" type="none">
+					<before-init>
+						eg_temp.name = eg_temp.param.oldName + "2";
+						eg_temp.srcName = eg_temp.param.oldSrcName + "2";
+						eg_temp.valueObj = _eterna.getValue_fromRecords(
+								eg_temp.dataName, eg_temp.srcName, eg_temp.index);
+					</before-init>
+					<replacement name="maxValue" baseComponentName="text_date_withCheck"/>
+				</component>
+			</typical-component>
+
+
+			<!-- 添加style节点 -->
+			<function name="addGlobeStyle" param="flag, styleStr"><![CDATA[
+				{$ef:addGlobalStyle}(flag, styleStr);
+			]]></function>
+			<function name="addGlobalStyle" param="flag, styleStr"><![CDATA[
+				if (eg_cache.styleFlags == null)
+				{
+					eg_cache.styleFlags = {};
+				}
+				if (eg_cache.styleFlags[flag])
+				{
+					return;
+				}
+				eg_cache.styleFlags[flag] = 1;
+				if (jQuery.support.style)
+				{
+					var styleObj = jQuery("<style type='text/css'></style>");
+					styleObj.html(styleStr);
+					jQuery("script").eq(0).before(styleObj);
+				}
+				else
+				{
+					// 对于ie浏览器, 需要合并到第一个, 并且是设置到styleSheet.cssText属性中
+					var styleObj = null;
+					var oldStyle = "";
+					var sArr = document.getElementsByTagName("style");
+					for (var i = 0; i < sArr.length; i++)
+					{
+						if (sArr[i].getAttribute("type") == "text/css")
+						{
+							styleObj = sArr[i];
+							oldStyle = styleObj.styleSheet.cssText + "\n";
+							break;
+						}
+					}
+					if (styleObj == null)
+					{
+						styleObj = document.createElement('style');
+						styleObj.setAttribute("type", "text/css");
+						var s = document.getElementsByTagName('script')[0];
+						s.parentNode.insertBefore(styleObj, s);
+					}
+					styleObj.styleSheet.cssText = oldStyle + styleStr;
+				}
+			]]></function>
+
+
+			<!--
+			列表单元格纵向合并需要的方法.
+			cm = cell merge
+			-->
+
+			<!-- 初始化列合并需要的信息 -->
+			<function name="cm_initColumnMergeInfo">
+				var data = _eterna.egTempData(true);
+				data.columnMergeInfo = {};
+			</function>
+
+			<!-- 判断上一个单元格与本单元格的值是否一致，一致则不生成此单元格 -->
+			<function name="cm_checkSameValue" param="objConfig"><![CDATA[
+				if (eg_temp.rowType == "row")
+				{
+					var cInfo = eg_temp.tempData.columnMergeInfo[objConfig.name];
+					if (cInfo == null)
+					{
+						cInfo = {tdObj:null,newValue:true};
+						eg_temp.tempData.columnMergeInfo[objConfig.name] = cInfo;
+					}
+					var newValue = true;
+					if (cInfo.tdObj != null)
+					{
+						// 如果父单元的值更新了，那本单元也要生成新的单元
+						// 注：父单元必须在本单元之前，否则效果会和预期的不一致
+						var pmName = _eterna.egTempParam().parentMerge;
+						if (pmName == null || !eg_temp.tempData.columnMergeInfo[pmName].newValue)
+						{
+							var tdValue = {$ef:getData_value}(eg_temp.dataName, eg_temp.srcName, eg_temp.index);
+							var tdValueOld = {$ef:getData_value}(eg_temp.dataName, eg_temp.srcName, eg_temp.index - 1);
+							if (tdValue == tdValueOld)
+							{
+								{$ef:cm_dealMergeTd}(cInfo.tdObj);
+								newValue = false;
+							}
+						}
+					}
+					eg_temp.tempData.columnMergeInfo[objConfig.name].newValue = newValue;
+					return newValue;
+				}
+				return true;
+			]]></function>
+
+			<!-- 存放当前单元格 -->
+			<function name="cm_storeCurrentTdObj" param="objConfig, theObj">
+				if (eg_temp.rowType == "row")
+				{
+					eg_temp.tempData.columnMergeInfo[objConfig.name].tdObj = theObj;
+				}
+			</function>
+
+			<!-- 处理单元格的合并 -->
+			<function name="cm_dealMergeTd" param="tdObj">
+				var spanCount = tdObj.attr("rowSpan");
+				if (spanCount == null || spanCount == "")
+				{
+					tdObj.attr("rowSpan", "2");
+				}
+				else
+				{
+					tdObj.attr("rowSpan", (parseInt(spanCount) + 1) + "");
+				}
+			</function>
+
+
+			<!--
+			处理自适应网页设计需要的方法.
+			rwd = Responsive Web Design
+			-->
+
+			<!--
+			获取容器的宽度等级, 数字越小表示宽度越大, 1表示最大尺寸 2表示次大尺寸 ...
+			blocks     表示每个宽度等级的分隔值, 必需为从大到小, 类型为数组
+			           如: [600, 300, 150], 则等级分布如下,
+			           600及以上为1  600～300为2  300～150为3  150以下为4
+			           当此参数不为空时, 表示需要初始化宽度等级分隔值到环境变量中
+			           当此参数为空时, 则仅根据已初始化的宽度等级分隔值获取容器的宽度等级
+			-->
+			<function name="rwd_widthLevel" param="blocks"><![CDATA[
+				if (blocks != null)
+				{
+					eg_temp.widthBlocks = blocks;
+				}
+				if (_eterna.rootWebObj == null || eg_temp.widthBlocks == null)
+				{
+					return 1;
+				}
+				var levelArr = eg_temp.widthBlocks;
+				var nowWidth = _eterna.rootWebObj.width();
+				for (var i = 0; i < levelArr.length; i++)
+				{
+					if (nowWidth >= levelArr[i])
+					{
+						return i + 1;
+					}
+				}
+				return levelArr.length + 1;
+			]]></function>
+
+			<!--
+			检测宽度现在的宽度等级与原来的宽度等级是否一致, 不同的话则要重新布局.
+			theObj  需要重新布局的控件
+ 			-->
+			<function name="rwd_checkWidthLevel" param="theObj"><![CDATA[
+				var wLevel = {$ef:rwd_widthLevel}();
+				if (eg_temp.widthLevel != null && eg_temp.widthLevel != wLevel)
+				{
+					{$ef:triggerEvents}(theObj, "save");
+					_eterna.reloadWebObj(theObj);
+				}
+			]]></function>
+
+			<!-- 根据当前的宽度等级给出checkResult的值, 即是否需要生成控件 -->
+			<function name="rwd_getCheckResult"><![CDATA[
+				var checkResult = true;
+				if (eg_temp.param != null)
+				{
+					if (eg_temp.param.needWidthLevel != null
+							&& eg_temp.widthLevel > eg_temp.param.needWidthLevel)
+					{
+						checkResult = eg_temp.extInfo;
+					}
+					else
+					{
+						checkResult = !eg_temp.extInfo;
+					}
+				}
+				else if (eg_temp.extInfo)
+				{
+					checkResult = false;
+				}
+				return checkResult;
+			]]></function>
+
+		</objs>
+	</factory>
+</eterna-config>

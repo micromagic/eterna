@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<grammer-config>
+
+   <!-- 表达式检测 -->
+   <list name="expression_checker">
+      <list-cell refName="expression"/>
+      <list-cell refName="end"/>
+   </list>
+   <list name="expression_checker_onlyPlus">
+      <list-cell opt="*">
+         <list>
+            <list-cell>
+               <list name="other" type="text" >
+                  <list-cell opt="*"><node other="true"><false-set chars="{"/></node></list-cell>
+               </list>
+            </list-cell>
+            <list-cell refName="plus" opt="?"/>
+            <list-cell opt="?"><node name="other" type="text"><true-set chars="{"/></node></list-cell>
+         </list>
+      </list-cell>
+      <list-cell refName="end"/>
+   </list>
+
+   <!-- 表达式 -->
+   <list name="expression">
+      <list-cell opt="*">
+         <list>
+            <list-cell refName="blankWithNote"/>
+            <list-cell refName="expression_cell" opt="?"/>
+            <list-cell opt="?">
+               <group type="egroup">
+                  <group-cell refName="plus"/>
+                  <group-cell>
+                     <list>
+                        <list-cell>
+                           <node name="block_b" type="operator"><true-set chars="{"/></node>
+                        </list-cell>
+                        <list-cell refName="expression" opt="?"/>
+                        <list-cell refName="blankWithNote"/>
+                        <list-cell>
+                           <node name="block_e" type="operator"><true-set chars="}"/></node>
+                        </list-cell>
+                     </list>
+                  </group-cell>
+               </group>
+            </list-cell>
+            <list-cell opt="?">
+               <list type="egroup">
+                  <list-cell refName="blankWithNote"/>
+                  <list-cell>
+                     <node name="m_block_b" type="operator"><true-set chars="["/></node>
+                  </list-cell>
+                  <list-cell refName="expression" opt="?"/>
+                  <list-cell refName="blankWithNote"/>
+                  <list-cell>
+                     <node name="m_block_e" type="operator"><true-set chars="]"/></node>
+                  </list-cell>
+               </list>
+            </list-cell>
+            <list-cell opt="?">
+               <list type="egroup">
+                  <list-cell refName="blankWithNote"/>
+                  <list-cell>
+                     <node name="s_block_b" type="operator"><true-set chars="("/></node>
+                  </list-cell>
+                  <list-cell refName="expression" opt="?"/>
+                  <list-cell refName="blankWithNote"/>
+                  <list-cell>
+                     <node name="s_block_e" type="operator"><true-set chars=")"/></node>
+                  </list-cell>
+               </list>
+            </list-cell>
+            <list-cell opt="?">
+               <node name="expression_end" type="EE"><true-set chars=";"/></node>
+            </list-cell>
+         </list>
+      </list-cell>
+   </list>
+
+   <!-- 表达式单元 -->
+   <group name="expression_cell">
+      <group-cell refName="const_text"/>
+      <group-cell refName="name"/>
+      <group-cell refName="opt_group"/>
+      <group-cell refName="plus"/>
+      <group-cell refName="object_group"/>
+   </group>
+
+   <!-- 扩展标记单元 -->
+   <list name="plus" type="expression">
+      <list-cell><queue chars="{$" type="operator"/></list-cell>
+      <list-cell refName="plus_name"/>
+      <list-cell><node type="operator"><true-set chars=":"/></node></list-cell>
+      <list-cell>
+         <list type="text" >
+            <list-cell opt="*"><node other="true"><false-set chars="}&#xD;&#xA;"/></node></list-cell>
+         </list>
+      </list-cell>
+      <list-cell><node type="operator"><true-set chars="}"/></node></list-cell>
+   </list>
+   <group name="plus_name">
+      <group-cell><queue type="name" chars="efV"/></group-cell>
+      <group-cell><queue type="name" chars="ef"/></group-cell>
+      <group-cell><queue type="name" chars="eternaFunction"/></group-cell>
+      <group-cell><queue type="name" chars="dataV"/></group-cell>
+      <group-cell><queue type="name" chars="data"/></group-cell>
+      <group-cell><queue type="name" chars="resV"/></group-cell>
+      <group-cell><queue type="name" chars="res"/></group-cell>
+      <group-cell><queue type="name" chars="tmpDataV"/></group-cell>
+      <group-cell><queue type="name" chars="tmpData"/></group-cell>
+      <group-cell><queue type="name" chars="typicalV"/></group-cell>
+      <group-cell><queue type="name" chars="typical"/></group-cell>
+      <group-cell><queue type="name" chars="globalV"/></group-cell>
+      <group-cell><queue type="name" chars="global"/></group-cell>
+      <group-cell><queue type="name" chars="caption"/></group-cell>
+   </group>
+
+   <!-- 注释 -->
+   <group name="note">
+      <group-cell>
+         <list type="note">
+            <list-cell><queue chars="/*" type="operator"/></list-cell>
+            <list-cell refName="note_text1"/>
+            <list-cell><queue chars="*/" type="operator"/></list-cell>
+         </list>
+      </group-cell>
+      <group-cell>
+         <list type="note">
+            <list-cell><queue chars="//" type="operator"/></list-cell>
+            <list-cell refName="note_text2"/>
+            <list-cell>
+               <group>
+                  <group-cell><node type="operator"><true-set chars="&#xA;"/></node></group-cell>
+                  <group-cell><queue chars="&#xD;&#xA;" type="operator"/></group-cell>
+                  <group-cell refName="end"/>
+               </group>
+            </list-cell>
+         </list>
+      </group-cell>
+   </group>
+   <list name="note_text1" type="text">
+      <list-cell opt="*">
+         <queue not="true" chars="*/"/>
+      </list-cell>
+   </list>
+   <list name="note_text2" type="text">
+      <list-cell opt="*">
+         <group not="true">
+            <group-cell><queue chars="&#13;&#10;"/></group-cell>
+            <group-cell><node><true-set chars="&#10;"/></node></group-cell>
+         </group>
+      </list-cell>
+   </list>
+
+   <!-- 运算符组 -->
+   <group name="opt_group" type="operator">
+      <group-cell><queue chars="++"/></group-cell>
+      <group-cell><queue chars="--"/></group-cell>
+      <group-cell><queue chars="+="/></group-cell>
+      <group-cell><queue chars="-="/></group-cell>
+      <group-cell><queue chars="*="/></group-cell>
+      <group-cell><queue chars="/="/></group-cell>
+      <group-cell><queue chars="%="/></group-cell>
+      <group-cell><queue chars="&amp;="/></group-cell>
+      <group-cell><queue chars="&amp;&amp;"/></group-cell>
+      <group-cell><queue chars="^="/></group-cell>
+      <group-cell><queue chars="|="/></group-cell>
+      <group-cell><queue chars="||"/></group-cell>
+      <group-cell><queue chars="=="/></group-cell>
+      <group-cell><queue chars="!="/></group-cell>
+      <group-cell><queue chars="&gt;="/></group-cell>
+      <group-cell><queue chars="&lt;="/></group-cell>
+      <group-cell><queue chars="&gt;&gt;"/></group-cell>
+      <group-cell><queue chars="&lt;&lt;"/></group-cell>
+      <group-cell><node><true-set chars="!.+-*\/%&amp;^|=?:;,&gt;&lt;@"/></node></group-cell>
+   </group>
+
+   <!-- json片段 -->
+   <list name="json_part" type="Object">
+      <list-cell opt="?">
+         <list>
+            <list-cell refName="blankWithNote"/>
+            <list-cell refName="first_json"/>
+            <list-cell refName="else_json" opt="*"/>
+         </list>
+      </list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell refName="end"/>
+   </list>
+
+   <!-- json名称部分 -->
+   <group name="value_name">
+      <group-cell refName="string"/>
+      <group-cell refName="name"/>
+   </group>
+
+   <!-- json的起始部分 -->
+   <list name="first_json">
+      <list-cell refName="value_name"/>
+      <list-cell refName="blankWithNote"/>
+      <list-cell>
+         <node type="operator"><true-set chars=":"/></node>
+      </list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell refName="object_group"/>
+   </list>
+
+   <!-- json的剩余部分 -->
+   <list name="else_json">
+      <list-cell refName="blankWithNote"/>
+      <list-cell>
+         <node type="operator"><true-set chars=","/></node>
+      </list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell refName="first_json"/>
+   </list>
+
+   <!-- 文件结束标志 -->
+   <node name="end" end="true" type="operator"/>
+
+   <!-- 带注释的空白部分 -->
+   <list name="blankWithNote">
+      <list-cell opt="*">
+         <list>
+            <list-cell refName="blank"/>
+            <list-cell refName="note" opt="?"/>
+         </list>
+      </list-cell>
+   </list>
+
+   <!-- 空白部分 -->
+   <list name="blank" type="blank">
+      <list-cell opt="*">
+         <node><true-set chars=" &#x9;&#xA;&#xD;"/></node>
+      </list-cell>
+   </list>
+   <list name="blank_need" type="blank">
+      <list-cell opt="+">
+         <node><true-set chars=" &#x9;&#xA;&#xD;"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 名称 -->
+   <list name="name" type="name">
+      <list-cell>
+         <node><true-set chars="_$"/><true-range begin="a" end="z"/><true-range begin="A" end="Z"/></node>
+      </list-cell>
+      <list-cell opt="*">
+         <node><true-set chars="_$"/><true-range begin="a" end="z"/><true-range begin="A" end="Z"/><true-range begin="0" end="9"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 关键字文本 -->
+   <group name="const_text" type="text">
+      <group-cell><queue chars="true"/></group-cell>
+      <group-cell><queue chars="false"/></group-cell>
+      <group-cell><queue chars="null"/></group-cell>
+   </group>
+
+   <!-- 整型 -->
+   <list name="int" type="int">
+      <list-cell refName="digits"/>
+   </list>
+
+   <!-- 数字 -->
+   <list name="digits">
+      <list-cell opt="?">
+         <node><true-set chars="+-"/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="9"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 8进制整型 -->
+   <list name="int8" type="int8">
+      <list-cell>
+         <node><true-set chars="0"/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="7"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 16进制整型 -->
+   <list name="int16" type="int16">
+      <list-cell>
+         <node><true-set chars="0"/></node>
+      </list-cell>
+      <list-cell>
+         <node><true-set chars="xX"/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="9"/><true-range begin="a" end="f"/><true-range begin="A" end="F"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 浮点型 -->
+   <group name="float" type="float">
+      <group-cell>
+         <list>
+            <list-cell refName="digits"/>
+            <list-cell refName="float_frac" opt="?"/>
+            <list-cell refName="float_exp" opt="?"/>
+         </list>
+      </group-cell>
+      <group-cell>
+         <list>
+            <list-cell refName="float_frac"/>
+            <list-cell refName="float_exp" opt="?"/>
+         </list>
+      </group-cell>
+   </group>
+
+   <!-- 浮点型小数部分 -->
+   <list name="float_frac">
+      <list-cell>
+         <node><true-set chars="."/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="9"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 浮点型指数部分 -->
+   <list name="float_exp">
+      <list-cell>
+         <node><true-set chars="eE"/></node>
+      </list-cell>
+      <list-cell refName="digits"/>
+   </list>
+
+   <!-- 数组 -->
+   <list name="array" type="array">
+      <list-cell>
+         <node type="operator"><true-set chars="["/></node>
+      </list-cell>
+      <list-cell opt="?">
+         <list>
+            <list-cell refName="blankWithNote"/>
+            <list-cell refName="object_group"/>
+            <list-cell opt="*">
+               <list>
+                  <list-cell refName="blankWithNote"/>
+                  <list-cell>
+                     <node type="operator"><true-set chars=","/></node>
+                  </list-cell>
+                  <list-cell refName="blankWithNote"/>
+                  <list-cell refName="object_group"/>
+               </list>
+            </list-cell>
+         </list>
+      </list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell>
+         <node type="operator"><true-set chars="]"/></node>
+      </list-cell>
+   </list>
+
+   <!-- json对象 -->
+   <list name="object" type="object">
+      <list-cell>
+         <node type="operator"><true-set chars="{"/></node>
+      </list-cell>
+      <list-cell opt="?">
+         <list>
+            <list-cell refName="blankWithNote"/>
+            <list-cell refName="first_json"/>
+            <list-cell refName="else_json" opt="*"/>
+         </list>
+      </list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell>
+         <node type="operator"><true-set chars="}"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 数字 -->
+   <group name="number">
+      <group-cell refName="int16"/>
+      <group-cell refName="int8"/>
+      <group-cell refName="int"/>
+      <group-cell refName="float"/>
+   </group>
+
+   <!-- 对象组 -->
+   <group name="object_group">
+      <group-cell refName="string"/>
+      <group-cell refName="const_text"/>
+      <group-cell refName="name"/>
+      <group-cell refName="number"/>
+      <group-cell refName="array"/>
+      <group-cell refName="plus"/>
+      <group-cell refName="object"/>
+      <group-cell refName="function"/>
+   </group>
+
+   <!-- 方法定义 -->
+   <list name="function" type="expression">
+      <list-cell refName="blankWithNote"/>
+      <list-cell><queue chars="function" type="name"/></list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell><node type="operator"><true-set chars="("/></node></list-cell>
+      <list-cell refName="function_param" opt="?"/>
+      <list-cell><node type="operator"><true-set chars=")"/></node></list-cell>
+      <list-cell refName="blankWithNote"/>
+      <list-cell><node type="operator"><true-set chars="{"/></node></list-cell>
+      <list-cell refName="expression"/>
+      <list-cell><node type="operator"><true-set chars="}"/></node></list-cell>
+      <list-cell refName="blankWithNote"/>
+   </list>
+   <list name="function_param">
+      <list-cell refName="blankWithNote"/>
+      <list-cell refName="name"/>
+      <list-cell opt="*">
+         <list>
+            <list-cell refName="blankWithNote"/>
+            <list-cell><node type="operator"><true-set chars=","/></node></list-cell>
+            <list-cell refName="blankWithNote"/>
+            <list-cell refName="name"/>
+         </list>
+      </list-cell>
+      <list-cell refName="blankWithNote"/>
+   </list>
+
+   <!-- 字符串 -->
+   <group name="string" type="string">
+      <group-cell refName="string1"/>
+      <group-cell refName="string2"/>
+   </group>
+
+   <!-- 字符串1 双引号的字符串 -->
+   <list name="string1">
+      <list-cell>
+         <node type="operator"><true-set chars="&quot;"/></node>
+      </list-cell>
+      <list-cell refName="stringBody1" opt="*"/>
+      <list-cell>
+         <node type="operator"><true-set chars="&quot;"/></node>
+      </list-cell>
+   </list>
+   <list name="chars1" type="text">
+      <list-cell opt="*">
+         <node other="true">
+            <false-set chars="{&quot;\&#xA;&#xD;"/>
+         </node>
+      </list-cell>
+   </list>
+   <list name="stringBody1">
+      <list-cell refName="chars1"/>
+      <list-cell refName="escape" opt="*"/>
+      <list-cell refName="plus" opt="?"/>
+      <list-cell opt="?"><node name="chars1_p" type="text"><true-set chars="{"/></node></list-cell>
+   </list>
+
+   <!-- 字符串1 单引号的字符串 -->
+   <list name="string2">
+      <list-cell>
+         <node type="operator"><true-set chars="'"/></node>
+      </list-cell>
+      <list-cell refName="stringBody2" opt="*"/>
+      <list-cell>
+         <node type="operator"><true-set chars="'"/></node>
+      </list-cell>
+   </list>
+   <list name="chars2" type="text">
+      <list-cell opt="*">
+         <node other="true">
+            <false-set chars="{'\&#xA;&#xD;"/>
+         </node>
+      </list-cell>
+   </list>
+   <list name="stringBody2">
+      <list-cell refName="chars2"/>
+      <list-cell refName="escape" opt="*"/>
+      <list-cell refName="plus" opt="?"/>
+      <list-cell opt="?"><node name="chars2_p" type="text"><true-set chars="{"/></node></list-cell>
+   </list>
+
+   <!-- 转义符 -->
+   <list name="escape" type="escape">
+      <list-cell>
+         <node><true-set chars="\"/></node>
+      </list-cell>
+      <list-cell>
+         <group>
+            <group-cell><node><true-set chars="t"/></node></group-cell>
+            <group-cell><node><true-set chars="f"/></node></group-cell>
+            <group-cell><node><true-set chars="r"/></node></group-cell>
+            <group-cell><node><true-set chars="n"/></node></group-cell>
+            <group-cell><node><true-set chars="b"/></node></group-cell>
+            <group-cell><node><true-set chars="\"/></node></group-cell>
+            <group-cell><node><true-set chars="'"/></node></group-cell>
+            <group-cell><node><true-set chars="&quot;"/></node></group-cell>
+            <group-cell>
+               <list>
+                  <list-cell><node><true-set chars="u"/></node></list-cell>
+                  <list-cell min="4" max="4"><node><true-range begin="0" end="9"/><true-range begin="a" end="f"/><true-range begin="A" end="F"/></node></list-cell>
+               </list>
+            </group-cell>
+         </group>
+      </list-cell>
+   </list>
+
+   <!-- 资源的参数标记的解析 -->
+   <list name="resource_parser">
+      <list-cell opt="*">
+         <list>
+            <list-cell>
+               <list name="other" type="text" >
+                  <list-cell opt="*"><node other="true"><false-set chars="{"/></node></list-cell>
+               </list>
+            </list-cell>
+            <list-cell opt="?">
+               <list name="resource" type="expression">
+                  <list-cell><node type="operator"><true-set chars="{"/></node></list-cell>
+                  <list-cell>
+                     <list type="int">
+                        <list-cell min="1" max="2"><node><true-range begin="0" end="9"/></node></list-cell>
+                     </list>
+                  </list-cell>
+                  <list-cell><node type="operator"><true-set chars="}"/></node></list-cell>
+               </list>
+            </list-cell>
+            <list-cell opt="?"><node name="other" type="text"><true-set chars="{"/></node></list-cell>
+         </list>
+      </list-cell>
+      <list-cell refName="end"/>
+   </list>
+
+</grammer-config>
