@@ -18,8 +18,6 @@ package self.micromagic.cg;
 
 import java.util.Map;
 
-import self.micromagic.util.container.SynHashMap;
-
 /**
  * 定义在<code>ClassLoader</code>中, 存放缓存数据的类.
  * 这个类只是为了获取定义类二进制流使用, 通过反射定义到指定的
@@ -31,7 +29,9 @@ public class ClassKeyCache$Caches
 {
 	/**
 	 * 用于缓存数据的map.
+	 * 在ClassKeyCache$CacheCellImpl1.getCache0中初始化
+	 * new SynHashMap(8, SynHashMap.WEAK)
 	 */
-	public static Map caches = new SynHashMap(8, SynHashMap.WEAK);
+	public static Map caches;
 
 }

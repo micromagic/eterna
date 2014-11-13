@@ -208,7 +208,7 @@ public class ClassKeyCache
 		CacheCell cc = (CacheCell) caches.get(cl);
 		if (cc == null)
 		{
-			if (cl == null)
+			if (cl == null || idParentLoader(cl))
 			{
 				cc = new CacheCellImpl0();
 			}
@@ -230,6 +230,23 @@ public class ClassKeyCache
 	}
 
 	/**
+	 * 检查目标ClassLoader是否为当前的ClassLoader或父ClassLoader.
+	 */
+	private static boolean idParentLoader(ClassLoader cl)
+	{
+		ClassLoader checkCL = ClassKeyCache.class.getClassLoader();
+		do
+		{
+			if (cl == checkCL)
+			{
+				return true;
+			}
+			checkCL = checkCL.getParent();
+		} while (checkCL != null);
+		return false;
+	}
+
+	/**
 	 * 生成<code>CacheCell</code>实际存放数据的类.
 	 */
 	private static Class getCachesClass(ClassLoader loader)
@@ -248,7 +265,7 @@ public class ClassKeyCache
 		byte[] b = cachesClassDef;
 		if (b == null)
 		{
-			return CacheCellImpl0.class;
+			return Class.forName(cachesClassName);
 		}
 		Class cl = Class.forName("java.lang.ClassLoader");
 		Class[] paramTypes = {String.class, byte[].class, int.class, int.class};
@@ -406,18 +423,26 @@ public class ClassKeyCache
 				{
 					return null;
 				}
-				cache = this.getCache0(c);
+				synchronized (c)
+				{
+					cache = this.getCache0(c);
+				}
 			}
 			return cache;
 		}
 
-		private synchronized Map getCache0(Class cellClass)
+		private Map getCache0(Class cellClass)
 		{
 			try
 			{
 				// 这段代码只会执行一次, 只要类不被释放, 这个缓存也不会被释放
 				Field f = cellClass.getField("caches");
 				Map caches = (Map) f.get(null);
+				if (caches == null)
+				{
+					caches = new SynHashMap(8, SynHashMap.WEAK);
+					f.set(null, caches);
+				}
 				Map cache = (Map) caches.get(this);
 				if (cache == null)
 				{

@@ -326,7 +326,8 @@ public class TableListImpl extends AbstractTable
 	{
 		private static final String DEFAULT_BINIT = "/*DBI*/ if(typeof $E.D[eg_temp.dataName].rowCount==\"number\"){checkResult=false;checkResult=$E.D[eg_temp.dataName].names[eg_temp.srcName]!=null;}";
 		private int width = -1;
-		private boolean defaultBeforeInit = false;
+		private boolean defaultBeforeInit;
+		private boolean cloneInitParam;
 
 		public void initialize(EternaFactory factory, Component parent)
 				throws ConfigurationException
@@ -341,6 +342,16 @@ public class TableListImpl extends AbstractTable
 				this.defaultBeforeInit = true;
 				this.beforeInit = DEFAULT_BINIT;
 			}
+		}
+
+		public boolean getCloneInitParam()
+		{
+			return this.cloneInitParam;
+		}
+
+		public void setCloneInitParam(boolean clone)
+		{
+			this.cloneInitParam = clone;
 		}
 
 		protected void printSpecialTitle(Writer out, AppData data)
@@ -358,6 +369,10 @@ public class TableListImpl extends AbstractTable
 			{
 				out.write(",width:");
 				out.write(String.valueOf(this.getWidth()));
+			}
+			if (this.getCloneInitParam())
+			{
+				out.write(",cloneInitParam:1");
 			}
 			if (this.defaultBeforeInit)
 			{

@@ -69,6 +69,8 @@ public interface TableListGenerator extends ComponentGenerator
 
 		void setInitParam(String param) throws ConfigurationException;
 
+		void setCloneInitParam(boolean clone) throws ConfigurationException;
+
 		TableList.Column createColumn() throws ConfigurationException;
 
 	}

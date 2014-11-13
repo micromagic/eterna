@@ -534,6 +534,7 @@ public class ViewRuleSet extends RuleSetBase
 					new StringPropertySetter("comParam", "setComponentParam", false, false),
 					new StringPropertySetter("titleParam", "setTitleParam", false, false),
 					new StringPropertySetter("initParam", "setInitParam", false, false),
+					new BooleanPropertySetter("cloneInitParam", "setCloneInitParam", "false"),
 					new BooleanPropertySetter("ignore", "setIgnore", "false") ,
 					new StringPropertySetter("attributes", "setAttributes", false)
 				};

@@ -527,8 +527,14 @@ public class AppDataLogExecute extends AbstractExecute
 				}
 				if (this.checkAndPush(parent, value))
 				{
-					this.printCollection(parent, (Collection) value);
-					this.pop();
+					try
+					{
+						this.printCollection(parent, (Collection) value);
+					}
+					finally
+					{
+						this.pop();
+					}
 				}
 			}
 			else if (value instanceof SearchAdapter.Result)
@@ -583,8 +589,14 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("type", "Map");
 				if (this.checkAndPush(parent, value))
 				{
-					this.printMap(parent, (Map) value);
-					this.pop();
+					try
+					{
+						this.printMap(parent, (Map) value);
+					}
+					finally
+					{
+						this.pop();
+					}
 				}
 			}
 			else if (value instanceof SessionCache.Property)
@@ -599,8 +611,14 @@ public class AppDataLogExecute extends AbstractExecute
 				{
 					if (this.checkAndPush(parent, value))
 					{
-						this.printIterator(parent, (PreFetchIterator) value);
-						this.pop();
+						try
+						{
+							this.printIterator(parent, (PreFetchIterator) value);
+						}
+						finally
+						{
+							this.pop();
+						}
 					}
 				}
 				else
@@ -633,8 +651,14 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("type", "bean:" + ClassGenerator.getClassName(value.getClass()));
 				if (this.checkAndPush(parent, value))
 				{
-					this.printBean(parent, value);
-					this.pop();
+					try
+					{
+						this.printBean(parent, value);
+					}
+					finally
+					{
+						this.pop();
+					}
 				}
 			}
 			else if (value instanceof Map.Entry)
@@ -652,18 +676,24 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("type", "Array");
 				if (this.checkAndPush(parent, value))
 				{
-					char flag = value.getClass().getName().charAt(1);
-					if (flag == 'L' || flag == '[')
+					try
 					{
-						this.printObjectArray(parent, (Object[]) value);
+						char flag = value.getClass().getName().charAt(1);
+						if (flag == 'L' || flag == '[')
+						{
+							this.printObjectArray(parent, (Object[]) value);
+						}
+						else
+						{
+							// 如果是基本类型, 则转成外覆类
+							Object[] tmpArr = (Object[]) ArrayTool.wrapPrimitiveArray(1, value);
+							this.printWrapperArray(parent, tmpArr);
+						}
 					}
-					else
+					finally
 					{
-						// 如果是基本类型, 则转成外覆类
-						Object[] tmpArr = (Object[]) ArrayTool.wrapPrimitiveArray(1, value);
-						this.printWrapperArray(parent, tmpArr);
+						this.pop();
 					}
-					this.pop();
 				}
 			}
 			else if (value instanceof Character)

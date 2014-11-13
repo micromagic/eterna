@@ -16,13 +16,22 @@
 
 package self.micromagic.cg;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.sql.Connection;
+import java.sql.ResultSet;
+
+import self.micromagic.util.Utility;
+import self.micromagic.util.StringTool;
 
 /**
  * 默认的bean检测器.
@@ -56,14 +65,8 @@ class DefaultBeanChecker
 			BeanTool.beanClassNameCheckMap.put(beanClassName, Boolean.FALSE);
 			return CHECK_RESULT_NO;
 		}
-		// 实现了Collection接口的类不是bean
-		if (Collection.class.isAssignableFrom(beanClass))
-		{
-			BeanTool.beanClassNameCheckMap.put(beanClassName, Boolean.FALSE);
-			return CHECK_RESULT_NO;
-		}
-		// 实现了Map接口的类不是bean
-		if (Map.class.isAssignableFrom(beanClass))
+		// 实现了基本接口的类不是bean
+		if (isBaseType(beanClass))
 		{
 			BeanTool.beanClassNameCheckMap.put(beanClassName, Boolean.FALSE);
 			return CHECK_RESULT_NO;
@@ -104,6 +107,71 @@ class DefaultBeanChecker
 			return CHECK_RESULT_NO;
 		}
 		return CHECK_RESULT_YES;
+	}
+
+	/**
+	 * 检查目标类型是否为一些基础类型.
+	 */
+	private boolean isBaseType(Class beanClass)
+	{
+		for (int i = 0; i < baseTypeArr.length; i++)
+		{
+			if (baseTypeArr[i].isAssignableFrom(beanClass))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * 在配置中设置基础类型列表的键值.
+	 */
+	public static final String BASE_TYPE_PROPERTY = "self.micromagic.cg.baseTypes";
+
+	private static Class[] baseTypeArr;
+	static
+	{
+		// 初始化基础类型列表
+		List tmp = new ArrayList();
+		tmp.add(Collection.class);
+		tmp.add(Map.class);
+		tmp.add(Iterator.class);
+		tmp.add(InputStream.class);
+		tmp.add(Reader.class);
+		tmp.add(OutputStream.class);
+		tmp.add(Writer.class);
+		tmp.add(Connection.class);
+		tmp.add(ResultSet.class);
+		String[] tNames = {
+			"javax.servlet.ServletRequest", "javax.servlet.ServletResponse",
+			"javax.servlet.http.HttpSession"
+		};
+		for (int i = 0; i < tNames.length; i++)
+		{
+			try
+			{
+				tmp.add(Class.forName(tNames[i]));
+			}
+			catch (Throwable ex) {}
+		}
+		String s = Utility.getProperty(BASE_TYPE_PROPERTY);
+		if (s != null)
+		{
+			tNames = StringTool.separateString(s, ";,", true);
+			for (int i = 0; i < tNames.length; i++)
+			{
+				try
+				{
+					tmp.add(Class.forName(tNames[i]));
+				}
+				catch (Throwable ex)
+				{
+					CG.log.warn("Error in read base type:[" + tNames[i] + "].", ex);
+				}
+			}
+		}
+		baseTypeArr = (Class[]) tmp.toArray(new Class[0]);
 	}
 
 }

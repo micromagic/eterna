@@ -41,7 +41,8 @@ public class ResourceImpl extends AbstractGenerator
 	private static final String[] EMPTY_RESOURCE = {""};
 
 	protected String text;
-	protected boolean trimLine = false;
+	protected boolean resolve;
+	protected boolean trimLine;
 	protected Object[] resArray;
 	protected int estimateResSize = 128;
 

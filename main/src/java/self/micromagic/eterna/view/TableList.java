@@ -68,5 +68,7 @@ public interface TableList extends Component
 
 		String getInitParam() throws ConfigurationException;
 
+		boolean getCloneInitParam() throws ConfigurationException;
+
 	}
 }

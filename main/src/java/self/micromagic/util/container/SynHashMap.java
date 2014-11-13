@@ -804,7 +804,7 @@ public class SynHashMap extends AbstractMap
 
 	protected static interface Ref
 	{
-		 SynEntry getEntry();
+		SynEntry getEntry();
 
 		Object get();
 

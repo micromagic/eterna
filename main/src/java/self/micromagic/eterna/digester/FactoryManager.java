@@ -886,7 +886,7 @@ public class FactoryManager
 
 		// Register our local copy of the DTDs that we can find
 		URL url = FactoryManager.class.getClassLoader().getResource(
-				"self/micromagic/eterna/digester/eterna_1_5.dtd");
+				"self/micromagic/eterna/digester/eterna_1_6.dtd");
 		digester.register("eterna", url.toString());
 
 		digester.addRuleSet(new ShareSet());
