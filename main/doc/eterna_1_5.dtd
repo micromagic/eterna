@@ -1,0 +1,1613 @@
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!--
+	DTD for the eterna 1.5
+
+	@author micromagic@sina.com
+-->
+
+
+<!-- ========== Defined Types ============================================= -->
+
+
+<!-- "Boolean"代表一个布尔值(true or false).
+-->
+<!ENTITY % Boolean "(true|false)">
+
+
+<!-- "ClassName"代表一个完整的Java类的名称.
+-->
+<!ENTITY % ClassName "CDATA">
+
+
+<!-- "Integer"代表一个可以转换成32-bit整形的数字.
+-->
+<!ENTITY % Integer "CDATA">
+
+
+<!-- "SQLType"代表一个SQL的类型, "reader"和"parameter"将会需要设置SQL的类型.
+-->
+<!ENTITY % SQLType "(String|BigString|int|long|short|byte|double|float|Bytes|boolean|Date|Time|Datetime|Timestamp|Object|Stream|Reader|ignore)">
+
+
+<!-- "FormatType"代表一个数据格式化输出的类型, "ResultFormat"将会参照这个类型来
+     格式化输出结果.
+     可选值有: (Number|Date|boolean)
+-->
+<!ENTITY % FormatType "CDATA">
+
+
+<!-- "OperatorName"代表一个用于构成条件的操作的名称, "ConditionBuilderGenerator"将会
+     通过这个名词来构造相应的"ConditionBuilder".
+     可选值有: (isNull|notNull|equal|notEqual|large|below|notLarge|notBelow|beginWith|endWith|include|match)
+-->
+<!ENTITY % OperatorName "CDATA">
+
+
+<!-- "CBList"一个条件构造列表, 生成条件输入界面时会根据他来生成条件操作选项.
+
+     cbl_String      代表字符串的条件列表.
+
+     cbl_Other       代表非字符串(如：数值, 日期)的条件列表.
+
+     cbl_List        代表代码(如选项代码)的条件列表.
+
+     可选值有: (cbl_String|cbl_Other|cbl_List)
+-->
+<!ENTITY % CBList "CDATA">
+
+
+<!-- "CB"一个条件构造器, 用于根据列名和值生成一个条件.
+     可选值有: (equal|notEqual|include|beginWith|endWith|match|large|below|notBelow|notLarge)
+-->
+<!ENTITY % CB "CDATA">
+
+
+<!-- "Transaction"事物处理的类型.
+
+     requared        如果已有事务就加入现有的事务, 如果没有就新建一个事务.
+
+     new             无论是否已有事务, 都新建一个事务.
+
+     hold            由业务自己管理数据库链接的释放, 此数据库链接的事务设为自动提交.
+                     注: 业务中必须设置接管了数据库链接的标志, 这样这个链接才不会被提前释放.
+                     设置样例(data为self.micromagic.eterna.model.AppData的实例):
+                     data.addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, "1");
+
+     none            创建一个新的数据库链接的事务设为自动提交.
+
+     notNeed         不需要创建一个新的数据库链接.
+
+     idel            创建一个新的数据库链接, 不设置事务是否自动提交.
+
+-->
+<!ENTITY % Transaction "(requared|new|hold|none|notNeed|idel)">
+
+
+<!-- "CountType"查询时计算总记录数的方式.
+
+     none          不计算总记录数.
+
+     auto          自动计算总记录数.
+
+     count         生成查询语句计算总记录数.
+
+-->
+<!ENTITY % CountType "(none|auto|count)">
+
+
+<!-- "Position"事物处理的类型.
+     可选值有: (servlet|portletAction|portletRender|special|model|other1|other2|other3)
+     如果有多个值, 之间用","分隔
+-->
+<!ENTITY % Positions "CDATA">
+
+
+<!-- "DataType"数据输出的类型.
+
+     web        输出展现的页面.
+
+     all        输出框架结构的所有数据.
+
+     data       仅输出数据部分.
+
+     REST       去除框架的数据结构, 仅保留数据部分, 可以作为REST的返回值.
+
+-->
+<!ENTITY % DataType "(web|all|data|REST)">
+
+
+<!-- ========== memos ===================================================== -->
+
+<!--
+注1: 排序规则的书写
+出现的顺序按名称出现的顺序用","分隔.
+特殊符号:
+$parent[:number], 代表将第几个父对象的名称顺序排在所在位置, 默认为第一个
+$gap[:n], 代表在所在位置开始将未指定的对象填入n个, 默认为一个
+-->
+
+<!--
+注2:
+数据位置的说明
+request-parameter[:name]
+request-attribute[:name]
+session-attribute[:name]
+data[:name]
+stack[:pop|peek[-index]]
+cache[:index]
+
+转化规则
+getFirstRow
+getNext
+getFirstString
+getFormated:name
+getObject:name
+getMapValue:name
+toResultIterator
+toIterator
+toArray[:seprate]
+toString
+toInteger
+toLong
+toDouble
+toTime
+toDate
+toDatetime
+class:className
+
+-->
+
+<!-- ========== Top Level Elements ======================================== -->
+
+
+<!-- "eterna-config"是这个配置文件的根元素, 并且嵌套了factory的配置元素.
+
+-->
+<!ELEMENT eterna-config  (factory)>
+<!ATTLIST eterna-config  id             ID              #IMPLIED>
+
+
+<!-- "attributes"元素代表属性的集合.
+     注: 在一个factory中, 后设置的属性会覆盖前面的属性, 也就是说
+     如果两个文件中factory下有同名的属性, 后一个文件的属性才会生效.
+-->
+<!ELEMENT attributes  (attribute*)>
+<!ATTLIST attributes  id             ID              #IMPLIED>
+
+
+<!-- "attribute"元素代表某个属性.
+
+     name            属性的名称.
+
+     value           属性的值, 如果设为"$useBodyText", 则值设在body中.
+-->
+<!ELEMENT attribute  (#PCDATA)>
+<!ATTLIST attribute  id             ID              #IMPLIED>
+<!ATTLIST attribute  name           CDATA           #REQUIRED>
+<!ATTLIST attribute  value          CDATA           #REQUIRED>
+
+
+<!-- "objs"元素代表所有对象的集合.
+-->
+<!ELEMENT objs  ((constant | vpc | format | query | update | reader-manager | parameter-group | builder | builder-list | search | model | export | view | typical-component | typical-replacement | function | resource | data-printer)*)>
+<!ATTLIST objs  id             ID              #IMPLIED>
+
+
+<!-- "factory"元素描述了用于构造所有对象的工厂.
+
+     type            指定构造工厂的类型, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.share.EternaFactory"]
+-->
+<!ELEMENT factory  (objs?, attributes?, special-log?, search-manager?, model-caller?, string-coder?, user-manager?, data-source-manager?)>
+<!ATTLIST factory  id             ID              #IMPLIED>
+<!ATTLIST factory  type           %ClassName;     #IMPLIED>
+
+
+<!-- "user-manager"元素用于具体描述"UserManager"对象的实现类.
+
+     className       指定"UserManager"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.security.UserManager"]
+-->
+<!ELEMENT user-manager  EMPTY>
+<!ATTLIST user-manager  id             ID                #IMPLIED>
+<!ATTLIST user-manager  className      %ClassName;       #REQUIRED>
+
+
+<!-- "data-source-manager"元素用于具体描述"DataSourceManager"对象的实现类.
+
+     className       指定"DataSourceManager"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.share.DataSourceManager"]
+
+     defaultName     指定默认数据源的名称.
+
+-->
+<!ELEMENT data-source-manager  (data-source+)>
+<!ATTLIST data-source-manager  id             ID                #IMPLIED>
+<!ATTLIST data-source-manager  className      %ClassName;       #IMPLIED>
+<!ATTLIST data-source-manager  defaultName    CDATA             #REQUIRED>
+
+
+<!-- "data-source"元素用于具体描述"DataSourceManager"对象中的DataSource配置.
+
+     java.naming.factory.initial     指定初始化javax.naming.InitialContext的初始化工厂.
+
+     节点的body为SataSource的配置文本, 格式如下:
+     [名称1]=[jndiName1];[名称2]=[jndiName2];...
+
+-->
+<!ELEMENT data-source  (#PCDATA)>
+<!ATTLIST data-source  id                              ID                #IMPLIED>
+<!ATTLIST data-source  java.naming.factory.initial     %ClassName;       #IMPLIED>
+
+
+<!-- "constant"元素代表一个常量值.
+
+     name            常量的名称.
+
+     value           常量的值.
+-->
+<!ELEMENT constant  (#PCDATA)>
+<!ATTLIST constant  id             ID              #IMPLIED>
+<!ATTLIST constant  name           CDATA           #REQUIRED>
+<!ATTLIST constant  value          CDATA           #REQUIRED>
+
+
+<!-- "vpc"元素代表一个数据准备生成器.
+
+     name            数据准备生成器的名称.
+
+     generator       数据准备生成器的实现类, 必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.ValuePreparerCreaterGenerator"]
+-->
+<!ELEMENT vpc  (attribute*)>
+<!ATTLIST vpc  id             ID              #IMPLIED>
+<!ATTLIST vpc  name           CDATA           #REQUIRED>
+<!ATTLIST vpc  generator      %ClassName;     #IMPLIED>
+
+
+<!-- "special-log"元素用于具体描述"SpecialLog"对象的实现类.
+
+     className       指定"SpecialLog"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.SpecialLog"]
+-->
+<!ELEMENT special-log  EMPTY>
+<!ATTLIST special-log  id             ID                #IMPLIED>
+<!ATTLIST special-log  className      %ClassName;       #REQUIRED>
+
+
+<!-- "format"元素用于具体描述一个"ResultFormat"对象.
+
+     name            "ResultFormat"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator       如果指定了"ResultFormat"的构造器, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.ResultFormatGenerator"]
+
+     type            格式化输出的类型.
+
+     pattern         格式化输出的模式, 如: 对于Number可设置(#,000.00).
+-->
+<!ELEMENT format  (pattern?, attribute*)>
+<!ATTLIST format  id             ID              #IMPLIED>
+<!ATTLIST format  name           CDATA           #REQUIRED>
+<!ATTLIST format  generator      %ClassName;     #IMPLIED>
+<!ATTLIST format  type           %FormatType;    #REQUIRED>
+<!ATTLIST format  pattern        CDATA           #IMPLIED>
+
+
+
+<!-- "pattern"代表format的格式化输出的模式.
+     如果即设置了子节点, 又设置了pattern属性, 则取属性中设置的值.
+
+     trimLine           设为"true"可以去除模式语句每一行中两边的控制符,
+                        默认值为"true".
+-->
+<!ELEMENT pattern  (#PCDATA)>
+<!ATTLIST pattern  id             ID              #IMPLIED>
+<!ATTLIST pattern  trimLine       %Boolean;       #IMPLIED>
+
+
+<!-- "reader-manager"元素代表一个"ResultReaderManager"对象.
+
+     name            "ResultReaderManager"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     parent          "ResultReaderManager"的父对象.
+
+     readerOrder     reader的排序规则, 具体规则见"注1".
+
+     className       "ResultReaderManager"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.ResultReaderManager"]
+-->
+<!ELEMENT reader-manager  (reader*)>
+<!ATTLIST reader-manager  id             ID              #IMPLIED>
+<!ATTLIST reader-manager  name           CDATA           #REQUIRED>
+<!ATTLIST reader-manager  parent         CDATA           #IMPLIED>
+<!ATTLIST reader-manager  readerOrder    CDATA           #IMPLIED>
+<!ATTLIST reader-manager  className      %ClassName;     #IMPLIED>
+
+
+<!-- "parameter-group"元素代表一个"SQLParameterGroup"对象.
+
+     name            "SQLParameterGroup"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     className       "SQLParameterGroup"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.SQLParameterGroup"]
+-->
+<!ELEMENT parameter-group  (parameter*)>
+<!ATTLIST parameter-group  id             ID              #IMPLIED>
+<!ATTLIST parameter-group  name           CDATA           #REQUIRED>
+<!ATTLIST parameter-group  className      %ClassName;     #IMPLIED>
+
+
+<!-- "query"元素用于具体描述一个"QueryAdapter"对象.
+
+     name            "QueryAdapter"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     logType         为这个query单独设定sql日志记录的方式.
+                     可选的类型有: save, print, special, none
+                     注: none为最高级别, 设置了none就会忽略其他的
+
+     generator       指定"QueryAdapter"的构造器, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.QueryAdapterGenerator"]
+
+     forwardOnly     标识此SQL查询的结果集是否只能向前滚动, 默认值为"true".
+
+     orderIndex      如果此SQL查询有排序相关的子语句, 则可在这设置排序子语句所在
+                     的索引值.
+-->
+<!ELEMENT query  (prepared-sql, parameters?, readers?, attribute*)>
+<!ATTLIST query  id             ID              #IMPLIED>
+<!ATTLIST query  name           CDATA           #REQUIRED>
+<!ATTLIST query  logType        CDATA           #IMPLIED>
+<!ATTLIST query  generator      %ClassName;     #IMPLIED>
+<!ATTLIST query  forwardOnly    %Boolean;       #IMPLIED>
+<!ATTLIST query  orderIndex     %Integer;       #IMPLIED>
+
+
+<!-- "update"元素用于具体描述一个"UpdateAdapter"对象.
+
+     name            "UpdateAdapter"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     logType         为这个update单独设定sql日志记录的方式.
+                     可选的类型有: save, print, special, none
+                     注: none为最高级别, 设置了none就会忽略其他的
+
+     generator       指定"UpdateAdapter"的构造器, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.UpdateAdapterGenerator"]
+-->
+<!ELEMENT update  (prepared-sql, parameters?, attribute*)>
+<!ATTLIST update  id             ID              #IMPLIED>
+<!ATTLIST update  name           CDATA           #REQUIRED>
+<!ATTLIST update  logType        CDATA           #IMPLIED>
+<!ATTLIST update  generator      %ClassName;     #IMPLIED>
+
+
+<!-- "prepared-sql"元素代表"QueryAdapter"和"UpdateAdapter"所使用的预备SQL语句,
+     SQL语句可写在他的正文体中.
+
+     trimLine           设为"true"可以去除SQL语句每一行中两边的控制符,
+                        默认值为"true".
+
+     noLine             设为"true"可以获得没有换行的SQL语句, 默认值为"false".
+-->
+<!ELEMENT prepared-sql  (#PCDATA)>
+<!ATTLIST prepared-sql  id              ID              #IMPLIED>
+<!ATTLIST prepared-sql  trimLine        %Boolean;       #IMPLIED>
+<!ATTLIST prepared-sql  noLine          %Boolean;       #IMPLIED>
+
+
+<!-- "parameters"元素代表参数的集合.
+-->
+<!ELEMENT parameters  ((parameter | parameter-ref)*)>
+<!ATTLIST parameters  id              ID              #IMPLIED>
+
+
+<!-- "parameter"元素描述了预备SQL语句中的一个参数的名称.
+
+     name            参数的名称, 你可以用这个名称来设置参数.
+
+     colName         参数对应的数据库列名, 默认为参数的名称.
+
+     index           预备SQL语句中相应参数的索引值, 如果没有指定则索引
+                     是前一个索引值加1.
+
+     type            参数的类型.
+
+     vpcName         对应数据准备生成器vpn的名称.
+-->
+<!ELEMENT parameter  (attribute*)>
+<!ATTLIST parameter  id              ID              #IMPLIED>
+<!ATTLIST parameter  name            CDATA           #REQUIRED>
+<!ATTLIST parameter  colName         CDATA           #IMPLIED>
+<!ATTLIST parameter  type            %SQLType;       #IMPLIED>
+<!ATTLIST parameter  vpcName         CDATA           #IMPLIED>
+
+
+<!-- "parameter-ref"元素描述了预备SQL语句中对一个参数组的引用.
+
+     groupName       参数组的名称.
+
+     ignoreList      忽略该参数组中的哪些名称.
+-->
+<!ELEMENT parameter-ref  EMPTY>
+<!ATTLIST parameter-ref  id              ID              #IMPLIED>
+<!ATTLIST parameter-ref  groupName       CDATA           #REQUIRED>
+<!ATTLIST parameter-ref  ignoreList      CDATA           #IMPLIED>
+
+
+<!-- "readers"元素代表"ResultReader"对象的集合.
+
+     baseReaderManager   表示本"ResultReader"的集合是在哪些"ResultReaderManager"
+                         的基础上扩展.
+
+     readerOrder         reader的排序规则, 具体规则见"注1".
+-->
+<!ELEMENT readers  (reader*)>
+<!ATTLIST readers  id                   ID      #IMPLIED>
+<!ATTLIST readers  baseReaderManager    CDATA   #IMPLIED>
+<!ATTLIST readers  readerOrder          CDATA   #IMPLIED>
+
+
+<!-- "reader"元素用于具体描述一个"ResultReader"对象.
+
+     name            "ResultReader"的名称, 它在同一个"QueryAdapter"中必须是唯一的.
+
+     type            指定所读取的结果的类型, 仅当"generator"没有指定时才合法.
+
+     generator       仅当"type"没有指定时才合法, 如果指定了"ResultReader"的构造器,
+                     这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.sql.ResultReaderGenerator"]
+
+     colName         指定要读取的结果的列名, 仅当"colIndex"没有指定时才合法.
+
+     colIndex        指定要读取结果的索引值, 仅当"colName"没有指定时才合法.
+
+     format          指定所使用的格式化输出"ResultFormat"的名称.
+
+     orderName       在SQL的排序子句中出现时的名称.
+
+     caption         该列的标题(在用到表格输出模块时会使用).
+
+     width           该列的宽度(在用到表格输出模块时会使用).
+
+     htmlFilter      是否要对值进行html的过滤, 默认为"true"(在用到表格输出模块
+                     时会使用).
+
+     permissions     设置可以读取该列的权限列表(分割符为","), 只要其中的一个
+                     权限符合就会读取.
+
+     visible         是否在自动生成界面时可见.
+-->
+<!ELEMENT reader  (attribute*)>
+<!ATTLIST reader  id              ID                #IMPLIED>
+<!ATTLIST reader  name            CDATA             #REQUIRED>
+<!ATTLIST reader  type            %SQLType;         #IMPLIED>
+<!ATTLIST reader  generator       %ClassName;       #IMPLIED>
+<!ATTLIST reader  colName         CDATA             #IMPLIED>
+<!ATTLIST reader  colIndex        %Integer;         #IMPLIED>
+<!ATTLIST reader  format          CDATA             #IMPLIED>
+<!ATTLIST reader  orderName       CDATA             #IMPLIED>
+<!ATTLIST reader  caption         CDATA             #IMPLIED>
+<!ATTLIST reader  width           %Integer;         #IMPLIED>
+<!ATTLIST reader  htmlFilter      %Boolean;         #IMPLIED>
+<!ATTLIST reader  permissions     CDATA             #IMPLIED>
+<!ATTLIST reader  visible         %Boolean;         #IMPLIED>
+
+
+<!-- "builder"元素用于具体描述一个"ConditionBuilder"对象.
+
+     name            "ConditionBuilder"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator       指定"ConditionBuilder"的构造器, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.search.ConditionBuilderGenerator"]
+
+     caption         该条件构造器的标题(自动生成条件输入界面时会使用).
+
+     operator        构成条件的操作.
+-->
+<!ELEMENT builder  (attribute*)>
+<!ATTLIST builder  id             ID                #IMPLIED>
+<!ATTLIST builder  name           CDATA             #REQUIRED>
+<!ATTLIST builder  caption        CDATA             #IMPLIED>
+<!ATTLIST builder  generator      %ClassName;       #IMPLIED>
+<!ATTLIST builder  operator       %OperatorName;    #IMPLIED>
+
+
+<!-- "builder-list"元素用于具体描述"ConditionBuilder"对象的列表.
+
+     name            "ConditionBuilder"列表的名称, 它在同一个"Factory"中必须是唯一的.
+-->
+<!ELEMENT builder-list  (builder-name*)>
+<!ATTLIST builder-list  id             ID                #IMPLIED>
+<!ATTLIST builder-list  name           CDATA             #REQUIRED>
+
+
+<!-- "builder-name"元素用于具体描述"builder-list"中对应的每个 "ConditionBuilder"
+      对象的名称.
+
+     name            指定的"ConditionBuilder"对象的名称.
+-->
+<!ELEMENT builder-name  EMPTY>
+<!ATTLIST builder-name  id             ID                #IMPLIED>
+<!ATTLIST builder-name  name           CDATA             #REQUIRED>
+
+
+<!-- "search-manager"元素用于具体描述"SearchManager"对象的实现类.
+
+     generator       指定"SearchManager"的构造器, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.search.SearchManagerGenerator"]
+-->
+<!ELEMENT search-manager  (attribute*)>
+<!ATTLIST search-manager  id             ID                #IMPLIED>
+<!ATTLIST search-manager  generator      %ClassName;       #REQUIRED>
+
+
+<!-- "search"元素用于具体描述一个"SearchAdapter"对象.
+
+     name               "SearchAdapter"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator          指定"SearchAdapter"的构造器, 这个类必须实现下面这个接口.
+                        ["self.micromagic.eterna.search.SearchAdapterGenerator"]
+
+     pageSize           读取结果时, 每一页读取的记录数.
+
+     queryName          执行查询时, 所要使用的"QueryAdapter"对象的名称.
+                        如果设为"$none", 则表示此search不需要执行.
+
+     countType          计算总记录数的方式, 默认为"auto"(自动计算),
+                        其他方式有"none"(不计算总记录数), "count"(通过生成查询语句计算).
+                        另外, 还可以按search:[searchName],[readerName]的格式设置用于计算
+                        总记录数的search.
+
+     searchManager      使用的"SearchManager"对象的名称, 每个SearchAdapter在查询时
+                        都会生成一个"SearchManager"对象, 并将其放入Session中, 这个
+                        属性就可以设置它放入Session的名称.
+                        注: 不同配置体系下设置了相同的searchManager的名称, 那这两个
+                        search也会使用相同的searchManager.
+
+     specialCondition   是否是特殊的条件, 需要重新构造的条件子语句, 默认为"false".
+
+     needWrap           是否需要在条件外面带上括号"(", ")", 默认为"true".
+
+     conditionIndex     此SQL查询中条件子语句所在的索引值, 默认值为"1".
+                        如果将其设为"0", 表示没有条件子句.
+-->
+<!ELEMENT search  (other-search-manager?, condition-propertys?, column-setting?, parameter-setting?, attribute*)>
+<!ATTLIST search  id                ID              #IMPLIED>
+<!ATTLIST search  name              CDATA           #REQUIRED>
+<!ATTLIST search  generator         %ClassName;     #IMPLIED>
+<!ATTLIST search  pageSize          %Integer;       #IMPLIED>
+<!ATTLIST search  queryName         CDATA           #REQUIRED>
+<!ATTLIST search  countType         CDATA           #IMPLIED>
+<!ATTLIST search  searchManager     CDATA           #IMPLIED>
+<!ATTLIST search  specialCondition  %Boolean;       #IMPLIED>
+<!ATTLIST search  needWrap          %Boolean;       #IMPLIED>
+<!ATTLIST search  conditionIndex    %Integer;       #IMPLIED>
+
+
+<!-- "other-search-manager"元素代表其他"search"对象的集合.
+     用于分布式条件查询的时候使用.
+
+     otherName        其他"search"对象的名称.
+
+     propertyOrder    property的排序规则, 具体规则见"注1".
+-->
+<!ELEMENT other-search-manager  EMPTY>
+<!ATTLIST other-search-manager  id                 ID      #IMPLIED>
+<!ATTLIST other-search-manager  otherName          CDATA   #IMPLIED>
+<!ATTLIST other-search-manager  propertyOrder      CDATA   #IMPLIED>
+
+
+<!-- "condition-propertys"元素代表"ConditionProperty"对象的集合.
+
+     parent           表示本"property"的集合是在哪些"search"的"property"集合
+                      的基础上扩展.
+
+     propertyOrder    property的排序规则, 具体规则见"注1".
+-->
+<!ELEMENT condition-propertys  (condition-property*)>
+<!ATTLIST condition-propertys  id                 ID      #IMPLIED>
+<!ATTLIST condition-propertys  parent             CDATA   #IMPLIED>
+<!ATTLIST condition-propertys  propertyOrder      CDATA   #IMPLIED>
+
+
+<!-- "condition-property"元素用于具体描述一个"ConditionProperty"对象.
+
+     generator            指定"ConditionProperty"的构造器, 这个类必须实现下面这个接口.
+                          ["self.micromagic.eterna.search.ConditionPropertyGenerator"]
+
+     name                 条件配置属性的名称, 它在同一个"SearchAdapter"中必须是唯一的.
+
+     colName              构成一个条件列名, 如果对应的查询语句中存在多个表的并且有重复列名
+                          的话, 请以[表名].[列名]的形式书写.
+
+     caption              条件的标题(生成条件输入界面时会使用).
+
+     colType              该条件的数据类型.
+
+     vpcName              对应数据准备生成器vpn的名称.
+
+     inputType            该条件的输入类型.
+
+     defaultValue         当没有条件时使用的默认条件.
+
+     defaultBuilder       默认使用的"ConditionBuilder"对象的名称.
+
+     useDefaultBuilder    是否强制使用默认的"ConditionBuilder", 默认为"false".
+
+     builderList          可使用的"ConditionBuilder"对象列表(生成条件输入界面时会使用).
+
+     permissions          可设置该条件的权限列表(分割符为","), 只要其中的一个权限符合
+                          就可设置该条件.
+
+     visible              是否在自动生成界面时可见.
+-->
+<!ELEMENT condition-property  (attribute*)>
+<!ATTLIST condition-property  id                ID                #IMPLIED>
+<!ATTLIST condition-property  name              CDATA             #REQUIRED>
+<!ATTLIST condition-property  generator         %ClassName;       #IMPLIED>
+<!ATTLIST condition-property  colName           CDATA             #IMPLIED>
+<!ATTLIST condition-property  caption           CDATA             #IMPLIED>
+<!ATTLIST condition-property  colType           %SQLType;         #REQUIRED>
+<!ATTLIST condition-property  vpcName           CDATA             #IMPLIED>
+<!ATTLIST condition-property  inputType         CDATA             #IMPLIED>
+<!ATTLIST condition-property  defaultValue      CDATA             #IMPLIED>
+<!ATTLIST condition-property  defaultBuilder    %CB;              #IMPLIED>
+<!ATTLIST condition-property  useDefaultBuilder %Boolean;         #IMPLIED>
+<!ATTLIST condition-property  builderList       %CBList;          #IMPLIED>
+<!ATTLIST condition-property  permissions       CDATA             #IMPLIED>
+<!ATTLIST condition-property  visible           %Boolean;         #IMPLIED>
+
+
+<!-- "column-setting"元素代表获取相关列设置时所使用的类.
+
+     className       指定获取列设置所使用的类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.search.ColumnSetting"]
+
+     columnType      列设置的类型, 读取列设置时将通过他来区分不同类型的列设置.
+-->
+<!ELEMENT column-setting  EMPTY>
+<!ATTLIST column-setting  id              ID            #IMPLIED>
+<!ATTLIST column-setting  className       %ClassName;   #REQUIRED>
+<!ATTLIST column-setting  columnType      CDATA         #REQUIRED>
+
+
+<!-- "parameter-setting"元素代表需要设置其它参数时所使用的类.
+
+     className       指定需要设置其它参数时所使用的类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.search.ParameterSetting"]
+-->
+<!ELEMENT parameter-setting  EMPTY>
+<!ATTLIST parameter-setting  id              ID            #IMPLIED>
+<!ATTLIST parameter-setting  className       %ClassName;   #REQUIRED>
+
+
+<!-- "export"元素代表代表一个业务的出口.
+
+     name           "export"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     modelName      指定转到下一个"model"的名称. 如果指定了modelName, 则不可指定
+                    viewName, path, redirect.
+
+     path           指定业务出口的页面, 如果指定了path则不可指定modelName. 另外
+                    modelName和path必须指定一个.
+
+     viewName       指定出口所使用的"view"对象.
+
+     errorExport    业务出口是否是一个出错的处理出口, 默认为"false".
+
+     redirect       业务出口是否需要redirect, 默认为"false".
+
+-->
+<!ELEMENT export  EMPTY>
+<!ATTLIST export  id              ID            #IMPLIED>
+<!ATTLIST export  name            CDATA         #REQUIRED>
+<!ATTLIST export  modelName       CDATA         #IMPLIED>
+<!ATTLIST export  path            CDATA         #IMPLIED>
+<!ATTLIST export  viewName        CDATA         #IMPLIED>
+<!ATTLIST export  errorExport     %Boolean;     #IMPLIED>
+<!ATTLIST export  redirect        %Boolean;     #IMPLIED>
+
+
+<!-- "model-caller"元素用于具体描述"ModelCaller"对象的实现类.
+
+     className       指定"ModelCaller"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.model.ModelCaller"]
+-->
+<!ELEMENT model-caller  EMPTY>
+<!ATTLIST model-caller  id             ID                #IMPLIED>
+<!ATTLIST model-caller  className      %ClassName;       #REQUIRED>
+
+
+<!-- "model"元素代表代表一个业务.
+
+     name              "ModelAdapter"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator         指定"ModelAdapter"的构造器, 这个类必须实现下面这个接口.
+                       ["self.micromagic.eterna.model.ModelAdapterGenerator"]
+
+     keepCaches        是否需要保持所有的cache, 在退出这个model后和进入model前
+                       一致, 默认为"false".
+
+     needFrontModel    是否需要执行前置model, 默认为"true".
+
+     frontModelName    需要执行前置model的名称, 只有needFrontModel为"true"时,
+                       这个属性才有效.
+                       注: frontModel在一次完整的model请求期间只会执行一次.
+
+     modelExportName   指定业务的正常出口.
+
+     errorExportName   指定业务的异常(或出错处理)出口.
+
+     transactionType   业务的事务处理方式, 默认为"requared".
+
+     dataSourceName    使用的数据源名称.
+
+     positions         可执行此业务的位置, 默认为"servlet"和"portletRender".
+
+-->
+<!ELEMENT model  (attribute*, (execute | update-execute | query-execute | trans-execute | search-execute | model-execute | check-execute)*)>
+<!ATTLIST model  id               ID              #IMPLIED>
+<!ATTLIST model  name             CDATA           #REQUIRED>
+<!ATTLIST model  generator        %ClassName;     #IMPLIED>
+<!ATTLIST model  keepCaches       %Boolean;       #IMPLIED>
+<!ATTLIST model  needFrontModel   %Boolean;       #IMPLIED>
+<!ATTLIST model  frontModelName   CDATA           #IMPLIED>
+<!ATTLIST model  modelExportName  CDATA           #IMPLIED>
+<!ATTLIST model  errorExportName  CDATA           #IMPLIED>
+<!ATTLIST model  transactionType  %Transaction;   #IMPLIED>
+<!ATTLIST model  dataSourceName   CDATA           #IMPLIED>
+<!ATTLIST model  positions        %Positions;     #IMPLIED>
+
+
+<!-- "execute"元素代表代表一个自定义的业务执行.
+
+     name              "execute"的名称.
+
+     generator         指定"execute"的构造器, 这个类必须实现下面这两个接口.
+                       ["self.micromagic.eterna.model.Execute"]
+                       ["self.micromagic.eterna.share.Generator"]
+
+-->
+<!ELEMENT execute  (attribute*)>
+<!ATTLIST execute  id               ID              #IMPLIED>
+<!ATTLIST execute  name             CDATA           #REQUIRED>
+<!ATTLIST execute  generator        %ClassName;     #IMPLIED>
+
+
+<!-- "update-execute"元素代表代表一个"update"的业务执行.
+
+     updateName        需执行的"update"的名称.
+
+     generator         指定"execute"的构造器, 这个类必须实现下面这个接口.
+                       ["self.micromagic.eterna.model.UpdateExecuteGenerator"]
+
+     sqlCache          生成的"update"对象存放在第几个"cache"中.
+
+     doExecute         是否要执行这个"update", 默认为"true".
+
+     multiType         是否以批量语句的方式执行更新, 默认为"false".
+
+     pushResult        是否要将执行结果压入堆栈, 默认为"false".
+
+-->
+<!ELEMENT update-execute  (param-bind*)>
+<!ATTLIST update-execute  id               ID              #IMPLIED>
+<!ATTLIST update-execute  updateName       CDATA           #REQUIRED>
+<!ATTLIST update-execute  generator        %ClassName;     #IMPLIED>
+<!ATTLIST update-execute  sqlCache         %Integer;       #IMPLIED>
+<!ATTLIST update-execute  doExecute        %Boolean;       #IMPLIED>
+<!ATTLIST update-execute  multiType        %Boolean;       #IMPLIED>
+<!ATTLIST update-execute  pushResult       %Boolean;       #IMPLIED>
+
+
+<!-- "query-execute"元素代表代表一个"query"的业务执行.
+
+     queryName         需执行的"query"的名称.
+
+     generator         指定"execute"的构造器, 这个类必须实现下面这个接口.
+                       ["self.micromagic.eterna.model.UpdateExecuteGenerator"]
+
+     sqlCache          生成的"query"对象存放在第几个"cache"中.
+
+     doExecute         是否要执行这个"query", 默认为"true".
+
+     start             从第几条记录开始取结果集, 默认为"1".
+
+     count             总共取几条记录, 默认为"-1"(取全部记录).
+
+     countType         计算总记录数的方式, 默认为"none"(不计算总记录数),
+                       其他方式有"auto"(自动计算), "count"(通过生成查询语句计算).
+
+     pushResult        是否要将执行结果压入堆栈, 默认为"true".
+
+-->
+<!ELEMENT query-execute  (param-bind*)>
+<!ATTLIST query-execute  id               ID              #IMPLIED>
+<!ATTLIST query-execute  queryName        CDATA           #REQUIRED>
+<!ATTLIST query-execute  generator        %ClassName;     #IMPLIED>
+<!ATTLIST query-execute  sqlCache         %Integer;       #IMPLIED>
+<!ATTLIST query-execute  doExecute        %Boolean;       #IMPLIED>
+<!ATTLIST query-execute  start            %Integer;       #IMPLIED>
+<!ATTLIST query-execute  count            %Integer;       #IMPLIED>
+<!ATTLIST query-execute  countType        %CountType;     #IMPLIED>
+<!ATTLIST query-execute  doExecute        %Boolean;       #IMPLIED>
+<!ATTLIST query-execute  pushResult       %Boolean;       #IMPLIED>
+
+
+<!-- "param-bind"元素代表代表一个数据库业务执行的一个参数绑定规则.
+
+     src               参数的来源, 具体说明见"注2".
+
+     generator         指定"param-bind"的构造器, 这个类必须实现下面这个接口.
+                       ["self.micromagic.eterna.model.ParamBindGenerator"]
+
+     names             要设置绑定参数的名称列表.
+
+     loop              是否要执循环执行, 默认为"false".
+
+     subSQL            是否是设置sql子语句, 默认为"false".
+
+-->
+<!ELEMENT param-bind  EMPTY>
+<!ATTLIST param-bind  id            ID              #IMPLIED>
+<!ATTLIST param-bind  src           CDATA           #REQUIRED>
+<!ATTLIST param-bind  generator     %ClassName;     #IMPLIED>
+<!ATTLIST param-bind  names         CDATA           #IMPLIED>
+<!ATTLIST param-bind  loop          %Boolean;       #IMPLIED>
+<!ATTLIST param-bind  subSQL        %Boolean;       #IMPLIED>
+
+
+<!-- "trans-execute"元素代表代表一个数据转移的业务执行.
+
+     generator         指定"execute"的构造器, 这个类必须实现下面这个接口.
+                       ["self.micromagic.eterna.model.TransExecuteGenerator"]
+
+     from              数据转移的来源, 具体说明见"注2".
+
+     removeFrom        是否要将数据从来源中移除.
+
+     pushResult        是否要将执行结果压入堆栈, 默认为"false".
+
+     mustExist         是否必须要存在数据.
+
+     opt               数据的转化规则, 具体说明见"注2"..
+
+     to                数据转移的去向.
+
+-->
+<!ELEMENT trans-execute  EMPTY>
+<!ATTLIST trans-execute  id               ID              #IMPLIED>
+<!ATTLIST trans-execute  generator        %ClassName;     #IMPLIED>
+<!ATTLIST trans-execute  from             CDATA           #REQUIRED>
+<!ATTLIST trans-execute  removeFrom       %Boolean;       #IMPLIED>
+<!ATTLIST trans-execute  pushResult       %Boolean;       #IMPLIED>
+<!ATTLIST trans-execute  mustExist        %Boolean;       #IMPLIED>
+<!ATTLIST trans-execute  opt              CDATA           #IMPLIED>
+<!ATTLIST trans-execute  to               CDATA           #IMPLIED>
+
+
+<!-- "search-execute"元素代表代表一个"search"的业务执行.
+
+     generator            指定"execute"的构造器, 这个类必须实现下面这个接口.
+                          ["self.micromagic.eterna.model.SearchExecuteGenerator"]
+
+     searchName           需执行的"search"的名称.
+
+     searchCache          生成的"search"对象存放在第几个"cache"中.
+
+     searchNameTag        如果是传入search的名称, 对应在request-parameter或request-attribute
+                          中的名称, 默认为"searchName".
+
+     queryResultName      查询结果放入data中使用的名称, 默认为"queryResult".
+
+     searchManagerName    查询使用的searchManager放入data中使用的名称, 默认为"searchManager".
+
+     searchCountName      总记录数查询结果放入data中使用的名称, 默认为"searchCount".
+
+     saveCondition        是否要将查询条件保存成对象, 默认为"true".
+
+     forceSetParam        是否要强制根据参数来设置查询条件, 默认为"false".
+
+     start                查询结果的起始行数.
+
+     count                查询结果的取值个数.
+
+     holdConnection       设置是否以保持数据库链接的方式查询, 默认为"false".
+
+     doExecute            是否要执行这个"search", 默认为"true".
+
+-->
+<!ELEMENT search-execute  EMPTY>
+<!ATTLIST search-execute  id                 ID              #IMPLIED>
+<!ATTLIST search-execute  generator          %ClassName;     #IMPLIED>
+<!ATTLIST search-execute  searchName         CDATA           #IMPLIED>
+<!ATTLIST search-execute  searchCache        %Integer;       #IMPLIED>
+<!ATTLIST search-execute  searchNameTag      CDATA           #IMPLIED>
+<!ATTLIST search-execute  queryResultName    CDATA           #IMPLIED>
+<!ATTLIST search-execute  searchManagerName  CDATA           #IMPLIED>
+<!ATTLIST search-execute  searchCountName    CDATA           #IMPLIED>
+<!ATTLIST search-execute  saveCondition      %Boolean;       #IMPLIED>
+<!ATTLIST search-execute  forceSetParam      %Boolean;       #IMPLIED>
+<!ATTLIST search-execute  start              %Integer;       #IMPLIED>
+<!ATTLIST search-execute  count              %Integer;       #IMPLIED>
+<!ATTLIST search-execute  holdConnection     %Boolean;       #IMPLIED>
+<!ATTLIST search-execute  doExecute          %Boolean;       #IMPLIED>
+
+
+<!-- "model-execute"元素代表代表一个"model"的业务执行.
+
+     modelName         需执行的"model"的名称.
+
+     generator         指定"execute"的构造器, 这个类必须实现下面这个接口.
+                       ["self.micromagic.eterna.model.ModelExecuteGenerator"]
+
+     exportName        出口.
+
+     transactionType   执行model的事务类型, 默认为"requared".
+
+     noJump            如果设为"true", 无论model的执行结果如何, 都不进行跳转,
+                       默认为"false". 只有在未设置exportName的情况下该属性才有效.
+
+-->
+<!ELEMENT model-execute  (attribute*)>
+<!ATTLIST model-execute  id               ID              #IMPLIED>
+<!ATTLIST model-execute  modelName        CDATA           #IMPLIED>
+<!ATTLIST model-execute  generator        %ClassName;     #IMPLIED>
+<!ATTLIST model-execute  exportName       CDATA           #IMPLIED>
+<!ATTLIST model-execute  transactionType  %Transaction;   #IMPLIED>
+<!ATTLIST model-execute  noJump           %Boolean;       #IMPLIED>
+
+
+<!-- "check-execute"元素代表代表一个检测的业务执行.
+
+     checkPattern          检测的模式, 格式如: number1;(null|array|<|=|>|class:className)[;number2].
+
+     generator             指定"execute"的构造器, 这个类必须实现下面这个接口.
+                           ["self.micromagic.eterna.model.CheckExecuteGenerator"]
+
+     loopType              循环类型, -1为"false"进行循环, 1为"true"进行循环.
+
+     trueModelName         检测为"true"时执行的"model"的名称.
+
+     falseModelName        检测为"false"时执行的"model"的名称.
+
+     trueExportName        检测为"true"时的出口.
+
+     falseExportName       检测为"false"时的出口.
+
+     trueTransactionType   检测为"true"时执行model的事务类型, 默认为"requared".
+
+     falseTransactionType  检测为"false"时执行model的事务类型, 默认为"requared".
+
+-->
+<!ELEMENT check-execute  (attribute*)>
+<!ATTLIST check-execute  id                   ID              #IMPLIED>
+<!ATTLIST check-execute  checkPattern         CDATA           #REQUIRED>
+<!ATTLIST check-execute  generator            %ClassName;     #IMPLIED>
+<!ATTLIST check-execute  loopType             %Integer;       #IMPLIED>
+<!ATTLIST check-execute  trueModelName        CDATA           #IMPLIED>
+<!ATTLIST check-execute  falseModelName       CDATA           #IMPLIED>
+<!ATTLIST check-execute  trueExportName       CDATA           #IMPLIED>
+<!ATTLIST check-execute  falseExportName      CDATA           #IMPLIED>
+<!ATTLIST check-execute  trueTransactionType  %Transaction;   #IMPLIED>
+<!ATTLIST check-execute  falseTransactionType %Transaction;   #IMPLIED>
+
+
+<!-- "string-coder"元素用于具体描述对字符串编码输出的实现类, 如html格式或JSON
+     字符串定义的格式.
+
+     className       指定"StingCoder"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.view.StingCoder"]
+
+-->
+<!ELEMENT string-coder  EMPTY>
+<!ATTLIST string-coder  id             ID                #IMPLIED>
+<!ATTLIST string-coder  className      %ClassName;       #REQUIRED>
+
+
+<!-- "view"元素用于描述一个页面的显示.
+
+     name               "ViewAdapter"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator          指定"ViewAdapter"的实现类, 这个类必须实现下面这个接口.
+                        ["self.micromagic.eterna.view.ViewAdapterGenerator"]
+
+     dataPrinterName    使用的数据集输出器的名称, 默认为"dataPrinter".
+
+     defaultDataType    设置默认的输出数据类型, 默认为"web".
+
+     width              视图的宽度.
+
+     height             视图的高度.
+
+     beforeInit         作用同before-init子节点.
+
+     initScript         作用同init-script子节点.
+
+     debug              页面显示时使用的debug等级.
+
+-->
+<!ELEMENT view  (view-res?, before-init?, init-script?, attribute*, (component | table-form | table-list | replacement)*)>
+<!ATTLIST view  id                ID                #IMPLIED>
+<!ATTLIST view  name              CDATA             #REQUIRED>
+<!ATTLIST view  generator         %ClassName;       #IMPLIED>
+<!ATTLIST view  dataPrinterName   CDATA             #IMPLIED>
+<!ATTLIST view  defaultDataType   %DataType;        #IMPLIED>
+<!ATTLIST view  width             CDATA             #IMPLIED>
+<!ATTLIST view  height            CDATA             #IMPLIED>
+<!ATTLIST view  beforeInit        CDATA             #IMPLIED>
+<!ATTLIST view  initScript        CDATA             #IMPLIED>
+<!ATTLIST view  debug             %Integer;         #IMPLIED>
+
+
+<!-- "view-res"用于记录view所要用到的资源.
+     对于一些静态的资源引用, 如:{$fn:name}, 框架会将它加到资源列表中.
+     但是, 对于一些动态的资源引用, 如:{$fnV:"name"+index}, 就需要在此节点中,
+     以静态引用的方式将它加到资源列表中, 方式如下:
+     {$fn:name1} {$fn:name2} {$fn:name3} ...
+
+     trimLine           设为"true"可以去除每一行中两边的控制符, 默认值为"true".
+-->
+<!ELEMENT view-res  (#PCDATA)>
+<!ATTLIST view-res  id             ID              #IMPLIED>
+<!ATTLIST view-res  trimLine       %Boolean;       #IMPLIED>
+
+
+<!-- "typical-component"元素用于描述一个典型元素, 可以通过replacement来引用.
+
+     name            "Component"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator       指定"Component"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.view.ComponentGenerator"]
+
+     type            "Component"的类型, 如: "br", "div", "input-text", "select"等.
+
+     ignoreGlobal    是否忽略全局属性设置, 默认为"false".
+
+     beforeInit      作用同before-init子节点.
+
+     initScript      作用同init-script子节点.
+
+     comParam        作用同component-param子节点.
+
+     attributes      "Component"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT typical-component  (component-param?, before-init?, init-script?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST typical-component  id            ID                #IMPLIED>
+<!ATTLIST typical-component  name          CDATA             #REQUIRED>
+<!ATTLIST typical-component  generator     %ClassName;       #IMPLIED>
+<!ATTLIST typical-component  type          CDATA             #REQUIRED>
+<!ATTLIST typical-component  ignoreGlobal  %Boolean;         #IMPLIED>
+<!ATTLIST typical-component  beforeInit    CDATA             #IMPLIED>
+<!ATTLIST typical-component  initScript    CDATA             #IMPLIED>
+<!ATTLIST typical-component  comParam      CDATA             #IMPLIED>
+<!ATTLIST typical-component  attributes    CDATA             #IMPLIED>
+
+
+<!-- "typical-replacement"元素用于描述一个典型替换元素, 可以通过replacement来引用.
+
+     name               "Replacement"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator          指定"Replacement"的实现类, 这个类必须实现下面这个接口.
+                        ["self.micromagic.eterna.view.ReplacementGenerator"]
+
+     baseComponentName  使用的"typical-component"的名称.
+
+     ignoreGlobal       是否忽略全局属性设置, 默认为"false".
+
+     beforeInit         作用同before-init子节点.
+
+     initScript         作用同init-script子节点.
+
+     comParam           作用同component-param子节点.
+
+     attributes         "Replacement"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT typical-replacement  (component-param?, before-init?, init-script?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST typical-replacement  id                ID                #IMPLIED>
+<!ATTLIST typical-replacement  name              CDATA             #REQUIRED>
+<!ATTLIST typical-replacement  generator         %ClassName;       #IMPLIED>
+<!ATTLIST typical-replacement  baseComponentName CDATA             #REQUIRED>
+<!ATTLIST typical-replacement  ignoreGlobal      %Boolean;         #IMPLIED>
+<!ATTLIST typical-replacement  beforeInit        CDATA             #IMPLIED>
+<!ATTLIST typical-replacement  initScript        CDATA             #IMPLIED>
+<!ATTLIST typical-replacement  comParam          CDATA             #IMPLIED>
+<!ATTLIST typical-replacement  attributes        CDATA             #IMPLIED>
+
+
+<!-- "function"元素用于描述一个script方法. 方法体写在body中, 语法为javascript.
+
+     name            "Function"的名称, 它在同一个"Factory"中必须是唯一的.
+
+     generator       指定"Function"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.view.FunctionGenerator"]
+
+     param           方法的参数列表, 格式为用","分隔的参数名.
+
+     trimLine        设为"true"可以去除脚本中每一行中两边的控制符,
+                     默认值为"true".
+
+-->
+<!ELEMENT function  (#PCDATA)>
+<!ATTLIST function  id            ID                #IMPLIED>
+<!ATTLIST function  name          CDATA             #REQUIRED>
+<!ATTLIST function  generator     %ClassName;       #IMPLIED>
+<!ATTLIST function  param         CDATA             #IMPLIED>
+<!ATTLIST function  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "events"代表了事件的集合.
+
+-->
+<!ELEMENT events  (event*)>
+<!ATTLIST events  id            ID                #IMPLIED>
+
+
+<!-- "event"元素用于描述一个script方法. 方法体写在body中, 语法为javascript.
+
+     name            "Event"的名称, 也可以说是"event"的类型, 如: "click", "focus"等.
+
+     generator       指定"Function"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.view.Component.Event"]
+
+     scriptParam     "event"方法的额外参数, 可在事件脚本中通过event.data.eventParam
+                     来获得.
+
+     trimLine        设为"true"可以去除脚本中每一行中两边的控制符, 默认值为"true".
+
+-->
+<!ELEMENT event  (#PCDATA)>
+<!ATTLIST event  id            ID                #IMPLIED>
+<!ATTLIST event  name          CDATA             #REQUIRED>
+<!ATTLIST event  generator     %ClassName;       #IMPLIED>
+<!ATTLIST event  scriptParam   CDATA             #IMPLIED>
+<!ATTLIST event  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "before-init"代表生成"component"前执行的脚本, 脚本中可以对"checkResult"变量赋值,
+     如果将"checkResult"设为"false", 则此控件不会生成.
+     如果即设置了子节点, 又设置了beforeInit属性, 则取属性中设置的值.
+
+     trimLine           设为"true"可以去除脚本中每一行中两边的控制符, 默认值为"true".
+
+-->
+<!ELEMENT before-init  (#PCDATA)>
+<!ATTLIST before-init  id            ID                #IMPLIED>
+<!ATTLIST before-init  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "init-script"代表生成"component"后执行的脚本, 此脚本实在所有子控件全部生成之后
+     再执行.
+     如果即设置了子节点, 又设置了initScript属性, 则取属性中设置的值.
+
+     trimLine           设为"true"可以去除脚本中每一行中两边的控制符, 默认值为"true".
+
+-->
+<!ELEMENT init-script  (#PCDATA)>
+<!ATTLIST init-script  id            ID                #IMPLIED>
+<!ATTLIST init-script  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "component-param"代表了"component"的属性集合. 如attr, css, className, objName,
+     objValue, text, html.
+     如果即设置了子节点, 又设置了comParam属性, 则取属性中设置的值.
+
+     trimLine           设为"true"可以去除属性配置文本中每一行中两边的控制符, 默认值为"true".
+
+-->
+<!ELEMENT component-param  (#PCDATA)>
+<!ATTLIST component-param  id            ID                #IMPLIED>
+<!ATTLIST component-param  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "title-param"代表了"table"的"title"的属性集合. 如attr, css, className, upTitles,
+     text, html.
+     如果即设置了子节点, 又设置了titleParam属性, 则取属性中设置的值.
+
+     trimLine           设为"true"可以去除属性配置文本中每一行中两边的控制符, 默认值为"true".
+
+-->
+<!ELEMENT title-param  (#PCDATA)>
+<!ATTLIST title-param  id            ID                #IMPLIED>
+<!ATTLIST title-param  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "init-param"代表生成"cell"的初始化参数, 对应"eg_cache.param".
+     如果即设置了子节点, 又设置了initParam属性, 则取属性中设置的值.
+
+     trimLine           设为"true"可以去除参数配置文本中每一行中两边的控制符, 默认值为"true".
+
+-->
+<!ELEMENT init-param  (#PCDATA)>
+<!ATTLIST init-param  id            ID                #IMPLIED>
+<!ATTLIST init-param  trimLine      %Boolean;         #IMPLIED>
+
+
+<!-- "component"元素用于描述一个html元素.
+
+     name            "Component"的名称.
+
+     generator       指定"Component"的实现类, 这个类必须实现下面这个接口.
+                     ["self.micromagic.eterna.view.ComponentGenerator"]
+
+     type            "Component"的类型, 如: "br", "div", "input-text", "select"等.
+
+     ignoreGlobal    是否忽略全局属性设置, 默认为"false".
+
+     beforeInit      作用同before-init子节点.
+
+     initScript      作用同init-script子节点.
+
+     comParam        作用同component-param子节点.
+
+     attributes      "Component"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT component  (component-param?, before-init?, init-script?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST component  id            ID                #IMPLIED>
+<!ATTLIST component  name          CDATA             #REQUIRED>
+<!ATTLIST component  generator     %ClassName;       #IMPLIED>
+<!ATTLIST component  type          CDATA             #REQUIRED>
+<!ATTLIST component  ignoreGlobal  %Boolean;         #IMPLIED>
+<!ATTLIST component  beforeInit    CDATA             #IMPLIED>
+<!ATTLIST component  initScript    CDATA             #IMPLIED>
+<!ATTLIST component  comParam      CDATA             #IMPLIED>
+<!ATTLIST component  attributes    CDATA             #IMPLIED>
+
+
+<!-- "replacement"元素用于描述一个替换"typical-component"或其中间某个控件元素.
+
+     name                "Replacement"的名称.
+
+     generator           指定"Replacement"的实现类, 这个类必须实现下面这个接口.
+                         ["self.micromagic.eterna.view.ReplacementGenerator"]
+
+     ignoreGlobal        是否忽略全局属性设置, 默认为"false".
+
+     baseComponentName   使用的"typical-component"或"typical-replacement"的名称.
+
+     beforeInit          作用同before-init子节点.
+
+     initScript          作用同init-script子节点.
+
+     comParam            作用同component-param子节点.
+
+     attributes         "Replacement"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT replacement  (component-param?, before-init?, init-script?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST replacement  id                 ID                #IMPLIED>
+<!ATTLIST replacement  name               CDATA             #REQUIRED>
+<!ATTLIST replacement  generator          %ClassName;       #IMPLIED>
+<!ATTLIST replacement  ignoreGlobal       %Boolean;         #IMPLIED>
+<!ATTLIST replacement  baseComponentName  CDATA             #IMPLIED>
+<!ATTLIST replacement  beforeInit         CDATA             #IMPLIED>
+<!ATTLIST replacement  initScript         CDATA             #IMPLIED>
+<!ATTLIST replacement  comParam           CDATA             #IMPLIED>
+<!ATTLIST replacement  attributes         CDATA             #IMPLIED>
+
+
+<!-- "tr"元素用于描述表格中, "tr"部分的属性.
+
+     generator           指定"tr"的实现类, 这个类必须实现下面这个接口.
+                         ["self.micromagic.eterna.view.ComponentGenerator"]
+
+     name                "tr"的名称, 可以不填.
+
+     ignoreGlobal        是否忽略全局属性设置, 默认为"false".
+
+     beforeInit          作用同before-init子节点.
+
+     initScript          作用同init-script子节点.
+
+     comParam            作用同component-param子节点.
+
+     attributes         "tr"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT tr  (component-param?, before-init?, init-script?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST tr  id                 ID                #IMPLIED>
+<!ATTLIST tr  name               CDATA             #IMPLIED>
+<!ATTLIST tr  generator          %ClassName;       #IMPLIED>
+<!ATTLIST tr  ignoreGlobal       %Boolean;         #IMPLIED>
+<!ATTLIST tr  beforeInit         CDATA             #IMPLIED>
+<!ATTLIST tr  initScript         CDATA             #IMPLIED>
+<!ATTLIST tr  comParam           CDATA             #IMPLIED>
+<!ATTLIST tr  attributes         CDATA             #IMPLIED>
+
+
+<!-- "table-form"元素用于描述一个表单类型的表格控件元素.
+
+     name                "TableForm"的名称.
+
+     generator           指定"TableForm"的实现类, 这个类必须实现下面这个接口.
+                         ["self.micromagic.eterna.view.TableFormGenerator"]
+
+     ignoreGlobal        是否忽略全局属性设置, 默认为"false".
+
+     baseName            基础数据集, 可以是"query", "reader-manager", "search".
+
+     autoArrange         是否根据基础数据集来生成"cell", 默认为"true".
+
+     percentWidth        是否使用百分比宽度, 默认为"true".
+
+     caculateWidth       是否自动计算表格的总宽度, 只有在percentWidth设置为"false"
+                         时才有效, 默认为"false".
+
+     caculateWidthFix    自动计算表格的总宽度时, 每列的修正值.
+
+     columns             每列的宽度, 用","分隔.
+
+     dataName            数据集的名称, 数据集的类型必须是单行数据集.
+
+     beforeInit          作用同before-init子节点.
+
+     initScript          作用同init-script子节点.
+
+     comParam            作用同component-param子节点.
+
+     attributes         "TableForm"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT table-form  (component-param?, before-init?, init-script?, events?, tr?, cells?)>
+<!ATTLIST table-form  id                 ID                #IMPLIED>
+<!ATTLIST table-form  name               CDATA             #REQUIRED>
+<!ATTLIST table-form  generator          %ClassName;       #IMPLIED>
+<!ATTLIST table-form  ignoreGlobal       %Boolean;         #IMPLIED>
+<!ATTLIST table-form  baseName           CDATA             #IMPLIED>
+<!ATTLIST table-form  autoArrange        %Boolean;         #IMPLIED>
+<!ATTLIST table-form  percentWidth       %Boolean;         #IMPLIED>
+<!ATTLIST table-form  caculateWidth      %Boolean;         #IMPLIED>
+<!ATTLIST table-form  caculateWidthFix   %Integer;         #IMPLIED>
+<!ATTLIST table-form  columns            CDATA             #REQUIRED>
+<!ATTLIST table-form  dataName           CDATA             #IMPLIED>
+<!ATTLIST table-form  beforeInit         CDATA             #IMPLIED>
+<!ATTLIST table-form  initScript         CDATA             #IMPLIED>
+<!ATTLIST table-form  comParam           CDATA             #IMPLIED>
+<!ATTLIST table-form  attributes         CDATA             #IMPLIED>
+
+
+<!-- "cells"代表了"cell"的集合.
+
+     cellOrder        cell的排序规则, 具体规则见"注1".
+
+-->
+<!ELEMENT cells  (cell*)>
+<!ATTLIST cells  id            ID                #IMPLIED>
+<!ATTLIST cells  cellOrder     CDATA             #IMPLIED>
+
+
+<!-- "cell"元素用于描述"table-form"中的一个单元元素, 包括标题和数据主体.
+
+     name                  "Cell"的名称.
+
+     generator             指定"Cell"的实现类, 这个类必须实现下面这个接口.
+                           ["self.micromagic.eterna.view.TableFormGenerator.CellGenerator"]
+
+     ignoreGlobal          是否忽略全局属性设置, 默认为"false".
+
+     ignoreGlobalTitle     标题是否忽略全局属性设置, 默认为"false".
+
+     titleSize             标题所占的单元格数, 默认为"1", 或设为-1为表格的列数.
+
+     containerSize         数据主体所占的单元格数, 默认为"1", 或设为-1为表格的列数.
+
+     rowSpan               该"Cell"需要占用几行表格.
+
+     caption               标题中显示的内容.
+
+     defaultValue          控件的默认值.
+
+     srcName               数据来源的名称.
+
+     required              是否显示为必填, 默认为"false".
+
+     newRow                是否从新的一行开始, 默认为"false".
+
+     needIndex             在读取结果集时是否需要索引值, 默认为"false".
+
+     typicalComponentName  使用的"typical-component"的名称.
+
+     beforeInit            作用同before-init子节点.
+
+     initScript            作用同init-script子节点.
+
+     comParam              作用同component-param子节点.
+
+     titleParam            作用同title-param子节点.
+
+     initParam             作用同init-param子节点.
+
+     ignore                是否将替代的控件忽略掉, 即不生成.
+
+     attributes            "Cell"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT cell  (component-param?, title-param?, before-init?, init-script?, init-param?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST cell  id                   ID                #IMPLIED>
+<!ATTLIST cell  name                 CDATA             #REQUIRED>
+<!ATTLIST cell  generator            %ClassName;       #IMPLIED>
+<!ATTLIST cell  ignoreGlobal         %Boolean;         #IMPLIED>
+<!ATTLIST cell  ignoreGlobalTitle    %Boolean;         #IMPLIED>
+<!ATTLIST cell  titleSize            %Integer;         #IMPLIED>
+<!ATTLIST cell  containerSize        %Integer;         #IMPLIED>
+<!ATTLIST cell  rowSpan              %Integer;         #IMPLIED>
+<!ATTLIST cell  caption              CDATA             #IMPLIED>
+<!ATTLIST cell  defaultValue         CDATA             #IMPLIED>
+<!ATTLIST cell  srcName              CDATA             #IMPLIED>
+<!ATTLIST cell  required             %Boolean;         #IMPLIED>
+<!ATTLIST cell  newRow               %Boolean;         #IMPLIED>
+<!ATTLIST cell  needIndex            %Boolean;         #IMPLIED>
+<!ATTLIST cell  typicalComponentName CDATA             #IMPLIED>
+<!ATTLIST cell  beforeInit           CDATA             #IMPLIED>
+<!ATTLIST cell  initScript           CDATA             #IMPLIED>
+<!ATTLIST cell  comParam             CDATA             #IMPLIED>
+<!ATTLIST cell  titleParam           CDATA             #IMPLIED>
+<!ATTLIST cell  initParam            CDATA             #IMPLIED>
+<!ATTLIST cell  ignore               %Boolean;         #IMPLIED>
+<!ATTLIST cell  attributes           CDATA             #IMPLIED>
+
+
+<!-- "table-list"元素用于描述一个列表类型的表格控件元素.
+
+     name                "TableList"的名称.
+
+     generator           指定"TableList"的实现类, 这个类必须实现下面这个接口.
+                         ["self.micromagic.eterna.view.TableListGenerator"]
+
+     ignoreGlobal        是否忽略全局属性设置, 默认为"false".
+
+     baseName            基础数据集, 可以是"query", "reader-manager".
+
+     autoArrange         是否根据基础数据集来生成"column", 默认为"true".
+
+     percentWidth        是否使用百分比宽度, 默认为"true".
+
+     caculateWidth       是否自动计算表格的总宽度, 只有在percentWidth设置为"false"
+                         是才有效, 默认为"false".
+
+     caculateWidthFix    自动计算表格的总宽度时, 每列的修正值.
+
+     dataName            数据集的名称, 数据集的类型必须是单行数据集.
+
+     beforeInit          作用同before-init子节点.
+
+     initScript          作用同init-script子节点.
+
+     comParam            作用同component-param子节点.
+
+     attributes          "TableList"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT table-list  (component-param?, before-init?, init-script?, events?, tr?, columns?)>
+<!ATTLIST table-list  id                 ID                #IMPLIED>
+<!ATTLIST table-list  name               CDATA             #REQUIRED>
+<!ATTLIST table-list  generator          %ClassName;       #IMPLIED>
+<!ATTLIST table-list  ignoreGlobal       %Boolean;         #IMPLIED>
+<!ATTLIST table-list  baseName           CDATA             #IMPLIED>
+<!ATTLIST table-list  autoArrange        %Boolean;         #IMPLIED>
+<!ATTLIST table-list  percentWidth       %Boolean;         #IMPLIED>
+<!ATTLIST table-list  caculateWidth      %Boolean;         #IMPLIED>
+<!ATTLIST table-list  caculateWidthFix   %Integer;         #IMPLIED>
+<!ATTLIST table-list  dataName           CDATA             #IMPLIED>
+<!ATTLIST table-list  beforeInit         CDATA             #IMPLIED>
+<!ATTLIST table-list  initScript         CDATA             #IMPLIED>
+<!ATTLIST table-list  comParam           CDATA             #IMPLIED>
+<!ATTLIST table-list  attributes         CDATA             #IMPLIED>
+
+
+<!-- "columns"代表了"column"的集合.
+
+     columnOrder      column的排序规则, 具体规则见"注1".
+
+-->
+<!ELEMENT columns  (column*)>
+<!ATTLIST columns  id            ID                #IMPLIED>
+<!ATTLIST columns  columnOrder   CDATA             #IMPLIED>
+
+
+<!-- "column"元素用于描述"table-list"中的一个列元素, 包括标题和数据主体.
+
+     name                  "Column"的名称.
+
+     generator             指定"Column"的实现类, 这个类必须实现下面这个接口.
+                           ["self.micromagic.eterna.view.TableListGenerator.ColumnGenerator"]
+
+     ignoreGlobal          是否忽略全局属性设置, 默认为"false".
+
+     ignoreGlobalTitle     标题是否忽略全局属性设置, 默认为"false".
+
+     width                 本列的宽度.
+
+     caption               标题中显示的内容.
+
+     defaultValue          控件的默认值.
+
+     srcName               数据来源的名称.
+
+     typicalComponentName  使用的"typical-component"的名称.
+
+     beforeInit            作用同before-init子节点.
+
+     initScript            作用同init-script子节点.
+
+     comParam              作用同component-param子节点.
+
+     titleParam            作用同title-param子节点.
+
+     initParam             作用同init-param子节点.
+
+     ignore                是否将替代的控件忽略掉, 即不生成.
+
+     attributes            "Column"的属性, 格式为: {name}={value}[;{name}={value} ...].
+
+-->
+<!ELEMENT column  (component-param?, title-param?, before-init?, init-script?, init-param?, events?, (component | table-form | table-list | replacement)*)>
+<!ATTLIST column  id                   ID                #IMPLIED>
+<!ATTLIST column  name                 CDATA             #REQUIRED>
+<!ATTLIST column  generator            %ClassName;       #IMPLIED>
+<!ATTLIST column  ignoreGlobal         %Boolean;         #IMPLIED>
+<!ATTLIST column  ignoreGlobalTitle    %Boolean;         #IMPLIED>
+<!ATTLIST column  width                %Integer;         #IMPLIED>
+<!ATTLIST column  caption              CDATA             #IMPLIED>
+<!ATTLIST column  defaultValue         CDATA             #IMPLIED>
+<!ATTLIST column  srcName              CDATA             #IMPLIED>
+<!ATTLIST column  typicalComponentName CDATA             #IMPLIED>
+<!ATTLIST column  beforeInit           CDATA             #IMPLIED>
+<!ATTLIST column  initScript           CDATA             #IMPLIED>
+<!ATTLIST column  comParam             CDATA             #IMPLIED>
+<!ATTLIST column  titleParam           CDATA             #IMPLIED>
+<!ATTLIST column  initParam            CDATA             #IMPLIED>
+<!ATTLIST column  ignore               %Boolean;         #IMPLIED>
+<!ATTLIST column  attributes           CDATA             #IMPLIED>
+
+
+<!-- "resource"元素用于描述一个文本资源.
+     具体的资源文本写在该节点的body中.
+
+     name                "Resource"的名称.
+
+     generator           指定"Resource"的实现类, 这个类必须实现下面这个接口.
+                         ["self.micromagic.eterna.view.ResourceGenerator"]
+
+     trimLine            设为"true"可以去除资源文本中每一行中两边的控制符, 默认值为"false".
+
+     noLine              设为"true"可以获得没有换行的资源文本, 默认值为"true".
+
+-->
+<!ELEMENT resource  (#PCDATA)>
+<!ATTLIST resource  id                 ID                #IMPLIED>
+<!ATTLIST resource  name               CDATA             #REQUIRED>
+<!ATTLIST resource  generator          %ClassName;       #IMPLIED>
+<!ATTLIST resource  trimLine           %Boolean;         #IMPLIED>
+<!ATTLIST resource  noLine             %Boolean;         #IMPLIED>
+
+
+<!-- "data-printer"元素用于描述一个数据集输出器.
+
+     name                "DataPrinter"的名称.
+
+     generator           指定"DataPrinter"的实现类, 这个类必须实现下面这个接口.
+                         ["self.micromagic.eterna.view.DataPrinterGenerator"]
+
+-->
+<!ELEMENT data-printer  (attribute*)>
+<!ATTLIST data-printer  id                 ID                #IMPLIED>
+<!ATTLIST data-printer  name               CDATA             #REQUIRED>
+<!ATTLIST data-printer  generator          %ClassName;       #REQUIRED>
