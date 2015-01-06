@@ -16,13 +16,13 @@
 
 package self.micromagic.eterna.tag;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.jsp.tagext.TagSupport;
 
-import self.micromagic.eterna.view.ViewAdapter;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.view.ViewAdapter;
 
 /**
  * @author micromagic@sina.com
@@ -127,5 +127,7 @@ public class InitBaseTag extends TagSupport
 	{
 		this.scatterFlag = scatterFlag;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

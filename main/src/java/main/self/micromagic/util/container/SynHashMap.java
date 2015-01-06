@@ -828,6 +828,8 @@ public class SynHashMap extends AbstractMap
 
 	}
 
+	private static final long serialVersionUID = 1L;
+
 	private static class WeakRef extends WeakReference
 			implements Ref
 	{

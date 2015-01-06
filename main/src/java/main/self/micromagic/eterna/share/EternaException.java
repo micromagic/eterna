@@ -67,4 +67,6 @@ public class EternaException extends RuntimeException
 		return msg;
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

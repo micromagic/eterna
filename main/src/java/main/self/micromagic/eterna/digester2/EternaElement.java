@@ -16,9 +16,9 @@
 
 package self.micromagic.eterna.digester2;
 
-import org.dom4j.tree.DefaultElement;
-import org.dom4j.QName;
 import org.dom4j.Namespace;
+import org.dom4j.QName;
+import org.dom4j.tree.DefaultElement;
 
 public class EternaElement extends DefaultElement
 {
@@ -59,5 +59,7 @@ public class EternaElement extends DefaultElement
 		this.lineNum = lineNum;
 		this.colNum = colNum;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

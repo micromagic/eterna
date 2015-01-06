@@ -20,13 +20,11 @@ import java.util.Iterator;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.view.BaseManager;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.ComponentGenerator;
 import self.micromagic.eterna.view.TableForm;
 import self.micromagic.eterna.view.TableList;
 import self.micromagic.eterna.view.ViewAdapterGenerator;
-import self.micromagic.eterna.view.ViewAdapter;
 import self.micromagic.util.container.MultiIterator;
 
 public class TR extends ComponentImpl

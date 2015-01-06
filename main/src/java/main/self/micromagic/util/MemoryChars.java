@@ -35,8 +35,8 @@ public class MemoryChars
 	private static int COUNTER = 0;
 
 	private List blockList;
-	private int blockSize;
-	private int sizeThreshold;
+	private final int blockSize;
+	private final int sizeThreshold;
 	private long size;
 
 	private boolean inMemory = true;
@@ -123,7 +123,7 @@ public class MemoryChars
 	private File getTempFile()
 	{
 		File tempDir = new File(System.getProperty("java.io.tmpdir"));
-		String fileName = "MemoryChars_" + Utility.getUID() + "_" + this.getUniqueId() + ".tmp";
+		String fileName = "MemoryChars_" + Utility.getUID() + "_" + getUniqueId() + ".tmp";
 		File f = new File(tempDir, fileName);
 		return f;
 	}
@@ -487,6 +487,8 @@ public class MemoryChars
 		this.usedSize = 0L;
 	}
 
+	private static final long serialVersionUID = 1L;
+
 	private class MemoryWriter extends Writer
 	{
 		private long position = 0L;
@@ -791,14 +793,16 @@ public class MemoryChars
 	private static class CharsBlock
 			implements Serializable
 	{
-		public final long start;
 		public final char[] chars;
+		//public final long start;
 
 		public CharsBlock(int size, long start)
 		{
 			this.chars = new char[size];
-			this.start = start;
+			//this.start = start;
 		}
+
+		private static final long serialVersionUID = 1L;
 
 	}
 

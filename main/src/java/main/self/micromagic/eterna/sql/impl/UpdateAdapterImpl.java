@@ -22,12 +22,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.share.EternaException;
+
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.sql.SQLAdapter;
 import self.micromagic.eterna.sql.UpdateAdapter;
 import self.micromagic.eterna.sql.UpdateAdapterGenerator;
-import self.micromagic.eterna.sql.SQLAdapter;
 import self.micromagic.util.logging.TimeLogger;
 
 public class UpdateAdapterImpl extends SQLAdapterImpl
@@ -95,7 +96,7 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 		}
 		finally
 		{
-			this.logSQL(this, TimeLogger.getTime() - startTime, exception, conn);
+			logSQL(this, TimeLogger.getTime() - startTime, exception, conn);
 			if (stmt != null)
 			{
 				stmt.close();
@@ -148,7 +149,7 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 		}
 		finally
 		{
-			if (this.logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
 			{
 				if (result != -1)
 				{

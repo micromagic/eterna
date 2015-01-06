@@ -19,15 +19,13 @@ package self.micromagic.eterna.sql.preparer;
 import java.io.Reader;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
 import self.micromagic.eterna.sql.PreparedStatementWrap;
 import self.micromagic.util.converter.ReaderConverter;
-import self.micromagic.util.Utility;
 
 class ReaderPreparer extends AbstractValuePreparer
 {
-	private Reader value;
-	private int length;
+	private final Reader value;
+	private final int length;
 
 	public ReaderPreparer(ValuePreparerCreater vpc, Reader value, int length)
 	{

@@ -41,8 +41,8 @@ public class MemoryStream
 	private static int COUNTER = 0;
 
 	private List blockList;
-	private int blockSize;
-	private int sizeThreshold;
+	private final int blockSize;
+	private final int sizeThreshold;
 	private long size;
 
 	private boolean inMemory = true;
@@ -129,7 +129,7 @@ public class MemoryStream
 	private File getTempFile()
 	{
 		File tempDir = new File(System.getProperty("java.io.tmpdir"));
-		String fileName = "MemoryStream_" + Utility.getUID() + "_" + this.getUniqueId() + ".tmp";
+		String fileName = "MemoryStream_" + Utility.getUID() + "_" + getUniqueId() + ".tmp";
 		File f = new File(tempDir, fileName);
 		return f;
 	}
@@ -484,6 +484,8 @@ public class MemoryStream
 
 	}
 
+	private static final long serialVersionUID = 1L;
+
 	private class MemoryRewriteStream extends OutputStream
 	{
 		private long position = 0L;
@@ -657,14 +659,16 @@ public class MemoryStream
 	private static class MemoryBlock
 			implements Serializable
 	{
-		public final long start;
+		//public final long start;
 		public final byte[] memory;
 
 		public MemoryBlock(int size, long start)
 		{
 			this.memory = new byte[size];
-			this.start = start;
+			//this.start = start;
 		}
+
+		private static final long serialVersionUID = 1L;
 
 	}
 

@@ -16,11 +16,12 @@
 
 package self.micromagic.eterna.digester2;
 
-import self.micromagic.util.container.ThreadCache;
+import org.dom4j.Element;
+
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.eterna.share.EternaException;
-import org.dom4j.Element;
+import self.micromagic.util.container.ThreadCache;
 
 /**
  * 当适配器<code>Adapter</code>相关的配置文件不正确，或不正确的
@@ -169,6 +170,8 @@ public class ParseException extends EternaException
 			ci.element = element;
 		}
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }
 

@@ -16,9 +16,9 @@
 
 package self.micromagic.eterna.digester2;
 
-import org.dom4j.io.SAXReader;
-import org.dom4j.io.SAXContentHandler;
 import org.dom4j.DocumentFactory;
+import org.dom4j.io.SAXContentHandler;
+import org.dom4j.io.SAXReader;
 import org.xml.sax.XMLReader;
 
 public class EternaSAXReader extends SAXReader

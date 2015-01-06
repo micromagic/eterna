@@ -124,4 +124,6 @@ public class ObjectRef
 		return temp == null ? 0 : temp.hashCode();
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

@@ -17,14 +17,13 @@
 package self.micromagic.grammer;
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
-import self.micromagic.util.Utils;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
@@ -32,14 +31,14 @@ public class ParserData
 {
 	private boolean endSrc = false;
 	private int currentIndex = -1;
-	private Reader src;
+	private final Reader src;
 	private StringAppender buf;
 
-	private List checkerStack = new ArrayList();
-	private List errorStack = new ArrayList();
-	private List indexResetStack = new ArrayList();
+	private final List checkerStack = new ArrayList();
+	private final List errorStack = new ArrayList();
+	private final List indexResetStack = new ArrayList();
 
-	private IndexStore globalStore = new IndexStore(0);
+	private final IndexStore globalStore = new IndexStore(0);
 
 	private String maxBuf = null;
 	private Checker maxChecker = null;
@@ -245,13 +244,13 @@ public class ParserData
 	{
 		if (this.maxBuf != null)
 		{
-			out.println(Utils.dealString2EditCode(this.maxBuf));
-			out.println(Utils.dealString2EditCode(this.maxChecker.toString()));
+			out.println(StringTool.dealString2EditCode(this.maxBuf));
+			out.println(StringTool.dealString2EditCode(this.maxChecker.toString()));
 		}
 		Iterator itr = this.errorStack.iterator();
 		while (itr.hasNext())
 		{
-			out.println(Utils.dealString2EditCode(itr.next().toString()));
+			out.println(StringTool.dealString2EditCode(itr.next().toString()));
 		}
 	}
 
@@ -282,7 +281,7 @@ public class ParserData
 			}
 			else
 			{
-				buf.append(Utils.dealString2EditCode(cell.textBuf));
+				buf.append(StringTool.dealString2EditCode(cell.textBuf));
 			}
 			if (itr.hasNext())
 			{

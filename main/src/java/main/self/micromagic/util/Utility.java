@@ -235,7 +235,10 @@ public class Utility
 					tmpProps = new PropertiesManager(propLocal, cl);
 					urlMap.put(tmpLocal, tempURL);
 					propertiesMap.put(tempURL, tmpProps);
-					if (prop_URL != null) prop_URL.setObject(tempURL);
+					if (prop_URL != null)
+					{
+						prop_URL.setObject(tempURL);
+					}
 					return tmpProps;
 				}
 			}
@@ -249,7 +252,7 @@ public class Utility
 			if (propLocal == null || tmpLocal.equals(PROPERTIES_NAME))
 			{
 				urlMap.put(tmpLocal, properties_URL);
-				if (tmpProps != null)
+				if (prop_URL != null)
 				{
 					prop_URL.setObject(properties_URL);
 				}

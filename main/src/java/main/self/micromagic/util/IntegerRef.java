@@ -50,12 +50,12 @@ public class IntegerRef extends ObjectRef
 
 	public long longValue()
 	{
-		return (long) this.value;
+		return this.value;
 	}
 
 	public double doubleValue()
 	{
-		return (double) this.value;
+		return this.value;
 	}
 
 	public static int getIntegerValue(Object obj)
@@ -121,5 +121,7 @@ public class IntegerRef extends ObjectRef
 		}
 		return this.value == ((IntegerRef) other).value;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

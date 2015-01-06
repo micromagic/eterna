@@ -21,12 +21,11 @@ import java.io.IOException;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import self.micromagic.app.WebApp;
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.ResManager;
+import self.micromagic.util.StringTool;
 
 /**
  * 在JSP中, 可通过此标签在页面中初始化Eterna对象.
@@ -35,6 +34,15 @@ import self.micromagic.util.ResManager;
  */
 public class EternaInit extends InitBaseTag
 {
+	/**
+	 * 默认存放view对象的标签.
+	 */
+	public static final String VIEW_TAG = "eterna.view";
+	/**
+	 * 默认存放AppData对象的标签.
+	 */
+	public static final String APPDATA_TAG = "eterna.appData";
+
 	/**
 	 * 不输出html代码.
 	 */
@@ -90,8 +98,8 @@ public class EternaInit extends InitBaseTag
 	{
 		try
 		{
-			String viewTag = this.view == null ? WebApp.VIEW_TAG : this.view;
-			String appDataTag = this.appData == null ? WebApp.APPDATA_TAG : this.appData;
+			String viewTag = this.view == null ? VIEW_TAG : this.view;
+			String appDataTag = this.appData == null ? APPDATA_TAG : this.appData;
 			JspWriter out = this.pageContext.getOut();
 			ViewAdapter view = (ViewAdapter) this.pageContext.findAttribute(viewTag);
 			AppData data = (AppData) this.pageContext.findAttribute(appDataTag);
@@ -355,5 +363,7 @@ public class EternaInit extends InitBaseTag
 	{
 		this.includeEnd = includeEnd;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

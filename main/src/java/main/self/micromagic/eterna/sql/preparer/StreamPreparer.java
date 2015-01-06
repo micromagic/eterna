@@ -19,15 +19,13 @@ package self.micromagic.eterna.sql.preparer;
 import java.io.InputStream;
 import java.sql.SQLException;
 
-import org.apache.commons.logging.Log;
 import self.micromagic.eterna.sql.PreparedStatementWrap;
 import self.micromagic.util.converter.StreamConverter;
-import self.micromagic.util.Utility;
 
 class StreamPreparer extends AbstractValuePreparer
 {
-	private InputStream value;
-	private int length;
+	private final InputStream value;
+	private final int length;
 
 	public StreamPreparer(ValuePreparerCreater vpc, InputStream value, int length)
 	{

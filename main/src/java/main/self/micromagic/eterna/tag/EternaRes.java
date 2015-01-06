@@ -16,12 +16,12 @@
 
 package self.micromagic.eterna.tag;
 
-import javax.servlet.jsp.tagext.TagSupport;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.tagext.TagSupport;
 
 import self.micromagic.util.ResManager;
 
@@ -154,5 +154,7 @@ public class EternaRes extends TagSupport
 	{
 		this.charset = charset;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

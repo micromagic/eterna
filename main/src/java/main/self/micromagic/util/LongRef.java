@@ -55,7 +55,7 @@ public class LongRef extends ObjectRef
 
 	public double doubleValue()
 	{
-		return (double) this.value;
+		return this.value;
 	}
 
 	public static long getLongValue(Object obj)
@@ -121,5 +121,7 @@ public class LongRef extends ObjectRef
 		}
 		return this.value == ((LongRef) other).value;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

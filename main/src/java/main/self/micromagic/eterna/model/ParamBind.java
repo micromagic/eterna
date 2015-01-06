@@ -19,7 +19,6 @@ package self.micromagic.eterna.model;
 import java.sql.SQLException;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.EternaFactory;
 
 public interface ParamBind
 {

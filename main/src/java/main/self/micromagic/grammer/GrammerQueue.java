@@ -18,7 +18,7 @@ package self.micromagic.grammer;
 
 import java.util.Map;
 
-import self.micromagic.util.Utils;
+import self.micromagic.util.StringTool;
 
 public class GrammerQueue extends AbstractElement
 		implements GrammerElement
@@ -69,8 +69,9 @@ public class GrammerQueue extends AbstractElement
 
 	public String toString()
 	{
-		return "Queue:" + this.getName() + ":" + GrammerManager.getGrammerElementTypeName(this.getType())
-				+ ":Q[" + Utils.dealString2EditCode(this.queue) + "]";
+		return "Queue:" + this.getName() + ":"
+				+ GrammerManager.getGrammerElementTypeName(this.getType())
+				+ ":Q[" + StringTool.dealString2EditCode(this.queue) + "]";
 	}
 
 

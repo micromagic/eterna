@@ -32,10 +32,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.share.EternaException;
+
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.security.Permission;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.sql.QueryAdapter;
@@ -47,8 +48,8 @@ import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.SQLAdapter;
 import self.micromagic.eterna.sql.impl.ResultReaders.ObjectReader;
 import self.micromagic.util.BooleanRef;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.logging.TimeLogger;
 
@@ -881,7 +882,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 		}
 		finally
 		{
-			if (this.logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
 			{
 				if (result != null)
 				{

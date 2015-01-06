@@ -31,6 +31,7 @@ import java.util.logging.StreamHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogConfigurationException;
 import org.apache.commons.logging.LogFactory;
+
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.container.SynHashMap;
 import self.micromagic.util.logging.MemoryLogger;
@@ -65,8 +66,8 @@ public class Jdk14Factory extends LogFactory
 	private static Logger defaultLogger;
 	private static Map otherLoggerMap = new SynHashMap();
 
-	private Map attributes = new SynHashMap();
-	private Map instances = new SynHashMap();
+	private final Map attributes = new SynHashMap();
+	private final Map instances = new SynHashMap();
 
 	public static final String EXCEPTION_LOG_PROPERTY = "self.micromagic.eterna.exception.logType";
 	protected static int EXCEPTION_LOG_TYPE = 0;
@@ -374,7 +375,7 @@ public class Jdk14Factory extends LogFactory
 			{
 				tempLogger = Jdk14Factory.defaultLogger;
 			}
-			instance = new MyJdk14Logger(name, tempLogger);
+			instance = new MyJdk14Logger(tempLogger);
 			this.instances.put(name, instance);
 		}
 		return instance;
@@ -389,11 +390,9 @@ public class Jdk14Factory extends LogFactory
 			implements Log
 	{
 		protected Logger logger;
-		protected String name;
 
-		public MyJdk14Logger(String name, Logger logger)
+		public MyJdk14Logger(Logger logger)
 		{
-			this.name = name;
 			this.logger = logger;
 		}
 

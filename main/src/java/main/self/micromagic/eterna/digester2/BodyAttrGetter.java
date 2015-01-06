@@ -19,11 +19,11 @@ package self.micromagic.eterna.digester2;
 import java.util.Map;
 
 import org.dom4j.Element;
+
+import self.micromagic.eterna.digester.BodyText;
+import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
-import self.micromagic.util.IntegerRef;
-import self.micromagic.util.converter.BooleanConverter;
-import self.micromagic.eterna.digester.BodyText;
 
 /**
  * 获取属性或body中的值.
@@ -92,8 +92,8 @@ public class BodyAttrGetter
 		this.bodyTag = bodyTag;
 		this.attrTag = attrTag;
 	}
-	private String bodyTag;
-	private String attrTag;
+	private final String bodyTag;
+	private final String attrTag;
 
 	public void setIntern(boolean b)
 	{

@@ -16,12 +16,11 @@
 
 package self.micromagic.grammer;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
-import self.micromagic.util.Utils;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
@@ -104,11 +103,13 @@ public class GrammerNode extends AbstractElement
 				.append(':').append(GrammerManager.getGrammerElementTypeName(this.getType()));
 		if (this.trueCheckers != null)
 		{
-			buf.append(":T").append(Utils.dealString2EditCode(this.trueCheckers.toString()));
+			buf.append(":T").append(
+					StringTool.dealString2EditCode(this.trueCheckers.toString()));
 		}
 		if (this.falseCheckers != null)
 		{
-			buf.append(":F").append(Utils.dealString2EditCode(this.falseCheckers.toString()));
+			buf.append(":F").append(
+					StringTool.dealString2EditCode(this.falseCheckers.toString()));
 		}
 		return buf.toString();
 	}

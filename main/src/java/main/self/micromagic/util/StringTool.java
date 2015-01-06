@@ -16,14 +16,14 @@
 
 package self.micromagic.util;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.io.Reader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +46,84 @@ public class StringTool
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	public static final int MAX_INTERN_SIZE = 1024 * 8;
+
+	/**
+	 * 处理字符串, 将其转换为可放入双引号内赋值的字符串.
+	 * 同时会将小于空格的代码(不包括:\r,\n,\t), 转换为空格.
+	 */
+	public static String dealString2EditCode(String str)
+	{
+		if (str == null)
+		{
+			return "";
+		}
+		StringAppender temp = null;
+		int modifyCount = 0;
+		for (int i = 0; i < str.length(); i++)
+		{
+			char c = str.charAt(i);
+			String appendStr = null;
+			if (c < ' ')
+			{
+				if (c == '\r')
+				{
+					appendStr = "\\r";
+				}
+				else if (c == '\n')
+				{
+					appendStr = "\\n";
+				}
+				else if (c == '\t')
+				{
+					appendStr = "\\t";
+				}
+				else
+				{
+					appendStr = " ";
+				}
+				modifyCount++;
+			}
+			else if (c == '"')
+			{
+				appendStr = "\\\"";
+				modifyCount++;
+			}
+			else if (c == '\'')
+			{
+				appendStr = "\\'";
+				modifyCount++;
+			}
+			else if (c == '\\')
+			{
+				appendStr = "\\\\";
+				modifyCount++;
+			}
+			else if (c == '<')
+			{
+				appendStr = "\\074";  // 074 = 0x3C = '<'
+				modifyCount++;
+			}
+			if (modifyCount == 1)
+			{
+				temp = createStringAppender(str.length() + 16);
+				temp.append(str.substring(0, i));
+				//这里将modifyCount的个数增加, 防止下一次调用使他继续进入这个初始化
+				modifyCount++;
+			}
+			if (modifyCount > 0)
+			{
+				if (appendStr == null)
+				{
+					temp.append(c);
+				}
+				else
+				{
+					temp.append(appendStr);
+				}
+			}
+		}
+		return temp == null ? str : temp.toString();
+	}
 
 	/**
 	 * 对字符串进行intern处理. <p>
@@ -516,7 +594,7 @@ public class StringTool
 
 	public static class StringAppenderWriter extends Writer
 	{
-		private StringAppender out;
+		private final StringAppender out;
 
 		public StringAppenderWriter()
 		{

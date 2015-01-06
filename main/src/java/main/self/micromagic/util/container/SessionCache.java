@@ -16,11 +16,11 @@
 
 package self.micromagic.util.container;
 
-import java.util.Map;
-import java.util.Iterator;
-import java.util.Collection;
-import java.io.Serializable;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
@@ -179,7 +179,7 @@ public class SessionCache
 	private static class PropertyImpl
 			implements Property, Serializable
 	{
-		private int propertyVersion;
+		private final int propertyVersion;
 		private transient Object value;
 
 		public PropertyImpl(int propertyVersion, Object value)
@@ -240,6 +240,8 @@ public class SessionCache
 			boolean canSerialize = s.readBoolean();
 			this.value = canSerialize ? s.readObject() : null;
 		}
+
+		private static final long serialVersionUID = 1L;
 
 	}
 

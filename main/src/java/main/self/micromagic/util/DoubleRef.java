@@ -121,4 +121,6 @@ public class DoubleRef extends ObjectRef
 		return this.value == ((DoubleRef) other).value;
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

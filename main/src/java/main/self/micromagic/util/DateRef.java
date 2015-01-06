@@ -71,4 +71,6 @@ public class DateRef extends ObjectRef
 		return (Date) this.getObject();
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

@@ -16,7 +16,6 @@
 
 package self.micromagic.util.container;
 
-import java.util.Iterator;
 import java.util.Enumeration;
 
 /**

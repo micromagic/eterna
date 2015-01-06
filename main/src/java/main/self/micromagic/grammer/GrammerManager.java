@@ -27,8 +27,8 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+
 import self.micromagic.util.Utility;
-import self.micromagic.util.Utils;
 
 public class GrammerManager
 {
@@ -42,7 +42,7 @@ public class GrammerManager
 
 	protected static final Log log = Utility.createLog("eterna.grammer");
 
-	private Map grammerElementMap = new HashMap();
+	private final Map grammerElementMap = new HashMap();
 
 	public void init(InputStream is)
 			throws GrammerException
@@ -170,11 +170,19 @@ public class GrammerManager
 				hasRange = true;
 				if (min != null)
 				{
-					minI = Utils.parseInt(min, -1);
+					try
+					{
+						minI = Integer.parseInt(min);
+					}
+					catch (Exception ex) {}
 				}
 				if (max != null)
 				{
-					maxI = Utils.parseInt(max, -1);
+					try
+					{
+						maxI = Integer.parseInt(max);
+					}
+					catch (Exception ex) {}
 				}
 			}
 			if (refName != null)

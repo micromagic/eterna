@@ -17,9 +17,9 @@
 package self.micromagic.eterna.digester;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.container.ThreadCache;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.container.ThreadCache;
 
 /**
  * 当适配器<code>Adapter</code>相关的配置文件不正确，或不正确的
@@ -104,5 +104,7 @@ public class ConfigurationException extends EternaException
 		}
 		return msg;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

@@ -18,7 +18,6 @@ package self.micromagic.eterna.sql;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.util.IntegerRef;
 
 public interface SQLParameterGenerator extends Generator
 {

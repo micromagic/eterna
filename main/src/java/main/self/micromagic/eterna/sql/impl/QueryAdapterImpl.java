@@ -24,10 +24,11 @@ import java.sql.Statement;
 import java.util.List;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.share.EternaException;
+
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultMetaData;
@@ -113,7 +114,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 		}
 		finally
 		{
-			if (this.logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
 			{
 				if (result != null)
 				{
@@ -142,8 +143,8 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 
 	private class ResultSetIteratorImpl extends AbstractResultSetIterator
 	{
-		private ResultReaderManager readerManager;
-		private List readerList;
+		private final ResultReaderManager readerManager;
+		private final List readerList;
 		private ResultMetaData metaData = null;
 
 		public ResultSetIteratorImpl(Connection conn, Statement stmt, ResultSet rs,

@@ -49,6 +49,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
+
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.coder.Base64;
 import self.micromagic.eterna.share.AttributeManager;
@@ -56,8 +57,8 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaFactoryImpl;
 import self.micromagic.eterna.share.EternaInitialize;
 import self.micromagic.eterna.share.Factory;
-import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.FactoryContainer;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringAppender;
@@ -1953,7 +1954,7 @@ public class FactoryManager
 	{
 		private long preInitTime;
 		private long preCheckTime;
-		private long autoReloadTime;
+		private final long autoReloadTime;
 		private ConfigMonitor[] monitors = null;
 		private boolean atInitialize = false;
 
@@ -2175,7 +2176,7 @@ public class FactoryManager
 	/**
 	 * 配置更新的检测器.
 	 */
-	private static class ConfigMonitor
+	static class ConfigMonitor
 	{
 		private File configFile = null;
 		private URL configURL = null;

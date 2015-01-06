@@ -24,7 +24,6 @@ import java.util.Set;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.view.BaseManager;
 import self.micromagic.eterna.view.Function;
 import self.micromagic.eterna.view.ViewAdapter;
 import self.micromagic.eterna.view.ViewAdapterGenerator;

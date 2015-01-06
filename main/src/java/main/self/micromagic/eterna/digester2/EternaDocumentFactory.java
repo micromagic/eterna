@@ -62,4 +62,6 @@ public class EternaDocumentFactory extends DocumentFactory
 	}
 	private Locator documentLocator;
 
+	private static final long serialVersionUID = 1L;
+
 }

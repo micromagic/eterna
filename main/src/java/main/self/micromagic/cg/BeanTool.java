@@ -35,12 +35,32 @@ import java.util.Map;
 import java.util.Set;
 
 import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.util.converter.*;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.SynHashMap;
+import self.micromagic.util.converter.BigIntegerConverter;
+import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.converter.ByteConverter;
+import self.micromagic.util.converter.BytesConverter;
+import self.micromagic.util.converter.CalendarConverter;
+import self.micromagic.util.converter.CharacterConverter;
+import self.micromagic.util.converter.DateConverter;
+import self.micromagic.util.converter.DecimalConverter;
+import self.micromagic.util.converter.DoubleConverter;
+import self.micromagic.util.converter.FloatConverter;
+import self.micromagic.util.converter.IntegerConverter;
+import self.micromagic.util.converter.LongConverter;
+import self.micromagic.util.converter.MapConverter;
+import self.micromagic.util.converter.ReaderConverter;
+import self.micromagic.util.converter.ShortConverter;
+import self.micromagic.util.converter.StreamConverter;
+import self.micromagic.util.converter.StringConverter;
+import self.micromagic.util.converter.TimeConverter;
+import self.micromagic.util.converter.TimestampConverter;
+import self.micromagic.util.converter.UtilDateConverter;
+import self.micromagic.util.converter.ValueConverter;
 
 /**
  * 对bean进行操作的工具.
@@ -396,11 +416,6 @@ public class BeanTool
 		if (bd != null)
 		{
 			beanDescriptorCache.setProperty(beanClass, bd);
-		}
-		else
-		{
-			throw new IllegalArgumentException("Can't create bean properties info for ["
-					+ beanClass + "].");
 		}
 		return bd;
 	}

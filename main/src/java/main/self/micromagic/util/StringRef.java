@@ -55,4 +55,6 @@ public class StringRef extends ObjectRef
 		return (String) this.getObject();
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

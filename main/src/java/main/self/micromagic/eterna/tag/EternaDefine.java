@@ -25,10 +25,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.ViewAdapter;
 import self.micromagic.util.container.RequestParameterMap;
@@ -318,5 +318,7 @@ public class EternaDefine extends InitBaseTag
 	{
 		this.data = data;
 	}
+
+	private static final long serialVersionUID = 1L;
 
 }

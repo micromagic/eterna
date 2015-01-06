@@ -16,8 +16,6 @@
 
 package self.micromagic.grammer;
 
-import self.micromagic.util.Utils;
-
 public abstract class AbstractElement
 		implements GrammerElement
 {

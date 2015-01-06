@@ -103,4 +103,6 @@ public class BooleanRef extends ObjectRef
 		return this.value == ((BooleanRef) other).value;
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

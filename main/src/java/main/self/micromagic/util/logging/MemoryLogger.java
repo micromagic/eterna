@@ -16,20 +16,21 @@
 
 package self.micromagic.util.logging;
 
-import java.util.Iterator;
-import java.util.Date;
-import java.util.Map;
-import java.util.HashMap;
-import java.io.Writer;
 import java.io.IOException;
+import java.io.Writer;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.dom4j.Document;
-import org.dom4j.Element;
 import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
-import self.micromagic.util.FormatTool;
+
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.util.FormatTool;
 
 /**
  * 将日志以XML的形式记录在内存中.
@@ -220,9 +221,10 @@ public class MemoryLogger
 				this.addLog(null, cause, true, null, null, null, null, null, null, causeNode);
 			}
 		}
-		if (AppData.getAppLogType() > 0)
+		AppData aData = AppData.getCurrentData();
+		if (aData.getLogType() > 0)
 		{
-			Element nowNode = AppData.getCurrentData().getCurrentNode();
+			Element nowNode = aData.getCurrentNode();
 			if (nowNode != null)
 			{
 				nowNode.add(logNode.createCopy());

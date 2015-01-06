@@ -46,4 +46,6 @@ public class GrammerException extends Exception
 		return this.checker;
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

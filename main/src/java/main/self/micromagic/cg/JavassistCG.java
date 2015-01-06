@@ -30,12 +30,12 @@ import javassist.ClassPath;
 import javassist.ClassPool;
 import javassist.CtBehavior;
 import javassist.CtClass;
+import javassist.CtConstructor;
 import javassist.CtField;
+import javassist.CtMember;
 import javassist.CtMethod;
 import javassist.Modifier;
 import javassist.NotFoundException;
-import javassist.CtConstructor;
-import javassist.CtMember;
 import javassist.bytecode.Bytecode;
 import javassist.compiler.CompileError;
 import javassist.compiler.JvstCodeGen;
@@ -229,7 +229,7 @@ public class JavassistCG
 			this.delayObjs.clear();
 		}
 
-		private List delayObjs = new ArrayList();
+		private final List delayObjs = new ArrayList();
 
 		/**
 		 * 根据方法的源代码在CtClass中创建一个初始化函数.
@@ -301,6 +301,7 @@ public class JavassistCG
 		/**
 		 * 将一个定义(Declarator)列表转换成CtClass数组
 		 */
+		/*
 		CtClass[] resolveClasses(ASTList list)
 				throws CompileError
 		{
@@ -317,6 +318,7 @@ public class JavassistCG
 			}
 			return cArr;
 		}
+		*/
 
 		/**
 		 * 获取一个CtClass.
@@ -381,8 +383,8 @@ public class JavassistCG
 		/**
 		 * 这里使用<code>WeakReference</code>来引用类, 这样就不会影响其正常的释放.
 		 */
-		private WeakReference baseCL;
-		private String className;
+		private final WeakReference baseCL;
+		private final String className;
 
 		public WeakClassPath(Class c)
 		{
