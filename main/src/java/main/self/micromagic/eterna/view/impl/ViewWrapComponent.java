@@ -21,7 +21,7 @@ import java.util.Iterator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
-import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.view.View;
 import self.micromagic.util.container.UnmodifiableIterator;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -29,10 +29,10 @@ import self.micromagic.util.StringTool;
 public class ViewWrapComponent extends ComponentImpl
 		implements Component
 {
-	protected ViewAdapter view;
+	protected View view;
 	protected boolean needScript = true;
 
-	public ViewWrapComponent(ViewAdapter view)
+	public ViewWrapComponent(View view)
 	{
 		this.view = view;
 	}

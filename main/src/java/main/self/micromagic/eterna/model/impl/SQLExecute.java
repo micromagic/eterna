@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.ArrayList;
 
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.base.Base;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.sql.SQLAdapter;
 
 public abstract class SQLExecute extends AbstractExecute
 		implements Execute
@@ -60,7 +60,7 @@ public abstract class SQLExecute extends AbstractExecute
 		this.binds = tmpList;
 	}
 
-	protected abstract SQLAdapter getSQL() throws EternaException;
+	protected abstract Base getSQL() throws EternaException;
 
 	public boolean isPushResult()
 	{

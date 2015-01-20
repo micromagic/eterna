@@ -19,39 +19,40 @@ package self.micromagic.eterna.model.impl;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Iterator;
-import java.util.Collection;
-import java.util.Arrays;
-import java.util.Enumeration;
 
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.digester.ObjectCreateRule;
+import org.apache.commons.collections.iterators.EnumerationIterator;
+import org.dom4j.Element;
+
+import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.TransExecuteGenerator;
 import self.micromagic.eterna.model.TransOperator;
-import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.util.converter.StringConverter;
-import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.Tool;
+import self.micromagic.util.StringRef;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.container.PreFetchIterator;
+import self.micromagic.util.converter.DateConverter;
+import self.micromagic.util.converter.DoubleConverter;
 import self.micromagic.util.converter.IntegerConverter;
 import self.micromagic.util.converter.LongConverter;
-import self.micromagic.util.converter.DoubleConverter;
+import self.micromagic.util.converter.StringConverter;
 import self.micromagic.util.converter.TimeConverter;
-import self.micromagic.util.converter.DateConverter;
 import self.micromagic.util.converter.TimestampConverter;
-import self.micromagic.eterna.search.SearchAdapter;
-import self.micromagic.eterna.search.SearchManager;
-import self.micromagic.util.StringTool;
-import self.micromagic.util.StringRef;
-import self.micromagic.util.container.PreFetchIterator;
-import org.dom4j.Element;
-import org.apache.commons.collections.iterators.EnumerationIterator;
+import self.micromagic.util.converter.ValueConverter;
 
 public class TransExecute extends AbstractExecute
 		implements Execute, TransExecuteGenerator
@@ -120,7 +121,7 @@ public class TransExecute extends AbstractExecute
 		{
 			try
 			{
-				this.opt = (TransOperator) ObjectCreateRule.createObject(opt.substring(6));
+				this.opt = (TransOperator) Tool.createObject(opt.substring(6));
 			}
 			catch (Exception ex)
 			{
@@ -282,7 +283,7 @@ public class TransExecute extends AbstractExecute
 	private static class TransResultValue
 			implements TransOperator
 	{
-		private String param;
+		private final String param;
 		private boolean useFormated = true;
 
 		public TransResultValue(String param)
@@ -328,7 +329,7 @@ public class TransExecute extends AbstractExecute
 	private static class TransMapValue
 			implements TransOperator
 	{
-		private String param;
+		private final String param;
 
 		public TransMapValue(String param)
 		{
@@ -350,7 +351,7 @@ public class TransExecute extends AbstractExecute
 			else if (value instanceof SearchManager)
 			{
 				SearchManager sm = (SearchManager) value;
-				SearchManager.Condition condition = sm.getCondition(this.param);
+				SearchManager.ConditionInfo condition = sm.getCondition(this.param);
 				return condition != null ? condition.value : null;
 			}
 			throw new EternaException("Error Object type:" + value.getClass() + ".");
@@ -491,9 +492,9 @@ public class TransExecute extends AbstractExecute
 			{
 				return value;
 			}
-			if (value instanceof SearchAdapter.Result)
+			if (value instanceof SearchResult)
 			{
-				return ((SearchAdapter.Result) value).queryResult;
+				return ((SearchResult) value).queryResult;
 			}
 			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
@@ -530,9 +531,9 @@ public class TransExecute extends AbstractExecute
 				}
 				return ritr;
 			}
-			if (value instanceof SearchAdapter.Result)
+			if (value instanceof SearchResult)
 			{
-				ResultIterator ritr = ((SearchAdapter.Result) value).queryResult;
+				ResultIterator ritr = ((SearchResult) value).queryResult;
 				try
 				{
 					ritr.beforeFirst();
@@ -585,9 +586,9 @@ public class TransExecute extends AbstractExecute
 			{
 				return value;
 			}
-			if (value instanceof SearchAdapter.Result)
+			if (value instanceof SearchResult)
 			{
-				ResultIterator ritr = ((SearchAdapter.Result) value).queryResult;
+				ResultIterator ritr = ((SearchResult) value).queryResult;
 				if (ritr.hasNext())
 				{
 					try
@@ -616,7 +617,7 @@ public class TransExecute extends AbstractExecute
 	{
 		static TransToArray instance = new TransToArray();
 
-		private String param;
+		private final String param;
 
 		public TransToArray(String param)
 		{
@@ -671,7 +672,7 @@ public class TransExecute extends AbstractExecute
 	private static class TransToWatendType
 			implements TransOperator
 	{
-		private ValueConverter converter;
+		private final ValueConverter converter;
 
 		public TransToWatendType(ValueConverter converter)
 		{

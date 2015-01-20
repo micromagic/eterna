@@ -23,7 +23,7 @@ import javax.servlet.jsp.JspWriter;
 
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.view.View;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringTool;
 
@@ -78,7 +78,7 @@ public class EternaInit extends InitBaseTag
 		}
 		catch (Exception ex)
 		{
-			DefaultFinder.log.error("Error in get js res.", ex);
+			log.error("Error in get js res.", ex);
 		}
 		INIT_JS = js;
 	}
@@ -101,10 +101,10 @@ public class EternaInit extends InitBaseTag
 			String viewTag = this.view == null ? VIEW_TAG : this.view;
 			String appDataTag = this.appData == null ? APPDATA_TAG : this.appData;
 			JspWriter out = this.pageContext.getOut();
-			ViewAdapter view = (ViewAdapter) this.pageContext.findAttribute(viewTag);
+			View view = (View) this.pageContext.findAttribute(viewTag);
 			AppData data = (AppData) this.pageContext.findAttribute(appDataTag);
 			String dataType = view.getDataType(data);
-			if (ViewAdapter.DATA_TYPE_WEB.equals(dataType))
+			if (View.DATA_TYPE_WEB.equals(dataType))
 			{
 				this.includeBody = true;
 				this.printInitPage(view, data, out);
@@ -118,11 +118,11 @@ public class EternaInit extends InitBaseTag
 		}
 		catch (EternaException ex)
 		{
-			DefaultFinder.log.warn("Error in init.", ex);
+			log.warn("Error in init.", ex);
 		}
 		catch (Throwable ex)
 		{
-			DefaultFinder.log.error("Other Error in init.", ex);
+			log.error("Other Error in init.", ex);
 		}
 		return SKIP_BODY;
 	}
@@ -169,7 +169,7 @@ public class EternaInit extends InitBaseTag
 		}
 		catch (Throwable ex)
 		{
-			DefaultFinder.log.error("Other Error in init.", ex);
+			log.error("Other Error in init.", ex);
 		}
 		return EVAL_PAGE;
 	}
@@ -177,7 +177,7 @@ public class EternaInit extends InitBaseTag
 	/**
 	 * 输出初始化的脚本.
 	 */
-	private void printInitScript(ViewAdapter view, AppData data, JspWriter out)
+	private void printInitScript(View view, AppData data, JspWriter out)
 			throws IOException, EternaException
 	{
 		out.println("<script type=\"text/javascript\">");
@@ -191,7 +191,7 @@ public class EternaInit extends InitBaseTag
 	/**
 	 * 打印Eterna的初始化脚本.
 	 */
-	private void printEternaScript(ViewAdapter view, AppData data, JspWriter out)
+	private void printEternaScript(View view, AppData data, JspWriter out)
 			throws IOException, EternaException
 	{
 		// 定义初始化Eterna的变量
@@ -247,7 +247,7 @@ public class EternaInit extends InitBaseTag
 	/**
 	 * 输出初始化的页面.
 	 */
-	private void printInitPage(ViewAdapter view, AppData data, JspWriter out)
+	private void printInitPage(View view, AppData data, JspWriter out)
 			throws IOException, EternaException
 	{
 		if (this.printHTML == PRINT_HTML_ALL)

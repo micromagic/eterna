@@ -36,7 +36,7 @@ import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.DataSourceManager;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.view.View;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.Utility;
 import self.micromagic.util.StringAppender;
@@ -438,10 +438,10 @@ public class ModelCallerImpl
 			throws EternaException, IOException
 	{
 		StringAppender buf = StringTool.createStringAppender(512);
-		String dataType = data.getRequestParameter(ViewAdapter.DATA_TYPE);
+		String dataType = data.getRequestParameter(View.DATA_TYPE);
 		if (dataType != null)
 		{
-			buf.append(ViewAdapter.DATA_TYPE).append('=').append(URLEncoder.encode(dataType, charset));
+			buf.append(View.DATA_TYPE).append('=').append(URLEncoder.encode(dataType, charset));
 		}
 		Iterator params = data.dataMap.entrySet().iterator();
 		while (params.hasNext())

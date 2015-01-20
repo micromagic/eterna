@@ -18,8 +18,9 @@ package self.micromagic.eterna.view;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 
-public interface Function
+public interface Function extends EternaObject
 {
 	public static final String ETERNA_FUNCTION_BEGIN = "{$eternaFunction:";
 	public static final String ETERNA_FUNCTION_END = "}";
@@ -32,6 +33,6 @@ public interface Function
 
 	EternaFactory getFactory() throws EternaException;
 
-	ViewAdapter.ViewRes getViewRes() throws EternaException;
+	View.ViewRes getViewRes() throws EternaException;
 
 }

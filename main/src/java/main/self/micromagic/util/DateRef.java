@@ -49,9 +49,9 @@ public class DateRef extends ObjectRef
 		{
 			try
 			{
-				return DateRef.format.parse((String) obj);
+				return FormatTool.getThreadFormat(DateRef.format).parse((String) obj);
 			}
-			catch (ParseException e) {}
+			catch (ParseException ex) {}
 		}
 		return null;
 	}

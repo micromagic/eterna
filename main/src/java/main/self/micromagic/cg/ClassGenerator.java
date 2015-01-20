@@ -19,15 +19,15 @@ package self.micromagic.cg;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
-import self.micromagic.util.StringTool;
-import self.micromagic.util.Utility;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 /**
  * 一个类的自动编译及生成工具.
@@ -55,12 +55,12 @@ public class ClassGenerator
 	private String className;
 	private ClassLoader classLoader;
 	private Class superClass;
-	private List interfaces = new ArrayList();
-	private Set importPackages = new HashSet();
-	private Map classPathCache = new HashMap();
-	private List fields = new ArrayList();
-	private List constructors = new ArrayList();
-	private List methods = new ArrayList();
+	private final List interfaces = new ArrayList();
+	private final Set importPackages = new HashSet();
+	private final Map classPathCache = new HashMap();
+	private final List fields = new ArrayList();
+	private final List constructors = new ArrayList();
+	private final List methods = new ArrayList();
 	private String compileType;
 
 	/**
@@ -599,6 +599,7 @@ public class ClassGenerator
 			// 如果出现异常, 这可能是jdk版本小于1.5, 使用getName方法来获取类名
 			nameAccessor = new ClassNameAccessor();
 			if (!(ex instanceof UnsupportedClassVersionError || ex instanceof LinkageError
+					|| ex instanceof ClassNotFoundException
 					|| ex.getCause() instanceof UnsupportedClassVersionError))
 			{
 				// 当不是版本相关的异常时, 才记录日志

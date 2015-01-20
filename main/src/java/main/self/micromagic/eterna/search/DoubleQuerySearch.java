@@ -22,21 +22,21 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.base.Query;
+import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.base.ResultReaderManager;
+import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.base.preparer.CreaterManager;
+import self.micromagic.eterna.base.preparer.PreparerCreater;
+import self.micromagic.eterna.base.preparer.PreparerManager;
+import self.micromagic.eterna.base.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.search.impl.SearchAdapterImpl;
-import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.sql.QueryAdapter;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.ResultReaderManager;
-import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.eterna.sql.preparer.PreparerManager;
-import self.micromagic.eterna.sql.preparer.ValuePreparer;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreater;
-import self.micromagic.eterna.security.UserManager;
-import self.micromagic.eterna.security.User;
+import self.micromagic.eterna.search.impl.SearchImpl;
 import self.micromagic.eterna.security.EmptyPermission;
+import self.micromagic.eterna.security.User;
+import self.micromagic.eterna.security.UserManager;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.BooleanRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -61,15 +61,15 @@ import self.micromagic.util.StringTool;
  *
  * @author micromagic@sina.com
  */
-public class DoubleQuerySearch extends SearchAdapterImpl
-		implements SearchAdapter, SearchAdapterGenerator
+public class DoubleQuerySearch extends SearchImpl
+		implements Search
 {
 	private String sessionNextQueryTag;
 	private int nextQueryIndex;
 	private int keyConditionIndex = 1;
 	private int[] keyIndexs;
 	private String[] colNames;
-	private ValuePreparerCreater[] vpcs;
+	private PreparerCreater[] prepares;
 	private int assistSearchIndex = -1;
 	private boolean sameSearch = false;
 	private boolean needAssistCondition = false;
@@ -79,17 +79,13 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 	 */
 	private int conditionItemSize = 0;
 
-	private boolean initialized = false;
-
-	public void initialize(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (super.initialize(factory))
 		{
-			return;
+			return true;
 		}
-		this.initialized = true;
-		super.initialize(factory);
 		String tmp;
 
 		tmp = (String) this.getAttribute("nextQueryName");
@@ -98,7 +94,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 			throw new EternaException("Not found attribute [nextQueryName].");
 		}
 		this.sessionNextQueryTag = "q:" + tmp + ":" + factory.getFactoryContainer().getId();
-		this.nextQueryIndex = factory.getQueryAdapterId(tmp);
+		this.nextQueryIndex = factory.findObjectId(tmp);
 		tmp = (String) this.getAttribute("keyConditionIndex");
 		if (tmp != null)
 		{
@@ -111,11 +107,11 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 			throw new EternaException("Not found attribute [keyNameList].");
 		}
 		String[] keyList = StringTool.separateString(tmp, ",", true);
-		QueryAdapter keyQuery = factory.createQueryAdapter(this.getQueryName());
+		Query keyQuery = factory.createQueryAdapter(this.getQueryName());
 		ResultReaderManager keyReaders = keyQuery.getReaderManager();
 		this.keyIndexs = new int[keyList.length];
 		this.colNames = new String[keyList.length];
-		this.vpcs = new ValuePreparerCreater[keyList.length];
+		this.prepares = new PreparerCreater[keyList.length];
 		for (int i = 0; i < keyList.length; i++)
 		{
 			String str = keyList[i];
@@ -131,8 +127,8 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 				colN = str.substring(tmpI + 1);
 			}
 			this.keyIndexs[i] = keyReaders.getIndexByName(keyN);
-			this.vpcs[i] = factory.createValuePreparerCreater(
-					TypeManager.getPureType(keyReaders.getReaderInList(this.keyIndexs[i] - 1).getType()));
+			int typeId = keyReaders.getReaderInList(this.keyIndexs[i] - 1).getType();
+			this.prepares[i] = CreaterManager.createPrepare(typeId, null, factory);
 			this.colNames[i] = colN;
 			this.conditionItemSize += colN.length() + 4;
 			if (i > 1)
@@ -150,7 +146,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 			}
 			else
 			{
-				this.assistSearchIndex = factory.getSearchAdapterId(tmp);
+				this.assistSearchIndex = factory.findObjectId(tmp);
 				this.needAssistCondition = true;
 			}
 		}
@@ -159,9 +155,11 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 		{
 			this.needAssistCondition = "true".equalsIgnoreCase(tmp);
 		}
+
+		return false;
 	}
 
-	public Result doSearch(AppData data, Connection conn)
+	public SearchResult doSearch(AppData data, Connection conn)
 			throws EternaException, SQLException
 	{
 		if (this.needSynchronize)
@@ -174,15 +172,15 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 		return this.doSearch0(data, conn);
 	}
 
-	protected Result doSearch0(AppData data, Connection conn)
+	protected SearchResult doSearch0(AppData data, Connection conn)
 			throws EternaException, SQLException
 	{
-		Result result = super.doSearch0(data, conn, true);
+		SearchResult result = super.doSearch0(data, conn, true);
 		ResultIterator ritr = result.queryResult;
-		QueryAdapter nextQuery;
+		Query nextQuery;
 		if (this.sameSearch || this.assistSearchIndex != -1)
 		{
-			SearchAdapter assistSearch = this.sameSearch ? this
+			Search assistSearch = this.sameSearch ? this
 					: this.getFactory().createSearchAdapter(this.assistSearchIndex);
 			BooleanRef first = new BooleanRef();
 			SearchManager manager = assistSearch.getSearchManager(data);
@@ -236,15 +234,15 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 			}
 		}
 		nextQuery.setTotalCount(ritr.getRealRecordCount(),
-				new QueryAdapter.TotalCountExt(ritr.isHasMoreRecord(), ritr.isRealRecordCountAvailable()));
+				new Query.TotalCountExt(ritr.isHasMoreRecord(), ritr.isRealRecordCountAvailable()));
 		this.setNextQueryCondition(ritr, nextQuery);
-		return new Result(result, nextQuery.getName(), nextQuery.executeQuery(conn));
+		return new SearchResult(result, nextQuery.getName(), nextQuery.executeQuery(conn));
 	}
 
 	/**
 	 * 获取执行第二次查询的query对象.
 	 */
-	private void setNextQueryCondition(ResultIterator keyIterator, QueryAdapter nextQuery)
+	private void setNextQueryCondition(ResultIterator keyIterator, Query nextQuery)
 			throws EternaException, SQLException
 	{
 		boolean multiKey = this.keyIndexs.length > 1;
@@ -280,7 +278,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 					}
 					else
 					{
-						ValuePreparer vp = this.vpcs[i].createPreparer(keyValue);
+						ValuePreparer vp = this.prepares[i].createPreparer(keyValue);
 						vp.setRelativeIndex(++vpIndex);
 						vpList.add(vp);
 						buf.append(this.colNames[i]).append(" = ?");

@@ -47,10 +47,12 @@ public interface ElementProcessor
 	 * 根据配置解析元素节点的处理器.
 	 *
 	 * @param digester  文档解析工具
+	 * @param rule      所属的处理规则
 	 * @param config    配置信息
 	 * @param position  读取的起始位置
 	 * @return  解析出来的元素节点的处理器
 	 */
-	ElementProcessor parse(Digester digester, String config, IntegerRef position);
+	ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position);
 
 }

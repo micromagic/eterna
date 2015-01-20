@@ -16,12 +16,13 @@
 
 package self.micromagic.eterna.digester2;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.dom4j.Element;
-import self.micromagic.util.container.ThreadCache;
+
 import self.micromagic.util.IntegerRef;
+import self.micromagic.util.container.ThreadCache;
 
 /**
  * 检查父配置中的对象是否与子配置中相同.
@@ -36,7 +37,8 @@ public class SameCheck
 	}
 	private static SameCheck instance = new SameCheck();
 
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		int nBegin = position.value += 1;
 		int nEnd = ParseRule.findItemEnd(config, position);
@@ -55,10 +57,15 @@ public class SameCheck
 
 	public boolean begin(Digester digester, Element element)
 	{
-		String objFlag = element.getName();
+		String objType = element.getName();
+		String objFlag;
 		if (this.attrName != null)
 		{
-			objFlag = objFlag + ":" + element.attributeValue(this.attrName);
+			objFlag = element.attributeValue(this.attrName);
+		}
+		else
+		{
+			objFlag = "$".concat(objType);
 		}
 		ThreadCache cache = ThreadCache.getInstance();
 		Map dealedObjMap = (Map) cache.getProperty(DEALED_OBJECT_MAP);
@@ -67,21 +74,36 @@ public class SameCheck
 			dealedObjMap = new HashMap();
 			cache.setProperty(DEALED_OBJECT_MAP, dealedObjMap);
 		}
-		boolean hasObj = dealedObjMap.put(objFlag, Boolean.TRUE) != null;
-		if (hasObj && ContainerManager.getSuperInitLevel() > 0)
+		String oldType = (String) dealedObjMap.put(objFlag, objType);
+		if (oldType != null && ContainerManager.getSuperInitLevel() > 0)
 		{
-			if (ContainerManager.log.isDebugEnabled())
+			if (!oldType.equals(objType))
 			{
-				ContainerManager.log.debug(objFlag + " has bean overwrited.");
+				Digester.log.error("The object [" + objFlag + "] is "
+						+ objType + ", but supper is " + oldType + ".");
+			}
+			else if (Digester.log.isDebugEnabled())
+			{
+				String tmpName = this.attrName == null ? objType
+						: objType + ":" + objFlag;
+				Digester.log.debug(tmpName + " has bean overwrited.");
 			}
 			return false;
 		}
 		return true;
 	}
-	static final String DEALED_OBJECT_MAP = "_eterna.parse.dealedObj_";
+	private static final String DEALED_OBJECT_MAP = "eterna.parse.dealedObj";
 
 	public void end(Digester digester, Element element)
 	{
+	}
+
+	/**
+	 * 清除记录的处理对象.
+	 */
+	static void clearDealedMap()
+	{
+		ThreadCache.getInstance().removeProperty(DEALED_OBJECT_MAP);
 	}
 
 }

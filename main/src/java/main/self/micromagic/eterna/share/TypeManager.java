@@ -16,20 +16,22 @@
 
 package self.micromagic.eterna.share;
 
-import java.sql.Types;
-import java.util.HashMap;
-import java.util.Map;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
 
 import self.micromagic.util.Utility;
-import self.micromagic.util.converter.ValueConverter;
 import self.micromagic.util.converter.ConverterFinder;
+import self.micromagic.util.converter.ValueConverter;
 
 public class TypeManager
 {
-	public static final int TYPE_IGNORE = 0;
+	public static final int TYPE_NULL = 0;
 	public static final int TYPE_STRING = 1;
 	public static final int TYPE_INTEGER = 2;
 	public static final int TYPE_DOUBLE = 3;
@@ -45,15 +47,17 @@ public class TypeManager
 	public static final int TYPE_OBJECT = 13;
 	public static final int TYPE_BIGSTRING = 14;
 	public static final int TYPE_STREAM = 15;
-	public static final int TYPE_READER = 16;
+	public static final int TYPE_CHARS = 16;
 	public static final int TYPE_DECIMAL = 17;
+	public static final int TYPE_BLOB = 18;
+	public static final int TYPE_CLOB = 19;
 
-	public static final int TYPES_COUNT = 18;
+	public static final int TYPES_COUNT = 20;
 
 	private static Map typeMap = new HashMap();
 
 	private static int[] SQL_TYPES = new int[]{
-		Types.NULL,           //TYPE_IGNORE
+		Types.NULL,           //TYPE_NULL
 		Types.VARCHAR,        //TYPE_STRING
 		Types.INTEGER,        //TYPE_INTEGER
 		Types.DOUBLE,         //TYPE_DOUBLE
@@ -70,11 +74,13 @@ public class TypeManager
 		Types.LONGVARCHAR,    //TYPE_BIGSTRING
 		Types.LONGVARBINARY,  //TYPE_STREAM
 		Types.LONGVARCHAR,    //TYPE_READER
-		Types.DECIMAL         //TYPE_DECIMAL
+		Types.DECIMAL,        //TYPE_DECIMAL
+		Types.BLOB,           //TYPE_BLOB
+		Types.CLOB            //TYPE_CLOB
 	};
 
 	private static String[] typeNames = {
-		"ignore",
+		"null",
 		"String",
 		"int",
 		"double",
@@ -90,8 +96,10 @@ public class TypeManager
 		"Object",
 		"BigString",
 		"Stream",
-		"Reader",
-		"Decimal"
+		"Chars",
+		"Decimal",
+		"Blob",
+		"Clob"
 	};
 
 	private static ValueConverter[] converters;
@@ -113,12 +121,14 @@ public class TypeManager
 		String.class,
 		InputStream.class,
 		Reader.class,
-		BigDecimal.class
+		BigDecimal.class,
+		Blob.class,
+		Clob.class
 	};
 
 	static
 	{
-		typeMap.put("ignore", Utility.INTEGER_0);
+		typeMap.put("null", Utility.INTEGER_0);
 		typeMap.put("String", Utility.INTEGER_1);
 		typeMap.put("int", Utility.INTEGER_2);
 		typeMap.put("double", Utility.INTEGER_3);
@@ -137,6 +147,8 @@ public class TypeManager
 		typeMap.put("Stream", Utility.INTEGER_15);
 		typeMap.put("Reader", new Integer(16));
 		typeMap.put("Decimal", new Integer(17));
+		typeMap.put("Blob", new Integer(18));
+		typeMap.put("Clob", new Integer(19));
 
 		converters = new ValueConverter[javaTypes.length];
 		for (int i = 0; i < javaTypes.length; i++)
@@ -145,7 +157,10 @@ public class TypeManager
 			if (type != null)
 			{
 				converters[i] = ConverterFinder.findConverter(type, true);
-				converters[i].setNeedThrow(false);
+				if (converters[i] != null)
+				{
+					converters[i].setNeedThrow(false);
+				}
 			}
 		}
 	}
@@ -155,13 +170,13 @@ public class TypeManager
 	 *
 	 * @param name   类型的名称
 	 * @return    与类型名称对应的id, 如果该类型名称没有对应的类型id则
-	 *            返回TYPE_IGNORE
+	 *            返回TYPE_NULL
 	 */
 	public static int getTypeId(String name)
 	{
 		if (name == null)
 		{
-			return TYPE_IGNORE;
+			return TYPE_NULL;
 		}
 		int param = 0;
 		name = name.trim();
@@ -186,7 +201,7 @@ public class TypeManager
 			catch (Exception ex){}
 		}
 		Integer i = (Integer) typeMap.get(name);
-		return i == null ? TYPE_IGNORE : i.intValue() | param;
+		return i == null ? TYPE_NULL : i.intValue() | param;
 	}
 
 	/**
@@ -195,16 +210,28 @@ public class TypeManager
 	 * 如: 长度 精度等.
 	 *
 	 * @param id  类型的id
-	 * @return   纯类型id, 如果给出的类型id无效则返回TYPE_IGNORE
+	 * @return   纯类型id, 如果给出的类型id无效则返回TYPE_NULL
 	 */
 	public static int getPureType(int id)
 	{
 		int realId = id & 0xff;
 		if (realId < 0 || realId >= typeNames.length)
 		{
-			return TYPE_IGNORE;
+			return TYPE_NULL;
 		}
 		return realId;
+	}
+
+	/**
+	 * 根据类型id获取纯类型的名称.
+	 *
+	 * @param id  类型的id
+	 * @return  与此类型id对应的纯类型名称, 如果给出的类型id无效
+	 *          则返回null
+	 */
+	public static String getPureTypeName(int id)
+	{
+		return getTypeName(getPureType(id));
 	}
 
 	/**
@@ -238,7 +265,7 @@ public class TypeManager
 	 */
 	public static int transSQLType(int sqlType)
 	{
-      for (int i = 0; i < SQL_TYPES.length; i++)
+		for (int i = 0; i < SQL_TYPES.length; i++)
 		{
 			if (sqlType == SQL_TYPES[i])
 			{
@@ -298,12 +325,28 @@ public class TypeManager
 	}
 
 	/**
+	 * 判断给出的类型id是否是一个布尔类型.
+	 *
+	 * @param id  类型的id
+	 * @return  true表示此类型id为一个数字类型
+	 */
+	public static boolean isBoolean(int id)
+	{
+		int realId = id & 0xff;
+		if (realId < 0 || realId >= typeNames.length)
+		{
+			return false;
+		}
+		return realId == TYPE_BOOLEAN;
+	}
+
+	/**
 	 * 判断给出的类型id是否是一个数字类型.
 	 *
 	 * @param id  类型的id
 	 * @return  true表示此类型id为一个数字类型
 	 */
-	public static boolean isTypeNumber(int id)
+	public static boolean isNumber(int id)
 	{
 		int realId = id & 0xff;
 		if (realId < 0 || realId >= typeNames.length)
@@ -321,7 +364,7 @@ public class TypeManager
 	 * @param id  类型的id
 	 * @return  true表示此类型id为一个日期类型
 	 */
-	public static boolean isTypeDate(int id)
+	public static boolean isDate(int id)
 	{
 		int realId = id & 0xff;
 		if (realId < 0 || realId >= typeNames.length)
@@ -337,7 +380,7 @@ public class TypeManager
 	 * @param id  类型的id
 	 * @return  true表示此类型id为一个字符串类型
 	 */
-	public static boolean isTypeString(int id)
+	public static boolean isString(int id)
 	{
 		int realId = id & 0xff;
 		if (realId < 0 || realId >= typeNames.length)

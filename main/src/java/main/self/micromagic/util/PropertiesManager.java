@@ -16,32 +16,33 @@
 
 package self.micromagic.util;
 
-import java.util.Properties;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Enumeration;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.HashSet;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Method;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
+
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ConverterFinder;
-import self.micromagic.cg.ClassGenerator;
 
 /**
  * 配置属性的管理器.
@@ -54,12 +55,7 @@ public class PropertiesManager
 	 * 默认的配置文件名.
 	 * 注: 配置文件都必须在classpath下.
 	 */
-	public static final String PROPERTIES_NAME = "micromagic_config.properties";
-
-	/**
-	 * 存放父配置文件名的属性.
-	 */
-	public static final String PARENT_PROPERTIES_OLD = "self.micromagic.parent.properties";
+	public static final String PROPERTIES_NAME = "eterna.config";
 
 	/**
 	 * 存放父配置文件名的属性.
@@ -90,27 +86,27 @@ public class PropertiesManager
 	 * 配置文件名.
 	 * 注: 配置文件都必须在classpath下.
 	 */
-	private String propName;
+	private final String propName;
 
 	/**
 	 * 读取配置文件所使用的<code>ClassLoader</code>.
 	 */
-	private ClassLoader classLoader;
+	private final ClassLoader classLoader;
 
 	/**
 	 * 当前所读取的配置属性.
 	 */
-	private Properties properties = new Properties();
+	private final Properties properties = new Properties();
 
 	/**
 	 * 属性变化监听者列表.
 	 */
-	private List plList = new LinkedList();
+	private final List plList = new LinkedList();
 
 	/**
 	 * 配置属性的管理器中, 默认的属性变化监听者.
 	 */
-	private DefaultPropertyListener defaultPL = new DefaultPropertyListener();
+	private final DefaultPropertyListener defaultPL = new DefaultPropertyListener();
 
 	/**
 	 * 是否需要将系统的properties的值作为默认值.
@@ -120,7 +116,7 @@ public class PropertiesManager
 	/**
 	 * 父配置管理器.
 	 */
-	private PropertiesManager parent;
+	private final PropertiesManager parent;
 
 	/**
 	 * 默认的构造函数.
@@ -217,7 +213,6 @@ public class PropertiesManager
 			}
 			temp.remove(CHILD_PROPERTIES);
 			temp.remove(PARENT_PROPERTIES);
-			temp.remove(PARENT_PROPERTIES_OLD);
 			String sd = (String) temp.remove(SYSTEM_DEFAULT);
 			if (sd != null)
 			{
@@ -283,8 +278,7 @@ public class PropertiesManager
 		temp.load(inStream);
 		inStream.close();
 		this.loadChildProperties(temp, this.properties.getProperty(CHILD_PROPERTIES));
-		String oldParent = this.properties.getProperty(PARENT_PROPERTIES_OLD);
-		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES, oldParent));
+		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES));
 		return temp;
 	}
 
@@ -654,7 +648,7 @@ public class PropertiesManager
 			throws IOException
 	{
 		String pName = nowName != null ? nowName : props.getProperty(PARENT_PROPERTIES);
-		if (pName == null && (pName = props.getProperty(PARENT_PROPERTIES_OLD)) == null)
+		if (pName == null)
 		{
 			return;
 		}
@@ -841,7 +835,7 @@ public class PropertiesManager
 		/**
 		 * 当前的配置属性管理器.
 		 */
-		private WeakReference nowPM;
+		private final WeakReference nowPM;
 
 		public ParentPropertyListener(PropertiesManager pm)
 		{
@@ -873,7 +867,7 @@ public class PropertiesManager
 	private static class DefaultPropertyListener
 			implements PropertyListener
 	{
-		private Map propertyMap = new HashMap();
+		private final Map propertyMap = new HashMap();
 
 		public synchronized void addPropertyManager(String key, PropertyManager pm)
 		{
@@ -985,12 +979,12 @@ public class PropertiesManager
 		/**
 		 * 对应属性的键值.
 		 */
-		private String key;
+		private final String key;
 
 		/**
 		 * 这里使用<code>WeakReference</code>来引用对应的类, 并在其释放时删除本属性管理者.
 		 */
-		private WeakReference baseClass;
+		private final WeakReference baseClass;
 
 		/**
 		 * 这里使用<code>WeakReference</code>来引用对应的成员, 这样不会影响类的正常释放.
@@ -1000,17 +994,17 @@ public class PropertiesManager
 		/**
 		 * 要操作的成员名称.
 		 */
-		private String optMemberName;
+		private final String optMemberName;
 
 		/**
 		 * 标识是否是属性成员, <code>true</code>表示属性成员, <code>false</code>表示方法成员.
 		 */
-		private boolean fieldMember;
+		private final boolean fieldMember;
 
 		/**
 		 * 该配置管理器所在的listener.
 		 */
-		private DefaultPropertyListener listener;
+		private final DefaultPropertyListener listener;
 
 		private PropertyManager(String key, boolean fieldMember, Class baseClass, Member optMember,
 				DefaultPropertyListener listener)
@@ -1217,7 +1211,7 @@ public class PropertiesManager
 
 	private static class BaseClassRef extends WeakReference
 	{
-		private PropertyManager pm;
+		private final PropertyManager pm;
 
 		public BaseClassRef(PropertyManager pm, Object baseClass, ReferenceQueue q)
 		{

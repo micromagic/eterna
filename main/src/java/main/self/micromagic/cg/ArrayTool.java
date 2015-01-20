@@ -25,7 +25,7 @@ import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.converter.ValueConverter;
-import self.micromagic.eterna.sql.ResultRow;
+import self.micromagic.eterna.base.ResultRow;
 
 /**
  * 管理数组相关的自动处理代码.
@@ -242,7 +242,7 @@ public class ArrayTool
 		{
 			throw ex;
 		}
-		catch (Exception ex)
+		catch (Throwable ex)
 		{
 			throw new CGException(ex);
 		}
@@ -338,7 +338,7 @@ public class ArrayTool
 		// 实现接口中不带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object converter, boolean needThrow)").appendln()
-				.append("      throws Exception").appendln().append('{').appendln();
+				.append("      throws Throwable").appendln().append('{').appendln();
 		BeanTool.codeRes.printRes("convertArrayType", tmpParam, 0, fnCode)
 				.appendln().append('}');
 		cg.addMethod(fnCode.toString());
@@ -347,7 +347,7 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object destArr, Object converter, boolean needThrow)")
 				.appendln()
-				.append("      throws Exception").appendln().append('{').appendln();
+				.append("      throws Throwable").appendln().append('{').appendln();
 		BeanTool.codeRes.printRes("convertArrayType.withDest", tmpParam, 0, fnCode)
 				.appendln().append('}');
 		cg.addMethod(fnCode.toString());
@@ -361,7 +361,7 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray(Object").append(srcVLStr)
 				.append(" array0, Object converter, boolean needThrow)").appendln()
-				.append("      throws Exception").appendln().append('{').appendln();
+				.append("      throws Throwable").appendln().append('{').appendln();
 		fnCode.append(destType).append(destVLStr).append(" destArr0 = new ")
 				.append(destType).append("[array0.length]").append(destVLStr.substring(2)).append(';').appendln();
 		appendConvertArrayCode(fnCode, cellType, srcVLStr.substring(2), destVLStr.substring(2),
@@ -374,7 +374,7 @@ public class ArrayTool
 		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray(Object").append(srcVLStr)
 				.append(" array0, ").append(destType).append(destVLStr)
 				.append(" destArr0, Object converter, boolean needThrow)").appendln()
-				.append("      throws Exception").appendln().append('{').appendln();
+				.append("      throws Throwable").appendln().append('{').appendln();
 		fnCode.append("if (destArr0 == null)").appendln().append('{').appendln()
 				.append("return this.convertArray(array0, converter, needThrow);").appendln().append('}')
 				.appendln();
@@ -615,7 +615,7 @@ public class ArrayTool
 		{
 			return ac == null ? null : ac.convertArray(array, null, false);
 		}
-		catch (Exception ex)
+		catch (Throwable ex)
 		{
 			throw new RuntimeException(ex);
 		}
@@ -671,7 +671,7 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("private Map").append(arrVLStr)
 				.append(" convertArray(Object").append(arrVLStr).append(" array0, Object converter)").appendln()
-				.append("      throws Exception").appendln().append('{').appendln();
+				.append("      throws Throwable").appendln().append('{').appendln();
 		fnCode.append("Map").append(arrVLStr).append(" destArr0 = new Map[array0.length]")
 				.append(arrVLStr.substring(2)).append(';').appendln();
 		appendBeanArray2MapCode(fnCode, arrVLStr.substring(2), tmpParam, 0, level);
@@ -681,7 +681,7 @@ public class ArrayTool
 		// 实现接口中不带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object converter, boolean needThrow)").appendln()
-				.append("      throws Exception").appendln().append('{').appendln()
+				.append("      throws Throwable").appendln().append('{').appendln()
 				.append("return this.convertArray((Object").append(arrVLStr).append(") array, converter);")
 				.appendln().append('}');
 		cg.addMethod(fnCode.toString());
@@ -690,7 +690,7 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object destArr, Object converter, boolean needThrow)")
 				.appendln()
-				.append("      throws Exception").appendln().append('{').appendln()
+				.append("      throws Throwable").appendln().append('{').appendln()
 				.append("return null;").appendln().append('}');
 		cg.addMethod(fnCode.toString());
 	}

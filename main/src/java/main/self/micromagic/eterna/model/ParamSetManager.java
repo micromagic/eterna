@@ -21,37 +21,39 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.base.Parameter;
+import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.base.preparer.CreaterManager;
+import self.micromagic.eterna.base.preparer.PreparerManager;
+import self.micromagic.eterna.base.preparer.ValuePreparer;
 import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.eterna.sql.SQLAdapter;
-import self.micromagic.eterna.sql.SQLParameter;
-import self.micromagic.eterna.sql.preparer.PreparerManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 public class ParamSetManager
 {
-	private SQLAdapter sql;
-	private SQLParameter[] params;
-	private boolean[] paramsSetted;
-	private Object[] paramsValues;
+	private final Base sql;
+	private final Parameter[] params;
+	private final boolean[] paramsSetted;
+	private final Object[] paramsValues;
 	private Map paramsCacheValues;
 
-	public ParamSetManager(SQLAdapter sql)
+	public ParamSetManager(Base sql)
 			throws EternaException
 	{
 		this.sql = sql;
 		Iterator itr = sql.getParameterIterator();
 		int count = sql.getParameterCount();
-		this.params = new SQLParameter[count];
+		this.params = new Parameter[count];
 		this.paramsSetted = new boolean[count];
 		this.paramsValues = new Object[count];
 		for (int i = 0; i < count; i++)
 		{
-			SQLParameter param = (SQLParameter) itr.next();
+			Parameter param = (Parameter) itr.next();
 			// 因为parameter的index从1开始，所以要减1
 			int paramIndex = param.getIndex() - 1;
 			this.params[paramIndex] = param;
@@ -63,7 +65,7 @@ public class ParamSetManager
 	/**
 	 * 获取当前参数管理器所管理的SQLAdapter.
 	 */
-	public SQLAdapter getSQLAdapter()
+	public Base getSQLAdapter()
 	{
 		return this.sql;
 	}
@@ -86,7 +88,7 @@ public class ParamSetManager
 		this.paramsCacheValues.put(names, values);
 	}
 
-	public static void preparerValue(SQLAdapter sql, SQLParameter param, String value)
+	public static void preparerValue(Base sql, Parameter param, String value)
 			throws EternaException
 	{
 		try
@@ -103,7 +105,7 @@ public class ParamSetManager
 		}
 	}
 
-	public static void preparerValue(SQLAdapter sql, SQLParameter param, Object value)
+	public static void preparerValue(Base sql, Parameter param, Object value)
 			throws EternaException
 	{
 		try
@@ -120,7 +122,7 @@ public class ParamSetManager
 		}
 	}
 
-	private static void doPreparerError(SQLAdapter sql, SQLParameter param, Object value,
+	private static void doPreparerError(Base sql, Parameter param, Object value,
 			Exception ex)
 			throws EternaException
 	{
@@ -139,8 +141,10 @@ public class ParamSetManager
 		}
 		else
 		{
-			sql.setValuePreparer(sql.getFactory().getDefaultValuePreparerCreaterGenerator()
-					.createNullPreparer(param.getIndex(), TypeManager.getSQLType(param.getType())));
+			ValuePreparer p = CreaterManager.createNullPreparer(
+					sql.getFactory(), param.getType());
+			p.setRelativeIndex(param.getIndex());
+			sql.setValuePreparer(p);
 		}
 	}
 
@@ -161,7 +165,7 @@ public class ParamSetManager
 			throws EternaException
 	{
 		// 因为parameter的index从1开始，所以要减1
-		SQLParameter param = this.params[index - 1];
+		Parameter param = this.params[index - 1];
 		preparerValue(this.sql, param, value);
 		this.paramsSetted[index - 1] = true;
 		this.paramsValues[index - 1] = value;
@@ -171,7 +175,7 @@ public class ParamSetManager
 			throws EternaException
 	{
 		// 因为parameter的index从1开始，所以要减1
-		SQLParameter param = this.params[index - 1];
+		Parameter param = this.params[index - 1];
 		this.sql.setIgnore(param.getIndex());
 		this.paramsSetted[index - 1] = true;
 		this.paramsValues[index - 1] = null;
@@ -192,7 +196,7 @@ public class ParamSetManager
 	public void setParam(String name, Object value)
 			throws EternaException
 	{
-		SQLParameter param = this.sql.getParameter(name);
+		Parameter param = this.sql.getParameter(name);
 		preparerValue(this.sql, param, value);
 		// 因为parameter的index从1开始，所以要减1
 		int paramIndex = param.getIndex() - 1;
@@ -203,15 +207,17 @@ public class ParamSetManager
 	public void setIgnore(String name)
 			throws EternaException
 	{
-		SQLParameter param = this.sql.getParameter(name);
+		Parameter param = this.sql.getParameter(name);
 		if (this.sql.isDynamicParameter(param.getIndex()))
 		{
 			this.sql.setIgnore(param.getIndex());
 		}
 		else
 		{
-			this.sql.setValuePreparer(this.sql.getFactory().getDefaultValuePreparerCreaterGenerator()
-					.createNullPreparer(param.getIndex(), TypeManager.getSQLType(param.getType())));
+			ValuePreparer p = CreaterManager.createNullPreparer(
+					sql.getFactory(), param.getType());
+			p.setRelativeIndex(param.getIndex());
+			sql.setValuePreparer(p);
 		}
 		// 因为parameter的index从1开始，所以要减1
 		int paramIndex = param.getIndex() - 1;
@@ -222,14 +228,14 @@ public class ParamSetManager
 	public Object getParamValue(String name)
 			throws EternaException
 	{
-		SQLParameter param = this.sql.getParameter(name);
+		Parameter param = this.sql.getParameter(name);
 		return this.paramsValues[param.getIndex() - 1];
 	}
 
 	public boolean isParamSetted(String name)
 			throws EternaException
 	{
-		SQLParameter param = this.sql.getParameter(name);
+		Parameter param = this.sql.getParameter(name);
 		return this.paramsSetted[param.getIndex() - 1];
 	}
 
@@ -245,15 +251,17 @@ public class ParamSetManager
 		{
 			if (!this.paramsSetted[i])
 			{
-				SQLParameter param = this.params[i];
+				Parameter param = this.params[i];
 				if (this.sql.isDynamicParameter(param.getIndex()))
 				{
 					this.sql.setIgnore(param.getIndex());
 				}
 				else
 				{
-					this.sql.setValuePreparer(this.sql.getFactory().getDefaultValuePreparerCreaterGenerator()
-							.createNullPreparer(param.getIndex(), TypeManager.getSQLType(param.getType())));
+					ValuePreparer p = CreaterManager.createNullPreparer(
+							sql.getFactory(), param.getType());
+					p.setRelativeIndex(param.getIndex());
+					sql.setValuePreparer(p);
 				}
 				this.paramsSetted[i] = settedFlag;
 				if (settedFlag)
@@ -271,7 +279,7 @@ public class ParamSetManager
 		{
 			if (!this.paramsSetted[i])
 			{
-				SQLParameter param = this.params[i];
+				Parameter param = this.params[i];
 				Object value = values.get(param.getName());
 				if (value != null)
 				{
@@ -312,7 +320,7 @@ public class ParamSetManager
 		int loopCount = -1;
 		for (int i = 0; i < names.length; i++)
 		{
-			SQLParameter param = names[i].sqlIndex == -1 ?
+			Parameter param = names[i].sqlIndex == -1 ?
 					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
 			Object[] array = null;
 			if (index == 0)
@@ -362,7 +370,7 @@ public class ParamSetManager
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			SQLParameter param = names[i].sqlIndex == -1 ?
+			Parameter param = names[i].sqlIndex == -1 ?
 					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
 			Object value = values.get(names[i].srcName);
 			if (value != null)
@@ -398,7 +406,7 @@ public class ParamSetManager
 		{
 			if (!this.paramsSetted[i])
 			{
-				SQLParameter param = this.params[i];
+				Parameter param = this.params[i];
 				int colIndex = -1;
 				try
 				{
@@ -437,7 +445,7 @@ public class ParamSetManager
 			ResultRow row = ritr.nextRow();
 			for (int i = 0; i < names.length; i++)
 			{
-				SQLParameter param = names[i].sqlIndex == -1 ?
+				Parameter param = names[i].sqlIndex == -1 ?
 						this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
 				int colIndex = -1;
 				try
@@ -472,7 +480,7 @@ public class ParamSetManager
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			SQLParameter param = names[i].sqlIndex == -1 ?
+			Parameter param = names[i].sqlIndex == -1 ?
 					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
 			int colIndex = -1;
 			try
@@ -503,8 +511,8 @@ public class ParamSetManager
 		{
 			if (!this.paramsSetted[i])
 			{
-				SQLParameter param = this.params[i];
-				SearchManager.Condition con = searchManager.getCondition(param.getName());
+				Parameter param = this.params[i];
+				SearchManager.ConditionInfo con = searchManager.getCondition(param.getName());
 				if (con != null)
 				{
 					preparerValue(this.sql, param, con.value);
@@ -520,9 +528,9 @@ public class ParamSetManager
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			SQLParameter param = names[i].sqlIndex == -1 ?
+			Parameter param = names[i].sqlIndex == -1 ?
 					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
-			SearchManager.Condition con = searchManager.getCondition(names[i].srcName);
+			SearchManager.ConditionInfo con = searchManager.getCondition(names[i].srcName);
 			if (con != null)
 			{
 				preparerValue(this.sql, param, con.value);
@@ -536,7 +544,7 @@ public class ParamSetManager
 		}
 	}
 
-	private void dealNull(SQLParameter param)
+	private void dealNull(Parameter param)
 			throws EternaException
 	{
 		if (this.sql.isDynamicParameter(param.getIndex()))
@@ -545,8 +553,10 @@ public class ParamSetManager
 		}
 		else
 		{
-			this.sql.setValuePreparer(this.sql.getFactory().getDefaultValuePreparerCreaterGenerator()
-					.createNullPreparer(param.getIndex(), TypeManager.getSQLType(param.getType())));
+			ValuePreparer p = CreaterManager.createNullPreparer(
+					sql.getFactory(), param.getType());
+			p.setRelativeIndex(param.getIndex());
+			sql.setValuePreparer(p);
 		}
 		int paramIndex = param.getIndex() - 1;
 		this.paramsSetted[paramIndex] = true;

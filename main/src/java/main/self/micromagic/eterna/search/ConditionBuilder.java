@@ -16,19 +16,18 @@
 
 package self.micromagic.eterna.search;
 
+import self.micromagic.eterna.base.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.sql.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.util.StringAppender;
-import self.micromagic.util.StringTool;
+import self.micromagic.eterna.share.EternaObject;
 
 /**
  * SQL语句条件的生成器. <p>
- * {@link self.micromagic.eterna.search.ConditionBuilder.Condition}将通过该生成器来生成SQL条件。
+ * {@link self.micromagic.eterna.search.Condition}将通过该生成器来生成SQL条件。
  *
  * @author  micromagic@sina.com
  */
-public interface ConditionBuilder
+public interface ConditionBuilder extends EternaObject
 {
 	public static final String[] OPERATOR_NAMES = {
 		"isNull", "notNull", "checkNull",
@@ -38,7 +37,7 @@ public interface ConditionBuilder
 
 	public static ValuePreparer[] EMPTY_PREPARERS = new ValuePreparer[0];
 
-	void initialize(EternaFactory factory) throws EternaException;
+	boolean initialize(EternaFactory factory) throws EternaException;
 
 	public String getName() throws EternaException;
 
@@ -54,38 +53,5 @@ public interface ConditionBuilder
 	 */
 	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
 			throws EternaException;
-
-	public static class Condition
-	{
-		public final String sqlPart;
-		public final ValuePreparer[] preparers;
-
-		private String toStrBuf = null;
-
-		public Condition(String sqlPart)
-		{
-			this(sqlPart, null);
-		}
-
-		public Condition(String sqlPart, ValuePreparer[] preparers)
-		{
-			this.sqlPart = sqlPart;
-			this.preparers = preparers == null ? EMPTY_PREPARERS : preparers;
-		}
-
-		public String toString()
-		{
-			if (this.toStrBuf == null)
-			{
-				int count = this.sqlPart.length() + 39;
-				StringAppender buf = StringTool.createStringAppender(count);
-				buf.append("Condition[sqlPart:(").append(this.sqlPart);
-				buf.append("),preparerCount:").append(this.preparers.length).append(']');
-				this.toStrBuf = buf.toString();
-			}
-			return this.toStrBuf;
-		}
-
-	}
 
 }

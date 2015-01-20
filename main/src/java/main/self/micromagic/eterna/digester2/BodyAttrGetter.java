@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.dom4j.Element;
 
-import self.micromagic.eterna.digester.BodyText;
 import self.micromagic.util.IntegerRef;
+import self.micromagic.util.MultiLineText;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 
@@ -31,6 +31,9 @@ import self.micromagic.util.Utility;
 public class BodyAttrGetter
 		implements AttrGetter
 {
+	/**
+	 * 获取节点body数据的标识.
+	 */
 	static final String BODY_FLAG = "$body";
 
 	/**
@@ -107,7 +110,7 @@ public class BodyAttrGetter
 	}
 	private boolean mustExists = true;
 
-	public String get(Element el)
+	public Object get(Element el)
 	{
 		String bText = null;
 		Element attrEl = el;
@@ -176,9 +179,17 @@ public class BodyAttrGetter
 
 		if (this.trimLines)
 		{
-			BodyText bodyText = new BodyText();
+			MultiLineText bodyText = new MultiLineText();
 			bodyText.append(bText.toCharArray(), 0, bText.length());
 			bText = bodyText.trimEveryLineSpace(this.noLine);
+			if (this.noLine)
+			{
+				bText = bText.trim();
+			}
+			else
+			{
+				bText = MultiLineText.skipEmptyEndsLine(bText);
+			}
 		}
 		if (this.resolve)
 		{

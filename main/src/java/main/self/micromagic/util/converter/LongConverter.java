@@ -18,8 +18,9 @@ package self.micromagic.util.converter;
 
 import java.text.NumberFormat;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.FormatTool;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
@@ -129,7 +130,7 @@ public class LongConverter extends ObjectConverter
 			}
 			else
 			{
-				return format.parse(value).longValue();
+				return FormatTool.getThreadFormat(format).parse(value).longValue();
 			}
 		}
 		catch (Exception ex) {}

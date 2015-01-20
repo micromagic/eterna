@@ -24,14 +24,24 @@ import self.micromagic.util.StringRef;
 public interface FactoryContainer
 {
 	/**
+	 * 在attribute中存放ServletContext对象的键值.
+	 */
+	String SERVLET_FLAG = "eterna.servlet";
+
+	/**
+	 * 在attribute中存放ClassLoader对象的键值.
+	 */
+	String CLASSLOADER_FLAG = "eterna.classLoader";
+
+	/**
+	 * 在attribute中存放配置参数的键值.
+	 */
+	String CONFIG_PARAM_FLAG = "eterna.config.param";
+
+	/**
 	 * 获得工厂实例的id.
 	 */
 	String getId();
-
-	/**
-	 * 获得工厂容器的初始化配置.
-	 */
-	String getInitConfig();
 
 	/**
 	 * (重新)初始化工厂
@@ -69,14 +79,11 @@ public interface FactoryContainer
 
 	/**
 	 * 添加一个初始化监听者. <p>
-	 * 此对象必须实现<code>self.micromagic.eterna.share.EternaInitialize</code>接口,
-	 * 还必须定义afterEternaInitialize(FactoryContainer)方法, 在初始化完毕后
-	 * 会调用此方法.
 	 *
-	 * @param obj    初始化监听者
-	 * @see self.micromagic.eterna.share.EternaInitialize
+	 * @param l  初始化监听者
+	 * @see self.micromagic.eterna.share.InitializeListener
 	 */
-	void addInitializedListener(Object obj);
+	void addInitializeListener(InitializeListener l);
 
 	/**
 	 * 获得容器中的工厂实例.

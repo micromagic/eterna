@@ -122,7 +122,7 @@ class BeanPropertyReadProcesser
 		String fnName = "public Object getBeanValue(CellDescriptor cd, int[] indexs, Object arrObj, "
 				+ "String prefix, BeanMap beanMap)";
 		String beginCode = StringTool.createStringAppender().append(fnName).appendln()
-				.append("      throws Exception").appendln().append('{').appendln()
+				.append("      throws Throwable").appendln().append('{').appendln()
 				.append(ClassGenerator.getClassName(eType)).append(arrVLStr1).append(' ')
 				.append(BeanTool.DEF_ARRAY_NAME).append(" = (").append(ClassGenerator.getClassName(eType))
 				.append(arrVLStr1).append(") arrObj;").toString();

@@ -19,7 +19,7 @@ package self.micromagic.eterna.search;
 import java.sql.Connection;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.sql.QueryAdapter;
+import self.micromagic.eterna.base.Query;
 import self.micromagic.eterna.model.AppData;
 
 /**
@@ -30,7 +30,7 @@ public interface ParameterSetting
 	/**
 	 * 初始化, 该方法会在所属的search初始化时被调用.
 	 */
-	void initParameterSetting(SearchAdapter search) throws EternaException;
+	void initParameterSetting(Search search) throws EternaException;
 
 	/**
 	 * 设置用于查询的QueryAdapter的参数.
@@ -40,7 +40,7 @@ public interface ParameterSetting
 	 * @param data      数据, 里面包含了request的parameter, request的attribute,
 	 *                  session的attritute
 	 */
-	void setParameter(QueryAdapter query, SearchAdapter search, boolean first,
+	void setParameter(Query query, Search search, boolean first,
 			AppData data, Connection conn)
 			throws EternaException;
 

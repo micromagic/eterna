@@ -24,23 +24,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import self.micromagic.eterna.share.EternaException;
+import org.dom4j.Element;
+
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
-import self.micromagic.eterna.model.ModelAdapterGenerator;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.cg.ClassGenerator;
+import self.micromagic.eterna.share.ObjectCreater;
 import self.micromagic.util.ObjectRef;
-import org.dom4j.Element;
 
 /**
  * @author micromagic@sina.com
  */
 public class ModelAdapterImpl extends AbstractGenerator
-		implements ModelAdapter, ModelAdapterGenerator
+		implements ModelAdapter, ObjectCreater
 {
 	private boolean needFrontModel = true;
 	private boolean keepCaches = false;
@@ -59,12 +60,12 @@ public class ModelAdapterImpl extends AbstractGenerator
 
 	protected boolean initialized = false;
 
-	public void initialize(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
 		if (this.initialized)
 		{
-			return;
+			return true;
 		}
 		this.initialized = true;
 		if (this.modelExportName != null)
@@ -108,18 +109,20 @@ public class ModelAdapterImpl extends AbstractGenerator
 		{
 			if (this.frontModelName != null)
 			{
-				this.frontModelIndex = factory.getModelAdapterId(this.frontModelName);
+				this.frontModelIndex = factory.findObjectId(this.frontModelName);
 			}
 			else
 			{
 				String tmpName = (String) factory.getAttribute(FRONT_MODEL_ATTRIBUTE);
 				if (tmpName != null && tmpName.length() > 0)
 				{
-					this.frontModelIndex = factory.getModelAdapterId(tmpName);
+					this.frontModelIndex = factory.findObjectId(tmpName);
 				}
 			}
 		}
 		//log.info("Model:" + this.getName() + "," + this.allowPositions);
+
+		return false;
 	}
 
 	public EternaFactory getFactory()
@@ -446,6 +449,17 @@ public class ModelAdapterImpl extends AbstractGenerator
 			return T_IDLE;
 		}
 		throw new EternaException("Error transaction type:" + tType + ".");
+	}
+
+
+	public Class getObjectType()
+	{
+		return ModelAdapterImpl.class;
+	}
+
+	public boolean isSingleton()
+	{
+		return true;
 	}
 
 	public void destroy()

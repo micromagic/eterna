@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExecuteGenerator;
 import self.micromagic.eterna.model.ModelExport;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.ObjectRef;
 
@@ -57,7 +57,7 @@ public class ModelExecute extends AbstractExecute
 		}
 		if (this.getName() != null)
 		{
-			this.exeModelIndex = model.getFactory().getModelAdapterId(this.getName());
+			this.exeModelIndex = model.getFactory().findObjectId(this.getName());
 		}
 
 		if (this.exeModelIndex == -1 && this.export == null)

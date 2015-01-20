@@ -66,7 +66,7 @@ public class CellAccessInfo
 							this.cellDescriptor, this.indexs, beanObj, prefix, this.beanMap);
 				}
 			}
-			catch (Exception ex)
+			catch (Throwable ex)
 			{
 				if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
 				{
@@ -96,7 +96,7 @@ public class CellAccessInfo
 				String prefix = this.beanMap.getPrefix();
 				if (beanObj != null)
 				{
-					if (this.beanMap.isReadBeforeModify() && this.cellDescriptor.readProcesser != null)
+					if (this.cellDescriptor.readProcesser != null && this.beanMap.isReadBeforeModify())
 					{
 						oldValue = this.cellDescriptor.readProcesser.getBeanValue(
 								this.cellDescriptor, this.indexs, beanObj, prefix, this.beanMap);
@@ -110,12 +110,9 @@ public class CellAccessInfo
 						beanObj, value, prefix, this.beanMap, null, oldValue);
 				return oldValue;
 			}
-			catch (Exception ex)
+			catch (Throwable ex)
 			{
-				if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-				{
-					CG.log.info("Write bean value error.", ex);
-				}
+				this.beanMap.dealWriteException(ex);
 			}
 		}
 		return null;

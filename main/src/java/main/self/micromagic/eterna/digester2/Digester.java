@@ -17,25 +17,66 @@
 package self.micromagic.eterna.digester2;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Properties;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import org.dom4j.Element;
+import org.apache.commons.logging.Log;
 import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.Element;
+
+import self.micromagic.eterna.digester2.dom.EternaDocumentFactory;
+import self.micromagic.eterna.digester2.dom.EternaSAXReader;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.ResManager;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 /**
  * 文档的解析工具.
  */
 public class Digester
 {
-	public static Digester getInstance()
+	/**
+	 * 在classes目录中存放扩展规则的文件名.
+	 */
+	public static final String RULES_EXT_FILE = "rules_ext.res";
+	/**
+	 * 在classes目录中存放自定义配置项的文件名.
+	 */
+	public static final String RULES_CINFIG_FILE = "rules_config.properties";
+
+	/**
+	 * 日志.
+	 */
+	static final Log log = Utility.createLog("eterna.digester2");
+
+	/**
+	 * 构造一个Digester.
+	 *
+	 * @param resManager  存放规则的资源管理器
+	 * @param resConfig   规则定义中需要使用的配置参数
+	 */
+	public Digester(ResManager resManager, Map resConfig)
+	{
+		this.initRules(resManager, resConfig);
+	}
+
+	/**
+	 * 无参的构造函数用于生成默认的Digester.
+	 */
+	private Digester()
+	{
+	}
+	static Digester getInstance()
 	{
 		return instance;
 	}
@@ -47,7 +88,22 @@ public class Digester
 		rm.load(Digester.class.getResourceAsStream("rules.res"));
 		Properties rConfig = new Properties();
 		rConfig.load(Digester.class.getResourceAsStream("config.properties"));
+		InputStream in = Digester.class.getResourceAsStream("/" + RULES_CINFIG_FILE);
+		if (in != null)
+		{
+			// 如果有自定义的配置, 将当前配置作为父配置
+			rConfig = new Properties(rConfig);
+			rConfig.load(in);
+		}
 		instance.initRules(rm, rConfig);
+		in = Digester.class.getResourceAsStream("/" + RULES_EXT_FILE);
+		if (in != null)
+		{
+			// 载入扩展规则.
+			rm = new ResManager();
+			rm.load(in);
+			instance.initRules(rm, rConfig);
+		}
 	}
 	static
 	{
@@ -57,13 +113,12 @@ public class Digester
 		}
 		catch (Exception ex)
 		{
-			ContainerManager.log.error("Init error.", ex);
+			log.error("Init error.", ex);
 		}
 	}
 
 	private void initRules(ResManager resManager, Map resConfig)
 	{
-		ArrayList tmpRuleAndConfig = new ArrayList();
 		Class[] cParamTypes = new Class[]{Digester.class};
 		Object[] cParams = new Object[]{this};
 		Class dRuleClass = ParseRule.class;
@@ -78,7 +133,7 @@ public class Digester
 				throw new ParseException("Error rule [" + name + "], config [" + config + "].");
 			}
 			String firstLine = config.substring(0, index).trim();
-         int endFlag = firstLine.indexOf(';');
+			int endFlag = firstLine.indexOf(';');
 			Class rClass;
 			String pattern;
 			if (endFlag == -1)
@@ -94,7 +149,7 @@ public class Digester
 				{
 					try
 					{
-						rClass = ParseRule.getClass(cName, Thread.currentThread().getContextClassLoader());
+						rClass = Tool.getClass(cName, Thread.currentThread().getContextClassLoader());
 					}
 					catch (ClassNotFoundException ex)
 					{
@@ -112,8 +167,8 @@ public class Digester
 				ParseRule rule = (ParseRule) constructor.newInstance(cParams);
 				rule.setPattern(pattern);
 				this.addRule(name, rule);
-				tmpRuleAndConfig.add(rule);
-				tmpRuleAndConfig.add(config.substring(index + 1));
+				this.willInitRules.put(rule,
+						new StringRef(config.substring(index + 1)));
 			}
 			catch (Exception ex)
 			{
@@ -122,27 +177,58 @@ public class Digester
 		}
 
 		// 在所有的规则都注册完后在执行规则的初始化
-		int count = tmpRuleAndConfig.size();
-		for (int i = 0; i < count; i += 2)
+		int count = this.willInitRules.size();
+		itr = this.willInitRules.entrySet().iterator();
+		this.inInit = true;
+		for (int i = 0; i < count; i++)
 		{
-			ParseRule rule = (ParseRule) tmpRuleAndConfig.get(i);
-			String config = (String) tmpRuleAndConfig.get(i + 1);
-			rule.init(config);
+			Map.Entry e = (Map.Entry) itr.next();
+			StringRef config = (StringRef) e.getValue();
+			String tConfig;
+			if ((tConfig = config.getString()) != null)
+			{
+				config.setString(null);
+				ParseRule rule = (ParseRule) e.getKey();
+				rule.init(tConfig);
+			}
 		}
+		this.willInitRules.clear();
+		this.inInit = false;
+	}
+
+	private boolean inInit;
+	/**
+	 * 记录已执行过初始化的规则.
+	 */
+	private final Map willInitRules = new IdentityHashMap();
+
+	/**
+	 * 对一个xml数据流进行解析.
+	 *
+	 * @param in  xml数据流
+	 * @throws DocumentException
+	 */
+	void parse(InputStream in)
+			throws DocumentException
+	{
+		EternaSAXReader reader = new EternaSAXReader(new EternaDocumentFactory());
+		Document doc = reader.read(in);
+		this.parse(doc);
 	}
 
 	/**
 	 * 对一个文档进行解析.
 	 *
 	 * @param doc   需要解析的文档
-	 * @param rule  进行解析的根规则
 	 */
-	public void parse(Document doc, String rule)
+	public void parse(Document doc)
 	{
-		ParseRule r = this.getRule(rule);
+		Element root = doc.getRootElement();
+		String rName = root.getName();
+		ParseRule r = this.getRule(rName);
 		if (r == null)
 		{
-			throw new ParseException("Not found rule [" + rule + "].");
+			throw new ParseException("Not found rule [" + rName + "].");
 		}
 		r.doRule(doc.getRootElement());
 	}
@@ -154,7 +240,7 @@ public class Digester
 	 */
 	public void doRules(Element element, ParseRule[] rules)
 	{
-      for (int i = 0; i < rules.length; i++)
+		for (int i = 0; i < rules.length; i++)
 		{
 			if (rules[i].match(element))
 			{
@@ -172,7 +258,7 @@ public class Digester
 	 */
 	private void addRule(String name, ParseRule rule)
 	{
-      if (this.roleMap.put(name, rule) != null)
+		if (this.roleMap.put(name, rule) != null)
 		{
 			throw new ParseException("Same rule name [" + name + "].");
 		}
@@ -183,9 +269,21 @@ public class Digester
 	 */
 	public ParseRule getRule(String name)
 	{
-		return (ParseRule) this.roleMap.get(name);
+		ParseRule r = (ParseRule) this.roleMap.get(name);
+		if (this.inInit)
+		{
+			// 如果在初始化过程中获取规则, 需要判断是否已初始化
+			StringRef config = (StringRef) this.willInitRules.get(r);
+			String tConfig;
+			if (config != null && (tConfig = config.getString()) != null)
+			{
+				config.setString(null);
+				r.init(tConfig);
+			}
+		}
+		return r;
 	}
-	private Map roleMap = new HashMap();
+	private final Map roleMap = new HashMap();
 
 	/**
 	 * 获取解析配置中的属性.
@@ -224,6 +322,6 @@ public class Digester
 		}
 		return null;
 	}
-	private List stack = new ArrayList();
+	private final List stack = new ArrayList();
 
 }

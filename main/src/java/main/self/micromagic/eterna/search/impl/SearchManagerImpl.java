@@ -16,6 +16,8 @@
 
 package self.micromagic.eterna.search.impl;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,22 +26,23 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.io.Writer;
-import java.io.IOException;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import self.micromagic.eterna.share.EternaException;
+
+import self.micromagic.eterna.base.preparer.PreparerManager;
+import self.micromagic.eterna.base.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.search.SearchAttributes;
+import self.micromagic.eterna.search.Condition;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
-import self.micromagic.eterna.search.SearchAdapter;
+import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.share.AbstractGenerator;
-import self.micromagic.eterna.sql.preparer.PreparerManager;
-import self.micromagic.eterna.sql.preparer.ValuePreparer;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -52,13 +55,13 @@ public class SearchManagerImpl extends AbstractGenerator
 {
 	static final String SEARCHMANAGER_DEALED_PREFIX = "ETERNA_SEARCHMANAGER_DEALED:";
 
-	private transient Attributes attributes = DEFAULT_PROPERTIES;
+	private transient SearchAttributes attributes = DEFAULT_PROPERTIES;
 
 	private transient String preparedCondition = "";
 	private transient PreparerManager generatedPM = null;
 	private transient Map conditionMap = null;
 	private List conditionList = null;
-	private transient SearchAdapter resetConditionSearch = null;
+	private transient Search resetConditionSearch = null;
 	private transient Map specialMap = null;
 
 	private int conditionVersion = 1;
@@ -104,13 +107,13 @@ public class SearchManagerImpl extends AbstractGenerator
 		return this.conditionVersion;
 	}
 
-	public void setPageNumAndCondition(AppData data, SearchAdapter search)
+	public void setPageNumAndCondition(AppData data, Search search)
 			throws EternaException
 	{
 		this.setPageNumAndCondition(data, search, true);
 	}
 
-	private void setPageNumAndCondition(AppData data, SearchAdapter search, boolean checkDealed)
+	private void setPageNumAndCondition(AppData data, Search search, boolean checkDealed)
 			throws EternaException
 	{
 		Map raMap = data.getRequestAttributeMap();
@@ -197,7 +200,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	/**
 	 * 根据参数的名称从<code>doc</code>中的条件配置，设置查询条件。
 	 */
-	private void setConditionValues(Document doc, SearchAdapter search, boolean saveCondition)
+	private void setConditionValues(Document doc, Search search, boolean saveCondition)
 			throws EternaException
 	{
 		StringAppender buf = StringTool.createStringAppender(512);
@@ -226,13 +229,13 @@ public class SearchManagerImpl extends AbstractGenerator
 						ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ? cp.getDefaultConditionBuilder()
 								: search.getFactory().getConditionBuilder(condition.attributeValue("builder"));
 						value = condition.attributeValue("value");
-						ConditionBuilder.Condition cbCon = null;
+						Condition cbCon = null;
 						try
 						{
 							cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
 							if (saveCondition)
 							{
-								this.addCondition(new Condition(cp.getName(), group.attributeValue("name"), value, cb));
+								this.addCondition(new ConditionInfo(cp.getName(), group.attributeValue("name"), value, cb));
 							}
 						}
 						catch (Exception ex)
@@ -308,7 +311,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	/**
 	 * 根据参数的名称从<code>request</code>中的读取参数，设置查询条件。
 	 */
-	private void setConditionValues(AppData data, SearchAdapter search, boolean saveCondition, boolean dealDefault)
+	private void setConditionValues(AppData data, Search search, boolean saveCondition, boolean dealDefault)
 			throws EternaException
 	{
 		StringAppender buf = StringTool.createStringAppender(512);
@@ -347,13 +350,13 @@ public class SearchManagerImpl extends AbstractGenerator
 			if (!cp.isIgnore() && value != null && value.length() > 0)
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
-				ConditionBuilder.Condition cbCon = null;
+				Condition cbCon = null;
 				try
 				{
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
 					if (saveCondition)
 					{
-						this.addCondition(new Condition(cp.getName(), null, value, cb));
+						this.addCondition(new ConditionInfo(cp.getName(), null, value, cb));
 					}
 				}
 				catch (Exception ex)
@@ -422,7 +425,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		return this.generatedPM;
 	}
 
-	public PreparerManager getSpecialPreparerManager(SearchAdapter search)
+	public PreparerManager getSpecialPreparerManager(Search search)
 			throws EternaException
 	{
 		if (search == this.resetConditionSearch)
@@ -455,7 +458,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		return needWrap || r.length() == 0 ? r : r.substring(1, r.length() - 1);
 	}
 
-	public String getSpecialConditionPart(SearchAdapter search)
+	public String getSpecialConditionPart(Search search)
 			throws EternaException
 	{
 		if (search == this.resetConditionSearch)
@@ -473,7 +476,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		return (String) this.createSpecialCondition(search)[0];
 	}
 
-	public String getSpecialConditionPart(SearchAdapter search, boolean needWrap)
+	public String getSpecialConditionPart(Search search, boolean needWrap)
 			throws EternaException
 	{
 		if (search == this.resetConditionSearch)
@@ -485,7 +488,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 
-	private Map prepareCondition(SearchAdapter search)
+	private Map prepareCondition(Search search)
 			throws EternaException
 	{
 		List cons = this.getConditions();
@@ -497,7 +500,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		Iterator itr = cons.iterator();
 		while (itr.hasNext())
 		{
-			Condition con = (Condition) itr.next();
+			ConditionInfo con = (ConditionInfo) itr.next();
 			ConditionProperty cp = search.getConditionProperty(con.name);
 			if (cp != null && !cp.isIgnore())
 			{
@@ -517,7 +520,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	/**
 	 * 生成条件子集，返回值为2个，第一个为ConditionPart，第二个为PreparerManager.
 	 */
-	private Object[] createSpecialCondition(SearchAdapter search)
+	private Object[] createSpecialCondition(Search search)
 			throws EternaException
 	{
 		Map consMap = this.prepareCondition(search);
@@ -538,12 +541,12 @@ public class SearchManagerImpl extends AbstractGenerator
 				int index = 0;
 				while (citr.hasNext())
 				{
-					Condition condition = (Condition) citr.next();
+					ConditionInfo condition = (ConditionInfo) citr.next();
 					ConditionProperty cp = (ConditionProperty) citr.next();
 					ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ?
 							cp.getDefaultConditionBuilder() : condition.builder;
 					value = condition.value;
-					ConditionBuilder.Condition cbCon = null;
+					Condition cbCon = null;
 					try
 					{
 						cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
@@ -620,17 +623,17 @@ public class SearchManagerImpl extends AbstractGenerator
 		return result;
 	}
 
-	public Attributes getAttributes()
+	public SearchAttributes getAttributes()
 	{
 		return this.attributes;
 	}
 
-	public void setAttributes(Attributes attributes)
+	public void setAttributes(SearchAttributes attributes)
 	{
 		this.attributes = attributes == null ? DEFAULT_PROPERTIES : attributes;
 	}
 
-	public Condition getCondition(String name)
+	public ConditionInfo getCondition(String name)
 	{
 		if (this.conditionMap == null)
 		{
@@ -641,7 +644,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		{
 			return null;
 		}
-		return (Condition) list.get(0);
+		return (ConditionInfo) list.get(0);
 	}
 
 	public List getConditions(String name)
@@ -677,7 +680,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		}
 	}
 
-	private void addCondition(Condition condition)
+	private void addCondition(ConditionInfo condition)
 	{
 		if (this.conditionList == null)
 		{
@@ -714,7 +717,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		p.printObjectBegin(out);
 		while (itr.hasNext())
 		{
-			Condition con = (Condition) itr.next();
+			ConditionInfo con = (ConditionInfo) itr.next();
 			if (con.value != null)
 			{
 				p.printPair(out, con.name, con.value, firstValue);

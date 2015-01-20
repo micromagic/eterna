@@ -20,7 +20,11 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.share.EternaException;
+import org.dom4j.Element;
+
+import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.base.Query;
+import self.micromagic.eterna.base.ResultIterator;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -30,17 +34,14 @@ import self.micromagic.eterna.model.QueryExecuteGenerator;
 import self.micromagic.eterna.security.EmptyPermission;
 import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
-import self.micromagic.eterna.sql.QueryAdapter;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.SQLAdapter;
-import org.dom4j.Element;
+import self.micromagic.eterna.share.EternaException;
 
 public class QueryExecute extends SQLExecute
 		implements Execute, QueryExecuteGenerator
 {
 	private int start = 1;
 	private int count = -1;
-	private int countType = QueryAdapter.TOTAL_COUNT_NONE;
+	private int countType = Query.TOTAL_COUNT_NONE;
 	protected int queryAdapterIndex = -1;
 
 	public void initialize(ModelAdapter model)
@@ -51,10 +52,10 @@ public class QueryExecute extends SQLExecute
 			return;
 		}
 		super.initialize(model);
-		this.queryAdapterIndex = this.factory.getQueryAdapterId(this.getName());
+		this.queryAdapterIndex = this.factory.findObjectId(this.getName());
 	}
 
-	protected SQLAdapter getSQL()
+	protected Base getSQL()
 			throws EternaException
 	{
 		return this.queryAdapterIndex == -1 ? this.factory.createQueryAdapter(this.getName())
@@ -81,15 +82,15 @@ public class QueryExecute extends SQLExecute
 	{
 		if ("auto".equals(countType))
 		{
-			this.countType = QueryAdapter.TOTAL_COUNT_AUTO;
+			this.countType = Query.TOTAL_COUNT_AUTO;
 		}
 		else if ("count".equals(countType))
 		{
-			this.countType = QueryAdapter.TOTAL_COUNT_COUNT;
+			this.countType = Query.TOTAL_COUNT_COUNT;
 		}
 		else if ("none".equals(countType))
 		{
-			this.countType = QueryAdapter.TOTAL_COUNT_NONE;
+			this.countType = Query.TOTAL_COUNT_NONE;
 		}
 		else
 		{
@@ -101,13 +102,13 @@ public class QueryExecute extends SQLExecute
 			throws EternaException, SQLException, IOException
 	{
 		boolean inCache = false;
-		QueryAdapter query = null;
+		Query query = null;
 		if (this.sqlCacheIndex != -1)
 		{
 			Object temp = data.caches[this.sqlCacheIndex];
-			if (temp instanceof QueryAdapter)
+			if (temp instanceof Query)
 			{
-				query = (QueryAdapter) temp;
+				query = (Query) temp;
 				if (!query.getName().equals(this.getName()))
 				{
 					query = null;
@@ -155,15 +156,15 @@ public class QueryExecute extends SQLExecute
 			Element nowNode = data.getCurrentNode();
 			nowNode.addAttribute("queryName", query.getName());
 			String countTypeStr = "err";
-			if (this.countType == QueryAdapter.TOTAL_COUNT_AUTO)
+			if (this.countType == Query.TOTAL_COUNT_AUTO)
 			{
 				countTypeStr = "auto";
 			}
-			else if (this.countType == QueryAdapter.TOTAL_COUNT_COUNT)
+			else if (this.countType == Query.TOTAL_COUNT_COUNT)
 			{
 				countTypeStr = "count";
 			}
-			else if (this.countType == QueryAdapter.TOTAL_COUNT_NONE)
+			else if (this.countType == Query.TOTAL_COUNT_NONE)
 			{
 				countTypeStr = "none";
 			}

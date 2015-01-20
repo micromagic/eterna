@@ -16,24 +16,23 @@
 
 package self.micromagic.eterna.view.impl;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Function;
-import self.micromagic.eterna.view.FunctionGenerator;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
+import self.micromagic.eterna.view.ModifiableViewRes;
+import self.micromagic.eterna.view.View;
 
 /**
  * @author micromagic@sina.com
  */
 public class FunctionImpl extends AbstractGenerator
-			implements Function, FunctionGenerator
+			implements Function
 {
 	private String param = "";
 	private String scriptBody = "";
 
-	private ViewAdapterGenerator.ModifiableViewRes viewRes = null;
+	private ModifiableViewRes viewRes = null;
 
 	public String getParam()
 	{
@@ -60,7 +59,7 @@ public class FunctionImpl extends AbstractGenerator
 		return (EternaFactory) this.factory;
 	}
 
-	public ViewAdapter.ViewRes getViewRes()
+	public View.ViewRes getViewRes()
 			throws EternaException
 	{
 		if (this.viewRes == null)
@@ -72,14 +71,15 @@ public class FunctionImpl extends AbstractGenerator
 		return this.viewRes;
 	}
 
-	public Function createFunction()
+	public Object create()
 	{
 		return this;
 	}
 
-	public Object create()
+	public boolean initialize(EternaFactory factory)
 	{
-		return this.createFunction();
+		return false;
 	}
+
 
 }

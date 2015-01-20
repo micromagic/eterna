@@ -18,8 +18,9 @@ package self.micromagic.util.converter;
 
 import java.text.NumberFormat;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.FormatTool;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
@@ -129,7 +130,7 @@ public class DoubleConverter extends ObjectConverter
 			}
 			else
 			{
-				return format.parse(value).doubleValue();
+				return FormatTool.getThreadFormat(format).parse(value).doubleValue();
 			}
 		}
 		catch (Exception ex) {}

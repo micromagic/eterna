@@ -16,8 +16,8 @@
 
 package self.micromagic.eterna.share;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import self.micromagic.util.StringTool;
@@ -41,7 +41,7 @@ public class AttributeManager
 		{
 			return StringTool.EMPTY_STRING_ARRAY;
 		}
-		Set keys = attributes.keySet();
+		Set keys = this.attributes.keySet();
 		return (String[]) keys.toArray(new String[keys.size()]);
 	}
 

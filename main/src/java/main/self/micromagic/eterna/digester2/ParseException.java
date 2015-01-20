@@ -18,6 +18,7 @@ package self.micromagic.eterna.digester2;
 
 import org.dom4j.Element;
 
+import self.micromagic.eterna.digester2.dom.EternaElement;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -31,8 +32,6 @@ import self.micromagic.util.container.ThreadCache;
  */
 public class ParseException extends EternaException
 {
-	static String CONTEXT_INFO_TAG = "eterna.context.info";
-
 	/**
 	 * 构造一个<code>ParseException</code>.
 	 */
@@ -87,9 +86,31 @@ public class ParseException extends EternaException
 
 	public String getMessage()
 	{
-		String msg = super.getMessage();
+		return makeMsg(this.contextInfo, super.getMessage());
+	}
+
+	/**
+	 * 获取包含上下文环境的提示信息.
+	 */
+	static String getMessage(Throwable ex)
+	{
+		if (ex == null)
+		{
+			return "";
+		}
+		if (ex instanceof ParseException)
+		{
+			return ex.getMessage();
+		}
+		return makeMsg(getContextInfo(), ex.getMessage());
+	}
+
+	/**
+	 * 构造一个带有上下文环境信息的提示信息.
+	 */
+	private static String makeMsg(ContextInfo ci, String msg)
+	{
 		msg = msg == null ? "" : msg;
-		ContextInfo ci = this.contextInfo;
 		if (ci == null)
 		{
 			return msg;
@@ -97,11 +118,11 @@ public class ParseException extends EternaException
 		StringAppender temp = StringTool.createStringAppender(msg.length() + 32);
 		if (!StringTool.isEmpty(ci.config))
 		{
-			temp.append("Config:").append(ci.config).append("; ");
+			temp.append("Config:{").append(ci.config).append("}; ");
 		}
 		if (!StringTool.isEmpty(ci.uri))
 		{
-			temp.append("URI:").append(ci.uri).append("; ");
+			temp.append("URI:[").append(ci.uri).append("]; ");
 		}
 		if (!StringTool.isEmpty(ci.objName))
 		{
@@ -165,11 +186,26 @@ public class ParseException extends EternaException
 		{
 			ci.objName = objName;
 		}
-		if (element != null)
-		{
-			ci.element = element;
-		}
+		ci.element = element;
 	}
+
+	/**
+	 * 设置上下文环境信息.
+	 */
+	public static void setContextInfo(String objName)
+	{
+		setContextInfo(objName, (Element) null);
+	}
+
+	/**
+	 * 清空上下文环境信息.
+	 */
+	public static void clearContextInfo()
+	{
+		ThreadCache.getInstance().removeProperty(CONTEXT_INFO_TAG);
+	}
+
+	private static final String CONTEXT_INFO_TAG = "eterna.context.info";
 
 	private static final long serialVersionUID = 1L;
 

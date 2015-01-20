@@ -107,13 +107,13 @@ public interface Component
 
 	EternaFactory getFactory() throws EternaException;
 
-	ViewAdapter.ViewRes getViewRes() throws EternaException;
+	View.ViewRes getViewRes() throws EternaException;
 
-	void print(Writer out, AppData data, ViewAdapter view) throws IOException, EternaException;
+	void print(Writer out, AppData data, View view) throws IOException, EternaException;
 
-	void printBody(Writer out, AppData data, ViewAdapter view) throws IOException, EternaException;
+	void printBody(Writer out, AppData data, View view) throws IOException, EternaException;
 
-	void printSpecialBody(Writer out, AppData data, ViewAdapter view) throws IOException, EternaException;
+	void printSpecialBody(Writer out, AppData data, View view) throws IOException, EternaException;
 
 	interface Event
 	{
@@ -127,7 +127,7 @@ public interface Component
 
 		Component getComponent() throws EternaException;
 
-		ViewAdapter.ViewRes getViewRes() throws EternaException;
+		View.ViewRes getViewRes() throws EternaException;
 
 	}
 

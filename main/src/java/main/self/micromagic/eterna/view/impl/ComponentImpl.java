@@ -28,9 +28,9 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.ComponentGenerator;
+import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.StringCoder;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
+import self.micromagic.eterna.view.View;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.PreFetchIterator;
@@ -56,7 +56,7 @@ public class ComponentImpl extends AbstractGenerator
 	protected List componentList = new LinkedList();
 	protected List eventList = new LinkedList();
 
-	private ViewAdapterGenerator.ModifiableViewRes viewRes = null;
+	private ModifiableViewRes viewRes = null;
 	protected boolean initialized = false;
 
 	public void initialize(EternaFactory factory, Component parent)
@@ -106,7 +106,7 @@ public class ComponentImpl extends AbstractGenerator
 		}
 	}
 
-	public void print(Writer out, AppData data, ViewAdapter view)
+	public void print(Writer out, AppData data, View view)
 			throws IOException, EternaException
 	{
 		out.write('{');
@@ -115,7 +115,7 @@ public class ComponentImpl extends AbstractGenerator
 		out.write('}');
 	}
 
-	public void printBody(Writer out, AppData data, ViewAdapter view)
+	public void printBody(Writer out, AppData data, View view)
 			throws IOException, EternaException
 	{
 		out.write("name:\"");
@@ -191,7 +191,7 @@ public class ComponentImpl extends AbstractGenerator
 		}
 	}
 
-	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
+	public void printSpecialBody(Writer out, AppData data, View view)
 			throws IOException, EternaException
 	{
 	}
@@ -321,7 +321,7 @@ public class ComponentImpl extends AbstractGenerator
 		return this.eternaFactory;
 	}
 
-	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
+	protected ModifiableViewRes getModifiableViewRes()
 			throws EternaException
 	{
 		if (this.viewRes == null)
@@ -353,7 +353,7 @@ public class ComponentImpl extends AbstractGenerator
 	/**
 	 * 处理参数部分的脚本, 如: component-param, init-param.
 	 */
-	protected String dealParamPart(String param, ViewAdapterGenerator.ModifiableViewRes viewRes)
+	protected String dealParamPart(String param, ModifiableViewRes viewRes)
 			throws EternaException
 	{
 		// 为空或者没有代码都返回null
@@ -364,7 +364,7 @@ public class ComponentImpl extends AbstractGenerator
 		return ViewTool.dealScriptPart(viewRes, param, ViewTool.GRAMMER_TYPE_JSON, this.getFactory());
 	}
 
-	public ViewAdapter.ViewRes getViewRes()
+	public View.ViewRes getViewRes()
 			throws EternaException
 	{
 		return this.getModifiableViewRes();
@@ -389,7 +389,7 @@ public class ComponentImpl extends AbstractGenerator
 		private String scriptBody = "";
 
 		protected Component component;
-		protected ViewAdapterGenerator.ModifiableViewRes viewRes = null;
+		protected ModifiableViewRes viewRes = null;
 
 		public void initialize(Component component)
 		{
@@ -425,7 +425,7 @@ public class ComponentImpl extends AbstractGenerator
 			return this.component;
 		}
 
-		public ViewAdapter.ViewRes getViewRes()
+		public View.ViewRes getViewRes()
 				throws EternaException
 		{
 			if (this.viewRes == null)

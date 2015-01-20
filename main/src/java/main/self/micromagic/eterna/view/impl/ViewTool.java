@@ -24,22 +24,22 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.digester.FactoryManager;
+
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.eterna.view.BaseManager;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.Function;
+import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.Replacement;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
+import self.micromagic.eterna.view.View;
 import self.micromagic.grammer.GrammerElement;
 import self.micromagic.grammer.GrammerManager;
 import self.micromagic.grammer.ParserData;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 /**
  * 视图模块中需要用到的一些公共方法.
@@ -70,18 +70,33 @@ public class ViewTool
 
 	private static volatile int eternaId = 1;
 
+	/**
+	 * 配置中设置初始化时是否需要对界面脚本语言进行语法检查的键值.
+	 */
+	public static final String CHECK_GRAMMER_FLAG = "eterna.view.checkGrammer";
+	private static boolean checkGrammer = true;
+
 	static
 	{
 		try
 		{
 			ViewTool.grammerManager = new GrammerManager();
-			ViewTool.grammerManager.init(BaseManager.class.getClassLoader().getResource(
+			ViewTool.grammerManager.init(ViewTool.class.getClassLoader().getResource(
 					"self/micromagic/eterna/view/grammer.xml").openStream());
+			Utility.addFieldPropertyManager(CHECK_GRAMMER_FLAG, ViewTool.class, "checkGrammer");
 		}
 		catch (Exception ex)
 		{
-			log.error("Error in create grammerManager.", ex);
+			log.error("Error in init ViewTool.", ex);
 		}
+	}
+
+	/**
+	 * 初始化时是否需要对界面脚本语言进行语法检查.
+	 */
+	public static boolean isCheckGrammer()
+	{
+		return checkGrammer;
 	}
 
 	public static synchronized int createEternaId()
@@ -143,7 +158,7 @@ public class ViewTool
 			{
 				if (tmpCom == null)
 				{
-					data.addSpcialData(ViewAdapter.TYPICAL_COMPONENTS_MAP, idName, com);
+					data.addSpcialData(View.TYPICAL_COMPONENTS_MAP, idName, com);
 					break;
 				}
 				// 某些存储地址比较大的情况下, identityHashCode可能会重复, 所以再添加顺序编号
@@ -155,17 +170,17 @@ public class ViewTool
 		else
 		{
 			idName = com.getName();
-			data.addSpcialData(ViewAdapter.TYPICAL_COMPONENTS_MAP, idName, com);
+			data.addSpcialData(View.TYPICAL_COMPONENTS_MAP, idName, com);
 		}
 		return idName;
 	}
 
 	private static Component queryTypicalComponent(AppData data, String name)
 	{
-		Component tmp = (Component) data.getSpcialData(ViewAdapter.TYPICAL_COMPONENTS_MAP, name);
+		Component tmp = (Component) data.getSpcialData(View.TYPICAL_COMPONENTS_MAP, name);
 		if (tmp == null)
 		{
-			tmp = (Component) data.getSpcialData(ViewAdapter.USED_TYPICAL_COMPONENTS, name);
+			tmp = (Component) data.getSpcialData(View.USED_TYPICAL_COMPONENTS, name);
 		}
 		return tmp;
 	}
@@ -178,11 +193,11 @@ public class ViewTool
 		if (name != null)
 		{
 			AppData data = AppData.getCurrentData();
-			Set resourceNames = (Set) data.getSpcialData(ViewAdapter.VIEW_CACHE, ViewAdapter.DYNAMIC_RESOURCE_NAMES);
+			Set resourceNames = (Set) data.getSpcialData(View.VIEW_CACHE, View.DYNAMIC_RESOURCE_NAMES);
 			if (resourceNames == null)
 			{
 				resourceNames = new HashSet();
-				data.addSpcialData(ViewAdapter.VIEW_CACHE, ViewAdapter.DYNAMIC_RESOURCE_NAMES, resourceNames);
+				data.addSpcialData(View.VIEW_CACHE, View.DYNAMIC_RESOURCE_NAMES, resourceNames);
 			}
 		}
 	}
@@ -199,11 +214,11 @@ public class ViewTool
 		if (fnMap.size() > 0)
 		{
 			AppData data = AppData.getCurrentData();
-			Map functions = (Map) data.getSpcialData(ViewAdapter.VIEW_CACHE, ViewAdapter.DYNAMIC_FUNCTIONS);
+			Map functions = (Map) data.getSpcialData(View.VIEW_CACHE, View.DYNAMIC_FUNCTIONS);
 			if (functions == null)
 			{
 				functions = new HashMap();
-				data.addSpcialData(ViewAdapter.VIEW_CACHE, ViewAdapter.DYNAMIC_FUNCTIONS, functions);
+				data.addSpcialData(View.VIEW_CACHE, View.DYNAMIC_FUNCTIONS, functions);
 			}
 			putAllFunction(functions, fnMap);
 		}
@@ -261,7 +276,7 @@ public class ViewTool
 	/**
 	 * 处理代码中的注释, 替换代码中的扩展标签等.
 	 */
-	public static String dealScriptPart(ViewAdapterGenerator.ModifiableViewRes viewRes, String script,
+	public static String dealScriptPart(ModifiableViewRes viewRes, String script,
 			int grammerType, EternaFactory factory)
 			throws EternaException
 	{
@@ -272,12 +287,12 @@ public class ViewTool
 		return StringTool.intern(checkGrammmer(viewRes, script, grammerType, factory), true);
 	}
 
-	private static String checkGrammmer(ViewAdapterGenerator.ModifiableViewRes viewRes, String script,
+	private static String checkGrammmer(ModifiableViewRes viewRes, String script,
 			int grammerType, EternaFactory factory)
 			throws EternaException
 	{
 		GrammerElement ge;
-		if (!FactoryManager.isCheckGrammer() || grammerType == GRAMMER_TYPE_NONE)
+		if (!checkGrammer || grammerType == GRAMMER_TYPE_NONE)
 		{
 			ge = grammerManager.getGrammerElement("expression_checker_onlyPlus");
 		}
@@ -312,7 +327,7 @@ public class ViewTool
 		}
 	}
 
-	private static void parseGrammerCell(ViewAdapterGenerator.ModifiableViewRes viewRes, List gclist,
+	private static void parseGrammerCell(ModifiableViewRes viewRes, List gclist,
 			StringAppender buf, EternaFactory factory)
 			throws EternaException
 	{

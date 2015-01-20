@@ -15,30 +15,33 @@
 #
 #
 # 根节点
-## root
+## eterna-config
 eterna-config
 sub:{factory}
 
 
 ## factory
 factory
+log:{$factory}
 create:{type,${factory},1}
-sub:{objs,attributes}
+sub:{objs,factoryAttributes}
 
 
-## attributes
+## factoryAttributes
 attributes
+log:{$factory.attribute}
 sub:{attribute}
 
 
 ## attribute
 attribute
+log:{$}
 method:{setAttribute,name,$body(attr=value,i=1)}
 
 
 ## objs
 objs
-sub:{query,format}
+sub:{query,update,format,prepare}
 
 
 ## format
@@ -48,7 +51,17 @@ log:{name}
 create:{generator,${format}}
 attr:{name,type,$body(attr=pattern,body=pattern,m=0):pattern}
 sub:{attribute}
-stack:{addFormat,n:1,g:1}
+stack:{registerObject,n:0,g:1}
+
+
+## prepare
+prepare
+same:{name}
+log:{name}
+create:{generator,${prepare}}
+attr:{name,type}
+sub:{attribute}
+stack:{registerObject,n:0,g:1}
 
 
 ## query
@@ -57,8 +70,18 @@ same:{name}
 log:{name}
 create:{generator,${query}}
 attr:{name,logType(m=0,i=0),forwardOnly(m=0,i=0),orderIndex(m=0,i=0),$body(body=prepared-sql):preparedSQL}
-sub:{readers,attribute}
-stack:{registerQueryAdapter,n:0,g:0}
+sub:{readers,parameters,attribute}
+stack:{registerObject,n:0,g:0}
+
+
+## update
+update
+same:{name}
+log:{name}
+create:{generator,${update}}
+attr:{name,logType(m=0,i=0),$body(body=prepared-sql):preparedSQL}
+sub:{parameters,attribute}
+stack:{registerObject,n:0,g:0}
 
 
 ## readers
@@ -69,7 +92,7 @@ sub:{reader}
 
 ## reader
 reader
-log:{$E}
+log:{$}
 create:{generator,${reader}}
 attr:{
 	name,colName(m=0):columnName,colIndex(m=0,i=0):columnIndex,format(m=0):formatName,
@@ -79,5 +102,18 @@ attr:{
 sub:{attribute}
 stack:{addResultReader,n:0,g:1}
 
+
+## parameters
+parameters
+sub:{parameter}
+
+
+## parameter
+parameter
+log:{$}
+create:{generator,${parameter}}
+attr:{name,colName(m=0):columnName,type(m=0):paramType,prepare(m=0):prepareName}
+sub:{attribute}
+stack:{addParameter,n:0,g:0}
 
 

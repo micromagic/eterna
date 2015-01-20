@@ -134,7 +134,10 @@ if (${tmpObjName} != null)
 			${settedCountName}++;
 		}
 	}
-	catch (Throwable ex) {}
+	catch (Throwable ex)
+	{
+		${throw}
+	}
 }
 
 # 对可转换的类型通过方法进行设置
@@ -150,7 +153,10 @@ if (${tmpObjName} != null)
 			${settedCountName}++;
 		}
 	}
-	catch (Throwable ex) {}
+	catch (Throwable ex)
+	{
+		${throw}
+	}
 }
 
 # 对其他无法转换的类型通过属性进行设置
@@ -318,7 +324,10 @@ try
 	${beanName}.${fieldName} = v;
 	${settedCountName}++;
 }
-catch (Throwable ex) {}
+catch (Throwable ex)
+{
+	throw ex;
+}
 
 # BeanMap中对基本类型通过方法进行设置
 ## beanMap.primitiveMethodSet
@@ -328,7 +337,10 @@ try
 	${beanName}.${methodName}(v);
 	${settedCountName}++;
 }
-catch (Throwable ex) {}
+catch (Throwable ex)
+{
+	throw ex;
+}
 
 # BeanMap中对数组类型通过属性进行设置
 ## beanMap.arrayTypeFieldSet

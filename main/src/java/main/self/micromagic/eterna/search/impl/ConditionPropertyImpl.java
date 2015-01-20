@@ -19,16 +19,18 @@ package self.micromagic.eterna.search.impl;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.share.EternaException;
+
+import self.micromagic.eterna.base.preparer.CreaterManager;
+import self.micromagic.eterna.base.preparer.PreparerCreater;
+import self.micromagic.eterna.base.preparer.ValuePreparer;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AttributeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.sql.preparer.ValuePreparer;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreater;
 import self.micromagic.util.StringTool;
 
 /**
@@ -44,8 +46,8 @@ class ConditionPropertyImpl
 	String columnCaption = null;
 	boolean ignore = false;
 	int columnType;
-	String vpcName;
-	ValuePreparerCreater vpCreater;
+	String prepareName;
+	PreparerCreater prepare;
 	boolean visible = true;
 	String inputType;
 	String defaultValue;
@@ -92,13 +94,7 @@ class ConditionPropertyImpl
 					StringTool.separateString(this.permissions, ",", true));
 			this.permissionSet.initialize(factory);
 		}
-
-		this.vpCreater = factory.createValuePreparerCreater(this.vpcName, this.getColumnPureType());
-		if (this.vpCreater == null)
-		{
-			log.warn("The value preparer generator [" + this.vpcName + "] not found.");
-			this.vpCreater = factory.createValuePreparerCreater(this.getColumnPureType());
-		}
+		this.prepare = CreaterManager.createPrepare(this.columnType, this.prepareName, factory);
 
 		if (this.columnCaption == null)
 		{
@@ -139,13 +135,13 @@ class ConditionPropertyImpl
 	public ValuePreparer createValuePreparer(String value)
 			throws EternaException
 	{
-		return this.vpCreater.createPreparer(value);
+		return this.prepare.createPreparer(value);
 	}
 
 	public ValuePreparer createValuePreparer(Object value)
 			throws EternaException
 	{
-		return this.vpCreater.createPreparer(value);
+		return this.prepare.createPreparer(value);
 	}
 
 	public boolean isIgnore()

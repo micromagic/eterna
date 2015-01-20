@@ -16,13 +16,14 @@
 
 package self.micromagic.eterna.digester2;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.dom4j.Element;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.IntegerRef;
-import org.dom4j.Element;
 
 /**
  * 通过方法调用的设置来绑定配置与对象的属性.
@@ -40,7 +41,8 @@ public class MethodBinder
 	private String methodName;
 	private AttrGetter[] attrs;
 
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		return parseConfig(config, position);
 	}
@@ -79,7 +81,7 @@ public class MethodBinder
 		Object obj = digester.peek(0);
 		if (obj instanceof BeanMap)
 		{
-         obj = ((BeanMap) obj).getBean();
+			obj = ((BeanMap) obj).getBean();
 		}
 		this.bind(obj, element);
 		return true;
@@ -99,6 +101,10 @@ public class MethodBinder
 		try
 		{
 			Tool.invokeExactMethod(obj, this.methodName, args);
+		}
+		catch (RuntimeException ex)
+		{
+			throw ex;
 		}
 		catch (Exception ex)
 		{

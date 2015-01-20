@@ -20,19 +20,20 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.base.Parameter;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ParamBindGenerator;
 import self.micromagic.eterna.model.ParamSetManager;
-import self.micromagic.eterna.search.SearchAdapter;
+import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.AbstractGenerator;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.eterna.sql.SQLAdapter;
-import self.micromagic.eterna.sql.SQLParameter;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 
@@ -94,10 +95,10 @@ public class ParamBindImpl extends AbstractGenerator
 			{
 				try
 				{
-					SQLAdapter sql = ((SQLExecute) execute).getSQL();
+					Base sql = ((SQLExecute) execute).getSQL();
 					for (int i = 0; i < this.names.length; i++)
 					{
-						SQLParameter param = sql.getParameter(this.names[i].sqlName);
+						Parameter param = sql.getParameter(this.names[i].sqlName);
 						this.names[i] = new ParamSetManager.Name(this.names[i], param.getIndex());
 					}
 				}
@@ -202,9 +203,9 @@ public class ParamBindImpl extends AbstractGenerator
 					psm.setSubSQL(this.names[i].sqlIndex, sm.getConditionPart(), sm.getPreparerManager());
 				}
 			}
-			else if (tempValue instanceof SearchAdapter)
+			else if (tempValue instanceof Search)
 			{
-				SearchAdapter sa = (SearchAdapter) tempValue;
+				Search sa = (Search) tempValue;
 				SearchManager sm = sa.getSearchManager(data);
 				for (int i = 0; i < this.names.length; i++)
 				{
@@ -256,9 +257,9 @@ public class ParamBindImpl extends AbstractGenerator
 						ResultIterator ritr = (ResultIterator) tempValue;
 						loopCount = psm.setParams(ritr, this.names, loopIndex);
 					}
-					else if (tempValue instanceof SearchAdapter.Result)
+					else if (tempValue instanceof SearchResult)
 					{
-						ResultIterator ritr = ((SearchAdapter.Result) tempValue).queryResult;
+						ResultIterator ritr = ((SearchResult) tempValue).queryResult;
 						loopCount = psm.setParams(ritr, this.names, loopIndex);
 					}
 					else
@@ -295,9 +296,9 @@ public class ParamBindImpl extends AbstractGenerator
 							psm.setParams(ritr.nextRow(), this.names);
 						}
 					}
-					else if (tempValue instanceof SearchAdapter.Result)
+					else if (tempValue instanceof SearchResult)
 					{
-						ResultIterator ritr = ((SearchAdapter.Result) tempValue).queryResult;
+						ResultIterator ritr = ((SearchResult) tempValue).queryResult;
 						if (ritr.hasMoreRow())
 						{
 							psm.setParams(ritr.nextRow(), this.names);
@@ -360,9 +361,9 @@ public class ParamBindImpl extends AbstractGenerator
 						psm.setParams(ritr.nextRow());
 					}
 				}
-				else if (tempValue instanceof SearchAdapter.Result)
+				else if (tempValue instanceof SearchResult)
 				{
-					ResultIterator ritr = ((SearchAdapter.Result) tempValue).queryResult;
+					ResultIterator ritr = ((SearchResult) tempValue).queryResult;
 					if (ritr.hasMoreRow())
 					{
 						psm.setParams(ritr.nextRow());

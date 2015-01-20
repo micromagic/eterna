@@ -52,7 +52,7 @@ public class EternaRes extends TagSupport
 		}
 		catch (Exception ex)
 		{
-			DefaultFinder.log.error("Error in get js res.", ex);
+			InitBaseTag.log.error("Error in get js res.", ex);
 		}
 		RES_JS = js;
 	}
@@ -101,7 +101,7 @@ public class EternaRes extends TagSupport
 		}
 		catch (Throwable ex)
 		{
-			DefaultFinder.log.error("Other Error in service.", ex);
+			InitBaseTag.log.error("Other Error in service.", ex);
 		}
 		return SKIP_BODY;
 	}

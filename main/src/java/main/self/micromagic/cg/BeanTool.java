@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.sql.ResultRow;
+import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -283,7 +283,7 @@ public class BeanTool
 				String fnName = "public int setBeanValue(CellDescriptor cd, int[] indexs, Object bean, "
 						+ "Object value, String prefix, BeanMap beanMap, Object originObj, Object oldValue)";
 				String mh = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Exception").toString();
+						.append("		throws Throwable").toString();
 				String beginCode = StringTool.createStringAppender()
 						.append("	int ").append(SETTED_COUNT_NAME).append(" = 0;").appendln()
 						.toString();
@@ -330,7 +330,7 @@ public class BeanTool
 				fnName = "public Object getBeanValue(CellDescriptor cd, int[] indexs, Object bean, "
 						+ "String prefix, BeanMap beanMap)";
 				mh = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Exception").toString();
+						.append("		throws Throwable").toString();
 				beginCode = endCode = "";
 				BeanPropertyReadProcesser rp = new BeanPropertyReadProcesser(beanClass);
 				tmp = createPropertyProcessers(beanClass, BeanPropertyReader.class,
@@ -375,7 +375,7 @@ public class BeanTool
 
 				// 这里的fnName和前面的相同, 就不用重新赋值了
 				beginCode = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Exception").appendln().append('{').toString();
+						.append("		throws Throwable").appendln().append('{').toString();
 				endCode = "}";
 				String bodyCode = "return new " + ClassGenerator.getClassName(beanClass) + "();";
 				CellDescriptor tmpBMC = null;
@@ -413,10 +413,7 @@ public class BeanTool
 				throw new CGException(ex);
 			}
 		}
-		if (bd != null)
-		{
-			beanDescriptorCache.setProperty(beanClass, bd);
-		}
+		beanDescriptorCache.setProperty(beanClass, bd);
 		return bd;
 	}
 
@@ -445,7 +442,7 @@ public class BeanTool
 			{
 				String mh = StringTool.createStringAppender()
 						.append("public int setBeanValues(Object bean, Map values, String prefix)").appendln()
-						.append("		throws Exception").toString();
+						.append("		throws Throwable").toString();
 				String beginCode = StringTool.createStringAppender()
 						.append("	Object ").append(TMP_OBJ_NAME).append(';').appendln()
 						.append("	int ").append(SETTED_COUNT_NAME).append(" = 0;").appendln()
@@ -817,6 +814,11 @@ public class BeanTool
 			String code;
 			BeanMethodInfo m = methods[i];
 			String wrapName = null;
+			if (m.type == null)
+			{
+				// 跳过如setXXX(int) getXXX(int)之类的方法
+				continue;
+			}
 			if (m.type.isPrimitive())
 			{
 				wrapName = (String) BeanTool.primitiveWrapClass.get(ClassGenerator.getClassName(m.type));

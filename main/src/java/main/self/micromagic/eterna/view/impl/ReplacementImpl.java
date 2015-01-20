@@ -29,10 +29,10 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
+import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.Replacement;
 import self.micromagic.eterna.view.ReplacementGenerator;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
+import self.micromagic.eterna.view.View;
 import self.micromagic.util.container.MultiIterator;
 import self.micromagic.util.container.UnmodifiableIterator;
 import self.micromagic.util.container.PreFetchIterator;
@@ -80,7 +80,7 @@ public class ReplacementImpl extends ComponentImpl
 	 */
 	protected boolean baseReplacement;
 
-	private ViewAdapterGenerator.ModifiableViewRes viewRes;
+	private ModifiableViewRes viewRes;
 	private List replacedList;
 
 	public void initialize(EternaFactory factory, Component parent)
@@ -432,13 +432,13 @@ public class ReplacementImpl extends ComponentImpl
 		return com;
 	}
 
-	public void printBody(Writer out, AppData data, ViewAdapter view)
+	public void printBody(Writer out, AppData data, View view)
 			throws IOException, EternaException
 	{
 		super.printBody(out, data, view);
 	}
 
-	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
+	public void printSpecialBody(Writer out, AppData data, View view)
 			throws IOException, EternaException
 	{
 		if (this.linkTypical)
@@ -570,7 +570,7 @@ public class ReplacementImpl extends ComponentImpl
 			{
 				throw new EternaException("Error base name expression [" + nameExp + "].");
 			}
-			ViewAdapter view = factory.createViewAdapter(bName);
+			View view = factory.createViewAdapter(bName);
 			tmpCom = new ViewWrapComponent(view);
 		}
 		else
@@ -662,7 +662,7 @@ public class ReplacementImpl extends ComponentImpl
 		return names[0];
 	}
 
-	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
+	protected ModifiableViewRes getModifiableViewRes()
 			throws EternaException
 	{
 		if (this.viewRes == null)

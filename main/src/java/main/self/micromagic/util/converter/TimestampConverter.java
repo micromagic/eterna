@@ -16,14 +16,14 @@
 
 package self.micromagic.util.converter;
 
-import java.text.ParseException;
 import java.text.DateFormat;
+import java.text.ParseException;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
 
 public class TimestampConverter extends ObjectConverter
@@ -125,7 +125,7 @@ public class TimestampConverter extends ObjectConverter
 			}
 			else
 			{
-				return new java.sql.Timestamp(format.parse(value).getTime());
+				return new java.sql.Timestamp(FormatTool.getThreadFormat(format).parse(value).getTime());
 			}
 		}
 		catch (ParseException ex) {}

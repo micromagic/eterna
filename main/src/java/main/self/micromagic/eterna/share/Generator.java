@@ -16,24 +16,51 @@
 
 package self.micromagic.eterna.share;
 
-import self.micromagic.eterna.share.EternaException;
-
+/**
+ * 对象的创建者.
+ * 用于创建注册到工厂中的对象.
+ */
 public interface Generator
 {
+	/**
+	 * 设置对象创建者所属的工厂.
+	 */
 	void setFactory(Factory factory) throws EternaException;
 
+	/**
+	 * 根据名称获取一个属性.
+	 */
 	Object getAttribute(String name) throws EternaException;
 
+	/**
+	 * 获取对象创建者中的属性名称列表.
+	 * 如果没有任何属性则返回一个空的数组.
+	 */
 	String[] getAttributeNames() throws EternaException;
 
+	/**
+	 * 设置一个属性.
+	 */
 	Object setAttribute(String name, Object value) throws EternaException;
 
+	/**
+	 * 移除一个属性.
+	 */
 	Object removeAttribute(String name) throws EternaException;
 
+	/**
+	 * 设置对象创建者的名称.
+	 */
 	void setName(String name) throws EternaException;
 
+	/**
+	 * 获取对象创建者的名称.
+	 */
 	String getName() throws EternaException;
 
+	/**
+	 * 创建一个对象.
+	 */
 	Object create() throws EternaException;
 
 }

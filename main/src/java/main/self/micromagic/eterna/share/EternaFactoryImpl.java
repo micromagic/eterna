@@ -25,50 +25,52 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.Context;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.digester.FactoryManager;
-import self.micromagic.eterna.digester.ObjectLogRule;
-import self.micromagic.eterna.digester.ShareSet;
+
+import self.micromagic.eterna.base.Entity;
+import self.micromagic.eterna.base.Query;
+import self.micromagic.eterna.base.ResultFormat;
+import self.micromagic.eterna.base.SpecialLog;
+import self.micromagic.eterna.base.Update;
+import self.micromagic.eterna.base.preparer.PreparerCreater;
+import self.micromagic.eterna.digester2.ContainerManager;
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.model.ModelAdapter;
-import self.micromagic.eterna.model.ModelAdapterGenerator;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.ModelCallerImpl;
 import self.micromagic.eterna.search.ConditionBuilder;
-import self.micromagic.eterna.search.SearchAdapter;
-import self.micromagic.eterna.search.SearchAdapterGenerator;
+import self.micromagic.eterna.search.Search;
+import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.search.impl.SearchManagerImpl;
 import self.micromagic.eterna.security.UserManager;
-import self.micromagic.eterna.sql.QueryAdapter;
-import self.micromagic.eterna.sql.QueryAdapterGenerator;
-import self.micromagic.eterna.sql.ResultFormat;
-import self.micromagic.eterna.sql.ResultReaderManager;
-import self.micromagic.eterna.sql.SQLParameterGroup;
-import self.micromagic.eterna.sql.SpecialLog;
-import self.micromagic.eterna.sql.UpdateAdapter;
-import self.micromagic.eterna.sql.UpdateAdapterGenerator;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreater;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreaterGenerator;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreaterGeneratorImpl;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.eterna.view.Function;
 import self.micromagic.eterna.view.Resource;
 import self.micromagic.eterna.view.StringCoder;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
+import self.micromagic.eterna.view.View;
 import self.micromagic.eterna.view.impl.StringCoderImpl;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 public class EternaFactoryImpl extends AbstractFactory
 		implements EternaFactory
 {
 	protected static final Log log = Tool.log;
 
+	/**
+	 * 当前是否在执行初始化.
+	 */
+	private boolean inInit = false;
+
 	private EternaFactory shareEternaFactory;
-	private EternaFactoryImpl sameShare;
 	private boolean initialized = false;
 	private UserManager userManager = null;
 	private DataSourceManager dataSourceManager = null;
@@ -96,7 +98,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.userManager != null)
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate UserManager.");
 			}
@@ -126,7 +128,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.dataSourceManager != null)
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate DataSourceManager.");
 			}
@@ -144,8 +146,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public String[] getAttributeNames()
 			throws EternaException
 	{
-		String[] tmpP = this.shareEternaFactory != null ?
-				this.shareEternaFactory.getAttributeNames() : null;
+		String[] tmpP = this.shareFactory != null ? this.shareFactory.getAttributeNames() : null;
 		String[] tmpThis = super.getAttributeNames();
 		if (tmpP != null && tmpP.length > 0 && tmpThis != null && tmpThis.length > 0)
 		{
@@ -161,9 +162,9 @@ public class EternaFactoryImpl extends AbstractFactory
 			throws EternaException
 	{
 		Object tmp = super.getAttribute(name);
-		if (tmp == null && this.shareEternaFactory != null)
+		if (tmp == null && this.shareFactory != null)
 		{
-			tmp = this.shareEternaFactory.getAttribute(name);
+			tmp = this.shareFactory.getAttribute(name);
 		}
 		return tmp;
 	}
@@ -173,12 +174,12 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (!this.initialized)
 		{
-			// 未初始化完成时, 需要检查全局属性是否被重复设置了
+			// 未初始化完成时, 需要检查工厂属性是否被重复设置了
 			if (super.hasAttribute(name))
 			{
-				if (!FactoryManager.isSuperInit())
+				if (ContainerManager.getSuperInitLevel() == 0)
 				{
-					log.warn("Duplicate global attribute [" + name + "].");
+					log.warn("Duplicate factory attribute [" + name + "].");
 				}
 				return null;
 			}
@@ -186,255 +187,160 @@ public class EternaFactoryImpl extends AbstractFactory
 		return super.setAttribute(name, value);
 	}
 
-	public void initialize(FactoryContainer factoryContainer, Factory shareFactory)
+	public boolean initialize(FactoryContainer factoryContainer, Factory shareFactory)
 			throws EternaException
 	{
 		if (!this.initialized)
 		{
+			this.inInit = true;
 			this.initialized = true;
-			super.initialize(factoryContainer, shareFactory);
-			this.shareEternaFactory = (EternaFactory) shareFactory;
-			if (shareFactory != null && shareFactory instanceof EternaFactoryImpl)
+			try
 			{
-				this.sameShare = (EternaFactoryImpl) shareFactory;
+				this.init0(factoryContainer, shareFactory);
+				return true;
 			}
-
-			// 初始化, attributes
-			//this.putSuperAttributes();
-
-			// 注册bean类, 这里只需要获得当前的属性, share的会在自己的工厂中注册
-			String beans = (String) super.getAttribute(Tool.BEAN_CLASS_NAMES);
-			if (beans != null)
+			finally
 			{
-				Tool.registerBean(beans);
-			}
-
-			// 初始化, dataSourceManager
-			if (this.dataSourceManager != null)
-			{
-				ObjectLogRule.setObjName("dataSourceManager");
-				this.dataSourceManager.initialize(this);
-			}
-			else
-			{
-				this.dataSourceManager = ShareSet.getDataSourceFromCache(this.getFactoryContainer());
-				if (this.dataSourceManager != null)
-				{
-					ObjectLogRule.setObjName("dataSourceManager");
-					this.dataSourceManager.initialize(this);
-				}
-			}
-
-			String dName = (String) super.getAttribute(ValuePreparerCreater.DEFAULT_VPC_ATTRIBUTE);
-			if (dName != null)
-			{
-				// 如果指定了默认的vpc, 则获取这个vpc
-				this.defaultVPCG = (ValuePreparerCreaterGenerator) this.valuePreparerMap.get(dName);
-				if (this.defaultVPCG == null && this.shareEternaFactory != null)
-				{
-					this.defaultVPCG = this.shareEternaFactory.getValuePreparerCreaterGenerator(dName);
-				}
-				if (this.defaultVPCG == null)
-				{
-					log.error("The default vpc [" + dName + "] not found, use sys default.");
-				}
-			}
-			else if (this.shareEternaFactory != null)
-			{
-				// 如果有共享的factory, 则获取共享factory的默认vpcg
-				this.defaultVPCG = this.shareEternaFactory.getDefaultValuePreparerCreaterGenerator();
-			}
-			if (this.defaultVPCG == null)
-			{
-				// 如果前面没有获取到默认的vpcg, 则生成一个默认的
-				this.defaultVPCG = new ValuePreparerCreaterGeneratorImpl();
-				this.registerValuePreparerGenerator(this.defaultVPCG);
-			}
-
-
-			// 初始化, Resource
-			Iterator itr = this.resourceMap.values().iterator();
-			while (itr.hasNext())
-			{
-				Resource resource = (Resource) itr.next();
-				ObjectLogRule.setObjName("resource", resource.getName());
-				resource.initialize(this);
-			}
-
-			// 初始化, vpc
-			itr = this.valuePreparerMap.values().iterator();
-			while (itr.hasNext())
-			{
-				ValuePreparerCreaterGenerator vpcg = (ValuePreparerCreaterGenerator) itr.next();
-				ObjectLogRule.setObjName("vpc", String.valueOf(vpcg.getName()));
-				vpcg.initialize(this);
-			}
-
-			// 初始化, ResultFormat
-			itr = this.formatMap.values().iterator();
-			while (itr.hasNext())
-			{
-				ResultFormat format = (ResultFormat) itr.next();
-				ObjectLogRule.setObjName("format", format.getName());
-				format.initialize(this);
-			}
-
-			// 初始化, ResultReaderManager
-			itr = this.readerManagerMap.values().iterator();
-			while (itr.hasNext())
-			{
-				ResultReaderManager manager = (ResultReaderManager) itr.next();
-				ObjectLogRule.setObjName("readerManager", manager.getName());
-				manager.initialize(this);
-				manager.lock();
-			}
-
-			// 初始化, SQLParameterGroup
-			itr = this.paramGroupMap.values().iterator();
-			while (itr.hasNext())
-			{
-				SQLParameterGroup group = (SQLParameterGroup) itr.next();
-				ObjectLogRule.setObjName("parameterGroup", group.getName());
-				group.initialize(this);
-			}
-
-			// 初始化, SQL
-			if (this.sameShare != null)
-			{
-				this.queryManager.initialize(this.sameShare.queryManager);
-				this.updateManager.initialize(this.sameShare.updateManager);
-			}
-			else
-			{
-				this.queryManager.initialize(FactoryGeneratorManager.createQueryFGM(this.shareEternaFactory));
-				this.updateManager.initialize(FactoryGeneratorManager.createUpdateFGM(this.shareEternaFactory));
-			}
-
-			// 初始化, userManager
-			if (this.userManager != null)
-			{
-				ObjectLogRule.setObjName("userManager");
-				this.userManager.initUserManager(this);
-			}
-
-			// 初始化, special-sql-log
-			if (this.specialLog != null)
-			{
-				ObjectLogRule.setObjName("specialLog");
-				this.specialLog.initSpecialLog(this);
-			}
-
-			// 初始化, ConditionBuilder
-			itr = this.conditionBuilderMap.values().iterator();
-			while (itr.hasNext())
-			{
-				ConditionBuilder cb = (ConditionBuilder) itr.next();
-				ObjectLogRule.setObjName("builder", cb.getName());
-				cb.initialize(this);
-			}
-
-			// 初始化, ConditionBuilderList
-			itr = this.conditionBuilderNameListMap.keySet().iterator();
-			while (itr.hasNext())
-			{
-				Object name = itr.next();
-				List names = (List) this.conditionBuilderNameListMap.get(name);
-				ObjectLogRule.setObjName("builderList", (String) name);
-				this.initConditionBuilderList((String) name, names);
-			}
-			this.conditionBuilderNameListMap.clear();
-
-			// 初始化, search
-			if (this.sameShare != null)
-			{
-				this.searchAdapterManager.initialize(this.sameShare.searchAdapterManager);
-			}
-			else
-			{
-				this.searchAdapterManager.initialize(FactoryGeneratorManager.createSearchFGM(this.shareEternaFactory));
-			}
-
-			// 初始化, model-caller
-			if (this.modelCaller == this.defaultModelCaller && this.shareEternaFactory != null)
-			{
-				// 如果未设置过model-caller且有共享工厂, 则使用共享工厂的
-				this.modelCaller = this.shareEternaFactory.getModelCaller();
-			}
-			else
-			{
-				ObjectLogRule.setObjName("modelCaller");
-				this.modelCaller.initModelCaller(this);
-			}
-
-			// 初始化, model
-			if (this.sameShare != null)
-			{
-				this.modelManager.initialize(this.sameShare.modelManager);
-			}
-			else
-			{
-				this.modelManager.initialize(FactoryGeneratorManager.createModelFGM(this.shareEternaFactory));
-			}
-
-			// 初始化, string-coder
-			ObjectLogRule.setObjName("stringCoder");
-			this.stringCoder.initStringCoder(this);
-
-			// 初始化, DataPrinter
-			itr = this.dataPrinterMap.values().iterator();
-			while (itr.hasNext())
-			{
-				DataPrinter dataPrinter = (DataPrinter) itr.next();
-				ObjectLogRule.setObjName("dataPrinter", dataPrinter.getName());
-				dataPrinter.initialize(this);
-			}
-
-			// 初始化, Typical Component
-			itr = this.typicalComponentMap.values().iterator();
-			while (itr.hasNext())
-			{
-				Component component = (Component) itr.next();
-				ObjectLogRule.setObjName("typical", component.getName());
-				component.initialize(this, null);
-			}
-
-			// 初始化, view
-			if (this.sameShare != null)
-			{
-				this.viewManager.initialize(this.sameShare.viewManager);
-			}
-			else
-			{
-				this.viewManager.initialize(FactoryGeneratorManager.createViewFGM(this.shareEternaFactory));
+				this.inInit = false;
 			}
 		}
+		return false;
+	}
+
+	private void init0(FactoryContainer factoryContainer, Factory shareFactory)
+	{
+		super.initialize(factoryContainer, shareFactory);
+		if (shareFactory instanceof EternaFactory)
+		{
+			this.shareEternaFactory = (EternaFactory) shareFactory;
+		}
+
+		// 初始化, attributes
+		//this.putSuperAttributes();
+
+		// 注册bean类, 这里只需要获得当前的属性, share的会在自己的工厂中注册
+		String beans = (String) super.getAttribute(Tool.BEAN_CLASS_NAMES);
+		if (beans != null)
+		{
+			Tool.registerBean(beans);
+		}
+
+		// 初始化, dataSourceManager
+		if (this.dataSourceManager != null)
+		{
+			ParseException.setContextInfo("dataSourceManager");
+			this.dataSourceManager.initialize(this);
+		}
+		else
+		{
+			this.dataSourceManager = getDataSourceFromCache();
+			if (this.dataSourceManager != null)
+			{
+				ParseException.setContextInfo("dataSourceManager");
+				this.dataSourceManager.initialize(this);
+			}
+		}
+
+		// 重新构造列表, 去除对象列表中的多余空间
+		List temp = new ArrayList(this.objectList.size() + 8);
+		temp.addAll(this.objectList);
+		this.objectList = temp;
+
+		// 初始化注册的对象
+		int size = this.objectList.size();
+		ObjectContainer container;
+		for (int i = 0; i < size; i++)
+		{
+			container = (ObjectContainer) this.objectList.get(i);
+			String objName = container.getName() + "(" + container.getType().getName() + ")";
+			ParseException.setContextInfo(objName);
+			container.initialize(this);
+		}
+		Iterator itr;
+
+		// 初始化, userManager
+		if (this.userManager != null)
+		{
+			ParseException.setContextInfo("userManager");
+			this.userManager.initUserManager(this);
+		}
+
+		// 初始化, special-sql-log
+		if (this.specialLog != null)
+		{
+			ParseException.setContextInfo("specialLog");
+			this.specialLog.initSpecialLog(this);
+		}
+
+		// 初始化, model-caller
+		if (this.modelCaller == this.defaultModelCaller && this.shareEternaFactory != null)
+		{
+			// 如果未设置过model-caller且有共享工厂, 则使用共享工厂的
+			this.modelCaller = this.shareEternaFactory.getModelCaller();
+		}
+		else
+		{
+			ParseException.setContextInfo("modelCaller");
+			this.modelCaller.initModelCaller(this);
+		}
+
+		// 初始化, string-coder
+		ParseException.setContextInfo("stringCoder");
+		this.stringCoder.initStringCoder(this);
+
+		// 初始化, DataPrinter
+		itr = this.dataPrinterMap.values().iterator();
+		while (itr.hasNext())
+		{
+			DataPrinter dataPrinter = (DataPrinter) itr.next();
+			ParseException.setContextInfo("dataPrinter:".concat(dataPrinter.getName()));
+			dataPrinter.initialize(this);
+		}
+	}
+
+	public DataSourceManager getDataSourceFromCache()
+			throws EternaException
+	{
+		Map dsMap = (Map) this.getAttribute(DataSourceManager.DATA_SOURCE_MAP);
+		if (dsMap != null && dsMap.size() > 0)
+		{
+			DataSourceManagerImpl dsmi = new DataSourceManagerImpl();
+			String defaultDataSourceName = (String) this.getAttribute(
+					DataSourceManager.DEFAULT_DATA_SOURCE_NAME);
+			if (defaultDataSourceName == null)
+			{
+				Map.Entry entry = (Map.Entry) dsMap.entrySet().iterator().next();
+				defaultDataSourceName = (String) entry.getKey();
+			}
+			dsmi.setDefaultDataSourceName(defaultDataSourceName);
+			Iterator itr = dsMap.entrySet().iterator();
+			while (itr.hasNext())
+			{
+				Map.Entry entry = (Map.Entry) itr.next();
+				String dsName = (String) entry.getKey();
+				dsmi.addDataSource(dsName, (DataSource) entry.getValue());
+			}
+			return dsmi;
+		}
+		return null;
 	}
 
 	public void destroy()
 	{
-		super.destroy();
-		this.queryManager.destroy();
-		this.updateManager.destroy();
-		this.searchAdapterManager.destroy();
-		this.modelManager.destroy();
-		this.viewManager.destroy();
+		int size = this.objectList.size();
+		ObjectContainer container;
+		for (int i = 0; i < size; i++)
+		{
+			container = (ObjectContainer) this.objectList.get(i);
+			container.destroy();
+		}
 	}
 
 
-	//----------------------------------  SQLFactory  --------------------------------------
+	//----------------------------------  db  --------------------------------------
 
-	private Map constantMap = new HashMap();
+	private final Map constantMap = new HashMap();
 	private SpecialLog specialLog = null;
-	private Map formatMap = new HashMap();
-	private Map readerManagerMap = new HashMap();
-	private Map paramGroupMap = new HashMap();
-	private Map valuePreparerMap = new HashMap();
-
-	private ValuePreparerCreaterGenerator defaultVPCG;
-	private FactoryGeneratorManager queryManager
-			= new FactoryGeneratorManager("QueryAdapter", this);
-	private FactoryGeneratorManager updateManager
-			= new FactoryGeneratorManager("UpdateAdapter", this);
 
 	public String getConstantValue(String name)
 			throws EternaException
@@ -451,7 +357,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.constantMap.containsKey(name))
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate ConstantValue [" + name + "].");
 			}
@@ -477,7 +383,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.specialLog != null)
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate SpecialLog.");
 			}
@@ -492,246 +398,57 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 	}
 
+	public Entity getEntity(String name)
+			throws EternaException
+	{
+		return (Entity) this.createObject(name);
+	}
+
 	public ResultFormat getFormat(String name)
 			throws EternaException
 	{
-		ResultFormat result = (ResultFormat) this.formatMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getFormat(name);
-		}
-		return result;
+		return (ResultFormat) this.createObject(name);
 	}
 
-	public void addFormat(String name, ResultFormat format)
+	public Query createQueryAdapter(String name)
 			throws EternaException
 	{
-		if (this.formatMap.containsKey(name))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate Format [" + name + "].");
-			}
-		}
-		else if (format != null)
-		{
-			if (this.initialized)
-			{
-				format.initialize(this);
-			}
-			this.formatMap.put(name, format);
-		}
+		return (Query) this.createObject(name);
 	}
 
-	public ResultReaderManager getReaderManager(String name)
+	public Query createQueryAdapter(int id)
 			throws EternaException
 	{
-		ResultReaderManager result = (ResultReaderManager) this.readerManagerMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getReaderManager(name);
-		}
-		return result;
+		return (Query) this.createObject(id);
 	}
 
-	public void addReaderManager(String name, ResultReaderManager manager)
+	public Update createUpdateAdapter(String name)
 			throws EternaException
 	{
-		if (this.readerManagerMap.containsKey(name))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate reader manager [" + name + "].");
-			}
-		}
-		else if (manager != null)
-		{
-			if (this.initialized)
-			{
-				manager.initialize(this);
-			}
-			this.readerManagerMap.put(name, manager);
-		}
+		return (Update) this.createObject(name);
 	}
 
-	public SQLParameterGroup getParameterGroup(String name)
+	public Update createUpdateAdapter(int id)
 			throws EternaException
 	{
-		SQLParameterGroup group = (SQLParameterGroup) this.paramGroupMap.get(name);
-		if (group == null && this.shareEternaFactory != null)
-		{
-			group = this.shareEternaFactory.getParameterGroup(name);
-		}
-		return group;
+		return (Update) this.createObject(id);
 	}
 
-	public void addParameterGroup(String name, SQLParameterGroup group)
+	public PreparerCreater getPrepare(String name)
 			throws EternaException
 	{
-		if (this.paramGroupMap.containsKey(name))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate SQLParameterGroup [" + name + "].");
-			}
-		}
-		else if (group != null)
-		{
-			if (this.initialized)
-			{
-				group.initialize(this);
-			}
-			this.paramGroupMap.put(name, group);
-		}
+		return (PreparerCreater) this.createObject(name);
 	}
 
-	public QueryAdapter createQueryAdapter(String name)
-			throws EternaException
-	{
-		return (QueryAdapter) this.queryManager.create(name);
-	}
+	//----------------------------------  search  --------------------------------------
 
-	public QueryAdapter createQueryAdapter(int id)
-			throws EternaException
-	{
-		return (QueryAdapter) this.queryManager.create(id);
-	}
-
-	public int getQueryAdapterId(String name)
-			throws EternaException
-	{
-		return this.queryManager.getIdByName(name);
-	}
-
-	public void registerQueryAdapter(QueryAdapterGenerator generator)
-			throws EternaException
-	{
-		this.queryManager.register(generator);
-	}
-
-	public void deregisterQueryAdapter(String name)
-			throws EternaException
-	{
-		this.queryManager.deregister(name);
-	}
-
-	public UpdateAdapter createUpdateAdapter(String name)
-			throws EternaException
-	{
-		return (UpdateAdapter) this.updateManager.create(name);
-	}
-
-	public UpdateAdapter createUpdateAdapter(int id)
-			throws EternaException
-	{
-		return (UpdateAdapter) this.updateManager.create(id);
-	}
-
-	public int getUpdateAdapterId(String name)
-			throws EternaException
-	{
-		return this.updateManager.getIdByName(name);
-	}
-
-	public void registerUpdateAdapter(UpdateAdapterGenerator generator)
-			throws EternaException
-	{
-		this.updateManager.register(generator);
-	}
-
-	public void deregisterUpdateAdapter(String name)
-			throws EternaException
-	{
-		this.updateManager.deregister(name);
-	}
-
-	public void registerValuePreparerGenerator(ValuePreparerCreaterGenerator generator)
-			throws EternaException
-	{
-		if (generator == null)
-		{
-			throw new NullPointerException();
-		}
-		if (this.valuePreparerMap.containsKey(generator.getName()))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate VPGenerator [" + generator.getName() + "].");
-			}
-		}
-		else
-		{
-			if (this.initialized)
-			{
-				generator.initialize(this);
-			}
-			this.valuePreparerMap.put(generator.getName(), generator);
-		}
-	}
-
-	public ValuePreparerCreaterGenerator getDefaultValuePreparerCreaterGenerator()
-	{
-		return this.defaultVPCG;
-	}
-
-	public ValuePreparerCreaterGenerator getValuePreparerCreaterGenerator(String name)
-			throws EternaException
-	{
-		if (name == null)
-		{
-			return this.defaultVPCG;
-		}
-		ValuePreparerCreaterGenerator vpcg = (ValuePreparerCreaterGenerator) this.valuePreparerMap.get(name);
-		if (vpcg == null)
-		{
-			if (this.shareEternaFactory != null)
-			{
-				return this.shareEternaFactory.getValuePreparerCreaterGenerator(name);
-			}
-			throw new EternaException(
-					"Not found [ValuePreparerCreaterGenerator] name:" + name + ".");
-		}
-		return vpcg;
-	}
-
-	public ValuePreparerCreater createValuePreparerCreater(int type)
-			throws EternaException
-	{
-		int pureType = TypeManager.getPureType(type);
-		return this.defaultVPCG.createValuePreparerCreater(pureType);
-	}
-
-	public ValuePreparerCreater createValuePreparerCreater(String name, int type)
-			throws EternaException
-	{
-		int pureType = TypeManager.getPureType(type);
-		ValuePreparerCreaterGenerator vpcg = (ValuePreparerCreaterGenerator) this.valuePreparerMap.get(name);
-		if (vpcg == null)
-		{
-			if (this.shareEternaFactory != null)
-			{
-				return this.shareEternaFactory.createValuePreparerCreater(name, pureType);
-			}
-			throw new EternaException(
-					"Not found [ValuePreparerCreaterGenerator] name:" + name + ".");
-		}
-		return vpcg.createValuePreparerCreater(pureType);
-	}
-
-
-	//----------------------------------  SearchFactory  --------------------------------------
-
-	private Map conditionBuilderMap = new HashMap();
-	private Map conditionBuilderListMap = new HashMap();
-	private Map conditionBuilderNameListMap = new HashMap();
-
-	private FactoryGeneratorManager searchAdapterManager
-			= new FactoryGeneratorManager("SearchAdapter", this);
+	private final Map conditionBuilderListMap = new HashMap();
 
 	private SearchManagerGenerator searchManagerGenerator;
-	private SearchManager.Attributes searchManagerAttributes;
+	private SearchAttributes searchAttributes;
 
-	private void initConditionBuilderList(String name, List builderNames)
+	// TODO
+	void initConditionBuilderList(String name, List builderNames)
 			throws EternaException
 	{
 		Iterator itrName = builderNames.iterator();
@@ -760,100 +477,25 @@ public class EternaFactoryImpl extends AbstractFactory
 	public ConditionBuilder getConditionBuilder(String name)
 			throws EternaException
 	{
-		ConditionBuilder result = (ConditionBuilder) this.conditionBuilderMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getConditionBuilder(name);
-		}
-		return result;
-	}
-
-	public void addConditionBuilder(String name, ConditionBuilder builder)
-			throws EternaException
-	{
-		if (this.conditionBuilderMap.containsKey(name))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate ConditionBuilder [" + name + "].");
-			}
-		}
-		else if (builder != null)
-		{
-			if (this.initialized)
-			{
-				builder.initialize(this);
-			}
-			this.conditionBuilderMap.put(name, builder);
-		}
+		return (ConditionBuilder) this.createObject(name);
 	}
 
 	public List getConditionBuilderList(String name)
 			throws EternaException
 	{
-		List result = (List) this.conditionBuilderListMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getConditionBuilderList(name);
-		}
-		return result;
+		return (List) this.createObject(name);
 	}
 
-	public void addConditionBuilderList(String name, List builderNames)
+	public Search createSearchAdapter(String name)
 			throws EternaException
 	{
-		if (builderNames == null)
-		{
-			throw new NullPointerException();
-		}
-		if (this.initialized)
-		{
-			this.initConditionBuilderList(name, builderNames);
-		}
-		else
-		{
-			if (this.conditionBuilderNameListMap.containsKey(name))
-			{
-				if (!FactoryManager.isSuperInit())
-				{
-					log.warn("Duplicate ConditionBuilderList [" + name + "].");
-				}
-			}
-			else
-			{
-				this.conditionBuilderNameListMap.put(name, builderNames);
-			}
-		}
+		return (Search) this.createObject(name);
 	}
 
-	public SearchAdapter createSearchAdapter(String name)
+	public Search createSearchAdapter(int id)
 			throws EternaException
 	{
-		return (SearchAdapter) this.searchAdapterManager.create(name);
-	}
-
-	public SearchAdapter createSearchAdapter(int id)
-			throws EternaException
-	{
-		return (SearchAdapter) this.searchAdapterManager.create(id);
-	}
-
-	public int getSearchAdapterId(String name)
-			throws EternaException
-	{
-		return this.searchAdapterManager.getIdByName(name);
-	}
-
-	public void registerSearchAdapter(SearchAdapterGenerator generator)
-			throws EternaException
-	{
-		this.searchAdapterManager.register(generator);
-	}
-
-	public void deregisterSearchAdapter(String name)
-			throws EternaException
-	{
-		this.searchAdapterManager.deregister(name);
+		return (Search) this.createObject(id);
 	}
 
 	public void registerSearchManager(SearchManagerGenerator generator)
@@ -865,7 +507,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		if (this.searchManagerGenerator != null)
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate SearchManagerGenerator.");
 			}
@@ -880,7 +522,8 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 	}
 
-	public SearchManager createSearchManager() throws EternaException
+	public SearchManager createSearchManager()
+			throws EternaException
 	{
 		if (this.searchManagerGenerator == null)
 		{
@@ -888,43 +531,36 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.searchManagerGenerator.setFactory(this);
 		}
 		SearchManager searchManager = this.searchManagerGenerator.createSearchManager();
-		searchManager.setAttributes(this.getSearchManagerAttributes());
+		searchManager.setAttributes(this.getSearchAttributes());
 		return searchManager;
 	}
 
-	public SearchManager.Attributes getSearchManagerAttributes()
+	public SearchAttributes getSearchAttributes()
 			throws EternaException
 	{
-		if (this.searchManagerAttributes == null)
+		String attrs = (String) super.getAttribute(SEARCH_ATTRIBUTES_FLAG);
+		if (attrs != null)
 		{
-			String pageNumTag = (String) this.getAttribute(
-					SEARCH_MANAGER_ATTRIBUTE_PREFIX + "pageNumTag");
-			String pageSizeTag = (String) this.getAttribute(
-					SEARCH_MANAGER_ATTRIBUTE_PREFIX + "pageSizeTag");
-			String querySettingTag = (String) this.getAttribute(
-					SEARCH_MANAGER_ATTRIBUTE_PREFIX + "querySettingTag");
-			String queryTypeTag = (String) this.getAttribute(
-					SEARCH_MANAGER_ATTRIBUTE_PREFIX + "queryTypeTag");
-			String queryTypeClear = (String) this.getAttribute(
-					SEARCH_MANAGER_ATTRIBUTE_PREFIX + "queryTypeClear");
-			String queryTypeReset = (String) this.getAttribute(
-					SEARCH_MANAGER_ATTRIBUTE_PREFIX + "queryTypeReset");
-			this.searchManagerAttributes = new SearchManager.Attributes(pageNumTag, pageSizeTag,
-					querySettingTag, queryTypeTag, queryTypeClear, queryTypeReset);
+			Map attrMap = StringTool.string2Map(attrs, ",", ':', true, false, null, null);
+			this.searchAttributes = new SearchAttributes(attrMap);
 		}
-		return this.searchManagerAttributes;
+		else if (this.shareEternaFactory != null)
+		{
+			this.searchAttributes = this.shareEternaFactory.getSearchAttributes();
+		}
+		else
+		{
+			this.searchAttributes = new SearchAttributes(null);
+		}
+		return this.searchAttributes;
 	}
 
 
-	//----------------------------------  ModelFactory  --------------------------------------
+	//----------------------------------  model  --------------------------------------
 
 	private String modelNameTag;
-	private Map exportMap = new HashMap();
-	private ModelCaller defaultModelCaller = new ModelCallerImpl();
+	private final ModelCaller defaultModelCaller = new ModelCallerImpl();
 	private ModelCaller modelCaller = this.defaultModelCaller;
-
-	private FactoryGeneratorManager modelManager
-			= new FactoryGeneratorManager("ModelAdapter", this);
 
 	public String getModelNameTag()
 			throws EternaException
@@ -950,7 +586,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.modelCaller != this.defaultModelCaller)
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate ModelCaller.");
 			}
@@ -965,75 +601,31 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 	}
 
-	public void addModelExport(String exportName, ModelExport modelExport)
-	{
-		if (this.exportMap.containsKey(exportName))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate export [" + exportName + "].");
-			}
-		}
-		else if (modelExport != null)
-		{
-			this.exportMap.put(exportName, modelExport);
-		}
-	}
-
 	public ModelExport getModelExport(String exportName)
 			throws EternaException
 	{
-		ModelExport result = (ModelExport) this.exportMap.get(exportName);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getModelExport(exportName);
-		}
-		return result;
+		return (ModelExport) this.createObject(exportName);
 	}
 
 	public ModelAdapter createModelAdapter(String name)
 			throws EternaException
 	{
-		return (ModelAdapter) this.modelManager.create(name);
+		return (ModelAdapter) this.createObject(name);
 	}
 
 	public ModelAdapter createModelAdapter(int id)
 			throws EternaException
 	{
-		return (ModelAdapter) this.modelManager.create(id);
-	}
-
-	public int getModelAdapterId(String name)
-			throws EternaException
-	{
-		return this.modelManager.getIdByName(name);
-	}
-
-	public void registerModelAdapter(ModelAdapterGenerator generator)
-			throws EternaException
-	{
-		this.modelManager.register(generator);
-	}
-
-	public void deregisterModelAdapter(String name)
-			throws EternaException
-	{
-		this.modelManager.deregister(name);
+		return (ModelAdapter) this.createObject(id);
 	}
 
 
-	//----------------------------------  ViewFactory  --------------------------------------
+	//----------------------------------  view  --------------------------------------
 
 	private String viewGlobalSetting;
-	private Map typicalComponentMap = new HashMap();
-	private Map dataPrinterMap = new HashMap();
-	private Map functionMap = new HashMap();
-	private Map resourceMap = new HashMap();
-	private StringCoder defaultStringCoder = new StringCoderImpl();
+	private final Map dataPrinterMap = new HashMap();
+	private final StringCoder defaultStringCoder = new StringCoderImpl();
 	private StringCoder stringCoder = this.defaultStringCoder;
-
-	private FactoryGeneratorManager viewManager
-			= new FactoryGeneratorManager("ViewAdapter", this);
 
 	public String getViewGlobalSetting() throws EternaException
 	{
@@ -1064,7 +656,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.dataPrinterMap.containsKey(name))
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate DataPrinter [" + name + "].");
 			}
@@ -1082,62 +674,13 @@ public class EternaFactoryImpl extends AbstractFactory
 	public Function getFunction(String name)
 			throws EternaException
 	{
-		Function result = (Function) this.functionMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getFunction(name);
-		}
-		if (result == null)
-		{
-			throw new EternaException("Not found the function [" + name + "].");
-		}
-		return result;
-	}
-
-	public void addFunction(String name, Function fun)
-	{
-		if (this.functionMap.containsKey(name))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate function [" + name + "].");
-			}
-		}
-		else if (fun != null)
-		{
-			this.functionMap.put(name, fun);
-		}
+		return (Function) this.createObject(name);
 	}
 
 	public Component getTypicalComponent(String name)
 			throws EternaException
 	{
-		Component result = (Component) this.typicalComponentMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getTypicalComponent(name);
-		}
-		return result;
-	}
-
-	public void addTypicalComponent(String name, Component com)
-			throws EternaException
-	{
-		if (this.typicalComponentMap.containsKey(name))
-		{
-			if (!FactoryManager.isSuperInit())
-			{
-				log.warn("Duplicate typical component [" + name + "].");
-			}
-		}
-		else if (com != null)
-		{
-			if (this.initialized)
-			{
-				com.initialize(this, null);
-			}
-			this.typicalComponentMap.put(name, com);
-		}
+		return (Component) this.createObject(name);
 	}
 
 	public StringCoder getStringCoder()
@@ -1150,7 +693,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (this.stringCoder != this.defaultStringCoder)
 		{
-			if (!FactoryManager.isSuperInit())
+			if (ContainerManager.getSuperInitLevel() == 0)
 			{
 				log.warn("Duplicate StringCoder.");
 			}
@@ -1165,64 +708,466 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 	}
 
-	public ViewAdapter createViewAdapter(String name)
+	public View createViewAdapter(String name)
 			throws EternaException
 	{
-		return (ViewAdapter) this.viewManager.create(name);
+		return (View) this.createObject(name);
 	}
 
-	public ViewAdapter createViewAdapter(int id)
+	public View createViewAdapter(int id)
 			throws EternaException
 	{
-		return (ViewAdapter) this.viewManager.create(id);
-	}
-
-	public int getViewAdapterId(String name)
-			throws EternaException
-	{
-		return this.viewManager.getIdByName(name);
-	}
-
-	public void registerViewAdapter(ViewAdapterGenerator generator)
-			throws EternaException
-	{
-		this.viewManager.register(generator);
-	}
-
-	public void deregisterViewAdapter(String name)
-			throws EternaException
-	{
-		this.viewManager.deregister(name);
+		return (View) this.createObject(id);
 	}
 
 	public Resource getResource(String name)
 			throws EternaException
 	{
-		Resource result = (Resource) this.resourceMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getResource(name);
-		}
-		return result;
+		return (Resource) this.createObject(name);
 	}
 
-	public void addResource(String name, Resource resource)
+
+	//----------------------  object register & deregister ...  ------------------------
+
+	public void registerObject(Object obj)
 			throws EternaException
 	{
-		if (this.resourceMap.containsKey(name))
+		if (obj == null)
 		{
-			if (!FactoryManager.isSuperInit())
+			throw new NullPointerException("Param obj is null.");
+		}
+		int id = this.findEmptyPosition();
+		if (id >= Factory.MAX_OBJECT_COUNT)
+		{
+			String msg = "Max object count:" + id
+					+ "," + Factory.MAX_OBJECT_COUNT + ".";
+			throw new ParseException(msg);
+		}
+		ObjectContainer container;
+		if (obj instanceof ObjectCreater)
+		{
+			container = new ObjectCreaterCon(id, (ObjectCreater) obj);
+		}
+		else if (obj instanceof EternaObject)
+		{
+			container = new EternaObjectCon(id, (EternaObject) obj);
+		}
+		else
+		{
+			String msg = "The param obj must be "
+					+ "ObjectCreater or EternaObject, but it is ["
+					+ obj.getClass().getName() + "].";
+			throw new ParseException(msg);
+		}
+		String name = container.getName();
+		if (this.objectMap.containsKey(name))
+		{
+			throw new ParseException("Duplicate object name [" + name + "].");
+		}
+		if (id == this.objectList.size())
+		{
+			this.objectList.add(container);
+		}
+		else
+		{
+			this.objectList.set(id, container);
+		}
+		this.objectMap.put(name, container);
+		if (this.initialized)
+		{
+			container.initialize(this);
+		}
+	}
+	private int findEmptyPosition()
+	{
+		if (this.hasEmptyPosition)
+		{
+			return this.objectList.size();
+		}
+		int count = this.objectList.size();
+		for (int i = 0; i < count; i++)
+		{
+			if (this.objectList.get(i) == null)
 			{
-				log.warn("Duplicate Resource [" + name + "].");
+				return i;
 			}
 		}
-		else if (resource != null)
+		this.hasEmptyPosition = false;
+		return this.objectList.size();
+	}
+
+	/**
+	 * 注销一个已注册的对象.
+	 */
+	public void deregisterObject(Object key)
+			throws EternaException
+	{
+		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
+		if (container == null)
 		{
-			if (this.initialized)
+			throw new ParseException("Not found object [" + name + "].");
+		}
+		this.objectList.set(container.getId(), null);
+		this.objectMap.remove(key);
+		container.destroy();
+		this.hasEmptyPosition = true;
+	}
+
+	/**
+	 * 查询已注册的对象的编号.
+	 */
+	public int findObjectId(Object key)
+	{
+		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
+		if (container == null)
+		{
+			if (this.shareEternaFactory != null)
 			{
-				resource.initialize(this);
+				return this.shareEternaFactory.findObjectId(key) + Factory.MAX_OBJECT_COUNT;
 			}
-			this.resourceMap.put(name, resource);
+			throw new ParseException("Not found object [" + key + "].");
+		}
+		return container.getId();
+	}
+
+	/**
+	 * 根据给出的编号创建对象.
+	 */
+	public Object createObject(int id)
+			throws EternaException
+	{
+		if (id < 0 || id >= this.objectList.size())
+		{
+			if (this.shareEternaFactory != null && id >= Factory.MAX_OBJECT_COUNT)
+			{
+				return this.shareEternaFactory.createObject(id - Factory.MAX_OBJECT_COUNT);
+			}
+			throw new EternaException("Not found object id:" + id + ".");
+		}
+		ObjectContainer container = (ObjectContainer) this.objectList.get(id);
+		if (container == null)
+		{
+			throw new EternaException("Not found object id:" + id + ".");
+		}
+		return container.create(this.inInit, this);
+	}
+
+	public Object createObject(Object key)
+			throws EternaException
+	{
+		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
+		if (container == null)
+		{
+			if (this.shareFactory != null)
+			{
+				return this.shareFactory.createObject(key);
+			}
+			throw new ParseException("Not found object [" + key + "].");
+		}
+		return container.create(this.inInit, this);
+	}
+
+	/**
+	 * 获取某种类型的对象的所有名称.
+	 */
+	public String[] getObjectNames(Class type)
+	{
+		List result = new ArrayList();
+		Iterator itr = this.objectList.iterator();
+		int count = this.objectList.size();
+		for (int i = 0; i < count; i++)
+		{
+			ObjectContainer container = (ObjectContainer) itr.next();
+			if (container != null)
+			{
+				if (type == null || type.isAssignableFrom(container.getType()))
+				{
+					result.add(container.getName());
+				}
+			}
+		}
+		String[] names = new String[result.size()];
+		result.toArray(names);
+		return names;
+	}
+
+	// 存放对象的容器
+	private final Map objectMap = new HashMap();
+	private List objectList = new ArrayList();
+	// 列表中是否有空余位置, 如注销了对象之后
+	private boolean hasEmptyPosition;
+
+}
+
+/**
+ * 存放对象的容器.
+ */
+abstract class ObjectContainer
+{
+	ObjectContainer(int id)
+	{
+		this.id = id;
+	}
+
+	/**
+	 * 获取对象的编号.
+	 */
+	public int getId()
+	{
+		return this.id;
+	}
+	private final int id;
+
+	/**
+	 * 获取对象的名称.
+	 */
+	public abstract String getName();
+
+	/**
+	 * 所创建的对象是否为单例.
+	 */
+	public abstract boolean isSingleton();
+
+	/**
+	 * 获取对象的类型.
+	 */
+	public abstract Class getType();
+
+	/**
+	 * 执行初始化.
+	 */
+	public abstract boolean initialize(EternaFactory factory) throws EternaException;
+
+	/**
+	 * 创建容器中存放的对象.
+	 *
+	 * @param needInit  是否需要执行初始化
+	 */
+	public abstract Object create(boolean needInit, EternaFactory factory);
+
+	/**
+	 * 销毁存放的对象.
+	 */
+	public abstract void destroy();
+
+}
+
+/**
+ * EternaObject的容器.
+ */
+class EternaObjectCon extends ObjectContainer
+{
+	EternaObjectCon(int id, EternaObject obj)
+	{
+		super(id);
+		this.obj = obj;
+	}
+	private final EternaObject obj;
+
+	public String getName()
+	{
+		return this.obj.getName();
+	}
+
+	public boolean isSingleton()
+	{
+		return true;
+	}
+
+	public Class getType()
+	{
+		return this.obj.getClass();
+	}
+
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		return this.obj.initialize(factory);
+	}
+
+	public Object create(boolean needInit, EternaFactory factory)
+	{
+		if (needInit)
+		{
+			this.initialize(factory);
+		}
+		return this.obj;
+	}
+
+	public void destroy()
+	{
+	}
+
+}
+
+/**
+ * ObjectCreater的容器.
+ */
+class ObjectCreaterCon extends ObjectContainer
+{
+	ObjectCreaterCon(int id, ObjectCreater obj)
+	{
+		super(id);
+		this.obj = obj;
+	}
+	private final ObjectCreater obj;
+
+	public String getName()
+	{
+		return this.obj.getName();
+	}
+
+	public boolean isSingleton()
+	{
+		return this.obj.isSingleton();
+	}
+
+	public Class getType()
+	{
+		return this.obj.getObjectType();
+	}
+
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		return this.obj.initialize(factory);
+	}
+
+	public Object create(boolean needInit, EternaFactory factory)
+	{
+		if (needInit)
+		{
+			this.initialize(factory);
+		}
+		return this.obj.create();
+	}
+
+	public void destroy()
+	{
+		this.obj.destroy();
+	}
+
+}
+
+class DataSourceManagerImpl implements DataSourceManager
+{
+	private String defaultDataSourceName = null;
+	private DataSource defaultDataSource = null;
+
+	private Map dataSourceMap = null;
+
+	/**
+	 * 初始化这个DataSourceManager.
+	 */
+	public void initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (this.dataSourceMap == null)
+		{
+			throw new EternaException("Not registe any data source.");
+		}
+		if (this.defaultDataSourceName == null)
+		{
+			throw new EternaException("Must give this default data source name.");
+		}
+		this.defaultDataSource = (DataSource) this.dataSourceMap.get(this.defaultDataSourceName);
+		if (this.defaultDataSource == null)
+		{
+			throw new EternaException("Not found the data source:" + this.defaultDataSourceName + ".");
+		}
+
+	}
+
+	public DataSource getDefaultDataSource()
+	{
+		return this.defaultDataSource;
+	}
+
+	public DataSource getDataSource(String name)
+	{
+		return (DataSource) this.dataSourceMap.get(name);
+	}
+
+	public Map getDataSourceMap()
+	{
+		return Collections.unmodifiableMap(this.dataSourceMap);
+	}
+
+	protected boolean hasDataSource(String name)
+	{
+		if (this.dataSourceMap == null)
+		{
+			return false;
+		}
+		return this.dataSourceMap.containsKey(name);
+	}
+
+	public String getDefaultDataSourceName()
+	{
+		return this.defaultDataSourceName;
+	}
+
+	public void setDefaultDataSourceName(String name)
+			throws EternaException
+	{
+		if (this.defaultDataSource != null)
+		{
+			throw new EternaException("Can't set default data source name after Initialization.");
+		}
+		this.defaultDataSourceName = name;
+	}
+
+	protected void addDataSource(String name, DataSource ds)
+	{
+		if (this.dataSourceMap == null)
+		{
+			this.dataSourceMap = new HashMap();
+		}
+		this.dataSourceMap.put(name, ds);
+	}
+
+	public void addDataSource(Context context, String dataSourceConfig)
+			throws EternaException
+	{
+		String[] items = StringTool.separateString(
+				Utility.resolveDynamicPropnames(dataSourceConfig), ";", true);
+		try
+		{
+			for (int i = 0; i < items.length; i++)
+			{
+				if (this.dataSourceMap == null)
+				{
+					this.dataSourceMap = new HashMap();
+				}
+				String item = items[i];
+				if (item.length() > 0)
+				{
+					int index = item.indexOf('=');
+					if (index == -1)
+					{
+						throw new EternaException("Error DataSource define:" + item + ".");
+					}
+					String key = item.substring(0, index).trim();
+					if (this.dataSourceMap.containsKey(key))
+					{
+						throw new EternaException("Duplicate DataSource name:" + key + ".");
+					}
+					String name = item.substring(index + 1).trim();
+					if (name.length() > 0)
+					{
+						this.dataSourceMap.put(key, context.lookup(name));
+					}
+					else
+					{
+						this.dataSourceMap.put(key, Utility.getDataSource());
+					}
+				}
+			}
+		}
+		catch (NamingException ex)
+		{
+			EternaFactoryImpl.log.error("Error when get jdbc in jndi.", ex);
+			throw new EternaException(ex);
 		}
 	}
 

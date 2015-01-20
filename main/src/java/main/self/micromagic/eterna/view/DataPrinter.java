@@ -23,10 +23,10 @@ import java.util.Iterator;
 import java.sql.SQLException;
 import java.text.DateFormat;
 
+import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.ResultRow;
 
 /**
  * 数据集输出器, 用于将数据集按照一定的格式进行输出.

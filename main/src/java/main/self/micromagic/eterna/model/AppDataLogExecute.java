@@ -37,15 +37,16 @@ import self.micromagic.cg.ClassGenerator;
 import self.micromagic.cg.ClassKeyCache;
 import self.micromagic.cg.ArrayTool;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.base.ResultMetaData;
+import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.eterna.model.impl.AbstractExecute;
-import self.micromagic.eterna.search.SearchAdapter;
+import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.sql.ResultMetaData;
-import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.util.container.SessionCache;
 import self.micromagic.util.container.PreFetchIterator;
 import self.micromagic.util.container.ThreadCache;
@@ -493,7 +494,7 @@ public class AppDataLogExecute extends AbstractExecute
 				Iterator itr = sm.getConditions().iterator();
 				while (itr.hasNext())
 				{
-					SearchManager.Condition con = (SearchManager.Condition) itr.next();
+					SearchManager.ConditionInfo con = (SearchManager.ConditionInfo) itr.next();
 					Element vNode = parent.addElement("value");
 					vNode.addAttribute("conditionName", con.name);
 					if (con.value == null)
@@ -537,10 +538,10 @@ public class AppDataLogExecute extends AbstractExecute
 					}
 				}
 			}
-			else if (value instanceof SearchAdapter.Result)
+			else if (value instanceof SearchResult)
 			{
 				parent.addAttribute("type", "SearchAdapter.Result");
-				SearchAdapter.Result result = (SearchAdapter.Result) value;
+				SearchResult result = (SearchResult) value;
 				parent.addAttribute("pageNum", Integer.toString(result.pageNum));
 				parent.addAttribute("pageSize", Integer.toString(result.pageSize));
 				parent.addAttribute("searchName", result.searchName);
@@ -557,10 +558,10 @@ public class AppDataLogExecute extends AbstractExecute
 				Element vNode = parent.addElement("value");
 				printResultIterator(vNode, result.queryResult);
 			}
-			else if (value instanceof SearchManager.Attributes)
+			else if (value instanceof SearchAttributes)
 			{
 				parent.addAttribute("type", "SearchManager.Attributes");
-				SearchManager.Attributes sma = (SearchManager.Attributes) value;
+				SearchAttributes sma = (SearchAttributes) value;
 				parent.addAttribute("pageNumTag", sma.pageNumTag);
 				parent.addAttribute("pageSizeTag", sma.pageSizeTag);
 				parent.addAttribute("querySettingTag", sma.querySettingTag);

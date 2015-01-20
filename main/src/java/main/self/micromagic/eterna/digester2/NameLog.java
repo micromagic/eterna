@@ -16,10 +16,11 @@
 
 package self.micromagic.eterna.digester2;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.dom4j.Element;
+
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.container.ThreadCache;
 
@@ -36,7 +37,8 @@ public class NameLog
 	}
 	private static NameLog instance = new NameLog();
 
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		int nBegin = position.value += 1;
 		int nEnd = ParseRule.findItemEnd(config, position);
@@ -49,16 +51,16 @@ public class NameLog
 		position.value = nEnd + 1;
 		NameLog r = new NameLog();
 		r.attrName = aName.length() > 0 ? aName : null;
-		r.onlyElement = ONLY_ELEMENT_FLAG.equals(aName);
+		r.onlyElement = SPECIAL_FLAG.equals(aName);
 		return r;
 	}
 	private boolean onlyElement;
 	private String attrName;
 
 	/**
-	 * 仅仅记录元素节点的标签.
+	 * 标记仅仅记录元素节点等特殊的标签.
 	 */
-	private static final String ONLY_ELEMENT_FLAG = "$E";
+	private static final String SPECIAL_FLAG = "$";
 	/**
 	 * 线程中记录元素节点的堆栈.
 	 */
@@ -79,7 +81,8 @@ public class NameLog
 					stack = new ArrayList();
 					tc.setProperty(ELEMENT_STACK_FLAG, stack);
 				}
-            stack.add(ci.element);
+				stack.add(ci.objName);
+				stack.add(ci.element);
 			}
 		}
 		else
@@ -87,7 +90,22 @@ public class NameLog
 			objFlag = element.getName();
 			if (this.attrName != null)
 			{
-				objFlag = objFlag + ":" + element.attributeValue(this.attrName);
+				if (this.attrName.startsWith(SPECIAL_FLAG))
+				{
+					String tmp = this.attrName.substring(1);
+					if ("$parent".equals(tmp))
+					{
+						objFlag = element.getParent().getName() + "'s " + objFlag;
+					}
+					else
+					{
+						objFlag = tmp;
+					}
+				}
+				else
+				{
+					objFlag = objFlag + ":" + element.attributeValue(this.attrName);
+				}
 			}
 		}
 		ParseException.setContextInfo(objFlag, element);
@@ -98,10 +116,12 @@ public class NameLog
 	{
 		if (this.onlyElement)
 		{
-         List stack = (List) ThreadCache.getInstance().getProperty(ELEMENT_STACK_FLAG);
+			List stack = (List) ThreadCache.getInstance().getProperty(ELEMENT_STACK_FLAG);
 			if (stack != null && stack.size() > 0)
 			{
-				ParseException.setContextInfo(null, (Element) stack.remove(stack.size() - 1));
+				Element e = (Element) stack.remove(stack.size() - 1);
+				String objFlag = (String) stack.remove(stack.size() - 1);
+				ParseException.setContextInfo(objFlag, e);
 			}
 		}
 	}

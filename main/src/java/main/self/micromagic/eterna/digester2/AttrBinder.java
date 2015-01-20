@@ -16,15 +16,16 @@
 
 package self.micromagic.eterna.digester2;
 
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.dom4j.Element;
+
 import self.micromagic.cg.BeanMap;
 import self.micromagic.util.IntegerRef;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.StringRef;
+import self.micromagic.util.StringTool;
 
 /**
  * 通过名称来的设置来绑定配置与对象的属性.
@@ -32,6 +33,11 @@ import self.micromagic.util.StringRef;
 public class AttrBinder
 		implements ElementProcessor
 {
+	/**
+	 * 获取整个元素节点的标识.
+	 */
+	static final String ELEMENT_FLAG = "$element";
+
 	static final String __FLAG = "attr:";
 	public static AttrBinder getInstance()
 	{
@@ -42,7 +48,8 @@ public class AttrBinder
 	private AttrGetter[] attrs;
 	private String[] toNames;
 
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		return parseConfig(config, position);
 	}
@@ -78,7 +85,7 @@ public class AttrBinder
 	 */
 	static AttrGetter parseGetter(String config, IntegerRef position, StringRef name)
 	{
-      int beginPos = position.value;
+		int beginPos = position.value;
 		int endPos = ParseRule.findItemEnd(config, position);
 		String tmpName = config.substring(beginPos, endPos).trim();
 		if (tmpName.length() == 0)
@@ -112,12 +119,17 @@ public class AttrBinder
 				name.setString(config.substring(sFlag + 1, endPos).trim());
 			}
 		}
+		else if (ELEMENT_FLAG.equals(tmpName))
+		{
+			// $element
+			ag = new ElementGetter();
+		}
 		else
 		{
-			ag = new SimpleAttrGetter(tmpName);
+			ag = new StandardAttrGetter(tmpName);
 			if (pFlag != -1 && pFlag < endPos)
 			{
-				SimpleAttrGetter sag = (SimpleAttrGetter) ag;
+				StandardAttrGetter sag = (StandardAttrGetter) ag;
 				position.value = pFlag;
 				Map params = ParseRule.parseParam(config, position);
 				String bStr;
@@ -158,12 +170,12 @@ public class AttrBinder
 	{
 	}
 
-   public void bind(BeanMap bean, Element element)
+	public void bind(BeanMap bean, Element element)
 	{
 		int count = this.attrs.length;
 		for (int i = 0; i < count; i++)
 		{
-			String value = this.attrs[i].get(element);
+			Object value = this.attrs[i].get(element);
 			if (value != null)
 			{
 				bean.put(this.toNames[i], value);
@@ -171,51 +183,68 @@ public class AttrBinder
 		}
 	}
 
-	static class SimpleAttrGetter
-			implements AttrGetter
+}
+
+/**
+ * 一个标准的属性获取者.
+ */
+class StandardAttrGetter
+		implements AttrGetter
+{
+	StandardAttrGetter(String flag)
 	{
-		SimpleAttrGetter(String flag)
-		{
-			this.flag = flag;
-		}
-		private String flag;
+		this.flag = flag;
+	}
+	private final String flag;
 
-		public void setMustExists(boolean b)
-		{
-			this.mustExists = b;
-		}
-		private boolean mustExists = true;
+	public void setMustExists(boolean b)
+	{
+		this.mustExists = b;
+	}
+	private boolean mustExists = true;
 
-		public void setDefaultValue(String d)
+	public void setDefaultValue(String d)
+	{
+		this.defaultValue = d;
+		if (d != null)
 		{
-			this.defaultValue = d;
-			if (d != null)
+			this.mustExists = false;
+		}
+	}
+	private String defaultValue;
+
+	public void setIntern(boolean b)
+	{
+		this.intern = b;
+	}
+	private boolean intern = true;
+
+	public Object get(Element el)
+	{
+		String r = el.attributeValue(this.flag);
+		if (r == null && (this.mustExists || this.defaultValue != null))
+		{
+			if (this.defaultValue != null)
 			{
-				this.mustExists = false;
+				return this.defaultValue;
 			}
+			throw new ParseException("Not found attribute [" + this.flag
+					+ "] at tag [" + el.getName() + "].");
 		}
-		private String defaultValue;
+		return this.intern ? StringTool.intern(r) : r;
+	}
 
-		public void setIntern(boolean b)
-		{
-			this.intern = b;
-		}
-		private boolean intern = true;
+}
 
-		public String get(Element el)
-		{
-			String r = el.attributeValue(this.flag);
-			if (r == null && (this.mustExists || this.defaultValue != null))
-			{
-				if (this.defaultValue != null)
-				{
-					return this.defaultValue;
-				}
-				throw new ParseException("Not found attribute [" + this.flag + "] for tag [" + el.getName() + "].");
-			}
-			return this.intern ? StringTool.intern(r) : r;
-		}
-
+/**
+ * 元素节点的获取者.
+ */
+class ElementGetter
+		implements AttrGetter
+{
+	public Object get(Element el)
+	{
+		return el;
 	}
 
 }

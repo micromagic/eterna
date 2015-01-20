@@ -17,11 +17,16 @@
 package self.micromagic.util;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.NumberFormat;
 import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+import self.micromagic.util.container.ThreadCache;
 
 public class FormatTool
 {
@@ -37,11 +42,57 @@ public class FormatTool
 	private static final NumberFormat currency2Format = new DecimalFormat("#,##0.00");
 
 	/**
+	 * 在线程中存放Format实例的缓存.
+	 */
+	private static final String THREAD_FORMAT_KEY = "format.thread.cache";
+
+	/**
+	 * 根据给出的Format对象, 在当前线程中克隆一个实例.
+	 */
+	public static Format getThreadFormat(Format format)
+	{
+		return getThreadFormat0(format);
+	}
+	private static Format getThreadFormat0(Format format)
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		Map fCache = (Map) cache.getProperty(THREAD_FORMAT_KEY);
+		if (fCache == null)
+		{
+			fCache = new WeakHashMap();
+			cache.setProperty(THREAD_FORMAT_KEY, fCache);
+		}
+		Format result = (Format) fCache.get(format);
+		if (result == null)
+		{
+			result = (Format) format.clone();
+			fCache.put(format, result);
+		}
+		return result;
+	}
+
+	/**
+	 * 根据给出的DateFormat对象, 在当前线程中克隆一个实例.
+	 */
+	public static DateFormat getThreadFormat(DateFormat format)
+	{
+		return (DateFormat) getThreadFormat0(format);
+	}
+
+	/**
+	 * 根据给出的NumberFormat对象, 在当前线程中克隆一个实例.
+	 */
+	public static NumberFormat getThreadFormat(NumberFormat format)
+	{
+		return (NumberFormat) getThreadFormat0(format);
+	}
+
+	/**
 	 * 格式化输出当前的日期-时间
 	 */
 	public static String getCurrentDatetimeString()
 	{
-		return datetimeFormat.format(new Date());
+		return getThreadFormat(datetimeFormat).format(new Date());
 	}
 
 	/**
@@ -65,7 +116,7 @@ public class FormatTool
 	 */
 	public static String formatDatetime(Object datetime)
 	{
-		return datetime == null ? "" : datetimeFormat.format(datetime);
+		return datetime == null ? "" : getThreadFormat(datetimeFormat).format(datetime);
 	}
 
 	/**
@@ -73,7 +124,7 @@ public class FormatTool
 	 */
 	public static String formatDate(Object date)
 	{
-		return date == null ? "" : dateFormat.format(date);
+		return date == null ? "" : getThreadFormat(dateFormat).format(date);
 	}
 
 	/**
@@ -81,7 +132,7 @@ public class FormatTool
 	 */
 	public static String formatTime(Object time)
 	{
-		return time == null ? "" : timeFormat.format(time);
+		return time == null ? "" : getThreadFormat(timeFormat).format(time);
 	}
 
 	/**
@@ -90,7 +141,7 @@ public class FormatTool
 	public static Date parseDatetime(String str)
 			throws ParseException
 	{
-		return str == null ? null : datetimeFormat.parse(str);
+		return str == null ? null : getThreadFormat(datetimeFormat).parse(str);
 	}
 
 	/**
@@ -99,7 +150,7 @@ public class FormatTool
 	public static Date parseDate(String str)
 			throws ParseException
 	{
-		return str == null ? null : dateFormat.parse(str);
+		return str == null ? null : getThreadFormat(dateFormat).parse(str);
 	}
 
 	/**
@@ -108,7 +159,7 @@ public class FormatTool
 	public static Date parseTime(String str)
 			throws ParseException
 	{
-		return str == null ? null : timeFormat.parse(str);
+		return str == null ? null : getThreadFormat(timeFormat).parse(str);
 	}
 
 }

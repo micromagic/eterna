@@ -29,10 +29,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 
+import self.micromagic.eterna.base.ResultMetaData;
+import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.eterna.sql.ResultMetaData;
 import self.micromagic.eterna.share.EternaException;
 import org.apache.commons.collections.iterators.IteratorEnumeration;
 

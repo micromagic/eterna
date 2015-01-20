@@ -16,15 +16,19 @@
 
 package self.micromagic.eterna.share;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
+
+import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.BeanTool;
-import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.digester2.ParseException;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ConverterFinder;
@@ -177,7 +181,7 @@ public class Tool
 	 */
 	public static Object invokeExactMethod(Object object, String methodName, Object[] args,
 			Class[] parameterTypes)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException
+			throws NoSuchMethodException, IllegalAccessException
 	{
 		Class c;
 		if (object instanceof Class)
@@ -189,7 +193,14 @@ public class Tool
 			c = object.getClass();
 		}
 		Method method = c.getMethod(methodName, parameterTypes);
-		return method.invoke(object, args);
+		try
+		{
+			return method.invoke(object, args);
+		}
+		catch (InvocationTargetException ex)
+		{
+			throw transInvocationTargetException(ex);
+		}
 	}
 
 	/**
@@ -202,7 +213,7 @@ public class Tool
 	 * @return  被调用的方法的返回结果
 	 */
 	public static Object invokeExactMethod(Object object, String methodName, Object[] args)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException
+			throws NoSuchMethodException, IllegalAccessException
 	{
 		Class c;
 		if (object instanceof Class)
@@ -236,12 +247,154 @@ public class Tool
 		Class[] pTypes = method.getParameterTypes();
 		for (int i = 0; i < paramCount; i++)
 		{
-         if (args[i] != null && !pTypes[i].isInstance(args[i]))
+			if (args[i] != null && !pTypes[i].isInstance(args[i]))
 			{
 				args[i] = ConverterFinder.findConverter(pTypes[i]).convert(args[i]);
 			}
 		}
-		return method.invoke(object, args);
+		try
+		{
+			return method.invoke(object, args);
+		}
+		catch (InvocationTargetException ex)
+		{
+			throw transInvocationTargetException(ex);
+		}
+	}
+
+	/**
+	 * 获取InvocationTargetException的目标异常并转换为RuntimeException.
+	 */
+	public static RuntimeException transInvocationTargetException(InvocationTargetException ex)
+	{
+		Throwable t = ex.getTargetException();
+		if (t instanceof RuntimeException)
+		{
+			return (RuntimeException) t;
+		}
+		return new EternaException(t != null ? t : ex);
+	}
+
+	/**
+	 * 解析模式字符串中的所在地区信息.
+	 * 如: locale:zn_CN,yyyy-MM-dd
+	 *
+	 * @param pattern      需要解析的模式字符串
+	 * @param realPattern  去除地区信息部分的模式字符串
+	 * @return  地区信息对象, 如果为null表示模式字符串中没有地区信息
+	 */
+	public static Locale parseLocal(String pattern, StringRef realPattern)
+	{
+		if (pattern == null)
+		{
+			return null;
+		}
+		String checkStr = "locale:";
+		Locale locale = null;
+		if (pattern.startsWith(checkStr))
+		{
+			int index = pattern.indexOf(',');
+			if (index == -1)
+			{
+				// 如果有地区设置，地区与日期模式之间必须用","分隔
+				throw new EternaException(
+						"Error format pattern with locale [" + pattern + "].");
+			}
+			String localeStr = pattern.substring(7, index);
+			pattern = pattern.substring(index + 1);
+			index = localeStr.indexOf('_');
+			if (index == -1)
+			{
+				locale = new Locale(localeStr);
+			}
+			else
+			{
+				String language = localeStr.substring(0, index);
+				int tmpI = localeStr.indexOf('_', index + 1);
+				if (tmpI == -1)
+				{
+					locale = new Locale(language, localeStr.substring(index + 1));
+				}
+				else
+				{
+					locale = new Locale(language, localeStr.substring(index + 1, tmpI),
+							localeStr.substring(tmpI + 1));
+				}
+			}
+		}
+		if (realPattern != null)
+		{
+			realPattern.setString(pattern);
+		}
+		return locale;
+	}
+
+
+	/**
+	 * 根据指定的类名创建对象.
+	 */
+	public static Object createObject(String className)
+			throws EternaException, ClassNotFoundException, IllegalAccessException, InstantiationException
+	{
+		Class c = getClass(className, Thread.currentThread().getContextClassLoader());
+		return c.newInstance();
+	}
+
+	/**
+	 * 根据指定的类名获取class.
+	 */
+	public static Class getClass(String className, ClassLoader loader)
+			throws EternaException, ClassNotFoundException
+	{
+		try
+		{
+			return Class.forName(className);
+		}
+		catch (ClassNotFoundException ex)
+		{
+			if (loader == null)
+			{
+				throw ex;
+			}
+			return Class.forName(className, true, loader);
+		}
+	}
+
+	/**
+	 * 根据指定的类名生成对其处理的BeanMap. <p>
+	 * 如果不是必须生成, 在不能生成时返回null.
+	 * 如果必须生成, 在不能生成时会抛出异常.
+	 *
+	 * @param className    要生成实例的类名
+	 * @param loader       载入类所使用的ClassLoader.
+	 * @param mustCreate   是否必须生成, 默认为true.
+	 */
+	public static BeanMap createBeanMap(String className, ClassLoader loader, boolean mustCreate)
+			throws EternaException
+	{
+		try
+		{
+			Class theClass = getClass(className, loader);
+			BeanMap beanMap = BeanTool.getBeanMap(theClass, null);
+			if (beanMap.createBean() != null)
+			{
+				beanMap.setReadBeforeModify(false);
+				beanMap.setThrowException(true);
+				return beanMap;
+			}
+			if (mustCreate)
+			{
+				throw new ParseException("Can't create [" + className + "].");
+			}
+		}
+		catch (ClassNotFoundException ex)
+		{
+			if (mustCreate)
+			{
+				throw new ParseException(ex);
+			}
+		}
+		return null;
 	}
 
 }

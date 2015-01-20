@@ -41,7 +41,7 @@ public class Utility
 {
 	public static final int MEMORY_CACHE_SIZE_THRESHOLD = 1024 * 1024 * 8;
 
-	public static final String CHARSET_TAG = "self.micromagic.charset";
+	public static final String CHARSET_TAG = "_charset";
 
 	/**
 	 * 配置文件名.
@@ -51,7 +51,7 @@ public class Utility
 	/**
 	 * 配置在处理文本的动态属性时, 是否要显示处理失败的信息
 	 */
-	public static final String SHOW_RDP_FAIL_PROPERTY = "self.micromagic.show.rdp.fail";
+	public static final String SHOW_RDP_FAIL_PROPERTY = "show.rdp.fail";
 
 	public static final Integer INTEGER_MINUS1 = new Integer(-1);
 	public static final Integer INTEGER_0 = new Integer(0);
@@ -117,8 +117,7 @@ public class Utility
 		String nextLine = "\n";
 		try
 		{
-			nextLine = (String) java.security.AccessController.doPrivileged(
-					new sun.security.action.GetPropertyAction("line.separator"));
+			nextLine = System.getProperty("line.separator", "\n");
 			Utility.addFieldPropertyManager(SHOW_RDP_FAIL_PROPERTY, Utility.class, "SHOW_RDP_FAIL");
 		}
 		catch (Throwable ex)
@@ -747,7 +746,7 @@ public class Utility
 
 	/**
 	 * 处理文本中"${...}"的动态属性, 将他们替换成配置文件
-	 * (micromagic_config.properties 或 System.property)中的对应值.
+	 * (eterna.config 或 System.property)中的对应值.
 	 *
 	 * @param text      要处理的文本
 	 * @return 处理完的文本
@@ -760,7 +759,7 @@ public class Utility
 
 	/**
 	 * 处理文本中"${...}"的动态属性, 将他们替换成配置文件
-	 * (bindRes 或 micromagic_config.properties 或 System.property)中的对应值.
+	 * (bindRes 或 eterna.config 或 System.property)中的对应值.
 	 *
 	 * @param text      要处理的文本
 	 * @param bindRes   绑定的资源, 会先在bindRes寻找对应的值
@@ -774,13 +773,13 @@ public class Utility
 
 	/**
 	 * 处理文本中"${...}"的动态属性, 将他们替换成配置文件
-	 * (bindRes 或 micromagic_config.properties 或 System.property)中的对应值.
+	 * (bindRes 或 eterna.config 或 System.property)中的对应值.
 	 *
 	 * @param text      要处理的文本
 	 * @param bindRes   绑定的资源, 会先在bindRes寻找对应的值
 	 * @param onlyRes   设置为<code>true</code>时, 只对绑定的资源进行处理, 设置为
 	 *                  <code>false</code>时, 如果绑定的资源中不存在对应的值会再到
-	 *                  micromagic_config.properties 或 System.property中寻找
+	 *                  eterna.config 或 System.property中寻找
 	 * @return 处理完的文本
 	 * @see PropertiesManager#resolveDynamicPropnames(String, Map, boolean)
 	 */

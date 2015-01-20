@@ -21,8 +21,14 @@ import java.util.Map;
 
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.logging.Log;
+
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.FactoryContainer;
+import self.micromagic.eterna.view.View;
+import self.micromagic.util.Utility;
 
 /**
  * @author micromagic@sina.com
@@ -44,13 +50,33 @@ public class InitBaseTag extends TagSupport
 	 */
 	public static final String SCATTER_FLAG = "scatterFlag";
 
+	/**
+	 * 用于记录日志.
+	 */
+	static final Log log = Utility.createLog("eterna.tag");
+
+	/**
+	 * 根据工厂容器的名称获取其中的EternaFactory.
+	 */
+	public static EternaFactory findFactory(String name)
+	{
+		try
+		{
+			FactoryContainer fc = ContainerManager.getFactoryContainer(name);
+			return (EternaFactory) fc.getFactory();
+		}
+		catch (EternaException ex)
+		{
+			return null;
+		}
+	}
 
 	private String parentElement;
 	private String suffixId;
 	private boolean useAJAX;
 	private String scatterFlag;
 
-	protected Map getCacheMap(ViewAdapter view)
+	protected Map getCacheMap(View view)
 			throws EternaException
 	{
 		Map cache = new HashMap();

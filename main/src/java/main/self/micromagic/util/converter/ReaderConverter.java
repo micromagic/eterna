@@ -34,7 +34,7 @@ public class ReaderConverter extends ObjectConverter
 		{
 			typeName.setString("Reader");
 		}
-		return TypeManager.TYPE_READER;
+		return TypeManager.TYPE_CHARS;
 	}
 
 	public Reader getResult(Object result)

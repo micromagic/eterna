@@ -25,12 +25,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import self.micromagic.eterna.digester.FactoryManager;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.share.FactoryContainer;
+import self.micromagic.eterna.view.View;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.container.ThreadCache;
 import self.micromagic.util.container.ValueContainerMap;
@@ -50,7 +51,7 @@ public class EternaDefine extends InitBaseTag
 	/**
 	 * 在上下文环境中获得工厂实例的名称前缀.
 	 */
-	public static final String CONTEXT_FMI_PREFIX = "$context.";
+	public static final String CONTEXT_PREFIX = "$context.";
 
 
 	private String name;
@@ -85,7 +86,7 @@ public class EternaDefine extends InitBaseTag
 				Object obj = this.pageContext.findAttribute(this.param);
 				if (obj == null)
 				{
-					DefaultFinder.log.warn("Not found param:[" + this.param + "].");
+					log.warn("Not found param:[" + this.param + "].");
 				}
 				else
 				{
@@ -95,7 +96,7 @@ public class EternaDefine extends InitBaseTag
 					}
 					else
 					{
-						DefaultFinder.log.warn("Error param type:[" + obj.getClass() + "].");
+						log.warn("Error param type:[" + obj.getClass() + "].");
 					}
 				}
 			}
@@ -145,7 +146,7 @@ public class EternaDefine extends InitBaseTag
 				Object obj = this.pageContext.findAttribute(this.data);
 				if (obj == null)
 				{
-					DefaultFinder.log.warn("Not found data:[" + this.data + "].");
+					log.warn("Not found data:[" + this.data + "].");
 				}
 				else
 				{
@@ -155,14 +156,14 @@ public class EternaDefine extends InitBaseTag
 					}
 					else
 					{
-						DefaultFinder.log.warn("Error data type:[" + obj.getClass() + "].");
+						log.warn("Error data type:[" + obj.getClass() + "].");
 					}
 				}
 			}
-			ViewAdapter view = f.createViewAdapter(tmpViewName);
+			View view = f.createViewAdapter(tmpViewName);
 			JspWriter out = this.pageContext.getOut();
 			String dataType = view.getDataType(nowData);
-			if (ViewAdapter.DATA_TYPE_WEB.equals(dataType))
+			if (View.DATA_TYPE_WEB.equals(dataType))
 			{
 				out.println("<script type=\"text/javascript\">");
 				out.println("(function() {");
@@ -188,24 +189,24 @@ public class EternaDefine extends InitBaseTag
 			else
 			{
 				view.printView(out, nowData, this.getCacheMap(view));
-				if (ViewAdapter.DATA_TYPE_ALL.equals(dataType))
+				if (View.DATA_TYPE_ALL.equals(dataType))
 				{
-					out.println(ViewAdapter.JSON_SPLIT_FLAG);
+					out.println(View.JSON_SPLIT_FLAG);
 					return EVAL_BODY_INCLUDE;
 				}
 			}
 		}
 		catch (EternaException ex)
 		{
-			DefaultFinder.log.warn("Error in def.", ex);
+			log.warn("Error in def.", ex);
 		}
 		catch (SQLException ex)
 		{
-			DefaultFinder.log.warn("SQL Error in def.", ex);
+			log.warn("SQL Error in def.", ex);
 		}
 		catch (Throwable ex)
 		{
-			DefaultFinder.log.error("Other Error in def.", ex);
+			log.error("Other Error in def.", ex);
 		}
 		finally
 		{
@@ -219,33 +220,33 @@ public class EternaDefine extends InitBaseTag
 	{
 		if (this.instanceName != null)
 		{
-			if (this.instanceName.startsWith(CONTEXT_FMI_PREFIX))
+			if (this.instanceName.startsWith(CONTEXT_PREFIX))
 			{
-				FactoryManager.Instance instance = (FactoryManager.Instance) this.pageContext.findAttribute(
-						this.instanceName.substring(CONTEXT_FMI_PREFIX.length()));
-				if (instance != null)
+				FactoryContainer fc = (FactoryContainer) this.pageContext.findAttribute(
+						this.instanceName.substring(CONTEXT_PREFIX.length()));
+				if (fc != null)
 				{
-					return instance.getEternaFactory();
+					return (EternaFactory) fc.getFactory();
 				}
 				else
 				{
-					DefaultFinder.log.error("Not found factory [" + this.instanceName + "] in context.");
+					log.error("Not found factory [" + this.instanceName + "] in context.");
 				}
 			}
 			else
 			{
-				FactoryManager.Instance instance = DefaultFinder.finder.findInstance(this.instanceName);
-				if (instance != null)
+				EternaFactory factory = findFactory(this.instanceName);
+				if (factory != null)
 				{
-					return instance.getEternaFactory();
+					return factory;
 				}
 				else
 				{
-					DefaultFinder.log.error("Not found factory [" + this.instanceName + "].");
+					log.error("Not found factory [" + this.instanceName + "].");
 				}
 			}
 		}
-		return FactoryManager.getEternaFactory();
+		return (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
 	}
 
 	public void release()

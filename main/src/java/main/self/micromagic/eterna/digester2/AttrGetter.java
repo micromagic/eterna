@@ -23,6 +23,6 @@ import org.dom4j.Element;
  */
 public interface AttrGetter
 {
-   String get(Element el);
+	Object get(Element el);
 
 }

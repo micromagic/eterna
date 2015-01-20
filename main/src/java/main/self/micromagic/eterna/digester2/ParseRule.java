@@ -16,18 +16,18 @@
 
 package self.micromagic.eterna.digester2;
 
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 
-import self.micromagic.cg.BeanMap;
-import self.micromagic.cg.BeanTool;
+import org.dom4j.Element;
+
+import self.micromagic.eterna.digester2.dom.EternaElement;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
-import self.micromagic.eterna.share.EternaException;
-import org.dom4j.Element;
 
 /**
  * 对文档的一个解析规则.
@@ -59,13 +59,13 @@ public class ParseRule
 		while ((begin = findBeginFlag(config, position)) != -1)
 		{
 			String flag = config.substring(position.value, begin).trim();
-			ElementProcessor ep = (ElementProcessor) epCache.get(flag);
+			ElementProcessor ep = this.findProcessor(flag);
 			if (ep == null)
 			{
 				throw new ParseException("Error flag [" + flag + "] in config:" + config);
 			}
 			position.value = begin;
-			epList.add(ep.parse(this.digester, config, position));
+			epList.add(ep.parse(this.digester, this, config, position));
 		}
 		this.epList = new ElementProcessor[epList.size()];
 		epList.toArray(this.epList);
@@ -73,11 +73,26 @@ public class ParseRule
 	private ElementProcessor[] epList;
 
 	/**
+	 * 根据给出的标签查找对应的元素节点处理器.
+	 */
+	protected ElementProcessor findProcessor(String flag)
+	{
+		return (ElementProcessor) epCache.get(flag);
+	}
+
+	/**
 	 * 判断当前节点是否与规则匹配.
 	 */
 	public boolean match(Element element)
 	{
-		return element.getName().equals(this.pattern);
+		String msg = ((EternaElement) element).getLineNumber() + ":" + element.getName() + ","
+				+ element.getNamespacePrefix() + ", " + this.pattern;
+		System.out.println(msg);
+		if (element.getName().equals(this.nodeName))
+		{
+			return this.nsPrefix.equals(element.getNamespacePrefix());
+		}
+		return false;
 	}
 
 	/**
@@ -93,9 +108,20 @@ public class ParseRule
 	 */
 	public void setPattern(String pattern)
 	{
-		this.pattern = pattern;
+		this.nodeName = this.pattern = pattern;
+		if (pattern != null)
+		{
+			int index = pattern.indexOf(':');
+			if (index != -1)
+			{
+				this.nodeName = pattern.substring(index + 1);
+				this.nsPrefix = pattern.substring(0, index);
+			}
+		}
 	}
 	private String pattern;
+	private String nodeName;
+	private String nsPrefix = "";
 
 	/**
 	 * 执行解析规则.
@@ -122,62 +148,6 @@ public class ParseRule
 			this.epList[index].end(this.digester, element);
 		}
 		return result;
-	}
-
-   /**
-	 * 根据指定的类名获取class.
-	 */
-	public static Class getClass(String className, ClassLoader loader)
-			throws EternaException, ClassNotFoundException
-	{
-		try
-		{
-			return Class.forName(className);
-		}
-		catch (ClassNotFoundException ex)
-		{
-			if (loader == null)
-			{
-				throw ex;
-			}
-			return Class.forName(className, true, loader);
-		}
-	}
-
-   /**
-	 * 根据指定的类名生成对其处理的BeanMap. <p>
-	 * 如果不是必须生成, 在不能生成时返回null.
-	 * 如果必须生成, 在不能生成时会抛出异常.
-	 *
-	 * @param className    要生成实例的类名
-	 * @param loader       载入类所使用的ClassLoader.
-	 * @param mustCreate   是否必须生成, 默认为true.
-	 */
-	public static BeanMap createBeanMap(String className, ClassLoader loader, boolean mustCreate)
-			throws EternaException
-	{
-		try
-		{
-			Class theClass = getClass(className, loader);
-			BeanMap beanMap = BeanTool.getBeanMap(theClass, null);
-			if (beanMap.createBean() != null)
-			{
-				beanMap.setReadBeforeModify(false);
-				return beanMap;
-			}
-			if (mustCreate)
-			{
-				throw new ParseException("Can't create [" + className + "].");
-			}
-		}
-		catch (ClassNotFoundException ex)
-		{
-			if (mustCreate)
-			{
-				throw new ParseException(ex);
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -280,29 +250,30 @@ public class ParseRule
 	 * @param flag  元素节点的处理器标识
 	 * @param ep    元素节点的处理器对象, 用于解析配置信息
 	 */
-	public static void registerBinder(String flag, ElementProcessor ep)
+	public static void registerElementProcessor(String flag, ElementProcessor ep)
 	{
 		synchronized (epCache)
 		{
 			if (epCache.containsKey(flag))
 			{
-				throw new ParseException("ElementProcessor [" + flag + "] has registered.");
+				throw new EternaException("ElementProcessor [" + flag + "] has registered.");
 			}
 			epCache.put(flag, ep);
 		}
 	}
-   private static Map epCache = new HashMap();
+	private static Map epCache = new HashMap();
 
 	static
 	{
 		// 注册现有的元素节点的处理器
-		registerBinder(ObjectCreater.__FLAG, ObjectCreater.getInstance());
-		registerBinder(AttrBinder.__FLAG, AttrBinder.getInstance());
-		registerBinder(MethodBinder.__FLAG, MethodBinder.getInstance());
-		registerBinder(StackBinder.__FLAG, StackBinder.getInstance());
-		registerBinder(SubRuleCaller.__FLAG, SubRuleCaller.getInstance());
-		registerBinder(SameCheck.__FLAG, SameCheck.getInstance());
-		registerBinder(NameLog.__FLAG, NameLog.getInstance());
+		registerElementProcessor(ObjectCreater.__FLAG, ObjectCreater.getInstance());
+		registerElementProcessor(AttrBinder.__FLAG, AttrBinder.getInstance());
+		registerElementProcessor(MethodBinder.__FLAG, MethodBinder.getInstance());
+		registerElementProcessor(StackBinder.__FLAG, StackBinder.getInstance());
+		registerElementProcessor(SubRuleCaller.__FLAG, SubRuleCaller.getInstance());
+		registerElementProcessor(SameCheck.__FLAG, SameCheck.getInstance());
+		registerElementProcessor(NameLog.__FLAG, NameLog.getInstance());
+		registerElementProcessor(InjectSub.__FLAG, InjectSub.getInstance());
 	}
 
 }

@@ -19,12 +19,12 @@ package self.micromagic.util.converter;
 import java.text.DateFormat;
 import java.text.ParseException;
 
-import self.micromagic.util.StringRef;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
-import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.share.EternaException;
 
 public class UtilDateConverter extends ObjectConverter
 {
@@ -147,7 +147,7 @@ public class UtilDateConverter extends ObjectConverter
 				{
 					try
 					{
-						return formats[i].parse(value);
+						return FormatTool.getThreadFormat(formats[i]).parse(value);
 					}
 					catch (Throwable ex) {}
 				}

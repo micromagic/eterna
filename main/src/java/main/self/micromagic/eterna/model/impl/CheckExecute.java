@@ -16,26 +16,27 @@
 
 package self.micromagic.eterna.model.impl;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.io.IOException;
 import java.util.Iterator;
 
-import self.micromagic.eterna.model.CheckExecuteGenerator;
-import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelExport;
-import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.model.ModelAdapter;
-import self.micromagic.eterna.model.CheckOperator;
-import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.digester.ObjectCreateRule;
-import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.util.StringTool;
-import self.micromagic.util.ObjectRef;
-import self.micromagic.util.Utility;
-import self.micromagic.util.StringAppender;
 import org.dom4j.Element;
+
+import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.model.AppDataLogExecute;
+import self.micromagic.eterna.model.CheckExecuteGenerator;
+import self.micromagic.eterna.model.CheckOperator;
+import self.micromagic.eterna.model.Execute;
+import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.ModelExport;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Tool;
+import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 public class CheckExecute extends AbstractExecute
 		implements Execute, CheckExecuteGenerator
@@ -101,7 +102,7 @@ public class CheckExecute extends AbstractExecute
 		{
 			if (nameBuf.length() > 0) nameBuf.append(',');
 			nameBuf.append("trueModel:").append(this.trueModelName);
-			this.trueModelIndex = model.getFactory().getModelAdapterId(this.trueModelName);
+			this.trueModelIndex = model.getFactory().findObjectId(this.trueModelName);
 		}
 
 		if (this.falseExportName != null)
@@ -118,7 +119,7 @@ public class CheckExecute extends AbstractExecute
 		{
 			if (nameBuf.length() > 0) nameBuf.append(',');
 			nameBuf.append("falseModel:").append(this.falseModelName);
-			this.falseModelIndex = model.getFactory().getModelAdapterId(this.falseModelName);
+			this.falseModelIndex = model.getFactory().findObjectId(this.falseModelName);
 		}
 		if (nameBuf.length() > 0) nameBuf.append(',');
 		nameBuf.append("loopType:").append(this.loopType).append(']');
@@ -278,7 +279,7 @@ public class CheckExecute extends AbstractExecute
 			{
 				try
 				{
-					this.checkOpt = (CheckOperator) ObjectCreateRule.createObject(
+					this.checkOpt = (CheckOperator) Tool.createObject(
 							params[1].substring(6));
 				}
 				catch (Exception ex)
@@ -423,7 +424,7 @@ public class CheckExecute extends AbstractExecute
 	private static class ClassTypeCheck
 			implements CheckOperator
 	{
-		private Class checkClass;
+		private final Class checkClass;
 
 		public ClassTypeCheck(Class checkClass)
 		{
@@ -454,7 +455,7 @@ public class CheckExecute extends AbstractExecute
 			new CompareCheck(-1), new CompareCheck(0), new CompareCheck(1)
 		};
 
-		private int compareResult;
+		private final int compareResult;
 
 		public CompareCheck(int compareResult)
 		{

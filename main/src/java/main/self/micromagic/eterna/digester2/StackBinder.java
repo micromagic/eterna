@@ -16,9 +16,8 @@
 
 package self.micromagic.eterna.digester2;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.dom4j.Element;
+
 import self.micromagic.cg.BeanMap;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
@@ -43,7 +42,8 @@ public class StackBinder
 	private boolean needName;
 	private boolean needGenerate;
 
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		return parseConfig(config, position);
 	}
@@ -149,13 +149,12 @@ public class StackBinder
 		{
 			Tool.invokeExactMethod(target, this.methodName, args);
 		}
+		catch (RuntimeException ex)
+		{
+			throw ex;
+		}
 		catch (Exception ex)
 		{
-			if (ex instanceof InvocationTargetException)
-			{
-				Throwable t = ((InvocationTargetException) ex).getTargetException();
-				throw new ParseException(t != null ? t : ex);
-			}
 			throw new ParseException(ex);
 		}
 	}

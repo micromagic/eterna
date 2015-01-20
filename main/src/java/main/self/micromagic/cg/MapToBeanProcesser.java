@@ -44,6 +44,7 @@ class MapToBeanProcesser
 		this.paramCache.put("settedCountName", BeanTool.SETTED_COUNT_NAME);
 		this.paramCache.put("prefixName", BeanTool.PREFIX_NAME);
 		this.paramCache.put("tmpStr", BeanTool.TMP_STR_NAME);
+		this.paramCache.put("throw", "");
 	}
 
 	public String getFieldCode(Field f, Class type, String wrapName, int processerType, ClassGenerator cg)

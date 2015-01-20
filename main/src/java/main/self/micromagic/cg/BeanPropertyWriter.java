@@ -45,6 +45,6 @@ public interface BeanPropertyWriter
 	 * @return              成功设置了值的属性的个数
 	 */
 	int setBeanValue(CellDescriptor cd, int[] indexs, Object bean, Object value, String prefix,
-			BeanMap beanMap, Object originObj, Object oldValue) throws Exception;
+			BeanMap beanMap, Object originObj, Object oldValue) throws Throwable;
 
 }

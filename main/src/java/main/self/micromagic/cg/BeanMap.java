@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.sql.ResultRow;
+import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.ValueConverter;
@@ -49,6 +49,7 @@ public class BeanMap extends AbstractMap
 	private boolean converterManagerCopied;
 	private List entryList = null;
 	private boolean bean2Map;
+	private boolean throwException;
 	private boolean readBeforeModify = true;
 
 	BeanMap(Object beanObj, String namePrefix, BeanDescriptor beanDescriptor)
@@ -114,7 +115,7 @@ public class BeanMap extends AbstractMap
 			this.beanObj = this.beanDescriptor.getInitCell().readProcesser.getBeanValue(
 					null, null, null, this.getPrefix(), this);
 		}
-		catch (Exception ex) {}
+		catch (Throwable ex) {}
 		return this.beanObj;
 	}
 
@@ -132,6 +133,22 @@ public class BeanMap extends AbstractMap
 	public Object getBean()
 	{
 		return this.beanObj;
+	}
+
+	/**
+	 * 在修改数据出错时是否要抛出异常.
+	 */
+	public boolean isThrowException()
+	{
+		return this.throwException;
+	}
+
+	/**
+	 * 设置在修改数据出错时是否要抛出异常.
+	 */
+	public void setThrowException(boolean t)
+	{
+		this.throwException = t;
 	}
 
 	/**
@@ -175,6 +192,37 @@ public class BeanMap extends AbstractMap
 	}
 
 	/**
+	 * 处理修改数据时抛出的异常.
+	 */
+	void dealWriteException(Throwable t)
+	{
+      if (this.throwException)
+		{
+         if (t instanceof RuntimeException)
+			{
+				throw (RuntimeException) t;
+			}
+			else if (t instanceof Error)
+			{
+				throw (Error) t;
+			}
+			else
+			{
+				throw new RuntimeException(t);
+			}
+		}
+		if (t instanceof ClassCastException)
+		{
+			// 类型转换异常不记录日志
+			return;
+		}
+		if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
+		{
+			CG.log.info("Write bean value error.", t);
+		}
+	}
+
+	/**
 	 * 通过一个Map设置bean中所有对应的属性值.
 	 * 此方法是以bean的结构为基础, 从map中获取对应的值并进行设置.
 	 */
@@ -207,17 +255,15 @@ public class BeanMap extends AbstractMap
 						Object oldValue = null;
 						if (cd.readProcesser != null && cd.isReadOldValue())
 						{
+							// 在设置数组或bean对象时需要读取原始值
 							oldValue = cd.readProcesser.getBeanValue(cd, null, beanObj, prefix, this);
 						}
 						settedCount += cd.writeProcesser.setBeanValue(
 								cd, null, bean, value, prefix, this, map, oldValue);
 					}
-					catch (Exception ex)
+					catch (Throwable ex)
 					{
-						if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-						{
-							CG.log.info("Write bean value error.", ex);
-						}
+						this.dealWriteException(ex);
 					}
 				}
 			}
@@ -259,6 +305,7 @@ public class BeanMap extends AbstractMap
 						Object oldValue = null;
 						if (cd.readProcesser != null && cd.isReadOldValue())
 						{
+							// 在设置数组或bean对象时需要读取原始值
 							oldValue = cd.readProcesser.getBeanValue(cd, null, beanObj, prefix, this);
 						}
 						settedCount += cd.writeProcesser.setBeanValue(
@@ -266,12 +313,9 @@ public class BeanMap extends AbstractMap
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (Throwable ex)
 			{
-				if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-				{
-					CG.log.info("Write bean value error.", ex);
-				}
+				this.dealWriteException(ex);
 			}
 		}
 		return settedCount;
@@ -329,7 +373,7 @@ public class BeanMap extends AbstractMap
 								sub = BeanTool.getBeanMap(tmpObj, prefix + tmpName + ".");
 							}
 						}
-						catch (Exception ex) {}
+						catch (Throwable ex) {}
 					}
 					if (sub == null)
 					{
@@ -341,12 +385,9 @@ public class BeanMap extends AbstractMap
 								cd.writeProcesser.setBeanValue(cd, null, thisObj, sub.createBean(),
 										prefix, this, null, null);
 							}
-							catch (Exception ex)
+							catch (Throwable ex)
 							{
-								if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-								{
-									CG.log.info("Write bean value error.", ex);
-								}
+								this.dealWriteException(ex);
 							}
 						}
 					}
@@ -382,7 +423,7 @@ public class BeanMap extends AbstractMap
 							BeanMap sub = BeanTool.getBeanMap(tmpObj, prefix + tmpName + ".");
 							return sub.getCellAccessInfo(key.substring(index + 1), needCreate);
 						}
-						catch (Exception ex) {}
+						catch (Throwable ex) {}
 					}
 				}
 				else if (Collection.class.isAssignableFrom(cd.getCellType()))
@@ -412,7 +453,7 @@ public class BeanMap extends AbstractMap
 							BeanMap sub = BeanTool.getBeanMap(tmpObj, prefix + tmpName + ".");
 							return sub.getCellAccessInfo(key.substring(index + 1), needCreate);
 						}
-						catch (Exception ex) {}
+						catch (Throwable ex) {}
 					}
 				}
 			}
@@ -536,7 +577,7 @@ public class BeanMap extends AbstractMap
 							sub = BeanTool.getBeanMap(tmpObj, prefix + pName + ".");
 						}
 					}
-					catch (Exception ex) {}
+					catch (Throwable ex) {}
 				}
 				if (sub == null)
 				{

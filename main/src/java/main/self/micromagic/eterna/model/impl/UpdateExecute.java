@@ -21,15 +21,16 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.share.EternaException;
+
+import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.base.Update;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.model.UpdateExecuteGenerator;
-import self.micromagic.eterna.sql.UpdateAdapter;
-import self.micromagic.eterna.sql.SQLAdapter;
+import self.micromagic.eterna.share.EternaException;
 
 public class UpdateExecute extends SQLExecute
 		implements Execute, UpdateExecuteGenerator
@@ -45,10 +46,10 @@ public class UpdateExecute extends SQLExecute
 			return;
 		}
 		super.initialize(model);
-		this.updateAdapterIndex = this.factory.getUpdateAdapterId(this.getName());
+		this.updateAdapterIndex = this.factory.findObjectId(this.getName());
 	}
 
-	protected SQLAdapter getSQL()
+	protected Base getSQL()
 			throws EternaException
 	{
 		return this.updateAdapterIndex == -1 ? this.factory.createUpdateAdapter(this.getName())
@@ -69,13 +70,13 @@ public class UpdateExecute extends SQLExecute
 			throws EternaException, SQLException, IOException
 	{
 		boolean inCache = false;
-		UpdateAdapter update = null;
+		Update update = null;
 		if (this.sqlCacheIndex != -1)
 		{
 			Object temp = data.caches[this.sqlCacheIndex];
-			if (temp instanceof UpdateAdapter)
+			if (temp instanceof Update)
 			{
-				update = (UpdateAdapter) temp;
+				update = (Update) temp;
 				if (!update.getName().equals(this.getName()))
 				{
 					update = null;

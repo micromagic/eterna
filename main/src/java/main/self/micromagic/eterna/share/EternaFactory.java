@@ -18,42 +18,52 @@ package self.micromagic.eterna.share;
 
 import java.util.List;
 
-import self.micromagic.eterna.sql.ResultFormat;
-import self.micromagic.eterna.sql.ResultReaderManager;
-import self.micromagic.eterna.sql.QueryAdapter;
-import self.micromagic.eterna.sql.QueryAdapterGenerator;
-import self.micromagic.eterna.sql.UpdateAdapter;
-import self.micromagic.eterna.sql.UpdateAdapterGenerator;
-import self.micromagic.eterna.sql.SpecialLog;
-import self.micromagic.eterna.sql.SQLParameterGroup;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreaterGenerator;
-import self.micromagic.eterna.sql.preparer.ValuePreparerCreater;
+import self.micromagic.eterna.base.Entity;
+import self.micromagic.eterna.base.Query;
+import self.micromagic.eterna.base.ResultFormat;
+import self.micromagic.eterna.base.SpecialLog;
+import self.micromagic.eterna.base.Update;
+import self.micromagic.eterna.base.preparer.PreparerCreater;
+import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.ModelCaller;
+import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.search.ConditionBuilder;
-import self.micromagic.eterna.search.SearchAdapter;
-import self.micromagic.eterna.search.SearchAdapterGenerator;
-import self.micromagic.eterna.search.SearchManagerGenerator;
+import self.micromagic.eterna.search.Search;
+import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.SearchManagerGenerator;
+import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.view.Component;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
-import self.micromagic.eterna.view.StringCoder;
+import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.eterna.view.Function;
 import self.micromagic.eterna.view.Resource;
-import self.micromagic.eterna.view.DataPrinter;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.model.ModelExport;
-import self.micromagic.eterna.model.ModelAdapter;
-import self.micromagic.eterna.model.ModelAdapterGenerator;
-import self.micromagic.eterna.model.ModelCaller;
-import self.micromagic.eterna.security.UserManager;
+import self.micromagic.eterna.view.StringCoder;
+import self.micromagic.eterna.view.View;
 
+/**
+ * eterna框架的工厂.
+ */
 public interface EternaFactory extends Factory
 {
-
 	/**
-	 * 获得本factory的父factory.
+	 * 获得本eterna工厂的共享工厂.
 	 */
 	EternaFactory getShareFactory() throws EternaException;
+
+	/**
+	 * 根据给出的编号创建对象.
+	 */
+	Object createObject(int id) throws EternaException;
+
+	/**
+	 * 查询已注册的对象的编号.
+	 */
+	int findObjectId(Object key) throws EternaException;
+
+	/**
+	 * 注销一个已注册的对象.
+	 */
+	void deregisterObject(Object key) throws EternaException;
 
 	/**
 	 * 获得一个UserManager对象.
@@ -80,22 +90,7 @@ public interface EternaFactory extends Factory
 	void setDataSourceManager(DataSourceManager dsm) throws EternaException;
 
 
-	//----------------------------------  SQLFactory  --------------------------------------
-
-	/**
-	 * 获得一个常量的值.
-	 *
-	 * @param name       常量的名称.
-	 */
-	String getConstantValue(String name) throws EternaException;
-
-	/**
-	 * 设置一个常量的值.
-	 *
-	 * @param name       常量的名称.
-	 * @param value      常量的值.
-	 */
-	void addConstantValue(String name, String value) throws EternaException;
+	//----------------------------------  db --------------------------------------
 
 	/**
 	 * 获得日志记录器<code>SpecialLog</code>.
@@ -108,235 +103,122 @@ public interface EternaFactory extends Factory
 	void setSpecialLog(SpecialLog sl)throws EternaException;
 
 	/**
-	 * 获得一个ResultFormat类. 用于格式化查询的结果.
+	 * 获得一个常量的值.
 	 *
-	 * @param name       format名称.
+	 * @param name       常量的名称.
+	 */
+	String getConstantValue(String name) throws EternaException;
+
+	/**
+	 * 添加一个常量的值.
+	 *
+	 * @param name       常量的名称.
+	 * @param value      常量的值.
+	 */
+	void addConstantValue(String name, String value) throws EternaException;
+
+	/**
+	 * 获得一个实体对象.
+	 *
+	 * @param name       实体的名称.
+	 */
+	Entity getEntity(String name) throws EternaException;
+
+	/**
+	 * 获得一个ResultFormat类, 用于格式化查询的结果.
+	 *
+	 * @param name       format的名称.
 	 */
 	ResultFormat getFormat(String name) throws EternaException;
 
 	/**
-	 * 设置一个ResultFormat类. 用于格式化查询的结果.
+	 * 生成一个<code>Query</code>的实例.
 	 *
-	 * @param name       format名称.
-	 * @param format     要设置的ResultFormat类.
+	 * @param name       <code>Query</code>的名称.
 	 */
-	void addFormat(String name, ResultFormat format) throws EternaException;
+	Query createQueryAdapter(String name) throws EternaException;
 
 	/**
-	 * 获得一个ResultReaderManager类. 用于管理查询显示的列.
+	 * 生成一个<code>Query</code>的实例.
 	 *
-	 * @param name       ResultReaderManager名称.
+	 * @param id         <code>Query</code>的id.
 	 */
-	ResultReaderManager getReaderManager(String name) throws EternaException;
+	Query createQueryAdapter(int id) throws EternaException;
 
 	/**
-	 * 设置一个ResultReaderManager类. 用于管理查询显示的列.
+	 * 生成一个<code>Update</code>的实例.
 	 *
-	 * @param name        ResultReaderManager名称.
-	 * @param manager     要设置的ResultReaderManager实例.
+	 * @param name       <code>Update</code>的名称.
 	 */
-	void addReaderManager(String name, ResultReaderManager manager) throws EternaException;
+	Update createUpdateAdapter(String name) throws EternaException;
 
 	/**
-	 * 获得一个SQLParameterGroup类.
+	 * 生成一个<code>Update</code>的实例.
 	 *
-	 * @param name       SQLParameterGroup名称.
+	 * @param id         <code>Update</code>的id.
 	 */
-	SQLParameterGroup getParameterGroup(String name) throws EternaException;
+	Update createUpdateAdapter(int id) throws EternaException;
 
 	/**
-	 * 设置一个SQLParameterGroup类.
+	 * 生成一个<code>PreparerCreater</code>的实例.
 	 *
-	 * @param name        SQLParameterGroup名称.
-	 * @param group       要设置的SQLParameterGroup实例.
+	 * @param name       PreparerCreater的名称.
 	 */
-	void addParameterGroup(String name, SQLParameterGroup group) throws EternaException;
-
-	/**
-	 * 生成一个<code>QueryAdapter</code>的实例.
-	 *
-	 * @param name       <code>QueryAdapter</code>的名称.
-	 * @return           <code>QueryAdapter</code>的实例.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	QueryAdapter createQueryAdapter(String name) throws EternaException;
-
-	/**
-	 * 生成一个<code>QueryAdapter</code>的实例.
-	 *
-	 * @param id         <code>QueryAdapter</code>的id.
-	 * @return           <code>QueryAdapter</code>的实例.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	QueryAdapter createQueryAdapter(int id) throws EternaException;
-
-	/**
-	 * 通过<code>QueryAdapter</code>的名称获得它的id.
-	 *
-	 * @param name       <code>QueryAdapter</code>的的名称.
-	 * @return           <code>QueryAdapter</code>的id.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	int getQueryAdapterId(String name) throws EternaException;
-
-	/**
-	 * 注册一个<code>QueryAdapter</code>.
-	 *
-	 * @param generator   需要注册的<code>QueryAdapter</code>的样本.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	void registerQueryAdapter(QueryAdapterGenerator generator) throws EternaException;;
-
-	/**
-	 * 撤销一个<code>QueryAdapter</code>的注册.
-	 *
-	 * @param name       需要撤销注册的<code>QueryAdapter</code>的名称.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	void deregisterQueryAdapter(String name) throws EternaException;
-
-	/**
-	 * 生成一个<code>UpdateAdapter</code>的实例.
-	 *
-	 * @param name       <code>UpdateAdapter</code>的名称.
-	 * @return           <code>UpdateAdapter</code>的实例.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	UpdateAdapter createUpdateAdapter(String name) throws EternaException;
-
-	/**
-	 * 生成一个<code>UpdateAdapter</code>的实例.
-	 *
-	 * @param id         <code>UpdateAdapter</code>的id.
-	 * @return           <code>UpdateAdapter</code>的实例.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	UpdateAdapter createUpdateAdapter(int id) throws EternaException;
-
-	/**
-	 * 通过<code>UpdateAdapter</code>的名称获得它的id.
-	 *
-	 * @param name       <code>UpdateAdapter</code>的的名称.
-	 * @return           <code>UpdateAdapter</code>的id.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	int getUpdateAdapterId(String name) throws EternaException;
-
-	/**
-	 * 注册一个<code>UpdateAdapter</code>.
-	 *
-	 * @param generator   需要注册的<code>UpdateAdapter</code>的样本.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	void registerUpdateAdapter(UpdateAdapterGenerator generator) throws EternaException;
-
-	/**
-	 * 撤销一个<code>UpdateAdapter</code>的注册.
-	 *
-	 * @param name       需要撤销注册的<code>UpdateAdapter</code>的名称.
-	 * @throws EternaException     当相关配置出错时.
-	 */
-	void deregisterUpdateAdapter(String name) throws EternaException;
-
-	/**
-	 * 注册一个<code>ValuePreparerCreaterGenerator</code>.
-	 */
-	void registerValuePreparerGenerator(ValuePreparerCreaterGenerator generator)
-			throws EternaException;
-
-	/**
-	 * 获得一个默认的<code>ValuePreparerCreaterGenerator</code>.
-	 */
-	ValuePreparerCreaterGenerator getDefaultValuePreparerCreaterGenerator();
-
-	/**
-	 * 获得一个指定名称<code>ValuePreparerCreaterGenerator</code>.
-	 *
-	 * @param name       ValuePreparerCreaterGenerator的名称.
-	 */
-	ValuePreparerCreaterGenerator getValuePreparerCreaterGenerator(String name)
-			throws EternaException;
-
-	/**
-	 * 生成一个<code>VPGenerator</code>的实例.
-	 * 如果name为null, 则使用默认的ValuePreparerGenerator.
-	 *
-	 * @param name       ValuePreparerCreater的名称.
-	 * @param type       value的类型.
-	 */
-	ValuePreparerCreater createValuePreparerCreater(String name, int type)
-			throws EternaException;
-
-	/**
-	 * 生成一个<code>VPGenerator</code>默认的实例.
-	 *
-	 * @param type       value的类型.
-	 */
-	ValuePreparerCreater createValuePreparerCreater(int type)
+	PreparerCreater getPrepare(String name)
 			throws EternaException;
 
 
-	//----------------------------------  SearchFactory  --------------------------------------
-
-	public static final String SEARCH_MANAGER_ATTRIBUTE_PREFIX = "search-manager.attribute.";
+	//----------------------------------  search  --------------------------------------
 
 	/**
-	 * 获得一个ConditionBuilder类. 用于构成一个查询条件.
+	 * 在工厂的属性中设置查询条件的配置的键值.
+	 */
+	String SEARCH_ATTRIBUTES_FLAG = "search.attributes";
+
+	/**
+	 * 获得一个ConditionBuilder类, 用于构成一个查询条件.
 	 *
-	 * @param name       ConditionBuilder名称.
+	 * @param name       ConditionBuilder的名称.
 	 */
 	ConditionBuilder getConditionBuilder(String name) throws EternaException;
 
 	/**
-	 * 设置一个ConditionBuilder类. 用于构成一个查询条件.
-	 *
-	 * @param name        ConditionBuilder名称.
-	 * @param builder     要设置的ConditionBuilder类.
-	 */
-	void addConditionBuilder(String name, ConditionBuilder builder) throws EternaException;
-
-	/**
-	 * 获得一个ConditionBuilder的列表. 在ConditionProperty中会用的该列表,
-	 * 用于确定该条件的可选操作的范围.
+	 * 获得一个ConditionBuilder的列表.
+	 * 在ConditionProperty中会用的该列表, 用于确定该条件的可选操作的范围.
 	 *
 	 * @param name       ConditionBuilder列表的名称.
 	 */
 	List getConditionBuilderList(String name) throws EternaException;
 
 	/**
-	 * 设置一个ConditionBuilder的列表.
+	 * 生成一个<code>Search</code>的实例.
 	 *
-	 * @param name              列表名称.
-	 * @param builderNames      要设置的ConditionBuilder的列表.
+	 * @param id         <code>Search</code>的名称.
 	 */
-	void addConditionBuilderList(String name, List builderNames) throws EternaException;
+	Search createSearchAdapter(String name) throws EternaException;
 
-	SearchAdapter createSearchAdapter(String name) throws EternaException;
-
-	SearchAdapter createSearchAdapter(int id) throws EternaException;
-
-	int getSearchAdapterId(String name) throws EternaException;
-
-	void registerSearchAdapter(SearchAdapterGenerator generator)
-			throws EternaException;
-
-	void deregisterSearchAdapter(String name) throws EternaException;
+	/**
+	 * 生成一个<code>Search</code>的实例.
+	 *
+	 * @param id         <code>Search</code>的id.
+	 */
+	Search createSearchAdapter(int id) throws EternaException;
 
 	void registerSearchManager(SearchManagerGenerator generator)
 			throws EternaException;
 
 	SearchManager createSearchManager() throws EternaException;
 
-	SearchManager.Attributes getSearchManagerAttributes()
+	SearchAttributes getSearchAttributes()
 			throws EternaException;
 
 
-	//----------------------------------  ModelFactory  --------------------------------------
+	//----------------------------------  model  --------------------------------------
 
 	/**
-	 * 在factory中设置存放model名称的标签的属性名称.
+	 * 在factory的属性中设置存放model名称的标签的属性名称.
 	 */
-	public static final String MODEL_NAME_TAG_FLAG = "model.name.tag";
+	String MODEL_NAME_TAG_FLAG = "model.name.tag";
 
 	String getModelNameTag() throws EternaException;
 
@@ -344,27 +226,31 @@ public interface EternaFactory extends Factory
 
 	void setModelCaller(ModelCaller mc)throws EternaException;
 
-	void addModelExport(String exportName, ModelExport modelExport) throws EternaException;
-
+	/**
+	 * 获取一个model的export对象.
+	 */
 	ModelExport getModelExport(String exportName) throws EternaException;
 
+	/**
+	 * 生成一个<code>Model</code>的实例.
+	 *
+	 * @param id         <code>Model</code>的名称.
+	 */
 	ModelAdapter createModelAdapter(String name) throws EternaException;
 
+	/**
+	 * 生成一个<code>Model</code>的实例.
+	 *
+	 * @param id         <code>Model</code>的id.
+	 */
 	ModelAdapter createModelAdapter(int id) throws EternaException;
 
-	int getModelAdapterId(String name) throws EternaException;
-
-	void registerModelAdapter(ModelAdapterGenerator generator) throws EternaException;
-
-	void deregisterModelAdapter(String name) throws EternaException;
-
-
-	//----------------------------------  ViewFactory  --------------------------------------
+	//----------------------------------  view  --------------------------------------
 
 	/**
-	 * 在factory中设置视图全局配置的属性名称.
+	 * 在factory的属性中设置视图全局配置的属性名称.
 	 */
-	public static final String VIEW_GLOBAL_SETTING_FLAG = "view.global.setting";
+	String VIEW_GLOBAL_SETTING_FLAG = "view.global.setting";
 
 	String getViewGlobalSetting() throws EternaException;
 
@@ -383,30 +269,37 @@ public interface EternaFactory extends Factory
 	 */
 	void addDataPrinter(String name, DataPrinter dataPrinter) throws EternaException;
 
+	/**
+	 * 获取一个界面中的函数对象.
+	 */
 	Function getFunction(String name) throws EternaException;
 
-	void addFunction(String name, Function fun)throws EternaException;
-
+	/**
+	 * 获取一个可在界面使用的控件对象.
+	 */
 	Component getTypicalComponent(String name) throws EternaException;
-
-	void addTypicalComponent(String name, Component com)throws EternaException;
 
 	StringCoder getStringCoder() throws EternaException;
 
 	void setStringCoder(StringCoder sc)throws EternaException;
 
-	ViewAdapter createViewAdapter(String name) throws EternaException;
+	/**
+	 * 生成一个<code>View</code>的实例.
+	 *
+	 * @param id         <code>View</code>的名称.
+	 */
+	View createViewAdapter(String name) throws EternaException;
 
-	ViewAdapter createViewAdapter(int id) throws EternaException;
+	/**
+	 * 生成一个<code>View</code>的实例.
+	 *
+	 * @param id         <code>View</code>的id.
+	 */
+	View createViewAdapter(int id) throws EternaException;
 
-	int getViewAdapterId(String name) throws EternaException;
-
-	void registerViewAdapter(ViewAdapterGenerator generator) throws EternaException;
-
-	void deregisterViewAdapter(String name) throws EternaException;
-
+	/**
+	 * 获取一个可在界面或后端程序中使用的资源对象.
+	 */
 	Resource getResource(String name) throws EternaException;
-
-	void addResource(String name, Resource resource)throws EternaException;
 
 }

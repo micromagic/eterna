@@ -16,12 +16,13 @@
 
 package self.micromagic.eterna.search.impl;
 
+import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.search.Condition;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.sql.preparer.ValuePreparer;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
@@ -37,7 +38,7 @@ class ConditionBuilderImpl
 
 	String name;
 	String caption;
-	private String operator;
+	private final String operator;
 
 	/**
 	 *   -1 : 是否为空的判断
@@ -46,7 +47,7 @@ class ConditionBuilderImpl
 	 *  0x2 : 针对字符串, 在前面加上通配符
 	 *  0x3 : 针对字符串, 在两边加上通配符
 	 */
-	private int optType;
+	private final int optType;
 
 	public ConditionBuilderImpl(String operator, int optType)
 	{
@@ -54,9 +55,10 @@ class ConditionBuilderImpl
 		this.optType = optType;
 	}
 
-	public void initialize(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		return false;
 	}
 
 	public String getName()
@@ -99,7 +101,7 @@ class ConditionBuilderImpl
 		StringAppender sqlPart = StringTool.createStringAppender(count);
 		sqlPart.append(colName).append(' ').append(this.operator).append(" ?");
 		ValuePreparer[] preparers = new ValuePreparer[1];
-		if (TypeManager.isTypeString(cp.getColumnType()))
+		if (TypeManager.isString(cp.getColumnType()))
 		{
 			if (LIKE_OPT_TAG.equalsIgnoreCase(this.operator))
 			{
@@ -110,7 +112,7 @@ class ConditionBuilderImpl
 				}
 				else
 				{
-					String newStr = ConditionBuilderGeneratorImpl.dealEscapeString(value);
+					String newStr = BuilderGenerator.dealEscapeString(value);
 					if (newStr != value)
 					{
 						value = newStr;

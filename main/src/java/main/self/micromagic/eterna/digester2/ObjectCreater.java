@@ -17,9 +17,11 @@
 package self.micromagic.eterna.digester2;
 
 import org.dom4j.Element;
+
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringTool;
-import self.micromagic.eterna.share.EternaFactory;
 
 /**
  * 创建一个对象.
@@ -38,7 +40,8 @@ public class ObjectCreater
 	private String defaultValue;
 	private boolean registerFactory;
 
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		int nBegin = position.value += 1;
 		int nEnd = ParseRule.findItemEnd(config, position);
@@ -76,42 +79,58 @@ public class ObjectCreater
 
 	public boolean begin(Digester digester, Element element)
 	{
-		String cName = element.attributeValue(this.attrName);
+		String cName = null;
+		boolean noAttr = false;
+		if (this.attrName != null)
+		{
+			cName = element.attributeValue(this.attrName);
+		}
 		if (cName == null)
 		{
+			noAttr = true;
+			if (this.defaultValue == null)
+			{
+				throw new ParseException("Not found attribute [" + this.attrName
+						+ "] at tag [" + element.getName() + "].");
+			}
 			cName = this.defaultValue;
 		}
 		Object obj;
 		ClassLoader loader = Thread.currentThread().getContextClassLoader();
 		if (this.registerFactory)
 		{
-			ParseException.setContextInfo("factory", element);
-			obj = ContainerManager.getCurrentFactory();
-			if (obj == null)
+			try
 			{
-				try
+				obj = ContainerManager.getCurrentFactory();
+				Class c = Tool.getClass(cName, loader);
+				if (obj == null)
 				{
-					Class c = ParseRule.getClass(cName, loader);
 					obj = c.newInstance();
 					ContainerManager.setCurrentFactory((EternaFactory) obj);
-					if (ContainerManager.log.isDebugEnabled())
+					if (Digester.log.isDebugEnabled())
 					{
-						ContainerManager.log.debug("Factory [" + cName + "] has created.");
+						Digester.log.debug("Factory [" + cName + "] has created.");
 					}
 				}
-				catch (Exception ex)
+				else if (!noAttr && c != obj.getClass())
 				{
-					if (ex instanceof RuntimeException)
-					{
-						throw (RuntimeException) ex;
-					}
-					throw new ParseException(ex);
+					String msg = "The factory isn't same, current [" + obj.getClass().getName()
+							+ "], wanted [" + cName + "].";
+					Digester.log.error(msg, new ParseException());
 				}
+			}
+			catch (RuntimeException ex)
+			{
+				throw ex;
+			}
+			catch (Exception ex)
+			{
+				throw new ParseException(ex);
 			}
 		}
 		else
 		{
-         obj = ParseRule.createBeanMap(cName, loader, true);
+			obj = Tool.createBeanMap(cName, loader, true);
 		}
 		digester.push(obj);
 		return true;

@@ -27,7 +27,8 @@ import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.search.SearchAdapter;
+import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.EternaFactory;
 import org.dom4j.Element;
@@ -228,7 +229,7 @@ public class SearchExecute extends AbstractExecute
 					nowNode.addAttribute("doExecute", String.valueOf(this.doExecute));
 				}
 			}
-			SearchAdapter search = f.createSearchAdapter(searchName);
+			Search search = f.createSearchAdapter(searchName);
 			if (this.searchCacheIdnex != -1)
 			{
 				data.caches[this.searchCacheIdnex] = search;
@@ -242,9 +243,9 @@ public class SearchExecute extends AbstractExecute
 			{
 				if (this.doExecute)
 				{
-					raMap.put(SearchAdapter.READ_ALL_ROW, "1");
-					raMap.put(SearchAdapter.HOLD_CONNECTION, "1");
-					SearchAdapter.Result sr = search.doSearch(data, conn);
+					raMap.put(Search.READ_ALL_ROW, "1");
+					raMap.put(Search.HOLD_CONNECTION, "1");
+					SearchResult sr = search.doSearch(data, conn);
 					if (this.queryResult != null)
 					{
 						this.queryResult.setData(data, sr);
@@ -255,8 +256,8 @@ public class SearchExecute extends AbstractExecute
 			{
 				if (this.start != -1)
 				{
-					raMap.put(SearchAdapter.READ_ROW_START_AND_COUNT,
-							new SearchAdapter.StartAndCount(this.start, this.count));
+					raMap.put(Search.READ_ROW_START_AND_COUNT,
+							new Search.StartAndCount(this.start, this.count));
 				}
 				if (this.saveCondition)
 				{
@@ -273,7 +274,7 @@ public class SearchExecute extends AbstractExecute
 				}
 				if (this.doExecute)
 				{
-					SearchAdapter.Result sr = search.doSearch(data, conn);
+					SearchResult sr = search.doSearch(data, conn);
 					if (this.queryResult != null)
 					{
 						this.queryResult.setData(data, sr);
@@ -285,7 +286,7 @@ public class SearchExecute extends AbstractExecute
 				}
 				if (this.start != -1)
 				{
-					raMap.remove(SearchAdapter.READ_ROW_START_AND_COUNT);
+					raMap.remove(Search.READ_ROW_START_AND_COUNT);
 				}
 			}
 			if (this.forceSetParam)
@@ -293,7 +294,7 @@ public class SearchExecute extends AbstractExecute
 				raMap.remove(SearchManager.FORCE_DEAL_CONDITION);
 			}
 		}
-		data.dataMap.put(SEARCH_MANAGER_ATTRIBUTES, f.getSearchManagerAttributes());
+		data.dataMap.put(SEARCH_MANAGER_ATTRIBUTES, f.getSearchAttributes());
 		return null;
 	}
 

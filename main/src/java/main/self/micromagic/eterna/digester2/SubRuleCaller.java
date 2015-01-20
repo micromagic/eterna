@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Element;
+
 import self.micromagic.util.IntegerRef;
 
 /**
@@ -42,7 +43,8 @@ public class SubRuleCaller
 	 * 解析配置信息.
 	 * 格式: sub:{name1,name2}
 	 */
-	public ElementProcessor parse(Digester digester, String config, IntegerRef position)
+	public ElementProcessor parse(Digester digester, ParseRule rule,
+			String config, IntegerRef position)
 	{
 		position.value += 1;
 		List rules = new ArrayList();
@@ -51,12 +53,12 @@ public class SubRuleCaller
 			int tmpBegin = position.value;
 			int tmpEnd = ParseRule.findItemEnd(config, position);
 			String tmpStr = config.substring(tmpBegin, tmpEnd).trim();
-			ParseRule rule = digester.getRule(tmpStr);
-			if (rule == null)
+			ParseRule tmpRule = digester.getRule(tmpStr);
+			if (tmpRule == null)
 			{
 				throw new ParseException("Not found rule [" + tmpStr + "], config [" + config + "] for SubRuleCaller.");
 			}
-			rules.add(rule);
+			rules.add(tmpRule);
 			position.value = tmpEnd + 1;
 		}
 		SubRuleCaller sub = new SubRuleCaller();

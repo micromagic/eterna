@@ -13,9 +13,9 @@
 # limitations under the License.
 # @author micromagic@sina.com
 #
-# 标签中需要输出的js脚本
+# 鏍囩涓渶瑕佽緭鍑虹殑js鑴氭湰
 #
-# init标签使用的js脚本
+# init鏍囩浣跨敤鐨刯s鑴氭湰
 ## init.js
 var retryFind = false;
 
@@ -52,7 +52,7 @@ else
 	setTimeout(eCheckInitFn, 50);
 }
 
-# res标签使用的js脚本
+# res鏍囩浣跨敤鐨刯s鑴氭湰
 ## res.js
 if (typeof eg_pageInitializedURL == "undefined")
 {

@@ -19,8 +19,8 @@ package self.micromagic.eterna.search;
 import java.sql.Connection;
 
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.base.Query;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.sql.QueryAdapter;
 
 /**
  * @author micromagic@sina.com
@@ -30,7 +30,7 @@ public interface ColumnSetting
 	/**
 	 * 初始化, 该方法会在所属的search初始化时被调用.
 	 */
-	void initColumnSetting(SearchAdapter search) throws EternaException;
+	void initColumnSetting(Search search) throws EternaException;
 
 	/**
 	 * 返回一个数组, 该数组可以用来设置查询的列.
@@ -40,9 +40,9 @@ public interface ColumnSetting
 	 * @param data      数据, 里面包含了request的parameter, request的attribute,
 	 *                  session的attritute
 	 *
-	 * @see    self.micromagic.eterna.sql.ResultReaderManager#setReaderList(String[])
+	 * @see    self.micromagic.eterna.base.ResultReaderManager#setReaderList(String[])
 	 */
-	String[] getColumnSetting(String columnType, QueryAdapter query, SearchAdapter search,
+	String[] getColumnSetting(String columnType, Query query, Search search,
 			boolean first, AppData data, Connection conn)
 			throws EternaException;
 }

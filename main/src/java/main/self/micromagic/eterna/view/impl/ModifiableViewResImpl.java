@@ -25,11 +25,11 @@ import java.util.Set;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Function;
-import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.view.ViewAdapterGenerator;
+import self.micromagic.eterna.view.ModifiableViewRes;
+import self.micromagic.eterna.view.View;
 
 public class ModifiableViewResImpl
-		implements ViewAdapterGenerator.ModifiableViewRes
+		implements ModifiableViewRes
 {
 	protected Map functionMap = null;
 	protected Set typicalComponentNames = null;
@@ -118,7 +118,7 @@ public class ModifiableViewResImpl
 		this.resourceNames.add(name);
 	}
 
-	public void addAll(ViewAdapter.ViewRes res)
+	public void addAll(View.ViewRes res)
 			throws EternaException
 	{
 		this.addAllFunction(res.getFunctionMap());

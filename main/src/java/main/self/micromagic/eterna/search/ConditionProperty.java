@@ -18,10 +18,10 @@ package self.micromagic.eterna.search;
 
 import java.util.List;
 
+import self.micromagic.eterna.base.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.sql.preparer.ValuePreparer;
 
 /**
  * @author micromagic@sina.com
