@@ -73,7 +73,7 @@ public class FactoryContainerImpl
 		Factory oldF = ContainerManager.getCurrentFactory();
 		ConfigResource oldR = ContainerManager.getCurrentResource();
 		ContainerManager.setCurrentFactory(null);
-		ContainerManager.setCurrentContainer(this);
+		ContainerManager.setCurrentContainer(this, false);
 		try
 		{
 			ParseException.clearContextInfo();
@@ -107,7 +107,7 @@ public class FactoryContainerImpl
 		{
 			ContainerManager.setCurrentResource(oldR);
 			ContainerManager.setCurrentFactory(oldF);
-			ContainerManager.setCurrentContainer(oldC);
+			ContainerManager.setCurrentContainer(oldC, false);
 			SameCheck.clearDealedMap();
 			ParseException.clearContextInfo();
 		}

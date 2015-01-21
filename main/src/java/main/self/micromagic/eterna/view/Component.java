@@ -115,20 +115,4 @@ public interface Component
 
 	void printSpecialBody(Writer out, AppData data, View view) throws IOException, EternaException;
 
-	interface Event
-	{
-		void initialize(Component component) throws EternaException;
-
-		String getName() throws EternaException;
-
-		String getScriptParam() throws EternaException;
-
-		String getScriptBody() throws EternaException;
-
-		Component getComponent() throws EternaException;
-
-		View.ViewRes getViewRes() throws EternaException;
-
-	}
-
 }

@@ -32,6 +32,7 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.ObjectCreater;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
+import self.micromagic.eterna.view.Event;
 import self.micromagic.eterna.view.Function;
 import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.Resource;
@@ -49,7 +50,7 @@ public class ViewImpl extends AbstractGenerator
 		implements View, ObjectCreater
 {
 	private final List componentList = new LinkedList();
-	private StringCoder stringCoder;
+	protected StringCoder stringCoder;
 	private String viewGlobalSetting = "";
 	private int debug = 0;
 	private String width;
@@ -61,11 +62,11 @@ public class ViewImpl extends AbstractGenerator
 	protected String dataPrinterName = DEFAULT_DATA_PRINTER_NAME;
 	protected DataPrinter dataPrinter;
 
-	private final ModifiableViewRes viewRes = new ModifiableViewResImpl();
+	protected final ModifiableViewRes viewRes = new ModifiableViewResImpl();
 
 	protected boolean initialized = false;
 
-	private MemoryChars mc = null;
+	protected MemoryChars mc = null;
 
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
@@ -264,7 +265,7 @@ public class ViewImpl extends AbstractGenerator
 			+ "}"
 			+ "},_fn:function(event,webObj,objConfig){";
 
-	public void printEvent(Writer out, AppData data, Component.Event event)
+	public void printEvent(Writer out, AppData data, Event event)
 			throws IOException, EternaException
 	{
 		out.write("{type:\"");

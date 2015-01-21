@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.util.converter.BooleanConverter;
+
 /**
  * <code>StringTool</code>类是实现一些常用的字符串处理. <p>
  *
@@ -39,9 +41,9 @@ public class StringTool
 	/**
 	 * 是否需要使用QuickStringAppend.
 	 * 如果需要则可在配置文件中设置:
-	 * self.micromagic.use.quickStringAppend=true
+	 * use.quickStringAppend=true
 	 */
-	public static final String USE_QUICK_STRING_APPEND = "self.micromagic.use.quickStringAppend";
+	public static final String USE_QUICK_APPEND_FLAG = "use.quickStringAppend";
 
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -544,7 +546,8 @@ public class StringTool
 		{
 			if (stringAppendCreater == null)
 			{
-				if ("true".equalsIgnoreCase(Utility.getProperty(USE_QUICK_STRING_APPEND)))
+				BooleanConverter bc = new BooleanConverter();
+				if (bc.convertToBoolean(Utility.getProperty(USE_QUICK_APPEND_FLAG, "true")))
 				{
 					stringAppendCreater = new QuickStringAppender();
 				}
@@ -592,58 +595,32 @@ public class StringTool
 
 	}
 
-	public static class StringAppenderWriter extends Writer
+	/**
+	 * 创建一个以StringAppender为基础的Writer.
+	 *
+	 * @param size  初始化缓存的大小.
+	 */
+	public static Writer createWriter(int size)
 	{
-		private final StringAppender out;
+		return new StringAppenderWriter(size);
+	}
 
-		public StringAppenderWriter()
-		{
-			this(16);
-		}
+	/**
+	 * 以StringAppender为基础创建一个Writer.
+	 *
+	 * @param size  初始化缓存的大小.
+	 */
+	public static Writer createWriter(StringAppender buf)
+	{
+		return new StringAppenderWriter(buf);
+	}
 
-		public StringAppenderWriter(int size)
-		{
-			this.out = createStringAppender(size);
-		}
-
-		public StringAppenderWriter(StringAppender out)
-		{
-			this.out = out;
-		}
-
-		public void write(int c)
-		{
-			this.out.append((char) c);
-		}
-
-		public void write(String str, int off, int len)
-		{
-			this.out.append(str, off, len);
-		}
-
-		public void write(char[] cbuf, int off, int len)
-		{
-			this.out.append(cbuf, off, len);
-		}
-
-		public StringAppender getStringAppender()
-		{
-			return this.out;
-		}
-
-		public String toString()
-		{
-			return this.out.toString();
-		}
-
-		public void flush()
-		{
-		}
-
-		public void close()
-		{
-		}
-
+	/**
+	 * 创建一个以StringAppender为基础的Writer.
+	 */
+	public static Writer createWriter()
+	{
+		return new StringAppenderWriter();
 	}
 
 
@@ -769,6 +746,60 @@ public class StringTool
 		}
 
 		return encodeValues;
+	}
+
+}
+
+class StringAppenderWriter extends Writer
+{
+	private final StringAppender out;
+
+	public StringAppenderWriter()
+	{
+		this(16);
+	}
+
+	public StringAppenderWriter(int size)
+	{
+		this.out = StringTool.createStringAppender(size);
+	}
+
+	public StringAppenderWriter(StringAppender out)
+	{
+		this.out = out;
+	}
+
+	public void write(int c)
+	{
+		this.out.append((char) c);
+	}
+
+	public void write(String str, int off, int len)
+	{
+		this.out.append(str, off, len);
+	}
+
+	public void write(char[] cbuf, int off, int len)
+	{
+		this.out.append(cbuf, off, len);
+	}
+
+	public StringAppender getStringAppender()
+	{
+		return this.out;
+	}
+
+	public String toString()
+	{
+		return this.out.toString();
+	}
+
+	public void flush()
+	{
+	}
+
+	public void close()
+	{
 	}
 
 }

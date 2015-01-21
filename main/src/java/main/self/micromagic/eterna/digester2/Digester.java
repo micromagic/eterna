@@ -91,8 +91,7 @@ public class Digester
 		InputStream in = Digester.class.getResourceAsStream("/" + RULES_CINFIG_FILE);
 		if (in != null)
 		{
-			// 如果有自定义的配置, 将当前配置作为父配置
-			rConfig = new Properties(rConfig);
+			// 如果有自定义的配置, 也将其载入
 			rConfig.load(in);
 		}
 		instance.initRules(rm, rConfig);

@@ -1149,12 +1149,12 @@ public class PropertiesManager
 		 */
 		private void expunge()
 		{
-			BaseClassRef bcr = (BaseClassRef) this.queue.poll();
+			Object bcr = this.queue.poll();
 			while (bcr != null)
 			{
-				PropertyManager pm = bcr.getPropertyManager();
+				PropertyManager pm = ((BaseClassRef) bcr).getPropertyManager();
 				this.listener.removePropertyManager(pm.key, pm);
-				bcr = (BaseClassRef) this.queue.poll();
+				bcr = this.queue.poll();
 			}
 		}
 

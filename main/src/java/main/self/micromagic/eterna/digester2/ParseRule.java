@@ -23,7 +23,6 @@ import java.util.Map;
 
 import org.dom4j.Element;
 
-import self.micromagic.eterna.digester2.dom.EternaElement;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringTool;
@@ -85,9 +84,9 @@ public class ParseRule
 	 */
 	public boolean match(Element element)
 	{
-		String msg = ((EternaElement) element).getLineNumber() + ":" + element.getName() + ","
-				+ element.getNamespacePrefix() + ", " + this.pattern;
-		System.out.println(msg);
+		//String msg = ((EternaElement) element).getLineNumber() + ":" + element.getName() + ","
+		//		+ element.getNamespacePrefix() + ", " + this.pattern;
+		//System.out.println(msg);
 		if (element.getName().equals(this.nodeName))
 		{
 			return this.nsPrefix.equals(element.getNamespacePrefix());

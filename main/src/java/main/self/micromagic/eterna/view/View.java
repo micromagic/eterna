@@ -22,11 +22,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.ObjectCreater;
 
-public interface View
+public interface View extends ObjectCreater
 {
 	/**
 	 * 默认的数据集输出器的名称
@@ -92,12 +93,6 @@ public interface View
 	 * 通过参数设置dataType值使用的名称.
 	 */
 	public static final String DATA_TYPE = "___dataType";
-
-	/**
-	 * 仅需要输出数据部分的数据类型.
-	 * @deprecated
-	 */
-	public static final String DATA_TYPE_ONLYRECORD = "data";
 
 	/**
 	 * 仅需要输出数据部分的数据类型.
@@ -182,7 +177,7 @@ public interface View
 	 * 输出控件的事件定义.
 	 * 由于要根据debug的等级，在事件脚本中加入调试代码，所以此功能在ViewAdapter中实现.
 	 */
-	void printEvent(Writer out, AppData data, Component.Event event) throws IOException, EternaException;
+	void printEvent(Writer out, AppData data, Event event) throws IOException, EternaException;
 
 	interface ViewRes
 	{

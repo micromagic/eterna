@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.share;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +44,15 @@ public class AttributeManager
 		}
 		Set keys = this.attributes.keySet();
 		return (String[]) keys.toArray(new String[keys.size()]);
+	}
+
+	public Set attributeEntrySet()
+	{
+		if (this.attributes == null)
+		{
+			return Collections.EMPTY_SET;
+		}
+		return this.attributes.entrySet();
 	}
 
 	public Object setAttribute(String name, Object value)

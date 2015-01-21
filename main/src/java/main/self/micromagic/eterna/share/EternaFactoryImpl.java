@@ -442,37 +442,8 @@ public class EternaFactoryImpl extends AbstractFactory
 
 	//----------------------------------  search  --------------------------------------
 
-	private final Map conditionBuilderListMap = new HashMap();
-
 	private SearchManagerGenerator searchManagerGenerator;
 	private SearchAttributes searchAttributes;
-
-	// TODO
-	void initConditionBuilderList(String name, List builderNames)
-			throws EternaException
-	{
-		Iterator itrName = builderNames.iterator();
-		List builders = new ArrayList(builderNames.size());
-		while (itrName.hasNext())
-		{
-			String cbName = (String) itrName.next();
-			ConditionBuilder cb = this.getConditionBuilder(cbName);
-			if (cb == null)
-			{
-				throw new EternaException(
-						"The ConditionBuilder [" + cbName + "] not found at list [" + name + "].");
-			}
-			builders.add(cb);
-		}
-		if (this.conditionBuilderListMap.containsKey(name))
-		{
-			log.warn("Duplicate ConditionBuilderList [" + name + "].");
-		}
-		else
-		{
-			this.conditionBuilderListMap.put(name, Collections.unmodifiableList(builders));
-		}
-	}
 
 	public ConditionBuilder getConditionBuilder(String name)
 			throws EternaException
@@ -1009,8 +980,11 @@ class ObjectCreaterCon extends ObjectContainer
 	{
 		super(id);
 		this.obj = obj;
+		this.singleton = this.obj.isSingleton();
 	}
 	private final ObjectCreater obj;
+	private Object instance;
+	private final boolean singleton;
 
 	public String getName()
 	{
@@ -1019,7 +993,7 @@ class ObjectCreaterCon extends ObjectContainer
 
 	public boolean isSingleton()
 	{
-		return this.obj.isSingleton();
+		return this.singleton;
 	}
 
 	public Class getType()
@@ -1035,11 +1009,15 @@ class ObjectCreaterCon extends ObjectContainer
 
 	public Object create(boolean needInit, EternaFactory factory)
 	{
+		if (this.instance != null)
+		{
+			return this.instance;
+		}
 		if (needInit)
 		{
 			this.initialize(factory);
 		}
-		return this.obj.create();
+		return this.singleton ? this.instance = this.obj.create() : this.obj.create();
 	}
 
 	public void destroy()

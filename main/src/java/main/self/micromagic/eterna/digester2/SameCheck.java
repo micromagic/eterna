@@ -61,7 +61,15 @@ public class SameCheck
 		String objFlag;
 		if (this.attrName != null)
 		{
-			objFlag = element.attributeValue(this.attrName);
+			if (this.attrName.startsWith("$"))
+			{
+				// 以"$"起始表示设置的是节点类型
+				objFlag = this.attrName;
+			}
+			else
+			{
+				objFlag = element.attributeValue(this.attrName);
+			}
 		}
 		else
 		{

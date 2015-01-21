@@ -28,9 +28,9 @@ public interface ComponentGenerator extends Generator
 
 	void clearComponents() throws EternaException;
 
-	void addEvent(Component.Event event) throws EternaException;
+	void addEvent(Event event) throws EternaException;
 
-	void deleteEvent(Component.Event event) throws EternaException;
+	void deleteEvent(Event event) throws EternaException;
 
 	void clearEvent() throws EternaException;
 
@@ -58,7 +58,7 @@ public interface ComponentGenerator extends Generator
 
 		void setScriptBody(String body) throws EternaException;
 
-		Component.Event createEvent() throws EternaException;
+		Event createEvent() throws EternaException;
 
 	}
 

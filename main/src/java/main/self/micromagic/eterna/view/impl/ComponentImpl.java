@@ -22,12 +22,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.ComponentGenerator;
+import self.micromagic.eterna.view.Event;
 import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.eterna.view.View;
@@ -51,7 +52,7 @@ public class ComponentImpl extends AbstractGenerator
 	protected boolean ignoreGlobalParam;
 	protected String beforeInit;
 	protected String initScript;
-	protected String attributes;
+	private String _attributes;
 
 	protected List componentList = new LinkedList();
 	protected List eventList = new LinkedList();
@@ -85,7 +86,7 @@ public class ComponentImpl extends AbstractGenerator
 			event.initialize(this);
 		}
 
-		this.initAttributes(factory, this.attributes == null ? "" : this.attributes);
+		this.initAttributes(factory, this._attributes == null ? "" : this._attributes);
 	}
 
 	public void initAttributes(EternaFactory factory, String attributes)
@@ -313,7 +314,7 @@ public class ComponentImpl extends AbstractGenerator
 	public void setAttributes(String attributes)
 			throws EternaException
 	{
-		this.attributes = attributes;
+		this._attributes = attributes;
 	}
 
 	public EternaFactory getFactory()

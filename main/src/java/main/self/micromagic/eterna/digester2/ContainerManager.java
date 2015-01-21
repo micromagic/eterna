@@ -251,6 +251,8 @@ public class ContainerManager
 			digester = Digester.getInstance();
 		}
 		FactoryContainerImpl fc = new FactoryContainerImpl();
+		fc.setId(id);
+		fc.setDigester(digester);
 		if (attrs != null)
 		{
 			int count = attrs.size();
@@ -357,8 +359,17 @@ public class ContainerManager
 	 */
 	public static void setCurrentContainer(FactoryContainer container)
 	{
+		setCurrentContainer(container, true);
+	}
+	/**
+	 * 设置当前的FactoryContainer.
+	 *
+	 * @param withFactory  是否需要同时设置当前的工厂
+	 */
+	public static void setCurrentContainer(FactoryContainer container, boolean withFactory)
+	{
 		ThreadCache.getInstance().setProperty(THREAD_COONTAINER_KEY, container);
-		if (container != null)
+		if (container != null && withFactory)
 		{
 			Factory f = container.getFactory();
 			if (f instanceof EternaFactory)

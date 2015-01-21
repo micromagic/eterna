@@ -66,7 +66,7 @@ public class ObjectCreater
 			paramIndex++;
 			position.value = tmpEnd + 1;
 		}
-		if (StringTool.isEmpty(dValue) || StringTool.isEmpty(aName))
+		if (StringTool.isEmpty(dValue) && StringTool.isEmpty(aName))
 		{
 			throw new ParseException("Error config [" + config + "] for ObjectCreater.");
 		}
