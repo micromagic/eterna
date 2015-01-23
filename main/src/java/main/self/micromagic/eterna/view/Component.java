@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 public interface Component
@@ -75,6 +75,12 @@ public interface Component
 	 */
 	public static final String INHERIT_GLOBAL_SEARCH = "inheritGlobalSearch";
 
+	/**
+	 * 初始化页面控件对象.
+	 *
+	 * @param factory  当前的工厂对象
+	 * @param parent   页面控件的父控件对象, 如果为null表示此控件在第一层
+	 */
 	void initialize(EternaFactory factory, Component parent) throws EternaException;
 
 	String getName() throws EternaException;

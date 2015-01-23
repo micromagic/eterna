@@ -47,8 +47,8 @@ public class BooleanReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		boolean booleanValue = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getBoolean(this.columnIndex) : rs.getBoolean(this.columnName);
+		boolean booleanValue = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getBoolean(this.columnIndex) : rs.getBoolean(this.alias);
 		return rs.wasNull() ? null : new Boolean(booleanValue);
 	}
 

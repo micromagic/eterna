@@ -38,11 +38,6 @@ public class ObjectReader
 		implements ResultReader, Cloneable
 {
 	/**
-	 * 在arrtibute中设置读取时是否需要获取列的索引值.
-	 */
-	public static final String CHECK_INDEX_FLAG = "checkIndex";
-
-	/**
 	 * 在arrtibute中设置导出时使用的标题.
 	 */
 	public static final String PRINT_CAPTION = "print.caption";
@@ -53,21 +48,18 @@ public class ObjectReader
 	protected static final AttributeManager EMPTY_ATTRIBUTES = new AttributeManager();
 
 	protected String name;
-	protected String orderName;
+	protected String columnName;
 	protected String formatName;
 	protected ResultFormat format;
-
-	private int width = -1;
 	private String caption;
 
 	protected PermissionSet permissionSet;
-	protected boolean htmlFilter = true;
-	protected boolean visible = true;
 
-	protected boolean useIndexOrName;
-	protected String columnName;
+	protected boolean useIndexOrAlias;
+	protected String alias;
 	protected int columnIndex = -1;
 	protected boolean checkIndex;
+	protected boolean initialized;
 
 	protected ValueConverter converter;
 	protected AttributeManager attributes = EMPTY_ATTRIBUTES;
@@ -79,15 +71,20 @@ public class ObjectReader
 
 	public ObjectReader(String name)
 	{
-		this.name = this.columnName = name;
+		this.name = this.alias = name;
 	}
 
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.orderName == null)
+		if (this.initialized)
 		{
-			this.orderName = this.columnName == null ? this.name : this.columnName;
+			return;
+		}
+		this.initialized = true;
+		if (this.columnName == null)
+		{
+			this.columnName = this.alias == null ? this.name : this.alias;
 		}
 		if (this.formatName != null)
 		{
@@ -114,13 +111,12 @@ public class ObjectReader
 		{
 			this.caption = Tool.translateCaption(factory, this.getName());
 		}
-		String tmpStr = (String) this.getAttribute(CHECK_INDEX_FLAG);
-		if (tmpStr != null)
+		if (this.columnIndex == -1)
 		{
-			this.checkIndex = "true".equalsIgnoreCase(tmpStr);
+			this.checkIndex = true;
 		}
 		// 检查有没有设置导出时使用的标题, 如果设置了则要尝试翻译
-		tmpStr = (String) this.getAttribute(PRINT_CAPTION);
+		String tmpStr = (String) this.getAttribute(PRINT_CAPTION);
 		if (tmpStr != null)
 		{
 			String pCaption = Tool.translateCaption(factory, tmpStr);
@@ -128,22 +124,6 @@ public class ObjectReader
 			{
 				this.attributes.setAttribute(PRINT_CAPTION, pCaption);
 			}
-		}
-	}
-
-	/**
-	 * 复制当前的ObjectReader.
-	 */
-	public ObjectReader copy()
-	{
-		try
-		{
-			return (ObjectReader) super.clone();
-		}
-		catch (CloneNotSupportedException ex)
-		{
-			// assert false
-			throw new Error();
 		}
 	}
 
@@ -172,31 +152,31 @@ public class ObjectReader
 		return this.name;
 	}
 
-	public String getOrderName()
-	{
-		return this.orderName;
-	}
-
-	public void setOrderName(String name)
-	{
-		this.orderName = name;
-	}
-
 	public String getColumnName()
 	{
 		return this.columnName;
 	}
 
-	public void setColumnName(String columnName)
+	public void setColumnName(String name)
 	{
-		this.columnName = columnName;
-		this.columnIndex = -1;
-		this.useIndexOrName = false;
+		this.columnName = name;
 	}
 
-	public boolean isUseColumnName()
+	public String getAlias()
 	{
-		return !this.useIndexOrName;
+		return this.alias;
+	}
+
+	public void setAlias(String alias)
+	{
+		this.alias = alias;
+		this.columnIndex = -1;
+		this.useIndexOrAlias = false;
+	}
+
+	public boolean isUseAlias()
+	{
+		return !this.useIndexOrAlias;
 	}
 
 	public int getColumnIndex()
@@ -206,14 +186,14 @@ public class ObjectReader
 
 	public void setColumnIndex(int columnIndex)
 	{
-		this.columnName = null;
+		this.alias = null;
 		this.columnIndex = columnIndex;
-		this.useIndexOrName = true;
+		this.useIndexOrAlias = true;
 	}
 
 	public boolean isUseColumnIndex()
 	{
-		return this.useIndexOrName;
+		return this.useIndexOrAlias;
 	}
 
 	/**
@@ -230,26 +210,6 @@ public class ObjectReader
 	public boolean isCheckIndex()
 	{
 		return this.checkIndex;
-	}
-
-	public void setHtmlFilter(boolean htmlFilter)
-	{
-		this.htmlFilter = htmlFilter;
-	}
-
-	public boolean needHtmlFilter()
-	{
-		return this.htmlFilter;
-	}
-
-	public boolean isVisible()
-	{
-		return this.visible;
-	}
-
-	public void setVisible(boolean visible)
-	{
-		this.visible = visible;
 	}
 
 	public boolean isValid()
@@ -273,16 +233,6 @@ public class ObjectReader
 		return this.permissionSet;
 	}
 
-	public int getWidth()
-	{
-		return this.width;
-	}
-
-	public void setWidth(int width)
-	{
-		this.width = width;
-	}
-
 	public String getCaption()
 	{
 		return this.caption;
@@ -293,7 +243,7 @@ public class ObjectReader
 		if (this.caption == null)
 		{
 			return this.isUseColumnIndex() ?
-					"col_" + this.getColumnIndex() : this.getColumnName();
+					"col_" + this.getColumnIndex() : this.getAlias();
 		}
 		return this.caption;
 	}
@@ -301,6 +251,15 @@ public class ObjectReader
 	public void setCaption(String caption)
 	{
 		this.caption = caption;
+	}
+
+	public void setAttribute(String name, Object value)
+	{
+		if (this.attributes == EMPTY_ATTRIBUTES)
+		{
+			this.attributes = new AttributeManager();
+		}
+		this.attributes.setAttribute(name, value);
 	}
 
 	public void setAttributes(AttributeManager attributes)
@@ -321,8 +280,8 @@ public class ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrName || this.transIndex(rs) ?
-				rs.getObject(this.columnIndex) : rs.getObject(this.columnName);
+		return this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getObject(this.columnIndex) : rs.getObject(this.alias);
 	}
 
 	/**
@@ -334,8 +293,8 @@ public class ObjectReader
 		{
 			try
 			{
-				this.columnIndex = rs.findColumn(this.columnName);
-				return this.useIndexOrName = true;
+				this.columnIndex = rs.findColumn(this.alias);
+				return this.useIndexOrAlias = true;
 			}
 			catch (SQLException ex)
 			{

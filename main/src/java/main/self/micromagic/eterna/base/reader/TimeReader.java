@@ -46,8 +46,8 @@ public class TimeReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrName || this.transIndex(rs) ?
-				rs.getTime(this.columnIndex) : rs.getTime(this.columnName);
+		return this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getTime(this.columnIndex) : rs.getTime(this.alias);
 	}
 
 }

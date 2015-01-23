@@ -47,8 +47,8 @@ public class FloatReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		float floatValue = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getFloat(this.columnIndex) : rs.getFloat(this.columnName);
+		float floatValue = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getFloat(this.columnIndex) : rs.getFloat(this.alias);
 		return rs.wasNull() ? null : new Float(floatValue);
 	}
 

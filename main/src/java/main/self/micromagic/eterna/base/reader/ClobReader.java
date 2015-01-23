@@ -44,8 +44,8 @@ public class ClobReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		Clob clob = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getClob(this.columnIndex) : rs.getClob(this.columnName);
+		Clob clob = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getClob(this.columnIndex) : rs.getClob(this.alias);
 		return clob;
 	}
 

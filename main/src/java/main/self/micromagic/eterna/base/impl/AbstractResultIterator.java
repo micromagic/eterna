@@ -72,7 +72,7 @@ public abstract class AbstractResultIterator
 	{
 		if (this.metaData == null)
 		{
-			this.metaData = new ResultMetaDataImpl(this.readerList, this.readerManager, this.query);
+			this.metaData = new MetaDataImpl(this.readerList, this.readerManager, this.query);
 		}
 		return this.metaData;
 	}

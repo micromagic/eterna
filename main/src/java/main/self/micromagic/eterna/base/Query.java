@@ -19,7 +19,6 @@ package self.micromagic.eterna.base;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.base.reader.ObjectReader;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.BooleanRef;
@@ -42,22 +41,6 @@ public interface Query extends Base
 	 * 对于一些数据库, 当设置了startRow和maxRows时, 会添加获取记录数限制的语句.
 	 */
 	String CHECK_DATABASE_NAME_FLAG = "checkDatabaseName";
-
-	/**
-	 * 复制所有的ResultReader. <p>
-	 * 如果设为true, 则会在初始化时复制所有继承了ResultReaders.ObjectReader
-	 * 的ResultReader, 并且将其checkIndex属性设为true.
-	 * 默认值为false.
-	 *
-	 * @see ObjectReader
-	 * @see ObjectReader#setCheckIndex
-	 */
-	String COPY_READERS_FLAG = "copyReaders";
-
-	/**
-	 * 可设置的其它ResultReaderManager的名称列表, 以逗号分割.
-	 */
-	String OTHER_READER_MANAGER_SET_FLAG = "otherReaderManagerSet";
 
 	/**
 	 * 自动计算总记录数, 通过循环ResultSet的next方法来计算.

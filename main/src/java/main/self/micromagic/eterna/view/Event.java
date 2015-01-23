@@ -14,41 +14,25 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.base.reader;
+package self.micromagic.eterna.view;
 
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import self.micromagic.eterna.share.EternaException;
 
-import self.micromagic.eterna.share.TypeManager;
-
-public class NullReader extends ObjectReader
+/**
+ * 控件中的事件对象.
+ */
+public interface Event
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_NULL;
-	}
+	void initialize(Component component) throws EternaException;
 
-	public NullReader(String name)
-	{
-		super(name);
-	}
+	String getName() throws EternaException;
 
-	public Object readCall(CallableStatement call, int index)
-			throws SQLException
-	{
-		return null;
-	}
+	String getScriptParam() throws EternaException;
 
-	public Object readResult(ResultSet rs)
-			throws SQLException
-	{
-		return null;
-	}
+	String getScriptBody() throws EternaException;
 
-	public Object readObject(Object obj)
-	{
-		return null;
-	}
+	Component getComponent() throws EternaException;
+
+	View.ViewRes getViewRes() throws EternaException;
 
 }

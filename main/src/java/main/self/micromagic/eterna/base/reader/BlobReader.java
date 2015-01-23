@@ -44,8 +44,8 @@ public class BlobReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		Blob blob = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getBlob(this.columnIndex) : rs.getBlob(this.columnName);
+		Blob blob = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getBlob(this.columnIndex) : rs.getBlob(this.alias);
 		return blob;
 	}
 

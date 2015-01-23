@@ -46,8 +46,8 @@ public class TimestampReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrName || this.transIndex(rs) ?
-				rs.getTimestamp(this.columnIndex) : rs.getTimestamp(this.columnName);
+		return this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getTimestamp(this.columnIndex) : rs.getTimestamp(this.alias);
 	}
 
 }

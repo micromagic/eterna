@@ -16,16 +16,16 @@
 
 package self.micromagic.util;
 
-import java.io.InputStream;
-import java.io.IOException;
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import self.micromagic.util.container.UnmodifiableIterator;
 
@@ -39,8 +39,7 @@ public class ResManager
 	private static final char[] INDENT_BUF = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
 
 	private String charset = "UTF-8";
-	private boolean skipEmptyLine = true;
-	private Map resCache = new HashMap();
+	private final Map resCache = new HashMap();
 
 	/**
 	 * 对代码进行缩进处理.
@@ -156,6 +155,15 @@ public class ResManager
 		}
 		return (char) 0;
 	}
+
+	/**
+	 * 设置是否忽略全空的行.
+	 */
+	public void setSkipEmptyLine(boolean b)
+	{
+		this.skipEmptyLine = b;
+	}
+	private boolean skipEmptyLine = true;
 
 	public synchronized void load(InputStream inStream)
 			throws IOException
@@ -288,7 +296,7 @@ public class ResManager
 	 */
 	public String getRes(String resName, Map paramBind, int indentCount)
 	{
-      StringAppender buf = this.printRes(resName, paramBind, indentCount, null);
+		StringAppender buf = this.printRes(resName, paramBind, indentCount, null);
 		return buf.toString();
 	}
 

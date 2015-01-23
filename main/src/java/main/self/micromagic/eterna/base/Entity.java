@@ -18,7 +18,6 @@ package self.micromagic.eterna.base;
 
 import java.util.Iterator;
 
-import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
@@ -38,6 +37,7 @@ public interface Entity extends EternaObject
 	 */
 	String getName() throws EternaException;
 
+
 	/**
 	 * 获取生成本实体对象的工厂.
 	 */
@@ -56,49 +56,17 @@ public interface Entity extends EternaObject
 	/**
 	 * 通过名称获取一个元素.
 	 */
-	Item getItem(String name) throws EternaException;
+	EntityItem getItem(String name) throws EternaException;
+
+	/**
+	 * 通过索引值获取一个元素.
+	 * 第一个元素是0, 第二个是1 ...
+	 */
+	EntityItem getItem(int index) throws EternaException;
 
 	/**
 	 * 以迭代器的方式获取元素的列表.
 	 */
 	Iterator getItemIterator() throws EternaException;
-
-	/**
-	 * 实体中的元素对象.
-	 */
-	interface Item
-	{
-		/**
-		 * 获取元素所属的实体.
-		 */
-		Entity getEntity() throws EternaException;
-
-		/**
-		 * 获取元素的名称.
-		 */
-		String getName() throws EternaException;
-
-		/**
-		 * 获取元素对应的列名.
-		 */
-		String getColumnName() throws EternaException;
-
-		/**
-		 * 获取元素的类型.
-		 */
-		int getType() throws EternaException;
-
-		/**
-		 * 获取元素的标题.
-		 */
-		String getCaption() throws EternaException;
-
-		/**
-		 * 获取元素的权限集合, 只有拥有集合中的任意一个权限就可以访问该元素. <p>
-		 * 如果没有设置权限集合, 则返回null, 表示访问该元素不需要权限.
-		 */
-		PermissionSet getPermissionSet() throws EternaException;
-
-	}
 
 }

@@ -42,13 +42,6 @@ public interface ResultMetaData
 	int getColumnCount() throws EternaException;
 
 	/**
-	 * 获取某列的显示宽度.
-	 *
-	 * @param column 第一列为1, 第二列为2, ...
-	 */
-	int getColumnWidth(int column) throws EternaException;
-
-	/**
 	 * 获取某列的显示标题.
 	 *
 	 * @param column 第一列为1, 第二列为2, ...

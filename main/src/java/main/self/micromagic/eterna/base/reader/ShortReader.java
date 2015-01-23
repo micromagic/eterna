@@ -47,8 +47,8 @@ public class ShortReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		short shortValue = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getShort(this.columnIndex) : rs.getShort(this.columnName);
+		short shortValue = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getShort(this.columnIndex) : rs.getShort(this.alias);
 		return rs.wasNull() ? null : new Short(shortValue);
 	}
 

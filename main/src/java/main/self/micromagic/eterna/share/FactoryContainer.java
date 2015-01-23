@@ -39,20 +39,31 @@ public interface FactoryContainer
 	String CONFIG_PARAM_FLAG = "eterna.config.param";
 
 	/**
-	 * 获得工厂实例的id.
+	 * 在attribute中存放最小重新载入配置资源的时间间隔的键值.
+	 *
+	 */
+	String RELOAD_TIME_FLAG = "eterna.reload.time";
+
+	/**
+	 * 获得工厂容器实例的id.
 	 */
 	String getId();
 
 	/**
-	 * (重新)初始化工厂
+	 * (重新)初始化工厂容器.
 	 */
 	void reInit();
 
 	/**
-	 * (重新)初始化工厂
+	 * (重新)初始化工厂容器.
 	 * @param msg  存放初始化的返回信息
 	 */
 	void reInit(StringRef msg);
+
+	/**
+	 * 判断当前工厂容器是否已完成初始化.
+	 */
+	boolean isInitialized();
 
 	/**
 	 * 设置自定义的属性. <p>

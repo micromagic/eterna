@@ -22,21 +22,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
+import self.micromagic.eterna.base.EntityItem;
+import self.micromagic.eterna.base.EntityRef;
 import self.micromagic.eterna.base.ResultReader;
 import self.micromagic.eterna.base.ResultReaderManager;
-import self.micromagic.eterna.base.reader.NullReader;
+import self.micromagic.eterna.base.reader.InvalidReader;
+import self.micromagic.eterna.base.reader.ObjectReader;
+import self.micromagic.eterna.base.reader.ReaderManager;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 
-public class ResultReaderManagerImpl
+public class ReaderManagerImpl
 		implements ResultReaderManager
 {
 	private boolean initialized;
@@ -46,26 +50,22 @@ public class ResultReaderManagerImpl
 	 * 锁住 readerMap 的标志, 比如在调用query的getReaderManager方法时
 	 * 就不需要复制 readerMap.
 	 */
-	private boolean readMapLocked;
+	private boolean readListLocked;
 
 	private boolean nonePermission;
 	private boolean colNameSensitive;
 
 	private String name;
-	private String parentName;
-	private ResultReaderManager[] parents;
 	private EternaFactory factory;
 
 	/**
 	 * 定义reader顺序的字符串
 	 */
-	private String readerOrder = null;
+	private String readerOrder;
 
-	private final Map readerMap;
 	private Map nameToIndexMap;
-
 	private List readerList;
-	private List allReaderList;
+	private final List allReaderList;
 
 	private List orderList;
 
@@ -74,52 +74,33 @@ public class ResultReaderManagerImpl
 	 */
 	private String orderStr;
 
-	public ResultReaderManagerImpl()
+	public ReaderManagerImpl()
 	{
 		this.initialized = false;
 		this.nonePermission = true;
 		this.colNameSensitive = true;
 
-		this.readerMap = new HashMap();
 		this.nameToIndexMap = new HashMap();
 		this.readerList = new ArrayList();
+		this.allReaderList = new ArrayList();
 		this.orderList = new ArrayList(0);
 		this.orderStr = null;
 	}
 
-	protected ResultReaderManagerImpl(ResultReaderManagerImpl other, boolean readMapLocked)
+	protected ReaderManagerImpl(ReaderManagerImpl other)
 	{
 		this.initialized = true;
 		this.nonePermission = other.nonePermission;
 		this.colNameSensitive = other.colNameSensitive;
 
 		this.locked = false;
-		this.readMapLocked = readMapLocked;
+		this.readListLocked = true;
 
 		this.readerOrder = other.readerOrder;
-		this.readerMap = readMapLocked ? other.readerMap : new HashMap(other.readerMap);
-		this.nameToIndexMap = readMapLocked ? other.nameToIndexMap : new HashMap(other.nameToIndexMap);
-		this.allReaderList = readMapLocked ? other.allReaderList : null;
-		this.readerList = readMapLocked ? other.readerList : new ArrayList(other.readerList);
+		this.nameToIndexMap = other.nameToIndexMap;
+		this.allReaderList = other.allReaderList;
+		this.readerList = other.readerList;
 		this.orderList = other.orderList;
-		this.orderStr = other.orderStr;
-	}
-
-	protected ResultReaderManagerImpl(ResultReaderManagerImpl other)
-	{
-		this.initialized = false;
-		this.nonePermission = other.nonePermission;
-		this.colNameSensitive = other.colNameSensitive;
-
-		this.locked = false;
-		this.readMapLocked = false;
-
-		this.readerOrder = other.readerOrder;
-		this.readerMap = new HashMap(other.readerMap);
-		this.nameToIndexMap = new HashMap(other.nameToIndexMap);
-		this.allReaderList = null;
-		this.readerList = new ArrayList(other.readerList);
-		this.orderList = new ArrayList(other.orderList);
 		this.orderStr = other.orderStr;
 	}
 
@@ -131,37 +112,46 @@ public class ResultReaderManagerImpl
 			this.initialized = true;
 			this.factory = factory;
 
-			Iterator itr = this.readerMap.values().iterator();
-			while (itr.hasNext())
+			this.readerList.clear();
+			Iterator itr = this.allReaderList.iterator();
+			int count = this.allReaderList.size();
+			boolean resetNameCache = false;
+			for (int i = 0; i < count; i++)
 			{
-				((ResultReader) itr.next()).initialize(factory);
-			}
-
-			if (this.parentName != null)
-			{
-				if (this.parentName.indexOf(',') == -1)
+				Object tmpObj = itr.next();
+				if (tmpObj instanceof ResultReader)
 				{
-					this.parents = new ResultReaderManager[1];
-					this.parents[0] = null;//factory.getReaderManager(this.parentName);
-					if (this.parents[0] == null)
+					ResultReader reader = (ResultReader) tmpObj;
+					String readerName = this.colNameSensitive ?
+							reader.getName() : reader.getName().toUpperCase();
+					if (resetNameCache)
 					{
-						BaseManager.log.warn(
-								"The reader manager [" + this.parentName + "] not found.");
+						this.nameToIndexMap.put(readerName,
+								Utility.createInteger(this.readerList.size()));
 					}
+					this.readerList.add(reader);
 				}
 				else
 				{
-					StringTokenizer token = new StringTokenizer(this.parentName, ",");
-					this.parents = new ResultReaderManager[token.countTokens()];
-					for (int i = 0; i < this.parents.length; i++)
-					{
-						String temp = token.nextToken().trim();
-						this.parents[i] = null;//factory.getReaderManager(temp);
-						if (this.parents[i] == null)
-						{
-							BaseManager.log.warn("The reader manager [" + temp + "] not found.");
-						}
-					}
+					EntityRef ref = (EntityRef) tmpObj;
+					ReaderManagerContainer rmc = new ReaderManagerContainer(this.getName(),
+							this.nameToIndexMap, this.readerList, this.colNameSensitive);
+					EntityImpl.addItems(factory, ref, rmc);
+					resetNameCache = true;
+				}
+			}
+			// 重新构造allReaderList并进行初始化
+			this.allReaderList.clear();
+			this.allReaderList.addAll(this.readerList);
+			itr = this.allReaderList.iterator();
+			count = this.allReaderList.size();
+			for (int i = 0; i < count; i++)
+			{
+				ResultReader reader = (ResultReader) itr.next();
+				reader.initialize(factory);
+				if (this.nonePermission && reader.getPermissionSet() != null)
+				{
+					this.nonePermission = false;
 				}
 			}
 		}
@@ -172,7 +162,7 @@ public class ResultReaderManagerImpl
 	{
 		if (this.initialized)
 		{
-			throw new EternaException("You can't set name at initialized ResultReaderManager.");
+			throw new EternaException("You can't set name at initialized ReaderManager.");
 		}
 		this.name = name;
 	}
@@ -180,30 +170,6 @@ public class ResultReaderManagerImpl
 	public String getName()
 	{
 		return this.name;
-	}
-
-	public void setParentName(String name)
-			throws EternaException
-	{
-		if (this.initialized)
-		{
-			throw new EternaException("You can't set parent name at initialized ResultReaderManager.");
-		}
-		this.parentName = name;
-	}
-
-	public String getParentName()
-	{
-		return this.parentName;
-	}
-
-	public ResultReaderManager getParent()
-	{
-		if (this.parents != null && this.parents.length > 0)
-		{
-			return this.parents[0];
-		}
-		return null;
 	}
 
 	public EternaFactory getFactory()
@@ -224,45 +190,71 @@ public class ResultReaderManagerImpl
 	public int getReaderCount()
 			throws EternaException
 	{
-		this.getReaderList0();
-		return this.readerMap.size();
+		return this.allReaderList.size();
 	}
 
 	public ResultReader getReader(String name)
 			throws EternaException
 	{
-		this.getReaderList0();
-		return (ResultReader) this.readerMap.get(this.colNameSensitive ? name : name.toUpperCase());
+		int index = this.getIndexByName(name, true);
+		if (index == -1)
+		{
+			return null;
+		}
+		return (ResultReader) this.readerList.get(index);
 	}
 
-	public ResultReader addReader(ResultReader reader)
+	public ResultReader getReader(int index)
 			throws EternaException
 	{
-		if (this.readMapLocked)
+		if (index < 0 || index >= this.readerList.size())
 		{
-			throw new EternaException("You can't add reader at initialized ResultReaderManager.");
+			String msg = "Not found ResultReader at index [" + index
+					+ "] in ReaderManager [" + this.getName() + "].";
+			throw new EternaException(msg);
+		}
+		return (ResultReader) this.readerList.get(index);
+	}
+
+	/**
+	 * 添加一个实体的引用.
+	 */
+	public void addEntityRef(EntityRef ref)
+			throws EternaException
+	{
+		if (this.initialized)
+		{
+			throw new EternaException("You can't invoke addEntityRef after initialized.");
+		}
+		this.allReaderList.add(ref);
+	}
+
+	public void addReader(ResultReader reader)
+			throws EternaException
+	{
+		if (this.readListLocked)
+		{
+			throw new EternaException("You can't add reader at initialized ReaderManager.");
 		}
 		if (this.locked)
 		{
-			throw new EternaException("You can't invoke addReader when ResultReaderManager locked.");
+			throw new EternaException("You can't invoke addReader when ReaderManager locked.");
 		}
 
-		this.allReaderList = null;
 		if (this.nonePermission && reader.getPermissionSet() != null)
 		{
 			this.nonePermission = false;
 		}
 		String readerName = this.colNameSensitive ? reader.getName() : reader.getName().toUpperCase();
-		ResultReader temp = (ResultReader) this.readerMap.put(readerName, reader);
 
-		if (temp != null)
+		if (this.nameToIndexMap.containsKey(readerName))
 		{
-			throw new EternaException(
-					"Duplicate [ResultReader] name:" + reader.getName() + ".");
+			throw new EternaException("Duplicate ResultReader name ["
+					+ readerName + "] at ReaderManager [" + this.getName() + "].");
 		}
-		this.readerList.add(reader);
+		this.allReaderList.add(reader);
 		this.nameToIndexMap.put(readerName, Utility.createInteger(this.readerList.size()));
-		return temp;
+		this.readerList.add(reader);
 	}
 
 	public void setColNameSensitive(boolean colNameSensitive)
@@ -274,7 +266,7 @@ public class ResultReaderManagerImpl
 		}
 		else
 		{
-			throw new EternaException("You can't set column name sensitive when ResultReaderManager has readers.");
+			throw new EternaException("You can't set column name sensitive when ReaderManager has readers.");
 		}
 	}
 
@@ -286,10 +278,9 @@ public class ResultReaderManagerImpl
 	public void setReaderList(String[] names)
 			throws EternaException
 	{
-		this.getReaderList0();
 		if (this.locked)
 		{
-			throw new EternaException("You can't invoke setReaderList when ResultReaderManager locked.");
+			throw new EternaException("You can't invoke setReaderList when ReaderManager locked.");
 		}
 
 		this.readerList = new ArrayList(names.length);
@@ -304,13 +295,12 @@ public class ResultReaderManagerImpl
 			ResultReader reader = this.getReader(name);
 			if (reader == null)
 			{
-				throw new EternaException(
-						"Invalid ResultReader name:" + name + " at ResultReaderManager "
-						+ this.getName() + ".");
+				throw new EternaException("Invalid ResultReader name [" + name
+						+ "] at ReaderManager [" + this.getName() + "].");
 			}
 			if (orderType != '-')
 			{
-				this.orderList.add(reader.getOrderName() + (orderType == 'D' ? " DESC" : "" ));
+				this.orderList.add(reader.getColumnName() + (orderType == 'D' ? " DESC" : "" ));
 			}
 			this.readerList.add(reader);
 			if (this.colNameSensitive)
@@ -329,7 +319,6 @@ public class ResultReaderManagerImpl
 	public int getIndexByName(String name, boolean notThrow)
 			throws EternaException
 	{
-		this.getReaderList0();
 		Integer i = (Integer) this.nameToIndexMap.get(
 				this.colNameSensitive ? name : name.toUpperCase());
 		if (i == null)
@@ -340,9 +329,9 @@ public class ResultReaderManagerImpl
 			}
 			else
 			{
-				throw new EternaException(
-						"Invalid ResultReader name:[" + name + "] at ResultReaderManager ["
-						+ this.getName() + "].");
+				String msg = "Invalid ResultReader name [" + name
+						+ "] at ReaderManager [" + this.getName() + "].";
+				throw new EternaException(msg);
 			}
 		}
 		return i.intValue();
@@ -385,7 +374,7 @@ public class ResultReaderManagerImpl
 	public List getReaderList()
 			throws EternaException
 	{
-		return this.getReaderList0();
+		return Collections.unmodifiableList(this.allReaderList);
 	}
 
 	/**
@@ -402,12 +391,7 @@ public class ResultReaderManagerImpl
 	public List getReaderList(Permission permission)
 			throws EternaException
 	{
-		this.getReaderList0();
-		if (this.nonePermission)
-		{
-			return Collections.unmodifiableList(this.readerList);
-		}
-		if (permission == null)
+		if (this.nonePermission || permission == null)
 		{
 			return Collections.unmodifiableList(this.readerList);
 		}
@@ -422,6 +406,7 @@ public class ResultReaderManagerImpl
 			{
 				if (temp == null)
 				{
+					// 如果temp为空, 需要构造list, 并添加之前的reader
 					temp = new ArrayList(this.readerList.size());
 					srcItr = this.readerList.iterator();
 					for (int i = 0; i < count; i++)
@@ -430,7 +415,9 @@ public class ResultReaderManagerImpl
 					}
 					srcItr.next();
 				}
-				temp.add(new NullReader(reader.getName()));
+				String tmpName = this.colNameSensitive ?
+						reader.getName() : reader.getName().toUpperCase();
+				temp.add(new InvalidReader(tmpName));
 			}
 			else
 			{
@@ -455,122 +442,166 @@ public class ResultReaderManagerImpl
 		return ps.checkPermission(permission);
 	}
 
-	public ResultReader getReaderInList(int index)
-			throws EternaException
-	{
-		this.getReaderList0();
-		try
-		{
-			return (ResultReader) this.readerList.get(index);
-		}
-		catch (Exception ex)
-		{
-			throw new EternaException(ex.getMessage());
-		}
-	}
-
+	/**
+	 * 锁住自己的所有属性, 这样使用者只能读取, 而不能修改. <p>
+	 * 一般用在通过xml装载后, 在EternaFactory的初始化中调用此方法.
+	 * 注:在调用了copy方法后, 新复制的ResultReaderManager是不被锁住的.
+	 *
+	 * @see #copy(String)
+	 */
 	public void lock()
 	{
 		this.locked = true;
 	}
 
+	/**
+	 * 判断是否已锁住所有属性, 这样使用者只能读取, 而不能修改. <p>
+	 *
+	 * @return  true表示已锁, false表示未锁
+	 * @see #lock
+	 */
 	public boolean isLocked()
 	{
 		return this.locked;
 	}
 
-	public ResultReaderManager copy(String copyName)
+	/**
+	 * 复制自身的所有属性, 并返回.
+	 */
+	public ResultReaderManager copy()
 			throws EternaException
 	{
-		ResultReaderManagerImpl other;
-		if (this.initialized)
+		if (!this.initialized)
 		{
-			this.getReaderList0();
-			other = new ResultReaderManagerImpl(this, copyName == null);
+			throw new EternaException("The ReaderManager [" + this.getName()
+					+ "] hasn't initialized, can't copy.");
 		}
-		else
-		{
-			other = new ResultReaderManagerImpl(this);
-		}
-		other.name = copyName == null ? this.name : this.name + "/" + copyName;
-		other.parentName = this.parentName;
-		other.parents = this.parents;
+		ReaderManagerImpl other = new ReaderManagerImpl(this);
+		other.name = this.name;
 		return other;
 	}
 
-	private List getReaderList0()
-			throws EternaException
+	/**
+	 * 将一个实体元素转换成reader对象.
+	 *
+	 * @param item        需要转换的实体元素
+	 * @param tableAlias  数据库表的别名
+	 */
+	static ResultReader item2Reader(EntityItem item, String tableAlias)
 	{
-		if (this.allReaderList != null)
+		String type = TypeManager.getPureTypeName(item.getType());
+		ObjectReader reader = (ObjectReader) ReaderManager.createReader(
+				type, item.getName());
+		if (item.getCaption() != null)
 		{
-			return this.allReaderList;
+			reader.setCaption(item.getCaption());
 		}
-		OrderManager om = new OrderManager();
-		List resultList = om.getOrder(new MyOrderItem(), this.parents, this.readerOrder,
-				this.readerList, this.readerMap);
-		Iterator itr = resultList.iterator();
-		int index = 1;
-		while (itr.hasNext())
+		reader.setAlias(item.getName());
+		String colName = item.getColumnName();
+		if (tableAlias != null)
 		{
-			ResultReader reader = (ResultReader) itr.next();
-			if (this.colNameSensitive)
+			colName = tableAlias.concat(".").concat(colName);
+		}
+		reader.setColumnName(colName);
+		String[] attrNames = item.getAttributeNames();
+		for (int i = 0; i < attrNames.length; i++)
+		{
+			String n = attrNames[i];
+			if (FORMAT_FLAG.equals(n))
 			{
-				this.nameToIndexMap.put(reader.getName(), Utility.createInteger(index));
+				reader.setFormatName((String) item.getAttribute(n));
 			}
 			else
 			{
-				this.nameToIndexMap.put(reader.getName().toUpperCase(), Utility.createInteger(index));
-			}
-			index++;
-			if (this.nonePermission && reader.getPermissionSet() != null)
-			{
-				this.nonePermission = false;
+				reader.setAttribute(n, item.getAttribute(n));
 			}
 		}
-		this.readerList = new ArrayList(resultList);
-		this.allReaderList = Collections.unmodifiableList(resultList);
-		return this.allReaderList;
+		return reader;
 	}
 
-	private static class MyOrderItem extends OrderManager.OrderItem
+}
+
+/**
+ * 处理EntityRef的容器.
+ */
+class ReaderManagerContainer
+		implements EntityImpl.Container
+{
+	public ReaderManagerContainer(String name, Map nameCache, List itemList,
+			boolean colNameSensitive)
 	{
-		private ResultReader reader;
+		this.name = name;
+		this.nameCache = nameCache;
+		this.itemList = itemList;
+		this.colNameSensitive = colNameSensitive;
+	}
+	private final Map nameCache;
+	private final List itemList;
+	private final String name;
+	private final boolean colNameSensitive;
 
-		public MyOrderItem()
+	public String getName()
+	{
+		return this.name;
+	}
+
+	public String getType()
+	{
+		return "ReaderManager";
+	}
+
+	public boolean contains(String name)
+	{
+		name = this.colNameSensitive || name == null ? name : name.toUpperCase();
+		return this.nameCache.containsKey(name);
+	}
+
+	public void add(EntityItem item, String tableAlias)
+	{
+		String rName = this.colNameSensitive ? item.getName() : item.getName().toUpperCase();
+		this.nameCache.put(rName, Utility.createInteger(this.itemList.size()));
+		this.itemList.add(ReaderManagerImpl.item2Reader(item, tableAlias));
+	}
+
+}
+
+class MyOrderItem extends OrderManager.OrderItem
+{
+	//private ResultReader reader;
+
+	public MyOrderItem()
+	{
+		super("", null);
+	}
+
+	protected MyOrderItem(String name, Object obj)
+	{
+		super(name, obj);
+		//this.reader = (ResultReader) obj;
+	}
+
+	public boolean isIgnore()
+			throws EternaException
+	{
+		return false;
+	}
+
+	public OrderManager.OrderItem create(Object obj)
+			throws EternaException
+	{
+		if (obj == null)
 		{
-			super("", null);
+			return null;
 		}
+		ResultReader reader = (ResultReader) obj;
+		return new MyOrderItem(reader.getName(), reader);
+	}
 
-		protected MyOrderItem(String name, Object obj)
-		{
-			super(name, obj);
-			this.reader = (ResultReader) obj;
-		}
-
-		public boolean isIgnore()
-				throws EternaException
-		{
-			return this.reader.isIgnore();
-		}
-
-		public OrderManager.OrderItem create(Object obj)
-				throws EternaException
-		{
-			if (obj == null)
-			{
-				return null;
-			}
-			ResultReader reader = (ResultReader) obj;
-			return new MyOrderItem(reader.getName(), reader);
-		}
-
-		public Iterator getOrderItemIterator(Object container)
-				throws EternaException
-		{
-			ResultReaderManager rm = (ResultReaderManager) container;
-			return rm.getReaderList().iterator();
-		}
-
+	public Iterator getOrderItemIterator(Object container)
+			throws EternaException
+	{
+		ResultReaderManager rm = (ResultReaderManager) container;
+		return rm.getReaderList().iterator();
 	}
 
 }

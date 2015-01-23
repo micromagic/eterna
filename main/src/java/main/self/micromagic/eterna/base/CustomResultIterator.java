@@ -20,7 +20,7 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 
 import self.micromagic.eterna.base.impl.AbstractResultIterator;
-import self.micromagic.eterna.base.impl.ResultMetaDataImpl;
+import self.micromagic.eterna.base.impl.MetaDataImpl;
 import self.micromagic.eterna.base.impl.ResultRowImpl;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
@@ -38,7 +38,7 @@ public class CustomResultIterator extends AbstractResultIterator
 	public CustomResultIterator(Entity entity, Permission permission)
 			throws EternaException
 	{
-		this(ResultMetaDataImpl.enrity2ReaderManager(entity), permission);
+		this(MetaDataImpl.enrity2ReaderManager(entity), permission);
 	}
 
 	public CustomResultIterator(ResultReaderManager manager, Permission permission)

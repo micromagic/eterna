@@ -256,7 +256,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			ParseException.setContextInfo(objName);
 			container.initialize(this);
 		}
-		Iterator itr;
 
 		// 初始化, userManager
 		if (this.userManager != null)
@@ -287,15 +286,6 @@ public class EternaFactoryImpl extends AbstractFactory
 		// 初始化, string-coder
 		ParseException.setContextInfo("stringCoder");
 		this.stringCoder.initStringCoder(this);
-
-		// 初始化, DataPrinter
-		itr = this.dataPrinterMap.values().iterator();
-		while (itr.hasNext())
-		{
-			DataPrinter dataPrinter = (DataPrinter) itr.next();
-			ParseException.setContextInfo("dataPrinter:".concat(dataPrinter.getName()));
-			dataPrinter.initialize(this);
-		}
 	}
 
 	public DataSourceManager getDataSourceFromCache()
@@ -594,7 +584,6 @@ public class EternaFactoryImpl extends AbstractFactory
 	//----------------------------------  view  --------------------------------------
 
 	private String viewGlobalSetting;
-	private final Map dataPrinterMap = new HashMap();
 	private final StringCoder defaultStringCoder = new StringCoderImpl();
 	private StringCoder stringCoder = this.defaultStringCoder;
 
@@ -614,32 +603,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public DataPrinter getDataPrinter(String name)
 			throws EternaException
 	{
-		DataPrinter result = (DataPrinter) this.dataPrinterMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getDataPrinter(name);
-		}
-		return result;
-	}
-
-	public void addDataPrinter(String name, DataPrinter dataPrinter)
-			throws EternaException
-	{
-		if (this.dataPrinterMap.containsKey(name))
-		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate DataPrinter [" + name + "].");
-			}
-		}
-		else if (dataPrinter != null)
-		{
-			if (this.initialized)
-			{
-				dataPrinter.initialize(this);
-			}
-			this.dataPrinterMap.put(name, dataPrinter);
-		}
+		return (DataPrinter) this.createObject(name);
 	}
 
 	public Function getFunction(String name)
@@ -821,6 +785,21 @@ public class EternaFactoryImpl extends AbstractFactory
 			throw new EternaException("Not found object id:" + id + ".");
 		}
 		return container.create(this.inInit, this);
+	}
+
+	public boolean isSingleton(Object key)
+			throws EternaException
+	{
+		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
+		if (container == null)
+		{
+			if (this.shareFactory != null)
+			{
+				return this.shareFactory.isSingleton(key);
+			}
+			throw new ParseException("Not found object [" + key + "].");
+		}
+		return container.isSingleton();
 	}
 
 	public Object createObject(Object key)

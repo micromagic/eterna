@@ -57,8 +57,8 @@ public class BigStringReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		Reader reader = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getCharacterStream(this.columnIndex) : rs.getCharacterStream(this.columnName);
+		Reader reader = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getCharacterStream(this.columnIndex) : rs.getCharacterStream(this.alias);
 		if (reader == null)
 		{
 			return null;

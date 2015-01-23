@@ -46,8 +46,8 @@ public class DateReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrName || this.transIndex(rs) ?
-				rs.getDate(this.columnIndex) : rs.getDate(this.columnName);
+		return this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getDate(this.columnIndex) : rs.getDate(this.alias);
 	}
 
 }

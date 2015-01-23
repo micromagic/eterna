@@ -122,8 +122,8 @@ public interface Base
 	Parameter getParameter(int paramIndex) throws EternaException;
 
 	/**
-	 * 获取包含所有Parameter的迭代器.
-	 * 迭代器中的所有Parameter必需按索引值从小到大顺序排列.
+	 * 获取Parameter的迭代器.
+	 * 迭代器中的所有Parameter按索引值从小到大顺序排列.
 	 *
 	 * @see Parameter#getIndex
 	 */

@@ -17,23 +17,17 @@
 package self.micromagic.eterna.base.impl;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Set;
-
-import org.dom4j.Element;
 
 import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.base.EntityRef;
 import self.micromagic.eterna.base.Query;
 import self.micromagic.eterna.base.ResultIterator;
 import self.micromagic.eterna.base.ResultReader;
@@ -41,8 +35,6 @@ import self.micromagic.eterna.base.ResultReaderManager;
 import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.eterna.base.reader.ObjectReader;
 import self.micromagic.eterna.base.reader.ReaderManager;
-import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -51,7 +43,6 @@ import self.micromagic.util.BooleanRef;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
-import self.micromagic.util.logging.TimeLogger;
 
 /**
  * @author micromagic@sina.com
@@ -60,16 +51,13 @@ public abstract class AbstractQuery extends BaseImpl
 		implements Query
 {
 	private String readerOrder;
-	private List tempResultReaders;
-	private Set otherReaderManagerSet;
-	private Map tempNameToIndexMap;
 	private ResultReaderManager readerManager;
+	private ReaderManagerImpl tmpReaderManager;
 	/**
 	 * 正对某个query的全局readerManager.
 	 */
 	private ObjectRef globalReaderManager;
 	private boolean readerManagerSetted;
-	private String readerManagerName;
 
 	protected Permission permission;
 	private int orderIndex = -1;
@@ -77,11 +65,6 @@ public abstract class AbstractQuery extends BaseImpl
 	private String[] orderStrs;
 	private String[] orderNames;
 
-	private int startRow = 1;
-	private int maxRows = -1;
-	private int totalCount = TOTAL_COUNT_NONE;
-	private TotalCountExt totalCountExt;
-	private Query countQuery;
 	private QueryHelper queryHelper;
 
 	/**
@@ -100,34 +83,11 @@ public abstract class AbstractQuery extends BaseImpl
 		{
 			return true;
 		}
-		/*
-		Iterator itr = this.tempResultReaders.iterator();
-		while (itr.hasNext())
-		{
-			((ResultReader) itr.next()).initialize(this.getFactory());
-		}
-		// 这里不需要初始化reader, 在createTempReaderManager中会通过
-		// ResultReaderManagerImpl对其初始化
-		*/
+
 		this.globalReaderManager = new ObjectRef();
 		this.readerManager = this.createTempReaderManager();
-		this.tempResultReaders = null;
-		this.tempNameToIndexMap = null;
-		String tmp = (String) this.getAttribute(OTHER_READER_MANAGER_SET_FLAG);
-		if (tmp != null)
-		{
-			String[] tmpArr = StringTool.separateString(tmp, ",", true);
-			if (tmpArr.length > 0)
-			{
-				this.otherReaderManagerSet = new HashSet();
-				for (int i = 0; i < tmpArr.length; i++)
-				{
-					this.otherReaderManagerSet.add(tmpArr[i]);
-				}
-			}
-		}
 
-		tmp = (String) this.getAttribute(CHECK_DATABASE_NAME_FLAG);
+		String tmp = (String) this.getAttribute(CHECK_DATABASE_NAME_FLAG);
 		if (tmp != null)
 		{
 			this.checkDatabaseName = "true".equalsIgnoreCase(tmp);
@@ -150,10 +110,10 @@ public abstract class AbstractQuery extends BaseImpl
 	 *
 	 * @param init  创建完后是否需要立刻执行初始化
 	 */
-	private ResultReaderManagerImpl createTempReaderManager0(boolean init)
+	private ReaderManagerImpl createTempReaderManager0(boolean init)
 			throws EternaException
 	{
-		ResultReaderManagerImpl temp = new ResultReaderManagerImpl();
+		ReaderManagerImpl temp = new ReaderManagerImpl();
 		temp.setName("<query>/" + this.getName());
 		if (init)
 		{
@@ -162,68 +122,19 @@ public abstract class AbstractQuery extends BaseImpl
 		return temp;
 	}
 
-	private ResultReaderManager createTempReaderManager()
+	private ReaderManagerImpl createTempReaderManager()
 			throws EternaException
 	{
-		ResultReaderManagerImpl temp = this.createTempReaderManager0(false);
-		temp.setParentName(this.readerManagerName);
-		temp.setReaderOrder(this.readerOrder);
-		boolean hasCheckIndexFlag = false;
-		if (this.tempResultReaders != null)
+		ReaderManagerImpl temp = this.tmpReaderManager;
+		this.tmpReaderManager = null;
+		if (temp == null)
 		{
-			Iterator itr = this.tempResultReaders.iterator();
-			while (itr.hasNext())
-			{
-				ResultReader r = (ResultReader) itr.next();
-				if (r instanceof ObjectReader)
-				{
-					ObjectReader tmpR = ((ObjectReader) r);
-					if (tmpR.getAttribute(ObjectReader.CHECK_INDEX_FLAG) == null)
-					{
-						tmpR.setCheckIndex(true);
-					}
-					else
-					{
-						hasCheckIndexFlag = true;
-					}
-				}
-				temp.addReader(r);
-			}
+			temp = this.createTempReaderManager0(false);
 		}
+		temp.setReaderOrder(this.readerOrder);
 		temp.initialize(this.getFactory());
 		if (temp.getReaderCount() > 0)
 		{
-			// 当设置了baseReaderManager且没有checkIndex的设置时, 复制的默认值为true
-			boolean needCopy = this.readerManagerName != null && !hasCheckIndexFlag;
-			String needCopyStr = (String) this.getAttribute(COPY_READERS_FLAG);
-			// 当设置了copyReaders时, 使用设置的值
-			if (needCopyStr != null)
-			{
-				needCopy = "true".equalsIgnoreCase(needCopyStr);
-			}
-			if (needCopy)
-			{
-				// 这里先执行初始化, 因为将要添加的reader都已被初始化过了
-				ResultReaderManagerImpl allReaders = this.createTempReaderManager0(true);
-				Iterator itr = temp.getReaderList().iterator();
-				while (itr.hasNext())
-				{
-					ResultReader r = (ResultReader) itr.next();
-					if (r instanceof ObjectReader)
-					{
-						ObjectReader tmpR = ((ObjectReader) r);
-						if (!tmpR.isCheckIndex() && !tmpR.isUseColumnIndex())
-						{
-							// 如果checkIndex属性为false, 则复制后将其设为true
-							tmpR = tmpR.copy();
-							tmpR.setCheckIndex(true);
-							r = tmpR;
-						}
-					}
-					allReaders.addReader(r);
-				}
-				temp = allReaders;
-			}
 			temp.lock();
 			String checkStr = (String) this.getAttribute(CHECK_READER_FLAG);
 			if (checkStr == null)
@@ -233,8 +144,7 @@ public abstract class AbstractQuery extends BaseImpl
 			boolean checkReader = false;
 			if (checkStr != null)
 			{
-				BooleanConverter converter = new BooleanConverter();
-				checkReader = converter.convertToBoolean(checkStr);
+				checkReader = (new BooleanConverter()).convertToBoolean(checkStr);
 			}
 			if (!checkReader)
 			{
@@ -258,12 +168,7 @@ public abstract class AbstractQuery extends BaseImpl
 	public ResultReaderManager getReaderManager()
 			throws EternaException
 	{
-		if (this.readerManagerSetted)
-		{
-			// 如果已设置过readerManager, 则就不需要再复制一份了, 因为已经复制过了.
-			return this.readerManager;
-		}
-		return this.readerManager.copy(null);
+		return this.readerManager.copy();
 	}
 
 	public void setReaderManager(ResultReaderManager readerManager)
@@ -275,22 +180,19 @@ public abstract class AbstractQuery extends BaseImpl
 			String name2 = this.readerManager.getName();
 			if (!name1.equals(name2))
 			{
-				if (this.otherReaderManagerSet != null)
-				{
-					if (!this.otherReaderManagerSet.contains(name1))
-					{
-						throw new EternaException(
-								"The setted readerManager name [" + name1 + "],  not same [" + name2
-								+ "] in query[" + this.getName() + "], or in " + OTHER_READER_MANAGER_SET_FLAG
-								+ " " + this.otherReaderManagerSet + ".");
-					}
-				}
-				else
-				{
-					throw new EternaException(
-							"The setted readerManager name [" + name1 + "],  not same [" + name2
-							+ "] in query[" + this.getName() + "].");
-				}
+				String msg = "The setted readerManager [" + name1 + "], not same as ["
+						+ name2 + "] in query[" + this.getName() + "].";
+				throw new EternaException(msg);
+			}
+			if (!(readerManager instanceof ReaderManagerImpl))
+			{
+				String msg = "The setted readerManager [" + name1
+						+ "] isn't getted from the query [" + this.getName() + "].";
+				throw new EternaException(msg);
+			}
+			if (readerManager instanceof ReaderManagerImpl)
+			{
+				((ReaderManagerImpl) readerManager).lock();
 			}
 			this.readerManager = readerManager;
 			this.readerManagerSetted = true;
@@ -314,27 +216,36 @@ public abstract class AbstractQuery extends BaseImpl
 		}
 	}
 
+	/**
+	 * 添加一个实体的引用.
+	 */
+	public void addReaderEntityRef(EntityRef ref)
+			throws EternaException
+	{
+		if (this.initialized)
+		{
+			throw new EternaException("You can't invoke addEntityRef after initialized.");
+		}
+		if (this.tmpReaderManager == null)
+		{
+			this.tmpReaderManager = this.createTempReaderManager0(false);
+		}
+		this.tmpReaderManager.addEntityRef(ref);
+	}
+
 	public void addResultReader(ResultReader reader)
 			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new EternaException(
-					"Can't add reader in initialized " + this.getType() + " [" + this.getName() + "].");
+			throw new EternaException("You can't add reader in initialized "
+					+ this.getType() + " [" + this.getName() + "].");
 		}
-		else if (this.tempNameToIndexMap == null)
+		if (this.tmpReaderManager == null)
 		{
-			this.tempNameToIndexMap = new HashMap();
-			this.tempResultReaders = new ArrayList();
+			this.tmpReaderManager = this.createTempReaderManager0(false);
 		}
-		if (this.tempNameToIndexMap.containsKey(reader.getName()))
-		{
-			throw new EternaException(
-					"Duplicate [ResultReader] name:" + reader.getName()
-					+ ", in query[" + this.getName() + "].");
-		}
-		this.tempResultReaders.add(reader);
-		this.tempNameToIndexMap.put(reader.getName(), new Integer(this.tempResultReaders.size()));
+		this.tmpReaderManager.addReader(reader);
 	}
 
 	protected void copy(Base copyObj)
@@ -342,9 +253,6 @@ public abstract class AbstractQuery extends BaseImpl
 		super.copy(copyObj);
 		AbstractQuery other = (AbstractQuery) copyObj;
 		other.readerOrder = this.readerOrder;
-		other.tempResultReaders = this.tempResultReaders;
-		other.otherReaderManagerSet = this.otherReaderManagerSet;
-		other.tempNameToIndexMap = this.tempNameToIndexMap;
 		other.globalReaderManager = this.globalReaderManager;
 		if (this.globalReaderManager.getObject() == null)
 		{
@@ -353,9 +261,8 @@ public abstract class AbstractQuery extends BaseImpl
 		else
 		{
 			// 如果当前query存在全局的ResultReaderManager则复制这个全局的
-			other.readerManager = (ResultReaderManager) this.globalReaderManager.getObject();
+			other.readerManager = (ReaderManagerImpl) this.globalReaderManager.getObject();
 		}
-		other.readerManagerName = this.readerManagerName;
 		other.forwardOnly = this.forwardOnly;
 		other.checkDatabaseName = this.checkDatabaseName;
 		other.orderIndex = this.orderIndex;
@@ -429,11 +336,6 @@ public abstract class AbstractQuery extends BaseImpl
 		return super.getPreparedSQL();
 	}
 
-	public void setReaderManagerName(String name)
-	{
-		this.readerManagerName = name;
-	}
-
 	public void setSingleOrder(String readerName)
 			throws EternaException
 	{
@@ -455,7 +357,7 @@ public abstract class AbstractQuery extends BaseImpl
 						+ "] in query[" + this.getName() + "].");
 				return;
 			}
-			String orderStr = reader.getOrderName();
+			String orderStr = reader.getColumnName();
 			if (orderType == 0)
 			{
 				if (this.orderStrs != null && orderStr.equals(this.orderStrs[0]))
@@ -525,7 +427,7 @@ public abstract class AbstractQuery extends BaseImpl
 							+ "] in query[" + this.getName() + "].");
 					return;
 				}
-				String orderStr = reader.getOrderName();
+				String orderStr = reader.getColumnName();
 				orderStr = orderType == 'D' ? orderStr + " DESC" : orderStr;
 				this.orderNames[i] = orderNames[i];
 				this.orderStrs[i] = orderStr;
@@ -609,9 +511,9 @@ public abstract class AbstractQuery extends BaseImpl
 		{
 			ResultReader r = (ResultReader) itr.next();
 			ColumnInfo tmp = null;
-			if (r.isUseColumnName())
+			if (r.isUseAlias())
 			{
-				tmp = (ColumnInfo) readerMap.get(r.getColumnName().toUpperCase());
+				tmp = (ColumnInfo) readerMap.get(r.getAlias().toUpperCase());
 			}
 			if (r.isUseColumnIndex())
 			{
@@ -641,7 +543,7 @@ public abstract class AbstractQuery extends BaseImpl
 
 		// 将剩余的查询结果构造成reader
 		boolean hasColumn = false;
-		ResultReaderManagerImpl tmpRm = this.createTempReaderManager0(false);
+		ReaderManagerImpl tmpRm = this.createTempReaderManager0(false);
 		tmpRm.setColNameSensitive(false);
 		itr = rReaders.iterator();
 		for (int i = 0; itr.hasNext(); i++)
@@ -654,7 +556,6 @@ public abstract class AbstractQuery extends BaseImpl
 				String typeName = TypeManager.getTypeName(tmp.typeId);
 				ObjectReader reader = (ObjectReader) ReaderManager.createReader(typeName, tmp.colName);
 				reader.setColumnIndex(i + 1);
-				reader.setVisible(false);
 				tmpRm.addReader(reader);
 				newReaders.add(reader);
 			}
@@ -665,14 +566,16 @@ public abstract class AbstractQuery extends BaseImpl
 		ResultReaderManager rm;
 		if (hasMissing || hasColumn)
 		{
-			rm = this.createTempReaderManager0(true);
-			rm.setColNameSensitive(!hasColumn);
+			tmpRm = this.createTempReaderManager0(true);
+			tmpRm.setColNameSensitive(!hasColumn);
 			itr = newReaders.iterator();
 			while (itr.hasNext())
 			{
-				rm.addReader((ResultReader) itr.next());
+				tmpRm.addReader((ResultReader) itr.next());
 			}
-			rm.lock();
+			// 这里所有的reader已在前面初始化过了
+			tmpRm.lock();
+			rm = tmpRm;
 		}
 		else
 		{
@@ -695,7 +598,7 @@ public abstract class AbstractQuery extends BaseImpl
 	private ResultReaderManager initDefaultResultReaders(ResultSet rs)
 			throws EternaException, SQLException
 	{
-		ResultReaderManagerImpl rm = this.createTempReaderManager0(false);
+		ReaderManagerImpl rm = this.createTempReaderManager0(false);
 		rm.setColNameSensitive(false);
 		Map temp = new HashMap();
 		ResultSetMetaData meta = rs.getMetaData();
@@ -715,7 +618,6 @@ public abstract class AbstractQuery extends BaseImpl
 			String typeName = TypeManager.getTypeName(typeId);
 			ObjectReader reader = (ObjectReader) ReaderManager.createReader(typeName, name);
 			reader.setColumnIndex(i + 1);
-			reader.setVisible(false);
 			rm.addReader(reader);
 		}
 		rm.initialize(this.getFactory());
@@ -731,184 +633,10 @@ public abstract class AbstractQuery extends BaseImpl
 		return rm;
 	}
 
-	public int getStartRow()
-	{
-		return this.startRow;
-	}
-
-	/**
-	 * 设置从第几条记录开始取值（从1开始计数）
-	 */
-	public void setStartRow(int startRow)
-	{
-		this.startRow = startRow < 1 ? 1 : startRow;
-	}
-
-	public int getMaxRows()
-	{
-		return this.maxRows;
-	}
-
-	/**
-	 * 设置取出几条记录，-1表示取完为止
-	 */
-	public void setMaxRows(int maxRows)
-	{
-		this.maxRows = maxRows < -1 ? -1 : maxRows;
-	}
-
-	public int getTotalCount()
-	{
-		return this.totalCount;
-	}
-
-	public void setTotalCount(int totalCount)
-			throws EternaException
-	{
-		this.setTotalCount(totalCount, null);
-	}
-
-	public void setTotalCount(int totalCount, TotalCountExt ext)
-			throws EternaException
-	{
-		if (this.totalCount < -3)
-		{
-			throw new EternaException("Error total count:" + totalCount + ".");
-		}
-		this.totalCount = totalCount;
-		this.totalCountExt = ext;
-	}
-
-	public TotalCountExt getTotalCountExt()
-	{
-		return this.totalCountExt;
-	}
-
 	public void execute(Connection conn)
 			throws EternaException, SQLException
 	{
 		this.executeQuery(conn);
-	}
-
-	public ResultIterator executeQuery(Connection conn)
-			throws EternaException, SQLException
-	{
-		long startTime = TimeLogger.getTime();
-		QueryHelper qh = this.getQueryHelper(conn);
-		Statement stmt = null;
-		ResultSet rs = null;
-		Throwable exception = null;
-		ResultIterator result = null;
-		try
-		{
-			if (this.hasActiveParam())
-			{
-				PreparedStatement temp;
-				if (this.isForwardOnly())
-				{
-					temp = conn.prepareStatement(this.getPreparedSQL());
-				}
-				else
-				{
-					temp = conn.prepareStatement(this.getPreparedSQL(),
-							ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-				}
-				stmt = temp;
-				this.prepareValues(temp);
-				rs = temp.executeQuery();
-			}
-			else
-			{
-				if (this.isForwardOnly())
-				{
-					stmt = conn.createStatement();
-				}
-				else
-				{
-					stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY);
-				}
-				rs = stmt.executeQuery(this.getPreparedSQL());
-			}
-			ResultReaderManager readerManager = this.getReaderManager0(rs);
-			List readerList = readerManager.getReaderList(this.getPermission0());
-			List tmpList = qh.readResults(rs, readerList);
-			ResultIteratorImpl ritr = new ResultIteratorImpl(readerManager, readerList, this);
-			ListIterator litr = tmpList.listIterator();
-			int rowNum = 1;
-			while (litr.hasNext())
-			{
-				ResultRow row = this.readResults(readerManager, (Object[]) litr.next(), ritr, rowNum++);
-				litr.set(row);
-			}
-			ritr.setResult(tmpList);
-			ritr.realRecordCount = qh.getRealRecordCount();
-			ritr.recordCount = qh.getRecordCount();
-			ritr.realRecordCountAvailable = qh.isRealRecordCountAvailable();
-			ritr.hasMoreRecord = qh.isHasMoreRecord();
-			if (qh.needCount())
-			{
-				rs.close();
-				stmt.close();
-				rs = null;
-				stmt = null;
-				if (this.countQuery == null)
-				{
-					this.countQuery = new CountQueryAdapter(this);
-				}
-				int count = this.countQuery.executeQuery(conn).nextRow().getInt(1);
-				ritr.realRecordCount = count;
-				ritr.realRecordCountAvailable = true;
-			}
-			result = ritr;
-			return ritr;
-		}
-		catch (EternaException ex)
-		{
-			exception = ex;
-			throw ex;
-		}
-		catch (SQLException ex)
-		{
-			exception = ex;
-			throw ex;
-		}
-		catch (RuntimeException ex)
-		{
-			exception = ex;
-			throw ex;
-		}
-		catch (Error ex)
-		{
-			exception = ex;
-			throw ex;
-		}
-		finally
-		{
-			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
-			{
-				if (result != null)
-				{
-					AppData data = AppData.getCurrentData();
-					if (data.getLogType() > 0)
-					{
-						Element nowNode = data.getCurrentNode();
-						if (nowNode != null)
-						{
-							AppDataLogExecute.printObject(nowNode.addElement(this.getType() + "-result"), result);
-						}
-					}
-				}
-			}
-			if (rs != null)
-			{
-				rs.close();
-			}
-			if (stmt != null)
-			{
-				stmt.close();
-			}
-		}
 	}
 
 	protected static Object[] getResults(Query query, List readerList, ResultSet rs)
@@ -957,97 +685,31 @@ public abstract class AbstractQuery extends BaseImpl
 			ResultIterator resultIterator, int rowNum)
 			throws EternaException, SQLException;
 
-	private static class ResultIteratorImpl extends AbstractResultIterator
-			implements ResultIterator
-	{
-		private int realRecordCount;
-		private int recordCount;
-		private boolean realRecordCountAvailable;
-		private boolean hasMoreRecord;
+}
 
-		public ResultIteratorImpl(ResultReaderManager readarManager, List readerList, Query query)
-		{
-			super(readerList);
-			this.readerManager = readarManager;
-			this.query = query;
-		}
-
-		private ResultIteratorImpl()
-		{
-		}
-
-		public void setResult(List result)
-		{
-			this.result = result;
-			this.resultItr = this.result.iterator();
-		}
-
-		public int getRealRecordCount()
-		{
-			return this.realRecordCount;
-		}
-
-		public int getRecordCount()
-		{
-			return this.recordCount;
-		}
-
-		public boolean isRealRecordCountAvailable()
-		{
-			return this.realRecordCountAvailable;
-		}
-
-		public boolean isHasMoreRecord()
-		{
-			return this.hasMoreRecord;
-		}
-
-		public ResultIterator copy()
-				throws EternaException
-		{
-			ResultIteratorImpl ritr = new ResultIteratorImpl();
-			this.copy(ritr);
-			return ritr;
-		}
-
-		protected void copy(ResultIterator copyObj)
-				throws EternaException
-		{
-			super.copy(copyObj);
-			ResultIteratorImpl ritr = (ResultIteratorImpl) copyObj;
-			ritr.realRecordCount = this.realRecordCount;
-			ritr.recordCount = this.recordCount;
-			ritr.realRecordCountAvailable = this.realRecordCountAvailable;
-			ritr.hasMoreRecord = this.hasMoreRecord;
-		}
-
-	}
+/**
+ * 存放查询结果中某列的信息.
+ */
+class ColumnInfo
+{
+	/**
+	 * 查询结果中的列名.
+	 */
+	public final String colName;
+	/**
+	 * 类型id.
+	 */
+	public final int typeId;
 
 	/**
-	 * 存放查询结果中某列的信息.
+	 * 此列是否已在reader中存在.
 	 */
-	static class ColumnInfo
+	public boolean exists;
+
+	public ColumnInfo(String colName, int typeId)
 	{
-		/**
-		 * 查询结果中的列名.
-		 */
-		public final String colName;
-		/**
-		 * 类型id.
-		 */
-		public final int typeId;
-
-		/**
-		 * 此列是否已在reader中存在.
-		 */
-		public boolean exists;
-
-		public ColumnInfo(String colName, int typeId)
-		{
-			this.colName = colName;
-			this.typeId = typeId;
-		}
-
+		this.colName = colName;
+		this.typeId = typeId;
 	}
 
 }

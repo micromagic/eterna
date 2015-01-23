@@ -47,8 +47,8 @@ public class IntegerReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		int intValue = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getInt(this.columnIndex) : rs.getInt(this.columnName);
+		int intValue = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getInt(this.columnIndex) : rs.getInt(this.alias);
 		return rs.wasNull() ? null : new Integer(intValue);
 	}
 

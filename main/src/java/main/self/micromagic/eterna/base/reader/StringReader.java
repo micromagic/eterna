@@ -46,8 +46,8 @@ public class StringReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrName || this.transIndex(rs) ?
-				rs.getString(this.columnIndex) : rs.getString(this.columnName);
+		return this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getString(this.columnIndex) : rs.getString(this.alias);
 	}
 
 }

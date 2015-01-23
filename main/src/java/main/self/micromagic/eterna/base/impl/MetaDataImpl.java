@@ -22,14 +22,16 @@ import java.util.List;
 import java.util.Map;
 
 import self.micromagic.eterna.base.Entity;
+import self.micromagic.eterna.base.EntityItem;
 import self.micromagic.eterna.base.Query;
 import self.micromagic.eterna.base.ResultMetaData;
 import self.micromagic.eterna.base.ResultReader;
 import self.micromagic.eterna.base.ResultReaderManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.Utility;
 
-public class ResultMetaDataImpl
+public class MetaDataImpl
 		implements ResultMetaData
 {
 	private String name;
@@ -39,7 +41,7 @@ public class ResultMetaDataImpl
 	private Map nameToIndexMap;
 	private boolean colNameSensitive = true;
 
-	public ResultMetaDataImpl(List readerList, ResultReaderManager readerManager, Query query)
+	public MetaDataImpl(List readerList, ResultReaderManager readerManager, Query query)
 			throws EternaException
 	{
 		this.query = query;
@@ -75,7 +77,7 @@ public class ResultMetaDataImpl
 		}
 		else if (this.readerManager != null)
 		{
-			this.name = "reader manager [" + this.readerManager.getName() + "]";
+			this.name = "reader-manager [" + this.readerManager.getName() + "]";
 		}
 		else
 		{
@@ -88,8 +90,40 @@ public class ResultMetaDataImpl
 	 */
 	public static ResultReaderManager enrity2ReaderManager(Entity entity)
 	{
-		return null;
+		if (entity == null)
+		{
+			return null;
+		}
+		EternaFactory factory = entity.getFactory();
+		Map rrmCache = (Map) factory.getFactoryContainer().getAttribute(CATTR_RRM);
+		if (rrmCache == null)
+		{
+			rrmCache = new HashMap();
+			factory.getFactoryContainer().setAttribute(CATTR_RRM, rrmCache);
+		}
+		ResultReaderManager rrm = (ResultReaderManager) rrmCache.get(entity.getName());
+		if (rrm != null)
+		{
+			return rrm;
+		}
+		ReaderManagerImpl temp = new ReaderManagerImpl();
+		temp.setName("<entity>/" + entity.getName());
+		Iterator itr = entity.getItemIterator();
+		int count = entity.getItemCount();
+		for (int i = 0; i < count; i++)
+		{
+			EntityItem item = (EntityItem) itr.next();
+			temp.addReader(ReaderManagerImpl.item2Reader(item, null));
+		}
+		temp.initialize(factory);
+		temp.lock();
+		rrmCache.put(entity.getName(), temp);
+		return temp;
 	}
+	/**
+	 * 在factory容器的属性中存放自动创建的ResultReaderManager的缓存的键值.
+	 */
+	public static final String CATTR_RRM = "__f_c_attr.ResultReaderManager";
 
 	public Query getQuery()
 	{
@@ -109,12 +143,6 @@ public class ResultMetaDataImpl
 	public int getColumnCount()
 	{
 		return this.readers.length;
-	}
-
-	public int getColumnWidth(int column)
-			throws EternaException
-	{
-		return this.readers[column - 1].getWidth();
 	}
 
 	public String getColumnCaption(int column)

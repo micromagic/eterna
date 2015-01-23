@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project basedir="." default="build" name="publish_jar">
+	<property environment="env" />
+	<property name="jdkv1.4" value="../java" />
+	<property name="jdkv1.5" value="." />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="encoding" value="UTF-8" />
+	<property name="out_1.4" value="../../out/1.4" />
+	<property name="out" value="../../out/1.5" />
+	<property name="out_tmp" value="../../out/1.5_tmp" />
+	<property name="out_src" value="../../out/1.5_src" />
+	<path id="lib">
+		<fileset dir="../../pub/libs">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="../../pub/libs/ext">
+			<include name="*.jar" />
+			<exclude name="ant.jar" />
+		</fileset>
+	</path>
+	<path id="lib_1.5">
+		<path refid="lib" />
+		<dirset dir="${out_1.4}">
+		</dirset>
+	</path>
+
+	<target name="cleanall">
+	</target>
+	
+	<target name="init.1.5">
+		<delete dir="${out}" />
+		<mkdir dir="${out}" />
+		<delete dir="${out_tmp}" />
+		<mkdir dir="${out_tmp}" />
+		<copy includeemptydirs="false" todir="${out}">
+			<fileset dir="${jdkv1.5}/main">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="${out}">
+			<fileset dir="${jdkv1.4}/main">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target depends="init.1.5" name="build.1.5">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${out_tmp}" 
+				encoding="${encoding}" source="1.4" target="1.5" includeantruntime="on">
+			<src path="${jdkv1.4}/main" />
+			<classpath refid="lib" />
+		</javac>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${out}" 
+				encoding="${encoding}" source="1.5" target="1.5" includeantruntime="on">
+			<src path="${jdkv1.5}/main" />
+			<classpath refid="lib_1.5" />
+		</javac>
+		<copy includeemptydirs="false" todir="${out_1.4}">
+			<fileset dir="${out}">
+				<include name="**/*.class" />
+				<exclude name="**/self/micromagic/util/*.class" />
+				<exclude name="**/self/micromagic/util/annotation/*.class" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="${out}">
+			<fileset dir="${out_tmp}">
+				<include name="**/*.class" />
+			</fileset>
+		</copy>
+		<delete dir="${out_tmp}" />
+	</target>
+	<target name="init.1.5_src">
+		<delete dir="${out_src}" />
+		<mkdir dir="${out_src}" />
+		<copy includeemptydirs="false" todir="${out_src}">
+			<fileset dir="${jdkv1.5}/main">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="${out_src}">
+			<fileset dir="${jdkv1.4}/main">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target depends="init.1.5_src,build.1.5" name="build"></target>
+
+</project>

@@ -123,6 +123,16 @@ public class AttrBinder
 		{
 			// $element
 			ag = new ElementGetter();
+			endPos = ParseRule.findItemEnd(config, position);
+			if (name != null && (sFlag == -1 || sFlag > endPos))
+			{
+				// $element必须设置绑定的属性名
+				throw new ParseException("Error config [" + config + "] for AttrBinder.");
+			}
+			else if (name != null)
+			{
+				name.setString(config.substring(sFlag + 1, endPos).trim());
+			}
 		}
 		else
 		{

@@ -61,7 +61,7 @@ public class ReaderManager
 		Class c = (Class) ReaderManager.typeClassMap.get(type);
 		if (c == null)
 		{
-			throw new EternaException("Can't create [ResultReader] type:" + type + ".");
+			throw new EternaException("Can't create ResultReader type [" + type + "].");
 		}
 		return ReaderManager.createReader(c, name);
 	}
@@ -76,7 +76,7 @@ public class ReaderManager
 		if (!ResultReader.class.isAssignableFrom(type))
 		{
 			throw new EternaException(ClassGenerator.getClassName(type)
-					+ " is not instance of " + ClassGenerator.getClassName(ObjectReader.class));
+					+ " is not instance of " + ClassGenerator.getClassName(ResultReader.class));
 		}
 		try
 		{
@@ -85,9 +85,9 @@ public class ReaderManager
 		}
 		catch (Exception ex)
 		{
-			Tool.log.warn("createReader:" + name, ex);
-			throw new EternaException("Can't create [ResultReader] class:"
-					+ ClassGenerator.getClassName(type) + ".");
+			Tool.log.warn("createReader [" + name + "]", ex);
+			throw new EternaException("Can't create ResultReader class ["
+					+ ClassGenerator.getClassName(type) + "].");
 		}
 	}
 

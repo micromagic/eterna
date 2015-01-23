@@ -46,8 +46,8 @@ public class BytesReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrName || this.transIndex(rs) ?
-				rs.getBytes(this.columnIndex): rs.getBytes(this.columnName);
+		return this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getBytes(this.columnIndex): rs.getBytes(this.alias);
 	}
 
 }

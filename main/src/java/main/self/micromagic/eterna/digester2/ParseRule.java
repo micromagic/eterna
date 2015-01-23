@@ -89,6 +89,10 @@ public class ParseRule
 		//System.out.println(msg);
 		if (element.getName().equals(this.nodeName))
 		{
+			if (this.nsPrefix == null)
+			{
+				return true;
+			}
 			return this.nsPrefix.equals(element.getNamespacePrefix());
 		}
 		return false;
@@ -115,6 +119,11 @@ public class ParseRule
 			{
 				this.nodeName = pattern.substring(index + 1);
 				this.nsPrefix = pattern.substring(0, index);
+				if ("*".equals(this.nsPrefix))
+				{
+					// "*"表示匹配任意命名空间.
+					this.nsPrefix = null;
+				}
 			}
 		}
 	}

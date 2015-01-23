@@ -33,6 +33,11 @@ log:{$factory.attribute}
 sub:{attribute}
 
 
+## attributes
+attributes
+sub:{attribute}
+
+
 ## attribute
 attribute
 log:{$}
@@ -41,7 +46,7 @@ method:{setAttribute,name,$body(attr=value,i=1)}
 
 ## objs
 objs
-sub:{query,update,format,prepare}
+sub:{query,update,format,prepare,entity,dataPrinter}
 
 
 ## format
@@ -62,6 +67,31 @@ create:{generator,${prepare}}
 attr:{name,type}
 sub:{attribute}
 stack:{registerObject,n:0,g:1}
+
+
+## entity
+entity
+same:{name}
+log:{name}
+create:{generator,${entity}}
+attr:{name,order(m=0,i=0)}
+sub:{attributes,item,entityRef}
+stack:{registerObject,n:0,g:1}
+
+
+## item
+item
+log:{$}
+create:{generator,${entityItem}}
+attr:{name,colName(m=0):columnName,type(m=0,i=0),caption(m=0),permission(m=0)}
+sub:{attribute}
+stack:{addItem,n:0,g:1}
+
+
+## entityRef
+entity-ref
+${entityRefConfig}
+stack:{addEntityRef,n:0,g:0}
 
 
 ## query
@@ -86,8 +116,14 @@ stack:{registerObject,n:0,g:0}
 
 ## readers
 readers
-attr:{baseReaderManager(m=0):readerManagerName,readerOrder(m=0,i=0)}
-sub:{reader}
+attr:{order(m=0,i=0):readerOrder}
+sub:{reader,entityRefReader}
+
+
+## entityRefReader
+entity-ref
+${entityRefConfig}
+stack:{addReaderEntityRef,n:0,g:0}
 
 
 ## reader
@@ -95,9 +131,8 @@ reader
 log:{$}
 create:{generator,${reader}}
 attr:{
-	name,colName(m=0):columnName,colIndex(m=0,i=0):columnIndex,format(m=0):formatName,
-	orderName(m=0),caption(m=0),width(m=0,i=0),permissions(m=0),htmlFilter(d=true,i=0),
-	type(m=0),visible(d=true,i=0)
+	name,alias(m=0),colIndex(m=0,i=0):columnIndex,format(m=0):formatName,
+	colName(m=0):columnName,caption(m=0),permissions(m=0),type(m=0,i=0)
 }
 sub:{attribute}
 stack:{addResultReader,n:0,g:1}
@@ -105,15 +140,22 @@ stack:{addResultReader,n:0,g:1}
 
 ## parameters
 parameters
-sub:{parameter}
+sub:{parameter,entityRef}
 
 
 ## parameter
 parameter
 log:{$}
 create:{generator,${parameter}}
-attr:{name,colName(m=0):columnName,type(m=0):paramType,prepare(m=0):prepareName}
+attr:{name,colName(m=0):columnName,type(m=0,i=0):paramType,prepare(m=0):prepareName}
 sub:{attribute}
 stack:{addParameter,n:0,g:0}
 
 
+## dataPrinter
+data-printer
+same:{name}
+log:{name}
+create:{generator}
+attr:{name}
+stack:{registerObject,n:0,g:0}

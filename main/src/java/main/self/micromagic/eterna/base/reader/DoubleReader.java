@@ -47,8 +47,8 @@ public class DoubleReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		double doubleValue = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getDouble(this.columnIndex) : rs.getDouble(this.columnName);
+		double doubleValue = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getDouble(this.columnIndex) : rs.getDouble(this.alias);
 		return rs.wasNull() ? null : new Double(doubleValue);
 	}
 

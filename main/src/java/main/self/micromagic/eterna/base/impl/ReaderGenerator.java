@@ -26,42 +26,39 @@ public class ReaderGenerator extends AbstractGenerator
 {
 	private String formatName;
 	private String type;
-	private String orderName;
+	private String columnName;
 	private String permissions;
-	private boolean htmlFilter = true;
-	private boolean visible = true;
 
-	private int width = -1;
 	private String caption;
 
-	private String columnName;
+	private String alias;
 	private int columnIndex = -1;
 	protected boolean useIndexOrName;
 
-	public void setOrderName(String orderName)
+	public void setColumnName(String columnName)
 	{
-		this.orderName = orderName;
+		this.columnName = columnName;
 	}
 
-	public void setColumnName(String columnName)
+	public void setAlias(String alias)
 			throws EternaException
 	{
 		if (this.columnIndex != -1)
 		{
 			throw new EternaException(
-					"Can't set the attribute 'colName' when given the attribute 'colIndex'.");
+					"Can't set the attribute 'alias' when given the attribute 'colIndex'.");
 		}
-		this.columnName = columnName;
+		this.alias = alias;
 		this.useIndexOrName = false;
 	}
 
 	public void setColumnIndex(int columnIndex)
 			throws EternaException
 	{
-		if (this.columnName != null)
+		if (this.alias != null)
 		{
 			throw new EternaException(
-					"Can't set the attribute 'colIndex' when given the attribute 'colName'.");
+					"Can't set the attribute 'colIndex' when given the attribute 'alias'.");
 		}
 		this.columnIndex = columnIndex;
 		this.useIndexOrName = true;
@@ -77,24 +74,9 @@ public class ReaderGenerator extends AbstractGenerator
 		this.permissions = permissions;
 	}
 
-	public void setHtmlFilter(boolean filter)
-	{
-		this.htmlFilter = filter;
-	}
-
-	public void setVisible(boolean visible)
-	{
-		this.visible = visible;
-	}
-
 	public void setType(String type)
 	{
 		this.type = type;
-	}
-
-	public void setWidth(int width)
-	{
-		this.width = width;
 	}
 
 	public void setCaption(String caption)
@@ -112,19 +94,15 @@ public class ReaderGenerator extends AbstractGenerator
 			throws EternaException
 	{
 		this.type = this.type == null ? "Object" : this.type;
-		ResultReader tmpReader = ReaderManager.createReader(this.type, this.name);
-		if (!(tmpReader instanceof ObjectReader))
-		{
-			return tmpReader;
-		}
-		ObjectReader reader = (ObjectReader) tmpReader;
+		ObjectReader reader = (ObjectReader) ReaderManager.createReader(
+				this.type, this.name);
 		if (this.formatName != null)
 		{
 			reader.setFormatName(this.formatName);
 		}
-		if (this.orderName != null)
+		if (this.columnName != null)
 		{
-			reader.setOrderName(this.orderName);
+			reader.setColumnName(this.columnName);
 		}
 		if (this.permissions != null)
 		{
@@ -134,9 +112,6 @@ public class ReaderGenerator extends AbstractGenerator
 		{
 			reader.setCaption(this.caption);
 		}
-		reader.setWidth(this.width);
-		reader.setHtmlFilter(this.htmlFilter);
-		reader.setVisible(this.visible);
 		reader.setAttributes(this.attributes);
 		if (this.useIndexOrName)
 		{
@@ -144,8 +119,8 @@ public class ReaderGenerator extends AbstractGenerator
 		}
 		else
 		{
-			this.columnName = this.columnName == null ? this.name : this.columnName;
-			reader.setColumnName(this.columnName);
+			this.alias = this.alias == null ? this.name : this.alias;
+			reader.setAlias(this.alias);
 		}
 		return reader;
 	}

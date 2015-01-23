@@ -47,8 +47,8 @@ public class LongReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		long longValue = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getLong(this.columnIndex) : rs.getLong(this.columnName);
+		long longValue = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getLong(this.columnIndex) : rs.getLong(this.alias);
 		return rs.wasNull() ? null : new Long(longValue);
 	}
 

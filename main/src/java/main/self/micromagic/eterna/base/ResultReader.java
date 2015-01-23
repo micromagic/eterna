@@ -16,12 +16,12 @@
 
 package self.micromagic.eterna.base;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.CallableStatement;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 /**
@@ -51,13 +51,6 @@ public interface ResultReader
 	int getType() throws EternaException;
 
 	/**
-	 * 是否Type的类型为TYPE_IGNORE.
-	 * 如果为true则表示忽略此ResultReader, 可以将其删除, 这样可以在ResultReaderManager
-	 * 继承时去掉父对象中不需要的ResultReader.
-	 */
-	boolean isIgnore() throws EternaException;
-
-	/**
 	 * 获取format的名称.
 	 */
 	String getFormatName() throws EternaException;
@@ -73,17 +66,17 @@ public interface ResultReader
 	String getName() throws EternaException;
 
 	/**
-	 * 获得作为排序列, 即出现在"ORDER BY"之后的列名.
+	 * 获得数据库的列列名, 用于生成在"ORDER BY"之后出现的列名.
 	 * 在多个表时, 也可以是"[表名].[列名]"的形式.
 	 */
-	String getOrderName() throws EternaException;
+	String getColumnName() throws EternaException;
 
 	/**
-	 * 读取数据时, 读取的列名. <p>
+	 * 读取数据时, 读取的列别名. <p>
 	 * 该方法和{@link #getColumnIndex}方法只有一个有效, 当索引值有效
-	 * 时，返回的列名为null.
+	 * 时，返回的列别名为null.
 	 */
-	String getColumnName() throws EternaException;
+	String getAlias() throws EternaException;
 
 	/**
 	 * 读取数据时, 读取的列索引. <p>
@@ -91,16 +84,6 @@ public interface ResultReader
 	 * 返回的索引值为-1.
 	 */
 	int getColumnIndex() throws EternaException;
-
-	/**
-	 * 在向html页面输出时, 是否需要进行特殊标签的过滤.
-	 */
-	boolean needHtmlFilter() throws EternaException;
-
-	/**
-	 * 该ResultReader是否可见.
-	 */
-	boolean isVisible() throws EternaException;
 
 	/**
 	 * 该ResultReader是否有效.
@@ -112,9 +95,9 @@ public interface ResultReader
 	boolean isValid() throws EternaException;
 
 	/**
-	 * 判断读取数据时, 是否是通过列名来读取.
+	 * 判断读取数据时, 是否是通过列别名来读取.
 	 */
-	boolean isUseColumnName() throws EternaException;
+	boolean isUseAlias() throws EternaException;
 
 	/**
 	 * 判断读取数据时, 是否是通过索引值来读取.
@@ -144,17 +127,6 @@ public interface ResultReader
 	 * 获取该列的标题.
 	 */
 	String getCaption() throws EternaException;
-
-	/**
-	 * 获取填充完的标题. <p>
-	 * 如果标题为空, 则会使用列名来代替.
-	 */
-	String getFilledCaption() throws EternaException;
-
-	/**
-	 * 获取该列显示时的宽度.
-	 */
-	int getWidth() throws EternaException;
 
 	/**
 	 * 从<code>ResultSet</code>对象中读取数据, 并以相应的对象返回.

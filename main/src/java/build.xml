@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<project basedir="." default="build" name="publish_jar">
+	<property environment="env" />
+	<property name="jdkv1.4" value="." />
+	<property name="jdkv1.5" value="../jdk1.5" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="encoding" value="UTF-8" />
+	<property name="out" value="../../out/1.4" />
+	<property name="out_src" value="../../out/1.4_src" />
+	<path id="lib">
+		<fileset dir="../../pub/libs">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="../../pub/libs/ext">
+			<include name="*.jar" />
+			<exclude name="ant.jar" />
+		</fileset>
+	</path>
+
+	<target name="cleanall">
+	</target>
+	
+	<target name="init.1.4">
+		<delete dir="${out}" />
+		<mkdir dir="${out}" />
+		<copy includeemptydirs="false" todir="${out}">
+			<fileset dir="${jdkv1.4}/main">
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target depends="init.1.4" name="build.1.4">
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${out}" 
+				encoding="${encoding}" source="1.4" target="1.4" includeantruntime="on">
+			<src path="${jdkv1.4}/main" />
+			<classpath refid="lib" />
+		</javac>
+	</target>
+	<target name="init.1.4_src">
+		<delete dir="${out_src}" />
+		<mkdir dir="${out_src}" />
+		<copy includeemptydirs="false" todir="${out_src}">
+			<fileset dir="${jdkv1.4}/main">
+				<include name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="${out_src}">
+			<fileset dir="${jdkv1.5}/main">
+				<include name="**/*.java" />
+				<exclude name="**/self/micromagic/util/*.java" />
+				<exclude name="**/self/micromagic/util/annotation/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target depends="init.1.4_src,build.1.4" name="build"></target>
+
+</project>

@@ -262,14 +262,6 @@ public interface EternaFactory extends Factory
 	DataPrinter getDataPrinter(String name) throws EternaException;
 
 	/**
-	 * 设置一个数据集输出器.
-	 *
-	 * @param name            数据集输出器的名称.
-	 * @param dataPrinter     要设置的数据集输出器.
-	 */
-	void addDataPrinter(String name, DataPrinter dataPrinter) throws EternaException;
-
-	/**
 	 * 获取一个界面中的函数对象.
 	 */
 	Function getFunction(String name) throws EternaException;

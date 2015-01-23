@@ -36,6 +36,7 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.LongConverter;
 
 /**
  *
@@ -76,9 +77,11 @@ public class FactoryContainerImpl
 		ContainerManager.setCurrentContainer(this, false);
 		try
 		{
+			this.destroy();
 			ParseException.clearContextInfo();
 			SameCheck.clearDealedMap();
 			this.resources.clear();
+			this.readReloadTime();
 			this.initializeXML();
 			Factory factory = ContainerManager.getCurrentFactory();
 			Factory shareFactory = this.shareContainer == null ?
@@ -111,6 +114,11 @@ public class FactoryContainerImpl
 			SameCheck.clearDealedMap();
 			ParseException.clearContextInfo();
 		}
+	}
+
+	public boolean isInitialized()
+	{
+		return this.initialized;
 	}
 	private boolean initialized;
 
@@ -278,10 +286,16 @@ public class FactoryContainerImpl
 	private final List listeners = new ArrayList(2);
 
 	/**
-	 * 设置最小重新载入配置资源的时间间隔.
+	 * 读取最小重新载入配置资源的时间间隔.
 	 */
-	void setReloadTime(long time)
+	private void readReloadTime()
 	{
+		Object tmpTime = this.getAttribute(RELOAD_TIME_FLAG);
+		if (tmpTime == null)
+		{
+			this.reloadTime = -1L;
+		}
+		long time = (new LongConverter()).convertToLong(tmpTime);
 		if (time >= 0L)
 		{
 			this.reloadTime = time < 200L ? 200L : time;
@@ -309,8 +323,15 @@ public class FactoryContainerImpl
 		}
 		if (!this.initialized)
 		{
-			throw new EternaException("The factory container ["
-					+ this.id + "] hasn't initialized.");
+			synchronized (this)
+			{
+				if (!this.initialized)
+				{
+					// 同步状态下再次检查是否已初始化
+					throw new EternaException("The factory container ["
+							+ this.id + "] hasn't initialized.");
+				}
+			}
 		}
 		return this.factory;
 	}

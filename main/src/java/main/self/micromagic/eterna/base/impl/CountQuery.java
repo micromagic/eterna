@@ -52,7 +52,7 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.logging.TimeLogger;
 
-class CountQueryAdapter
+class CountQuery
 		implements Query
 {
 	private final Query query;
@@ -61,7 +61,7 @@ class CountQueryAdapter
 	private String cacheSQL;
 	private String oldSQL;
 
-	public CountQueryAdapter(Query query)
+	public CountQuery(Query query)
 			throws EternaException
 	{
 		this.query = query;
@@ -69,7 +69,7 @@ class CountQueryAdapter
 		ObjectReader tmpReader
 				= (ObjectReader) ReaderManager.createReader("int", "theCount");
 		tmpReader.setColumnIndex(1);
-		ResultReaderManagerImpl temp = new ResultReaderManagerImpl();
+		ReaderManagerImpl temp = new ReaderManagerImpl();
 		temp.setName("<readers>/" + this.name);
 		temp.addReader(tmpReader);
 		temp.initialize(query.getFactory());
@@ -194,7 +194,7 @@ class CountQueryAdapter
 	public ResultReaderManager getReaderManager()
 			throws EternaException
 	{
-		return this.readerManager.copy(null);
+		return this.readerManager.copy();
 	}
 
 	public void prepareValues(PreparedStatement stmt)

@@ -57,8 +57,8 @@ public class StreamReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		InputStream ins = this.useIndexOrName || this.transIndex(rs) ?
-				rs.getBinaryStream(this.columnIndex) : rs.getBinaryStream(this.columnName);
+		InputStream ins = this.useIndexOrAlias || this.transIndex(rs) ?
+				rs.getBinaryStream(this.columnIndex) : rs.getBinaryStream(this.alias);
 		if (ins == null)
 		{
 			return null;

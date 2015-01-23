@@ -26,10 +26,10 @@ import java.util.List;
 import java.util.Map;
 
 import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.base.EntityRef;
 import self.micromagic.eterna.base.Parameter;
 import self.micromagic.eterna.base.ParameterGenerator;
 import self.micromagic.eterna.base.PreparedStatementWrap;
-import self.micromagic.eterna.base.SQLParameterGroup;
 import self.micromagic.eterna.base.preparer.PreparedStatementWrapImpl;
 import self.micromagic.eterna.base.preparer.PreparerManager;
 import self.micromagic.eterna.base.preparer.ValuePreparer;
@@ -48,10 +48,11 @@ public abstract class AbstractBase extends AbstractGenerator
 	private String preparedSQL;
 	private BaseManager sqlManager;
 	private PreparerManager preparerManager;
-	private SQLParameterGroup paramGroup;
+	private ParameterGroup paramGroup;
 
 	private Map parameterNameMap;
 	private Parameter[] parameterArray;
+	private List allParamList;
 
 	protected boolean initialized;
 
@@ -134,6 +135,7 @@ public abstract class AbstractBase extends AbstractGenerator
 		other.paramGroup = this.paramGroup;
 		other.parameterNameMap = this.parameterNameMap;
 		other.parameterArray = this.parameterArray;
+		other.allParamList = this.allParamList;
 		other.initialized = this.initialized;
 
 		other.attributes = this.attributes;
@@ -314,6 +316,12 @@ public abstract class AbstractBase extends AbstractGenerator
 		this.preparerManager.prepareValues(stmtWrap);
 	}
 
+	public Iterator getParameterIteratorWithFlag()
+			throws EternaException
+	{
+		return new PreFetchIterator(this.allParamList.iterator(), false);
+	}
+
 	public Iterator getParameterIterator()
 			throws EternaException
 	{
@@ -360,31 +368,24 @@ public abstract class AbstractBase extends AbstractGenerator
 	public void addParameter(ParameterGenerator paramGenerator)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (this.paramGroup == null)
 		{
-			throw new EternaException(
-					"Can't add parameter in initialized " + this.getType() + " [" + this.getName() + "].");
-		}
-		else if (this.paramGroup == null)
-		{
-			this.paramGroup = new ParameterGroupImpl();
+			this.paramGroup = new ParameterGroup(this.getName(), this.getType());
 		}
 		this.paramGroup.addParameter(paramGenerator);
 	}
 
-	public void addParameterRef(String groupName, String ignoreList)
+	/**
+	 * 添加一个实体的引用.
+	 */
+	public void addEntityRef(EntityRef ref)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (this.paramGroup == null)
 		{
-			throw new EternaException(
-					"Can't add parameter ref in initialized " + this.getType() + " [" + this.getName() + "].");
+			this.paramGroup = new ParameterGroup(this.getName(), this.getType());
 		}
-		else if (this.paramGroup == null)
-		{
-			this.paramGroup = new ParameterGroupImpl();
-		}
-		this.paramGroup.addParameterRef(groupName, ignoreList);
+		this.paramGroup.addEntityRef(ref);
 	}
 
 	protected int getIndexByParameterName(String name)
@@ -419,5 +420,4 @@ public abstract class AbstractBase extends AbstractGenerator
 	}
 
 }
-
 

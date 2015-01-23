@@ -16,29 +16,24 @@
 
 package self.micromagic.eterna.view;
 
-import java.io.Writer;
 import java.io.IOException;
-import java.util.Map;
-import java.util.Iterator;
+import java.io.Writer;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.Iterator;
+import java.util.Map;
 
 import self.micromagic.eterna.base.ResultIterator;
 import self.micromagic.eterna.base.ResultRow;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 
 /**
  * 数据集输出器, 用于将数据集按照一定的格式进行输出.
  * 注: 数据集中不可有自引用的数据.
  */
-public interface DataPrinter
+public interface DataPrinter extends EternaObject
 {
-	/**
-	 * 初始化此数据集输出器.
-	 */
-	public void initialize(EternaFactory factory) throws EternaException;
-
 	/**
 	 * 获取此数据集输出器的名称.
 	 */

@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.share;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,9 +24,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.ObjectRef;
 
+/**
+ * 容器中对象排序的管理器.
+ * 可以通过排序字符串的定义对容器中的对象进行排序.
+ *
+ * 排序的规则是基于关系的排序, 即指定每个关系组中对象的顺序.
+ * 关系组的分隔符为";", 关系组中每个对象名的分隔符为",".
+ * 第一个关系组表示要排列在起始部分的对象, 最后一个关系组表示要排列在
+ * 最后的对象, 中间的关系组表示第二个对象及后面的对象要按顺序排列在
+ * 第一个对象出现的位置之后.
+ * 第一个关系组和最后个关系组可以不设置对象名称, 如果只设置了一个关系组
+ * 其将作为第一个关系组, 而没有最后一个关系组.
+ *
+ * 样例:
+ * 三个关系组
+ * n1,n2,n3;n5,n6,n7,n11,n12,n13;n21,n22
+ * 第一个和最后个关系组没有设置对象名
+ * ;n2,n3,n4;
+ * 只有第一个关系组
+ * n1,n2
+ */
 public class OrderManager
 {
 	private String containerName = "$parent";
@@ -37,6 +57,154 @@ public class OrderManager
 	public OrderManager(String containerName)
 	{
 		this.containerName = "$" + containerName;
+	}
+
+	/**
+	 * 执行一个排序处理.
+	 *
+	 * @param list         需要排序的对象列表
+	 * @param orderConfig  排序的配置
+	 * @param nameHandler  获取对象名称的处理者
+	 * @return  排序后的对象列表
+	 */
+	public static List doOrder(List list, String orderConfig, NameHandler nameHandler)
+	{
+		if (orderConfig == null || list == null)
+		{
+			return list;
+		}
+		LinkedList groupList = new LinkedList();
+		Map nameCache = new HashMap();
+		parseOrderConfig(orderConfig, groupList, nameCache);
+
+		List objGroup = new ArrayList();
+		// 处理第一个分组和最后个分组
+		List lastGroup = null;
+		if (groupList.size() > 0)
+		{
+			List firstList = (List) groupList.removeFirst();
+			if (firstList.size() > 0)
+			{
+				ObjContainer oc = (ObjContainer) firstList.get(0);
+				oc.groupList = null;
+				objGroup.add(firstList);
+			}
+			// 处理最后一个分组
+			if (groupList.size() > 0)
+			{
+				lastGroup = (List) groupList.removeLast();
+				if (lastGroup.size() > 0)
+				{
+					ObjContainer oc = (ObjContainer) lastGroup.get(0);
+					oc.groupList = null;
+				}
+			}
+		}
+
+		// 把对象分组
+		List currentObjs = new ArrayList();
+		objGroup.add(currentObjs);
+		int count = list.size();
+		Iterator itr = list.iterator();
+		for (int i = 0; i < count; i++)
+		{
+			Object tmpObj = itr.next();
+			String oName = nameHandler.getName(tmpObj);
+			ObjContainer oc = (ObjContainer) nameCache.get(oName);
+			if (oc != null)
+			{
+				oc.obj = tmpObj;
+				if (oc.groupList != null)
+				{
+					objGroup.add(oc.groupList);
+					currentObjs = new ArrayList();
+					objGroup.add(currentObjs);
+				}
+			}
+			else
+			{
+				currentObjs.add(tmpObj);
+			}
+		}
+		if (lastGroup != null)
+		{
+			objGroup.add(lastGroup);
+		}
+
+		List result = new ArrayList(list.size());
+		// 将分组完的对象重新排列
+		itr = objGroup.iterator();
+		while (itr.hasNext())
+		{
+			List objList = (List) itr.next();
+			Iterator objItr = objList.iterator();
+			while (objItr.hasNext())
+			{
+				Object tObj = objItr.next();
+				if (tObj instanceof ObjContainer)
+				{
+					ObjContainer oc = (ObjContainer) tObj;
+					if (oc.obj == null)
+					{
+						String msg = "The name [" + oc.name + "] not found, config["
+								+ orderConfig + "].";
+						throw new EternaException(msg);
+					}
+					result.add(oc.obj);
+				}
+				else
+				{
+					result.add(tObj);
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 解析排序配置.
+	 */
+	private static void parseOrderConfig(String orderConfig, List groupList, Map nameCache)
+	{
+		StringTokenizer token = new StringTokenizer(orderConfig, ";,", true);
+		int groupCount = 1;
+		List currentObjs = new ArrayList();
+		groupList.add(currentObjs);
+		while (token.hasMoreTokens())
+		{
+			String str = token.nextToken();
+			if (";".equals(str))
+			{
+				if (groupCount > 1)
+				{
+					if (currentObjs.size() < 2)
+					{
+						String msg = "Error name count [" + currentObjs.size()
+								+ "] in midle group(" + groupCount + "), at least 2. config ["
+								+ orderConfig + "].";
+						throw new EternaException(msg);
+					}
+				}
+				// 需要创建一个新的分组
+				currentObjs = new ArrayList();
+				groupList.add(currentObjs);
+				groupCount++;
+			}
+			else if (!(",".equals(str)))
+			{
+				// 不是名称分隔符, 添加对象名称
+				ObjContainer oc = new ObjContainer(str.trim(),
+						currentObjs.size() == 0 ? currentObjs : null);
+				if (nameCache.containsKey(oc.name))
+				{
+					String msg = "Duplicate name [" + oc.name + "] in config ["
+							+ orderConfig + "].";
+					throw new EternaException(msg);
+				}
+				nameCache.put(oc.name, oc);
+				currentObjs.add(oc);
+			}
+		}
 	}
 
 	public List getOrder(OrderItem item, Object[] containers, String orderStr,
@@ -244,6 +412,15 @@ public class OrderManager
 		}
 	}
 
+	/**
+	 * 获取对象名称的处理者.
+	 */
+	interface NameHandler
+	{
+		String getName(Object obj);
+
+	}
+
 	public static abstract class OrderItem
 	{
 		public final String name;
@@ -265,5 +442,21 @@ public class OrderManager
 				throws EternaException;
 
 	}
+
+}
+
+/**
+ * 存放对象名称和对象的容器.
+ */
+class ObjContainer
+{
+	public ObjContainer(String name, List groupList)
+	{
+		this.name = name;
+		this.groupList = groupList;
+	}
+	public List groupList;
+	public String name;
+	public Object obj;
 
 }

@@ -146,7 +146,10 @@ public class ContainerManager
 				old.destroy();
 			}
 		}
-		container.reInit();
+		if (!container.isInitialized())
+		{
+			container.reInit();
+		}
 		return r;
 	}
 	private static final Map fcCache = new HashMap();

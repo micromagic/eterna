@@ -36,12 +36,11 @@ import self.micromagic.cg.ClassKeyCache;
 import self.micromagic.eterna.base.ResultIterator;
 import self.micromagic.eterna.base.ResultMetaData;
 import self.micromagic.eterna.base.ResultRow;
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.view.DataPrinter;
-import self.micromagic.eterna.view.DataPrinterGenerator;
 import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.util.FormatTool;
 
@@ -49,7 +48,7 @@ import self.micromagic.util.FormatTool;
  * @author micromagic@sina.com
  */
 public class DataPrinterImpl extends AbstractGenerator
-		implements DataPrinter, DataPrinterGenerator
+		implements DataPrinter
 {
 	protected StringCoder stringCoder;
 	protected DateFormat dateFormat = FormatTool.dateFullFormat;
@@ -63,10 +62,15 @@ public class DataPrinterImpl extends AbstractGenerator
 		this.stringCoder = stringCoder;
 	}
 
-	public void initialize(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.stringCoder != null)
+		{
+			return true;
+		}
 		this.stringCoder = factory.getStringCoder();
+		return false;
 	}
 
 	public void printData(Writer out, Map data, boolean hasPreData)
@@ -875,8 +879,8 @@ public class DataPrinterImpl extends AbstractGenerator
 	private static class BeanPrinterImpl
 			implements BeanPrinter
 	{
-		private Field[] fields;
-		private BeanMethodInfo[] methods;
+		private final Field[] fields;
+		private final BeanMethodInfo[] methods;
 
 		public BeanPrinterImpl(Class c)
 		{
