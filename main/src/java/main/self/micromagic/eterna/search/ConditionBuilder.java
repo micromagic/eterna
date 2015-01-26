@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.search;
 
-import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;

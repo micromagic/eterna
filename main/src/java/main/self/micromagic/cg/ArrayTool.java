@@ -25,7 +25,7 @@ import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.converter.ValueConverter;
-import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.dao.ResultRow;
 
 /**
  * 管理数组相关的自动处理代码.

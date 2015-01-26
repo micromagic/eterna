@@ -19,7 +19,7 @@ package self.micromagic.eterna.search;
 import java.sql.Connection;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.base.Query;
+import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.model.AppData;
 
 /**

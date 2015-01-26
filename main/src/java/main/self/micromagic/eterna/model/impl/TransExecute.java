@@ -29,8 +29,8 @@ import java.util.Map;
 import org.apache.commons.collections.iterators.EnumerationIterator;
 import org.dom4j.Element;
 
-import self.micromagic.eterna.base.ResultIterator;
-import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.Execute;

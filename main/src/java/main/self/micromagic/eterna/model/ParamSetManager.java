@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import self.micromagic.eterna.base.Base;
-import self.micromagic.eterna.base.Parameter;
-import self.micromagic.eterna.base.ResultIterator;
-import self.micromagic.eterna.base.ResultRow;
-import self.micromagic.eterna.base.preparer.CreaterManager;
-import self.micromagic.eterna.base.preparer.PreparerManager;
-import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.Parameter;
+import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.ResultRow;
+import self.micromagic.eterna.dao.preparer.CreaterManager;
+import self.micromagic.eterna.dao.preparer.PreparerManager;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
@@ -36,13 +36,13 @@ import self.micromagic.util.StringTool;
 
 public class ParamSetManager
 {
-	private final Base sql;
+	private final Dao sql;
 	private final Parameter[] params;
 	private final boolean[] paramsSetted;
 	private final Object[] paramsValues;
 	private Map paramsCacheValues;
 
-	public ParamSetManager(Base sql)
+	public ParamSetManager(Dao sql)
 			throws EternaException
 	{
 		this.sql = sql;
@@ -65,7 +65,7 @@ public class ParamSetManager
 	/**
 	 * 获取当前参数管理器所管理的SQLAdapter.
 	 */
-	public Base getSQLAdapter()
+	public Dao getSQLAdapter()
 	{
 		return this.sql;
 	}
@@ -88,7 +88,7 @@ public class ParamSetManager
 		this.paramsCacheValues.put(names, values);
 	}
 
-	public static void preparerValue(Base sql, Parameter param, String value)
+	public static void preparerValue(Dao sql, Parameter param, String value)
 			throws EternaException
 	{
 		try
@@ -105,7 +105,7 @@ public class ParamSetManager
 		}
 	}
 
-	public static void preparerValue(Base sql, Parameter param, Object value)
+	public static void preparerValue(Dao sql, Parameter param, Object value)
 			throws EternaException
 	{
 		try
@@ -122,7 +122,7 @@ public class ParamSetManager
 		}
 	}
 
-	private static void doPreparerError(Base sql, Parameter param, Object value,
+	private static void doPreparerError(Dao sql, Parameter param, Object value,
 			Exception ex)
 			throws EternaException
 	{

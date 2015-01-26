@@ -26,9 +26,9 @@ import java.sql.SQLException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 
-import self.micromagic.eterna.base.Query;
-import self.micromagic.eterna.base.ResultIterator;
-import self.micromagic.eterna.base.Update;
+import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;

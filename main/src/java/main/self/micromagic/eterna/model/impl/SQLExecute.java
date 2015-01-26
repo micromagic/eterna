@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.base.Base;
+import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -60,7 +60,7 @@ public abstract class SQLExecute extends AbstractExecute
 		this.binds = tmpList;
 	}
 
-	protected abstract Base getSQL() throws EternaException;
+	protected abstract Dao getSQL() throws EternaException;
 
 	public boolean isPushResult()
 	{

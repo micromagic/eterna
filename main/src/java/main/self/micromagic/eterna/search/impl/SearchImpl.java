@@ -34,10 +34,10 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
 
-import self.micromagic.eterna.base.Query;
-import self.micromagic.eterna.base.ResultIterator;
-import self.micromagic.eterna.base.ResultReaderManager;
-import self.micromagic.eterna.base.preparer.PreparerManager;
+import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.ResultReaderManager;
+import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.ColumnSetting;
 import self.micromagic.eterna.search.ConditionBuilder;

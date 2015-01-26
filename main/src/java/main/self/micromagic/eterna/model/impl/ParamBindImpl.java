@@ -20,10 +20,10 @@ import java.sql.SQLException;
 import java.util.Map;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.base.ResultIterator;
-import self.micromagic.eterna.base.ResultRow;
-import self.micromagic.eterna.base.Base;
-import self.micromagic.eterna.base.Parameter;
+import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.Parameter;
+import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -95,7 +95,7 @@ public class ParamBindImpl extends AbstractGenerator
 			{
 				try
 				{
-					Base sql = ((SQLExecute) execute).getSQL();
+					Dao sql = ((SQLExecute) execute).getSQL();
 					for (int i = 0; i < this.names.length; i++)
 					{
 						Parameter param = sql.getParameter(this.names[i].sqlName);

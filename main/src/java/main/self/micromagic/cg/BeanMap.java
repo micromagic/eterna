@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.ValueConverter;

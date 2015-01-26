@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import self.micromagic.eterna.base.preparer.CreaterManager;
+import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Factory;

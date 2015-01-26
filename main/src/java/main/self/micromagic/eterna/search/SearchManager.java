@@ -18,7 +18,7 @@ package self.micromagic.eterna.search;
 
 import java.util.List;
 
-import self.micromagic.eterna.base.preparer.PreparerManager;
+import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 

@@ -22,9 +22,9 @@ import java.sql.SQLException;
 
 import org.dom4j.Element;
 
-import self.micromagic.eterna.base.Base;
-import self.micromagic.eterna.base.Query;
-import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -55,7 +55,7 @@ public class QueryExecute extends SQLExecute
 		this.queryAdapterIndex = this.factory.findObjectId(this.getName());
 	}
 
-	protected Base getSQL()
+	protected Dao getSQL()
 			throws EternaException
 	{
 		return this.queryAdapterIndex == -1 ? this.factory.createQueryAdapter(this.getName())

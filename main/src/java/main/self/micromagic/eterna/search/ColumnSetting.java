@@ -19,7 +19,7 @@ package self.micromagic.eterna.search;
 import java.sql.Connection;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.base.Query;
+import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.model.AppData;
 
 /**
@@ -40,7 +40,7 @@ public interface ColumnSetting
 	 * @param data      数据, 里面包含了request的parameter, request的attribute,
 	 *                  session的attritute
 	 *
-	 * @see    self.micromagic.eterna.base.ResultReaderManager#setReaderList(String[])
+	 * @see    self.micromagic.eterna.dao.ResultReaderManager#setReaderList(String[])
 	 */
 	String[] getColumnSetting(String columnType, Query query, Search search,
 			boolean first, AppData data, Connection conn)

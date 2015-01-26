@@ -23,8 +23,8 @@ import java.text.DateFormat;
 import java.util.Iterator;
 import java.util.Map;
 
-import self.micromagic.eterna.base.ResultIterator;
-import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaObject;
 

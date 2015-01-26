@@ -31,12 +31,12 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 
-import self.micromagic.eterna.base.Entity;
-import self.micromagic.eterna.base.Query;
-import self.micromagic.eterna.base.ResultFormat;
-import self.micromagic.eterna.base.SpecialLog;
-import self.micromagic.eterna.base.Update;
-import self.micromagic.eterna.base.preparer.PreparerCreater;
+import self.micromagic.eterna.dao.Entity;
+import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultFormat;
+import self.micromagic.eterna.dao.SpecialLog;
+import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.model.ModelAdapter;

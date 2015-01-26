@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.search.impl;
 
-import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.Condition;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;

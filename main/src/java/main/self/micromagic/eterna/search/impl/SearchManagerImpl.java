@@ -31,8 +31,8 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
-import self.micromagic.eterna.base.preparer.PreparerManager;
-import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.dao.preparer.PreparerManager;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.Condition;

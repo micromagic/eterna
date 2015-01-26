@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.base.ResultRow;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;

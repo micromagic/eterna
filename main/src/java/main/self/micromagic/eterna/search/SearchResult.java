@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.base.ResultIterator;
+import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.DataPrinter;
 

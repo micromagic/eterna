@@ -20,9 +20,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
-import self.micromagic.eterna.base.preparer.CreaterManager;
-import self.micromagic.eterna.base.preparer.PreparerCreater;
-import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.dao.preparer.CreaterManager;
+import self.micromagic.eterna.dao.preparer.PreparerCreater;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.security.PermissionSet;

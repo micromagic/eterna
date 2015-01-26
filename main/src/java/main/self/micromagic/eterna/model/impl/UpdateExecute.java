@@ -22,8 +22,8 @@ import java.sql.SQLException;
 
 import org.dom4j.Element;
 
-import self.micromagic.eterna.base.Base;
-import self.micromagic.eterna.base.Update;
+import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -49,7 +49,7 @@ public class UpdateExecute extends SQLExecute
 		this.updateAdapterIndex = this.factory.findObjectId(this.getName());
 	}
 
-	protected Base getSQL()
+	protected Dao getSQL()
 			throws EternaException
 	{
 		return this.updateAdapterIndex == -1 ? this.factory.createUpdateAdapter(this.getName())

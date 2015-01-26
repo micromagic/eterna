@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.search;
 
-import self.micromagic.eterna.base.preparer.ValuePreparer;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
