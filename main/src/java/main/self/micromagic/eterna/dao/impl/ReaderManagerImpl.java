@@ -29,7 +29,7 @@ import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.reader.InvalidReader;
 import self.micromagic.eterna.dao.reader.ObjectReader;
-import self.micromagic.eterna.dao.reader.ReaderManager;
+import self.micromagic.eterna.dao.reader.ReaderFactory;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
@@ -140,6 +140,19 @@ public class ReaderManagerImpl
 					resetNameCache = true;
 				}
 			}
+			if (this.readerOrder != null)
+			{
+				this.readerList = OrderManager.doOrder(this.readerList,
+						this.readerOrder, new ReaderNameHandler());
+				// 重新排序后要重设名称和索引的对应关系
+				this.nameToIndexMap.clear();
+				itr = this.readerList.iterator();
+				for (int i = 0; i < count; i++)
+				{
+					ResultReader reader = (ResultReader) itr.next();
+					this.nameToIndexMap.put(reader.getName(), Utility.createInteger(i));
+				}
+			}
 			// 重新构造allReaderList并进行初始化
 			this.allReaderList.clear();
 			this.allReaderList.addAll(this.readerList);
@@ -196,7 +209,7 @@ public class ReaderManagerImpl
 	public ResultReader getReader(String name)
 			throws EternaException
 	{
-		int index = this.getIndexByName(name, true);
+		int index = this.getReaderIndex(name, true);
 		if (index == -1)
 		{
 			return null;
@@ -316,7 +329,7 @@ public class ReaderManagerImpl
 		}
 	}
 
-	public int getIndexByName(String name, boolean notThrow)
+	public int getReaderIndex(String name, boolean notThrow)
 			throws EternaException
 	{
 		Integer i = (Integer) this.nameToIndexMap.get(
@@ -337,10 +350,10 @@ public class ReaderManagerImpl
 		return i.intValue();
 	}
 
-	public int getIndexByName(String name)
+	public int getReaderIndex(String name)
 			throws EternaException
 	{
-		return this.getIndexByName(name, false);
+		return this.getReaderIndex(name, false);
 	}
 
 	public String getOrderByString()
@@ -487,10 +500,10 @@ public class ReaderManagerImpl
 	 * @param item        需要转换的实体元素
 	 * @param tableAlias  数据库表的别名
 	 */
-	static ResultReader item2Reader(EntityItem item, String tableAlias)
+	public static ResultReader item2Reader(EntityItem item, String tableAlias)
 	{
 		String type = TypeManager.getPureTypeName(item.getType());
-		ObjectReader reader = (ObjectReader) ReaderManager.createReader(
+		ObjectReader reader = (ObjectReader) ReaderFactory.createReader(
 				type, item.getName());
 		if (item.getCaption() != null)
 		{
@@ -510,6 +523,10 @@ public class ReaderManagerImpl
 			if (FORMAT_FLAG.equals(n))
 			{
 				reader.setFormatName((String) item.getAttribute(n));
+			}
+			else if (ALIAS_FLAG.equals(n))
+			{
+				reader.setAlias((String) item.getAttribute(n));
 			}
 			else
 			{
@@ -565,43 +582,12 @@ class ReaderManagerContainer
 
 }
 
-class MyOrderItem extends OrderManager.OrderItem
+class ReaderNameHandler
+		implements OrderManager.NameHandler
 {
-	//private ResultReader reader;
-
-	public MyOrderItem()
+	public String getName(Object obj)
 	{
-		super("", null);
-	}
-
-	protected MyOrderItem(String name, Object obj)
-	{
-		super(name, obj);
-		//this.reader = (ResultReader) obj;
-	}
-
-	public boolean isIgnore()
-			throws EternaException
-	{
-		return false;
-	}
-
-	public OrderManager.OrderItem create(Object obj)
-			throws EternaException
-	{
-		if (obj == null)
-		{
-			return null;
-		}
-		ResultReader reader = (ResultReader) obj;
-		return new MyOrderItem(reader.getName(), reader);
-	}
-
-	public Iterator getOrderItemIterator(Object container)
-			throws EternaException
-	{
-		ResultReaderManager rm = (ResultReaderManager) container;
-		return rm.getReaderList().iterator();
+		return ((ResultReader) obj).getName();
 	}
 
 }

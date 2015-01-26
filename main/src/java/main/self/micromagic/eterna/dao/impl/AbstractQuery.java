@@ -34,7 +34,7 @@ import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.dao.reader.ObjectReader;
-import self.micromagic.eterna.dao.reader.ReaderManager;
+import self.micromagic.eterna.dao.reader.ReaderFactory;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -47,7 +47,7 @@ import self.micromagic.util.converter.BooleanConverter;
 /**
  * @author micromagic@sina.com
  */
-public abstract class AbstractQuery extends DaoImpl
+public abstract class AbstractQuery extends BaseDao
 		implements Query
 {
 	private String readerOrder;
@@ -72,18 +72,9 @@ public abstract class AbstractQuery extends DaoImpl
 	 */
 	private boolean checkDatabaseName = true;
 
-	public boolean initialize(EternaFactory factory)
+	protected void initElse(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
-		{
-			return true;
-		}
-		if (super.initialize(factory))
-		{
-			return true;
-		}
-
 		this.globalReaderManager = new ObjectRef();
 		this.readerManager = this.createTempReaderManager();
 
@@ -92,7 +83,6 @@ public abstract class AbstractQuery extends DaoImpl
 		{
 			this.checkDatabaseName = "true".equalsIgnoreCase(tmp);
 		}
-		return false;
 	}
 
 	public Class getObjectType()
@@ -554,7 +544,7 @@ public abstract class AbstractQuery extends DaoImpl
 				hasColumn = true;
 				// 如果结果中的列不在reader配置中, 则添加
 				String typeName = TypeManager.getTypeName(tmp.typeId);
-				ObjectReader reader = (ObjectReader) ReaderManager.createReader(typeName, tmp.colName);
+				ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, tmp.colName);
 				reader.setColumnIndex(i + 1);
 				tmpRm.addReader(reader);
 				newReaders.add(reader);
@@ -616,7 +606,7 @@ public abstract class AbstractQuery extends DaoImpl
 			temp.put(name, colName);
 			int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
 			String typeName = TypeManager.getTypeName(typeId);
-			ObjectReader reader = (ObjectReader) ReaderManager.createReader(typeName, name);
+			ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, name);
 			reader.setColumnIndex(i + 1);
 			rm.addReader(reader);
 		}

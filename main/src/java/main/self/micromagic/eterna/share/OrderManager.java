@@ -415,7 +415,7 @@ public class OrderManager
 	/**
 	 * 获取对象名称的处理者.
 	 */
-	interface NameHandler
+	public interface NameHandler
 	{
 		String getName(Object obj);
 

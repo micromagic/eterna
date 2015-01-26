@@ -44,7 +44,7 @@ public interface Entity extends EternaObject
 	EternaFactory getFactory() throws EternaException;
 
 	/**
-	 * 获得实体对象的排序方式字符串.
+	 * 获得实体对象元素的排序配置.
 	 */
 	String getOrder() throws EternaException;
 

@@ -29,6 +29,7 @@ import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.UnmodifiableIterator;
@@ -72,6 +73,17 @@ public class EntityImpl extends AbstractGenerator
 				resetNameCache = true;
 			}
 		}
+		if (this.orderConfig != null)
+		{
+			tmp = OrderManager.doOrder(tmp, this.orderConfig, new ItemNameHandler());
+			// 重新排序后要重设名称和索引的对应关系
+			this.nameCache.clear();
+			for (int i = 0; i < count; i++)
+			{
+				EntityItem item = (EntityItem) tmp.get(i);
+				this.nameCache.put(item.getName(), Utility.createInteger(i));
+			}
+		}
 		// 重新构造items并初始化实体元素
 		this.items = new ArrayList(tmp.size());
 		this.items.addAll(tmp);
@@ -91,8 +103,12 @@ public class EntityImpl extends AbstractGenerator
 
 	public String getOrder()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.orderConfig;
+	}
+	private String orderConfig;
+	public void setOrder(String order)
+	{
+		this.orderConfig = order;
 	}
 
 	public int getItemCount()
@@ -286,6 +302,16 @@ class EntityContainer
 	{
 		this.nameCache.put(item.getName(), Utility.createInteger(this.itemList.size()));
 		this.itemList.add(new EntityItemWrapper(item));
+	}
+
+}
+
+class ItemNameHandler
+		implements OrderManager.NameHandler
+{
+	public String getName(Object obj)
+	{
+		return ((EntityItem) obj).getName();
 	}
 
 }

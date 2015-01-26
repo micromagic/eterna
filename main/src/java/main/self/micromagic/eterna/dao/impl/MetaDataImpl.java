@@ -173,7 +173,7 @@ public class MetaDataImpl
 	{
 		if (this.nameToIndexMap == null)
 		{
-			return this.readerManager.getIndexByName(columnName, notThrow);
+			return this.readerManager.getReaderIndex(columnName, notThrow);
 		}
 		else
 		{

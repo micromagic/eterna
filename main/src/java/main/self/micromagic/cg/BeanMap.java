@@ -196,9 +196,9 @@ public class BeanMap extends AbstractMap
 	 */
 	void dealWriteException(Throwable t)
 	{
-      if (this.throwException)
+		if (this.throwException)
 		{
-         if (t instanceof RuntimeException)
+			if (t instanceof RuntimeException)
 			{
 				throw (RuntimeException) t;
 			}

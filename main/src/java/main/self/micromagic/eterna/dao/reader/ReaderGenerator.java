@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.dao.impl;
+package self.micromagic.eterna.dao.reader;
 
 import self.micromagic.eterna.dao.ResultReader;
-import self.micromagic.eterna.dao.reader.ObjectReader;
-import self.micromagic.eterna.dao.reader.ReaderManager;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 
+/**
+ * reader对象的构造器.
+ */
 public class ReaderGenerator extends AbstractGenerator
 {
 	private String formatName;
@@ -94,7 +95,7 @@ public class ReaderGenerator extends AbstractGenerator
 			throws EternaException
 	{
 		this.type = this.type == null ? "Object" : this.type;
-		ObjectReader reader = (ObjectReader) ReaderManager.createReader(
+		ObjectReader reader = (ObjectReader) ReaderFactory.createReader(
 				this.type, this.name);
 		if (this.formatName != null)
 		{

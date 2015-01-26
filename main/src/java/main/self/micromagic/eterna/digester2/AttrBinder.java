@@ -23,6 +23,7 @@ import java.util.Map;
 import org.dom4j.Element;
 
 import self.micromagic.cg.BeanMap;
+import self.micromagic.cg.CellAccessInfo;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
@@ -188,7 +189,14 @@ public class AttrBinder
 			Object value = this.attrs[i].get(element);
 			if (value != null)
 			{
-				bean.put(this.toNames[i], value);
+				CellAccessInfo cai = bean.getCellAccessInfo(this.toNames[i]);
+				if (cai == null || cai.cellDescriptor.getWriteProcesser() == null)
+				{
+					String msg = "Can't set property [" + this.toNames[i]
+							+ "] for class [" + bean.getBean().getClass().getName() + "].";
+					throw new ParseException(msg);
+				}
+				cai.setValue(value);
 			}
 		}
 	}

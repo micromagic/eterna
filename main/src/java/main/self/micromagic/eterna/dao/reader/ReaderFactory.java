@@ -26,9 +26,9 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Tool;
 
 /**
- * @author micromagic@sina.com
+ * reader对象的创建工厂.
  */
-public class ReaderManager
+public class ReaderFactory
 {
 	private static Map typeClassMap = new HashMap();
 	static
@@ -58,12 +58,12 @@ public class ReaderManager
 	public static ResultReader createReader(String type, String name)
 			throws EternaException
 	{
-		Class c = (Class) ReaderManager.typeClassMap.get(type);
+		Class c = (Class) ReaderFactory.typeClassMap.get(type);
 		if (c == null)
 		{
 			throw new EternaException("Can't create ResultReader type [" + type + "].");
 		}
-		return ReaderManager.createReader(c, name);
+		return ReaderFactory.createReader(c, name);
 	}
 
 	public static ResultReader createReader(Class type, String name)

@@ -30,7 +30,7 @@ import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 
 /**
- * @author micromagic@sina.com
+ * prepare对象创建者的构造器和管理类.
  */
 public class CreaterManager extends AbstractGenerator
 {

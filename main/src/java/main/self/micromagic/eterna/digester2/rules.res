@@ -116,7 +116,7 @@ stack:{registerObject,n:0,g:0}
 
 ## readers
 readers
-attr:{order(m=0,i=0):readerOrder}
+attr:{readerOrder(m=0,i=0)}
 sub:{reader,entityRefReader}
 
 

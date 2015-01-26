@@ -38,7 +38,6 @@ import org.dom4j.io.XMLWriter;
 
 import self.micromagic.coder.Base64;
 import self.micromagic.eterna.dao.Dao;
-import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.dao.SpecialLog;
 import self.micromagic.eterna.model.AppData;
@@ -47,7 +46,10 @@ import self.micromagic.util.FormatTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.logging.TimeLogger;
 
-public class DaoImpl extends AbstractDao
+/**
+ * 带有日志记录等基础功能的数据库操作对象.
+ */
+public abstract class BaseDao extends AbstractDao
 {
 	/**
 	 * 全局的日志的记录类型.
@@ -64,7 +66,7 @@ public class DaoImpl extends AbstractDao
 		try
 		{
 			Utility.addMethodPropertyManager(LOG_TYPE_FLAG,
-					DaoImpl.class, "setGlobalLogType");
+					BaseDao.class, "setGlobalLogType");
 		}
 		catch (Throwable ex)
 		{
@@ -72,18 +74,10 @@ public class DaoImpl extends AbstractDao
 		}
 	}
 
-	public Object create()
-			throws EternaException
-	{
-		DaoImpl other = new DaoImpl();
-		this.copy(other);
-		return other;
-	}
-
 	protected void copy(Dao copyObj)
 	{
 		super.copy(copyObj);
-		DaoImpl other = (DaoImpl) copyObj;
+		BaseDao other = (BaseDao) copyObj;
 		other.objLogType = this.objLogType;
 	}
 
@@ -307,34 +301,6 @@ public class DaoImpl extends AbstractDao
 			throws EternaException, SQLException
 	{
 		this.logSQL(0L, null, conn);
-	}
-
-	public void setString(int parameterIndex, String x)
-			throws EternaException
-	{
-		Parameter p = this.getParameter(parameterIndex);
-		this.setValuePreparer(p.createValuePreparer(x));
-	}
-
-	public void setString(String parameterName, String x)
-			throws EternaException
-	{
-		Parameter p = this.getParameter(parameterName);
-		this.setValuePreparer(p.createValuePreparer(x));
-	}
-
-	public void setObject(int parameterIndex, Object x)
-			throws EternaException
-	{
-		Parameter p = this.getParameter(parameterIndex);
-		this.setValuePreparer(p.createValuePreparer(x));
-	}
-
-	public void setObject(String parameterName, Object x)
-			throws EternaException
-	{
-		Parameter p = this.getParameter(parameterName);
-		this.setValuePreparer(p.createValuePreparer(x));
 	}
 
 	private static class PreparedValueReader

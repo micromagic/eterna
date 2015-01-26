@@ -40,7 +40,7 @@ import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.dao.reader.ObjectReader;
-import self.micromagic.eterna.dao.reader.ReaderManager;
+import self.micromagic.eterna.dao.reader.ReaderFactory;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -67,7 +67,7 @@ class CountQuery
 		this.query = query;
 		this.name = "<count>/" + query.getName();
 		ObjectReader tmpReader
-				= (ObjectReader) ReaderManager.createReader("int", "theCount");
+				= (ObjectReader) ReaderFactory.createReader("int", "theCount");
 		tmpReader.setColumnIndex(1);
 		ReaderManagerImpl temp = new ReaderManagerImpl();
 		temp.setName("<readers>/" + this.name);
@@ -141,7 +141,7 @@ class CountQuery
 		}
 		finally
 		{
-			if (DaoImpl.logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (BaseDao.logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
 			{
 				if (result != null)
 				{

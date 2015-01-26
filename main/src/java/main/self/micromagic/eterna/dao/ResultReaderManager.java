@@ -30,6 +30,11 @@ public interface ResultReaderManager
 	String FORMAT_FLAG = "format";
 
 	/**
+	 * 在item的arrtibute中设置读取的列表别名的名称.
+	 */
+	String ALIAS_FLAG = "alias";
+
+	/**
 	 * 获取本ResultReaderManager的名称.
 	 */
 	String getName() throws EternaException;
@@ -85,7 +90,7 @@ public interface ResultReaderManager
 	 * @return  reader所在的索引值, 或-1(当对应名称的reader不存在时)
 	 *          第一个值为0, 第二个值为1, ...
 	 */
-	int getIndexByName(String name, boolean notThrow) throws EternaException;
+	int getReaderIndex(String name, boolean notThrow) throws EternaException;
 
 	/**
 	 * 通过reader的名称获取该reader对象所在的索引值.
@@ -95,7 +100,7 @@ public interface ResultReaderManager
 	 *          第一个值为0, 第二个值为1, ...
 	 * @throws EternaException  当对应名称的reader不存在时
 	 */
-	int getIndexByName(String name) throws EternaException;
+	int getReaderIndex(String name) throws EternaException;
 
 	/**
 	 * 获取用于排序的SQL子语句.

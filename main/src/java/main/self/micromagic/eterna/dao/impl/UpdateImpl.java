@@ -27,14 +27,19 @@ import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.logging.TimeLogger;
 
-public class UpdateImpl extends DaoImpl
+public class UpdateImpl extends BaseDao
 		implements Update
 {
 	public Class getObjectType()
 	{
 		return UpdateImpl.class;
+	}
+
+	protected void initElse(EternaFactory factory)
+	{
 	}
 
 	public String getType()

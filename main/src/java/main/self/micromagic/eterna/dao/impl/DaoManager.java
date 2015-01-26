@@ -24,10 +24,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 
+import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Parameter;
+import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
+import self.micromagic.util.BooleanRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
@@ -54,7 +58,10 @@ public class DaoManager
 	public static final String AUTO_TYPE_UPDATE = "update";
 	public static final String AUTO_TYPE_INSERT_N = "insertN";
 	public static final String AUTO_TYPE_INSERT_V = "insertV";
-	public static final String AUTO_TYPE_QUERY = "query";
+	public static final String AUTO_TYPE_SELECT = "select";
+
+	public static final String AUTO_OPT_DYNAMIC = "dynamic";
+	public static final String AUTO_OPT_CHECK_FIRST = "checkFirst";
 
 	public static final char TEMPLATE_BEGIN = '[';
 	public static final char TEMPLATE_END = ']';
@@ -162,9 +169,11 @@ public class DaoManager
 		return other;
 	}
 
-	public String frontParse(String sql, Parameter[] paramArray)
+	public String frontParse(String sql, Dao dao)
 			throws EternaException
 	{
+		ResultReader[] readerArray = null;
+		Parameter[] paramArray = null;
 		StringAppender buf = StringTool.createStringAppender(sql.length() + 16);
 		String dealedSql = sql;
 		int index = dealedSql.indexOf(EXTEND_FLAG + AUTO_NAME);
@@ -185,46 +194,118 @@ public class DaoManager
 				{
 					throw new EternaException("After #auto not found \"]\".");
 				}
-				String tStr = dealedSql.substring(1 + AUTO_NAME.length() + 1, endI);
-				String[] arr = StringTool.separateString(tStr, ",;", true);
-				if (arr.length != 3)
+				String autoConfig = dealedSql.substring(1 + AUTO_NAME.length() + 1, endI);
+				int sIndex = autoConfig.indexOf(';');
+				String beginParam = "1";
+				String endParam = "-1";
+				String optParam = autoConfig;
+				if (sIndex != -1)
 				{
-					throw new EternaException("The #auto must with 3 parameters.");
+					optParam = autoConfig.substring(0, sIndex);
+					String[] arr = StringTool.separateString(
+							autoConfig.substring(sIndex + 1), ",", true);
+					beginParam = arr[0];
+					if (arr.length > 1)
+					{
+						endParam = arr[1];
+						if (arr.length > 2)
+						{
+							throw new EternaException("Error #auto config [" + autoConfig + "].");
+						}
+					}
 				}
+				int paramCount = 0;
 				try
 				{
-					int begin = this.getAutoParamIndex(arr[1], paramArray) - 1;
-					int end = this.getAutoParamIndex(arr[2], paramArray);
-					String autoName = arr[0];
-					boolean dynamicAuto = false;
-					if (autoName.endsWith("D"))
+					BooleanRef dynamic = new BooleanRef();
+					BooleanRef checkFirst = new BooleanRef();
+					String type = this.getAutoType(optParam, dynamic, checkFirst);
+					if (AUTO_TYPE_SELECT.equals(type))
 					{
-						autoName = autoName.substring(0, autoName.length() - 1);
-						dynamicAuto = true;
-					}
-					if (AUTO_TYPE_UPDATE.equals(autoName))
-					{
-						this.dealAuto(" = ?", ", ", tStr, buf, paramArray, begin, end, true, dynamicAuto);
-					}
-					else if (AUTO_TYPE_INSERT_N.equals(autoName))
-					{
-						this.dealAuto("", ", ", tStr, buf, paramArray, begin, end, true, dynamicAuto);
-					}
-					else if (AUTO_TYPE_INSERT_V.equals(autoName))
-					{
-						this.dealAuto("?", ", ", tStr, buf, paramArray, begin, end, false, dynamicAuto);
-					}
-					else if (AUTO_TYPE_OR.equals(autoName))
-					{
-						this.dealAuto(" = ?", " or ", tStr, buf, paramArray, begin, end, true, dynamicAuto);
-					}
-					else if (AUTO_TYPE_AND.equals(autoName) || AUTO_TYPE_QUERY.equals(autoName))
-					{
-						this.dealAuto(" = ?", " and ", tStr, buf, paramArray, begin, end, true, dynamicAuto);
+						if (!(dao instanceof Query))
+						{
+							String msg = "The " + dao.getType() +" [" + dao.getName()
+									+ "] isn't a Query, can't use #auto[" + AUTO_TYPE_SELECT + "...].";
+							throw new EternaException(msg);
+						}
+						if (readerArray == null)
+						{
+							// 生成reader列表
+							List tmp = ((Query) dao).getReaderManager().getReaderList();
+							paramCount = tmp.size();
+							readerArray = new ResultReader[paramCount];
+							tmp.toArray(readerArray);
+						}
+						int begin = this.getAutoParamIndex(beginParam, null, readerArray) - 1;
+						int end = this.getAutoParamIndex(endParam, null, readerArray);
+						if (begin > end || begin < 0)
+						{
+							throw new EternaException("Error #auto range [" + autoConfig + "].");
+						}
+						if (dynamic.value)
+						{
+							String msg = "Can't use dynamic in #auto[" + AUTO_TYPE_SELECT
+									+ "...], config [" + autoConfig + "]";
+							throw new EternaException(msg);
+						}
+						boolean first = true;
+						for (int i = begin; i < end; i++)
+						{
+							if (!first)
+							{
+								buf.append(", ");
+							}
+							first = false;
+							buf.append(readerArray[i].getColumnName()).append(" as ")
+									.append(readerArray[i].getAlias());
+						}
 					}
 					else
 					{
-						throw new EternaException("Error #auto type [" + tStr + "].");
+						if (paramArray == null)
+						{
+							// 生成parameter列表
+							List tmp = new ArrayList();
+							Iterator itr = dao.getParameterIterator();
+							while (itr.hasNext())
+							{
+								tmp.add(itr.next());
+							}
+							paramCount = tmp.size();
+							paramArray = new Parameter[paramCount];
+							tmp.toArray(paramArray);
+						}
+						int begin = this.getAutoParamIndex(beginParam, paramArray, null) - 1;
+						int end = this.getAutoParamIndex(endParam, paramArray, null);
+						if (AUTO_TYPE_UPDATE.equals(type))
+						{
+							this.dealAuto(" = ?", ", ", autoConfig, buf, paramArray, begin, end,
+									true, dynamic.value);
+						}
+						else if (AUTO_TYPE_INSERT_N.equals(type))
+						{
+							this.dealAuto("", ", ", autoConfig, buf, paramArray, begin, end,
+									true, dynamic.value);
+						}
+						else if (AUTO_TYPE_INSERT_V.equals(type))
+						{
+							this.dealAuto("?", ", ", autoConfig, buf, paramArray, begin, end,
+									false, dynamic.value);
+						}
+						else if (AUTO_TYPE_OR.equals(type))
+						{
+							this.dealAuto(" = ?", " or ", autoConfig, buf, paramArray, begin, end,
+									true, dynamic.value);
+						}
+						else if (AUTO_TYPE_AND.equals(type))
+						{
+							this.dealAuto(" = ?", " and ", autoConfig, buf, paramArray, begin, end,
+									true, dynamic.value);
+						}
+						else
+						{
+							throw new EternaException("Error #auto type [" + autoConfig + "].");
+						}
 					}
 				}
 				catch (Exception ex)
@@ -233,8 +314,8 @@ public class DaoManager
 					{
 						throw (EternaException) ex;
 					}
-					throw new EternaException("Error #auto parameters [" + tStr
-							+ "], parameter count:" + paramArray.length + ".", ex);
+					throw new EternaException("Error #auto config [" + autoConfig
+							+ "], parameter count:" + paramCount + ".", ex);
 				}
 				dealedSql = dealedSql.substring(endI + 1);
 			}
@@ -250,19 +331,55 @@ public class DaoManager
 	}
 
 	/**
+	 * 解析自动生成的类型.
+	 *
+	 * @param dynamic     是否生成动态参数
+	 * @param checkFirst  动态参数是, 是否检测是否为第一个参数
+	 */
+	private String getAutoType(String optParam, BooleanRef dynamic, BooleanRef checkFirst)
+	{
+		String type = null;
+		String[] arr = StringTool.separateString(optParam, ",", true);
+		for (int i = 0; i < arr.length; i++)
+		{
+			if (AUTO_OPT_DYNAMIC.equals(arr[i]))
+			{
+				dynamic.value = true;
+			}
+			else if (AUTO_OPT_CHECK_FIRST.equals(arr[i]))
+			{
+				checkFirst.value = true;
+			}
+			else if (type != null)
+			{
+				throw new EternaException("Error #auto type [" + optParam + "].");
+			}
+			else
+			{
+				type = arr[i];
+			}
+		}
+		return type;
+	}
+
+	/**
 	 * 获取自动代码生成的索引值.
 	 */
-	private int getAutoParamIndex(String indexExp, Parameter[] paramArray)
+	private int getAutoParamIndex(String indexExp, Parameter[] paramArray,
+			ResultReader[] readerArray)
 			throws EternaException
 	{
 		if (indexExp.charAt(0) == 'i')
 		{
-			// i+XXX, i-XXX, i=XXX
+			// i+name, i-name, i=name
 			char flag = indexExp.charAt(1);
 			String name = indexExp.substring(2);
-			for (int i = 0; i < paramArray.length; i++)
+			int count = paramArray != null ? paramArray.length : readerArray.length;
+			for (int i = 0; i < count; i++)
 			{
-				if (name.equals(paramArray[i].getName()))
+				String tmpName = paramArray != null ? paramArray[i].getName()
+						: readerArray[i].getName();
+				if (name.equals(tmpName))
 				{
 					if (flag == '+')
 					{
@@ -290,7 +407,8 @@ public class DaoManager
 			int index = Integer.parseInt(indexExp);
 			if (index < 0)
 			{
-				index = paramArray.length + index + 1;
+				index = paramArray != null ? paramArray.length + index + 1
+						: readerArray.length + index + 1;
 			}
 			return index;
 		}

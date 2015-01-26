@@ -46,13 +46,12 @@ public abstract class AbstractDao extends AbstractGenerator
 		implements Dao, ObjectCreater
 {
 	private String preparedSQL;
-	private DaoManager sqlManager;
+	private DaoManager daoManager;
 	private PreparerManager preparerManager;
 	private ParameterGroup paramGroup;
 
 	private Map parameterNameMap;
 	private Parameter[] parameterArray;
-	private List allParamList;
 
 	protected boolean initialized;
 
@@ -91,11 +90,13 @@ public abstract class AbstractDao extends AbstractGenerator
 			paramList.toArray(paramArray);
 			this.parameterArray = paramArray;
 
-			this.sqlManager = new DaoManager();
-			String tmpSQL = this.sqlManager.frontParse(this.preparedSQL, paramArray);
-			this.sqlManager.parse(tmpSQL);
+			this.initElse(factory);
+
+			this.daoManager = new DaoManager();
+			String tmpSQL = this.daoManager.frontParse(this.preparedSQL, this);
+			this.daoManager.parse(tmpSQL);
 			this.preparerManager = new PreparerManager(this, paramArray);
-			this.sqlManager.initialize(this.getFactory());
+			this.daoManager.initialize(this.getFactory());
 
 			this.parameterNameMap = new HashMap();
 			for (int i = 0; i < paramArray.length; i++)
@@ -103,7 +104,7 @@ public abstract class AbstractDao extends AbstractGenerator
 				Parameter param = paramArray[i];
 				this.addParameterNameMap(param);
 			}
-			if (this.sqlManager.getParameterCount() > paramArray.length)
+			if (this.daoManager.getParameterCount() > paramArray.length)
 			{
 				throw new EternaException(
 						"Not all parameter has been bound in [" + this.getName() + "].");
@@ -112,6 +113,11 @@ public abstract class AbstractDao extends AbstractGenerator
 		}
 		return true;
 	}
+
+	/**
+	 * 对其他的属性进行初始化.
+	 */
+	protected abstract void initElse(EternaFactory factory) throws EternaException;
 
 	public Class getObjectType()
 	{
@@ -129,13 +135,12 @@ public abstract class AbstractDao extends AbstractGenerator
 		if (this.preparedSQL != null)
 		{
 			other.preparerManager = new PreparerManager(other, this.parameterArray);
-			other.sqlManager = this.sqlManager.copy(true);
+			other.daoManager = this.daoManager.copy(true);
 			other.preparedSQL = this.preparedSQL;
 		}
 		other.paramGroup = this.paramGroup;
 		other.parameterNameMap = this.parameterNameMap;
 		other.parameterArray = this.parameterArray;
-		other.allParamList = this.allParamList;
 		other.initialized = this.initialized;
 
 		other.attributes = this.attributes;
@@ -146,11 +151,12 @@ public abstract class AbstractDao extends AbstractGenerator
 	public int getParameterCount()
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
-		return this.sqlManager.getParameterCount();
+		return this.daoManager.getParameterCount();
 	}
 
 	public boolean hasActiveParam()
@@ -158,7 +164,8 @@ public abstract class AbstractDao extends AbstractGenerator
 	{
 		if (this.preparerManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
 		return this.preparerManager.hasActiveParam();
 	}
@@ -168,7 +175,8 @@ public abstract class AbstractDao extends AbstractGenerator
 	{
 		if (this.preparerManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
 		return this.preparerManager.getParamCount();
 	}
@@ -176,21 +184,23 @@ public abstract class AbstractDao extends AbstractGenerator
 	public int getSubSQLCount()
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
-		return this.sqlManager.getSubPartCount();
+		return this.daoManager.getSubPartCount();
 	}
 
 	public String getPreparedSQL()
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
-		return this.sqlManager.getPreparedSQL();
+		return this.daoManager.getPreparedSQL();
 	}
 
 	/**
@@ -199,11 +209,12 @@ public abstract class AbstractDao extends AbstractGenerator
 	String getTempPreparedSQL(int[] indexs, String[] subParts)
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
-		return this.sqlManager.getTempPreparedSQL(indexs, subParts);
+		return this.daoManager.getTempPreparedSQL(indexs, subParts);
 	}
 
 	public void setPreparedSQL(String sql)
@@ -211,22 +222,14 @@ public abstract class AbstractDao extends AbstractGenerator
 	{
 		if (this.preparedSQL != null)
 		{
-			throw new EternaException("You can't set prepared sql twice.");
+			throw new EternaException("You can't set prepared sql twice at "
+					+ this.getType() + " [" + this.getName() + "].");
 		}
 		if (sql == null)
 		{
 			throw new NullPointerException();
 		}
 		this.preparedSQL = sql;
-	}
-
-	protected void clear()
-			throws EternaException
-	{
-		this.preparedSQL = null;
-		this.sqlManager = null;
-		this.preparerManager = null;
-		this.clearParameters();
 	}
 
 	public void setSubSQL(int index, String subPart)
@@ -238,11 +241,12 @@ public abstract class AbstractDao extends AbstractGenerator
 	public void setSubSQL(int index, String subPart, PreparerManager pm)
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
-		int tempI = this.sqlManager.setSubPart(index - 1, subPart);
+		int tempI = this.daoManager.setSubPart(index - 1, subPart);
 		this.preparerManager.inserPreparerManager(pm, tempI, index);
 	}
 
@@ -254,54 +258,86 @@ public abstract class AbstractDao extends AbstractGenerator
 	public boolean isDynamicParameter(int index)
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
-		return this.sqlManager.isDynamicParameter(index - 1);
+		return this.daoManager.isDynamicParameter(index - 1);
 	}
 
 	public boolean isDynamicParameter(String name)
 			throws EternaException
 	{
-		return this.isDynamicParameter(this.getIndexByParameterName(name));
+		return this.isDynamicParameter(this.getParameterIndex(name));
 	}
 
 	public void setIgnore(int parameterIndex)
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
 		this.preparerManager.setIgnore(parameterIndex);
-		this.sqlManager.setParamSetted(parameterIndex - 1, false);
+		this.daoManager.setParamSetted(parameterIndex - 1, false);
 	}
 
 	public void setIgnore(String parameterName)
 			throws EternaException
 	{
-		this.setIgnore(this.getIndexByParameterName(parameterName));
+		this.setIgnore(this.getParameterIndex(parameterName));
 	}
 
 	public void setValuePreparer(ValuePreparer preparer)
 			throws EternaException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
 		this.preparerManager.setValuePreparer(preparer);
 		preparer.setName(this.parameterArray[preparer.getRelativeIndex() - 1].getName());
-		this.sqlManager.setParamSetted(preparer.getRelativeIndex() - 1, true);
+		this.daoManager.setParamSetted(preparer.getRelativeIndex() - 1, true);
+	}
+
+	public void setString(int parameterIndex, String x)
+			throws EternaException
+	{
+		Parameter p = this.getParameter(parameterIndex);
+		this.setValuePreparer(p.createValuePreparer(x));
+	}
+
+	public void setString(String parameterName, String x)
+			throws EternaException
+	{
+		Parameter p = this.getParameter(parameterName);
+		this.setValuePreparer(p.createValuePreparer(x));
+	}
+
+	public void setObject(int parameterIndex, Object x)
+			throws EternaException
+	{
+		Parameter p = this.getParameter(parameterIndex);
+		this.setValuePreparer(p.createValuePreparer(x));
+	}
+
+	public void setObject(String parameterName, Object x)
+			throws EternaException
+	{
+		Parameter p = this.getParameter(parameterName);
+		this.setValuePreparer(p.createValuePreparer(x));
 	}
 
 	public void prepareValues(PreparedStatement stmt)
 			throws EternaException, SQLException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
 		this.preparerManager.prepareValues(new PreparedStatementWrapImpl(stmt));
 	}
@@ -309,17 +345,12 @@ public abstract class AbstractDao extends AbstractGenerator
 	public void prepareValues(PreparedStatementWrap stmtWrap)
 			throws EternaException, SQLException
 	{
-		if (this.sqlManager == null)
+		if (this.daoManager == null)
 		{
-			throw new EternaException("SQL not initialized.");
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
 		}
 		this.preparerManager.prepareValues(stmtWrap);
-	}
-
-	public Iterator getParameterIteratorWithFlag()
-			throws EternaException
-	{
-		return new PreFetchIterator(this.allParamList.iterator(), false);
 	}
 
 	public Iterator getParameterIterator()
@@ -334,35 +365,17 @@ public abstract class AbstractDao extends AbstractGenerator
 		int index = param.getIndex();
 		if (index < 1 || index > this.getParameterCount())
 		{
-			throw new EternaException(
-					"Invalid parameter index:" + index + " at SQLAdapter "
-					+ this.getName() + ".");
+			throw new EternaException("Invalid parameter index [" + index + "] at "
+					+ this.getType() + "[" + this.getName() + "].");
 		}
 		Object obj = this.parameterNameMap.put(param.getName(), param);
 		if (obj != null)
 		{
-			throw new EternaException(
-					"Duplicate parameter name:" + param.getName() + " at SQLAdapter "
-					+ this.getName() + ".");
+			throw new EternaException("Duplicate parameter name [" + param.getName()
+					+ "] at " + this.getType() + "[" + this.getName() + "].");
 		}
-		ParameterManager pm = this.sqlManager.getParameterManager(index - 1);
+		ParameterManager pm = this.daoManager.getParameterManager(index - 1);
 		pm.setParam(param);
-	}
-
-	public void clearParameters()
-			throws EternaException
-	{
-		if (this.sqlManager != null)
-		{
-			int count = this.sqlManager.getParameterCount();
-			for (int i = 0; i < count; i++)
-			{
-				ParameterManager pm = this.sqlManager.getParameterManager(i);
-				pm.clearParam();
-			}
-			this.parameterNameMap = null;
-		}
-		this.paramGroup = null;
 	}
 
 	public void addParameter(ParameterGenerator paramGenerator)
@@ -388,7 +401,7 @@ public abstract class AbstractDao extends AbstractGenerator
 		this.paramGroup.addEntityRef(ref);
 	}
 
-	protected int getIndexByParameterName(String name)
+	protected int getParameterIndex(String name)
 			throws EternaException
 	{
 		return this.getParameter(name).getIndex();
