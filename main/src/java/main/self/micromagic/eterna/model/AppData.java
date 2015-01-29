@@ -20,10 +20,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Date;
 
 import javax.portlet.ActionRequest;
 import javax.portlet.ActionResponse;
@@ -40,17 +40,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
+import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.Attribute;
 import org.dom4j.io.XMLWriter;
-import self.micromagic.util.container.ThreadCache;
+
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.Utility;
 import self.micromagic.util.FormatTool;
-import self.micromagic.util.logging.TimeLogger;
+import self.micromagic.util.Utility;
 import self.micromagic.util.container.RequestParameterMap;
+import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.logging.TimeLogger;
 
 /**
  * @author micromagic@sina.com
@@ -91,6 +92,20 @@ public class AppData
 	private static Document logDocument = null;
 	private ArrayList nodeStack = null;
 
+	/**
+	 * 当前定义变量的缓存.
+	 */
+	public VarCache varCache;
+
+	/**
+	 * model作用域中存放的变量.
+	 */
+	public Object[] modelVars;
+	/**
+	 * 全局作用域中存放的变量.
+	 */
+	public Object[] globalVars;
+
 	public int position;
 	private String app_id = null;
 	public String contextRoot = "";
@@ -121,7 +136,7 @@ public class AppData
 	public final Map[] maps = new Map[4];
 	public final ArrayList stack = new ArrayList();
 
-	private Map spcialMap = new HashMap(2);
+	private final Map spcialMap = new HashMap(2);
 
 	static
 	{

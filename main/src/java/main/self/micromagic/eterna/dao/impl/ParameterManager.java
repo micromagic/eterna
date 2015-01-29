@@ -128,7 +128,7 @@ public class ParameterManager
 			Iterator itr = partList.iterator();
 			while (itr.hasNext())
 			{
-				DaoManager.PartSQL ps = (DaoManager.PartSQL) itr.next();
+				PartSQL ps = (PartSQL) itr.next();
 				ps.initialize(factory);
 				temp.append(ps.getSQL());
 			}

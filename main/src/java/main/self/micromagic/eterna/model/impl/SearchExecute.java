@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.io.IOException;
 import java.util.Map;
 
+import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.model.SearchExecuteGenerator;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;

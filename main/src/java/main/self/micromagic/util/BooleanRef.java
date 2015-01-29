@@ -17,6 +17,8 @@ package self.micromagic.util;
 
 import java.io.Serializable;
 
+import self.micromagic.util.converter.BooleanConverter;
+
 public class BooleanRef extends ObjectRef
 		implements Serializable
 {
@@ -59,11 +61,11 @@ public class BooleanRef extends ObjectRef
 		}
 		if (obj instanceof Number)
 		{
-			return ((Number) obj).doubleValue() != 0;
+			return ((Number) obj).intValue() != 0;
 		}
 		if (obj instanceof String)
 		{
-			return ((String) obj).equalsIgnoreCase("true");
+			return (new BooleanConverter()).convertToBoolean((String) obj);
 		}
 		return false;
 	}

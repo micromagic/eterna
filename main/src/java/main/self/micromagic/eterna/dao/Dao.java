@@ -190,6 +190,20 @@ public interface Dao
 	boolean isDynamicParameter(String name) throws EternaException;
 
 	/**
+	 * 根据索引值判断对应的参数是否已设置.
+	 *
+	 * @param index    第一个参数是1, 第二个是2, ...
+	 */
+	boolean isParameterSetted(int index) throws EternaException;
+
+	/**
+	 * 根据参数的名称判断对应的参数是否已设置.
+	 *
+	 * @param name    参数的名称
+	 */
+	boolean isParameterSetted(String name) throws EternaException;
+
+	/**
 	 * 通过ValuePreparer来设置参数.
 	 */
 	void setValuePreparer(ValuePreparer preparer) throws EternaException;

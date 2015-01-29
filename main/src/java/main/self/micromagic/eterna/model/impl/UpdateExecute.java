@@ -32,7 +32,7 @@ import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.model.UpdateExecuteGenerator;
 import self.micromagic.eterna.share.EternaException;
 
-public class UpdateExecute extends SQLExecute
+public class UpdateExecute extends DaoExecute
 		implements Execute, UpdateExecuteGenerator
 {
 	protected boolean multiType = false;
@@ -49,7 +49,7 @@ public class UpdateExecute extends SQLExecute
 		this.updateAdapterIndex = this.factory.findObjectId(this.getName());
 	}
 
-	protected Dao getSQL()
+	protected Dao getDao()
 			throws EternaException
 	{
 		return this.updateAdapterIndex == -1 ? this.factory.createUpdateAdapter(this.getName())

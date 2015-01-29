@@ -25,6 +25,7 @@ import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ParamBind;
@@ -79,26 +80,26 @@ public class ParamBindImpl extends AbstractGenerator
 					try
 					{
 						this.names[i] = new ParamSetManager.Name(
-								this.names[i], Integer.parseInt(this.names[i].sqlName));
+								this.names[i], Integer.parseInt(this.names[i].daoName));
 					}
 					catch (Exception ex)
 					{
 						throw new EternaException("When set sub SQL, names must be number. but the "
-								+ (i + 1) + " name is [" + this.names[i].sqlName +  "].");
+								+ (i + 1) + " name is [" + this.names[i].daoName +  "].");
 					}
 				}
 			}
 		}
 		else
 		{
-			if (this.names != null && execute instanceof SQLExecute)
+			if (this.names != null && execute instanceof DaoExecute)
 			{
 				try
 				{
-					Dao sql = ((SQLExecute) execute).getSQL();
+					Dao sql = ((DaoExecute) execute).getDao();
 					for (int i = 0; i < this.names.length; i++)
 					{
-						Parameter param = sql.getParameter(this.names[i].sqlName);
+						Parameter param = sql.getParameter(this.names[i].daoName);
 						this.names[i] = new ParamSetManager.Name(this.names[i], param.getIndex());
 					}
 				}
@@ -185,14 +186,14 @@ public class ParamBindImpl extends AbstractGenerator
 			{
 				for (int i = 0; i < this.names.length; i++)
 				{
-					psm.setSubSQL(this.names[i].sqlIndex, "");
+					psm.setSubSQL(this.names[i].daoIndex, "");
 				}
 			}
 			else if (tempValue instanceof String)
 			{
 				for (int i = 0; i < this.names.length; i++)
 				{
-					psm.setSubSQL(this.names[i].sqlIndex, (String) tempValue);
+					psm.setSubSQL(this.names[i].daoIndex, (String) tempValue);
 				}
 			}
 			else if (tempValue instanceof SearchManager)
@@ -200,7 +201,7 @@ public class ParamBindImpl extends AbstractGenerator
 				SearchManager sm = (SearchManager) tempValue;
 				for (int i = 0; i < this.names.length; i++)
 				{
-					psm.setSubSQL(this.names[i].sqlIndex, sm.getConditionPart(), sm.getPreparerManager());
+					psm.setSubSQL(this.names[i].daoIndex, sm.getConditionPart(), sm.getPreparerManager());
 				}
 			}
 			else if (tempValue instanceof Search)
@@ -209,7 +210,7 @@ public class ParamBindImpl extends AbstractGenerator
 				SearchManager sm = sa.getSearchManager(data);
 				for (int i = 0; i < this.names.length; i++)
 				{
-					psm.setSubSQL(this.names[i].sqlIndex, sm.getSpecialConditionPart(sa),
+					psm.setSubSQL(this.names[i].daoIndex, sm.getSpecialConditionPart(sa),
 							sm.getSpecialPreparerManager(sa));
 				}
 			}
@@ -221,11 +222,11 @@ public class ParamBindImpl extends AbstractGenerator
 					String v = RequestParameterMap.getFirstParam(subs.get(this.names[i].srcName));
 					if (v == null)
 					{
-						psm.setSubSQL(this.names[i].sqlIndex, "");
+						psm.setSubSQL(this.names[i].daoIndex, "");
 					}
 					else
 					{
-						psm.setSubSQL(this.names[i].sqlIndex, v);
+						psm.setSubSQL(this.names[i].daoIndex, v);
 					}
 				}
 			}
@@ -273,7 +274,7 @@ public class ParamBindImpl extends AbstractGenerator
 					{
 						for (int i = 0; i < this.names.length; i++)
 						{
-							psm.setParam(this.names[i].sqlName, tempValue);
+							psm.setParam(this.names[i].daoName, tempValue);
 						}
 					}
 					else if (tempValue instanceof Map)
@@ -311,14 +312,14 @@ public class ParamBindImpl extends AbstractGenerator
 						{
 							for (int i = 0; i < objs.length; i++)
 							{
-								psm.setParam(this.names[i].sqlName, objs[i]);
+								psm.setParam(this.names[i].daoName, objs[i]);
 							}
 						}
 						else if (objs.length == 1)
 						{
 							for (int i = 0; i < this.names.length; i++)
 							{
-								psm.setParam(this.names[i].sqlName, objs[0]);
+								psm.setParam(this.names[i].daoName, objs[0]);
 							}
 						}
 						else
@@ -330,7 +331,7 @@ public class ParamBindImpl extends AbstractGenerator
 					{
 						for (int i = 0; i < this.names.length; i++)
 						{
-							psm.setParam(this.names[i].sqlName, tempValue);
+							psm.setParam(this.names[i].daoName, tempValue);
 						}
 					}
 				}

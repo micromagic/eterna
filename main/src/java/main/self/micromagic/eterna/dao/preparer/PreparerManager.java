@@ -30,8 +30,8 @@ public class PreparerManager
 {
 	public static final ValuePreparer IGNORE_PREPARER = new IgnorePreparer();
 
-	private Dao sqlAdapter;
-	private ValuePreparer[] preparers;
+	private Dao dao;
+	private final ValuePreparer[] preparers;
 	private Parameter[] parameterArray = null;
 	private PreparerManagerList[] insertedPM = null;
 
@@ -44,13 +44,13 @@ public class PreparerManager
 	}
 
 	/**
-	 * 通过指定SQLParameter数组来构造一个PreparerManager
+	 * 通过指定Parameter数组来构造一个PreparerManager
 	 */
-	public PreparerManager(Dao sqlAdapter, Parameter[] parameterArray)
+	public PreparerManager(Dao dao, Parameter[] parameterArray)
 	{
 		this(parameterArray.length);
 		this.parameterArray = parameterArray;
-		this.sqlAdapter = sqlAdapter;
+		this.dao = dao;
 	}
 
 	/**
@@ -323,10 +323,10 @@ public class PreparerManager
 			if (this.preparers[i] == null)
 			{
 				StringAppender buf = StringTool.createStringAppender(52);
-				if (this.sqlAdapter != null)
+				if (this.dao != null)
 				{
-					buf.append("In").append(this.sqlAdapter.getType()).append(" [")
-							.append(this.sqlAdapter.getName()).append(']');
+					buf.append("In").append(this.dao.getType()).append(" [")
+							.append(this.dao.getName()).append(']');
 					buf.append(", the parameter");
 				}
 				else

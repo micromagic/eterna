@@ -663,12 +663,18 @@ public class DaoManager
 		}
 	}
 
+	public boolean isParamSetted(int index)
+			throws EternaException
+	{
+		ParameterManager pm = this.parameterManagers[index];
+		return pm.isParameterSetted();
+	}
+
 	public boolean isDynamicParameter(int index)
 			throws EternaException
 	{
 		ParameterManager pm = this.parameterManagers[index];
-		boolean isDynamicType = pm.getType() == ParameterManager.DYNAMIC_PARAMETER;
-		return isDynamicType;
+		return pm.getType() == ParameterManager.DYNAMIC_PARAMETER;
 	}
 
 	public int getSubPartCount()
@@ -849,387 +855,387 @@ public class DaoManager
 		return paramList;
 	}
 
+}
 
-	/**
-	 * sql 语句的片断, 可以是一部分普通的sql语句, 或一个子sql语句,
-	 * 或可选参数, 或一个常量.
-	 */
-	protected static abstract class PartSQL
+
+/**
+ * sql 语句的片断, 可以是一部分普通的sql语句, 或一个子sql语句,
+ * 或可选参数, 或一个常量.
+ */
+abstract class PartSQL
+{
+	public void initialize(EternaFactory factory)
+			throws EternaException
 	{
-		public void initialize(EternaFactory factory)
-				throws EternaException
-		{
-		}
-
-		public abstract PartSQL copy(boolean clear, DaoManager manager);
-
-		public abstract int getLength() throws EternaException;
-
-		public abstract String getSQL() throws EternaException;
-
 	}
 
-	protected static class ParameterPart extends PartSQL
+	public abstract PartSQL copy(boolean clear, DaoManager manager);
+
+	public abstract int getLength() throws EternaException;
+
+	public abstract String getSQL() throws EternaException;
+
+}
+
+class ParameterPart extends PartSQL
+{
+	private ParameterManager paramManager;
+	private int templateIndex;
+
+	public ParameterPart(ParameterManager paramManager, int templateIndex)
 	{
-		private ParameterManager paramManager;
-		private int templateIndex;
-
-		public ParameterPart(ParameterManager paramManager, int templateIndex)
+		if (paramManager == null)
 		{
-			if (paramManager == null)
-			{
-				throw new NullPointerException();
-			}
-			this.paramManager = paramManager;
-			this.templateIndex = templateIndex;
+			throw new NullPointerException();
 		}
+		this.paramManager = paramManager;
+		this.templateIndex = templateIndex;
+	}
 
-		private ParameterPart()
-		{
-		}
+	private ParameterPart()
+	{
+	}
 
-		public PartSQL copy(boolean clear, DaoManager manager)
-		{
-			ParameterManager pm = manager.getParameterManager(this.paramManager.getIndex());
-			ParameterPart other = new ParameterPart();
-			other.paramManager = pm;
-			other.templateIndex = this.templateIndex;
-			return other;
-		}
+	public PartSQL copy(boolean clear, DaoManager manager)
+	{
+		ParameterManager pm = manager.getParameterManager(this.paramManager.getIndex());
+		ParameterPart other = new ParameterPart();
+		other.paramManager = pm;
+		other.templateIndex = this.templateIndex;
+		return other;
+	}
 
-		public int getLength()
-				throws EternaException
-		{
-			try
-			{
-				String temp = this.paramManager.getParameterTemplate(this.templateIndex);
-				return this.paramManager.isParameterSetted() ? temp.length() : 0;
-			}
-			catch (Exception ex)
-			{
-				throw new EternaException(ex);
-			}
-		}
-
-		public String getSQL()
-				throws EternaException
+	public int getLength()
+			throws EternaException
+	{
+		try
 		{
 			String temp = this.paramManager.getParameterTemplate(this.templateIndex);
-			return this.paramManager.isParameterSetted() ? temp : "";
+			return this.paramManager.isParameterSetted() ? temp.length() : 0;
+		}
+		catch (Exception ex)
+		{
+			throw new EternaException(ex);
 		}
 	}
 
-	protected static class SubFlagPart extends PartSQL
+	public String getSQL()
+			throws EternaException
 	{
-		private String insertString = null;
+		String temp = this.paramManager.getParameterTemplate(this.templateIndex);
+		return this.paramManager.isParameterSetted() ? temp : "";
+	}
+}
 
-		public void setSubPart(String subPart)
-		{
-			this.insertString = subPart;
-		}
+class SubFlagPart extends PartSQL
+{
+	private String insertString = null;
 
-		public PartSQL copy(boolean clear, DaoManager manager)
-		{
-			SubFlagPart other = new SubFlagPart();
-			other.insertString = clear ? null : this.insertString;
-			return other;
-		}
-
-		public int getLength()
-		{
-			return this.insertString == null ? 1 : this.insertString.length();
-		}
-
-		public String getSQL()
-		{
-			return this.insertString == null ? DaoManager.SUBPART_FLAG + "" : this.insertString;
-		}
+	public void setSubPart(String subPart)
+	{
+		this.insertString = subPart;
 	}
 
-	protected static class SubPart extends PartSQL
+	public PartSQL copy(boolean clear, DaoManager manager)
 	{
-		private int flagPartIndex = -1;
-		private PartSQL[] parts = null;
-		private final String template;
-		private final int aheadParamCount;
-		private int subIndex = 0;
+		SubFlagPart other = new SubFlagPart();
+		other.insertString = clear ? null : this.insertString;
+		return other;
+	}
 
-		private String insertString = null;
-		private String backupString = null;
+	public int getLength()
+	{
+		return this.insertString == null ? 1 : this.insertString.length();
+	}
 
-		public SubPart(String template, int aheadParamCount)
+	public String getSQL()
+	{
+		return this.insertString == null ? DaoManager.SUBPART_FLAG + "" : this.insertString;
+	}
+}
+
+class SubPart extends PartSQL
+{
+	private int flagPartIndex = -1;
+	private PartSQL[] parts = null;
+	private final String template;
+	private final int aheadParamCount;
+	private int subIndex = 0;
+
+	private String insertString = null;
+	private String backupString = null;
+
+	public SubPart(String template, int aheadParamCount)
+	{
+		if (template == null)
 		{
-			if (template == null)
-			{
-				throw new NullPointerException();
-			}
-			this.template = template;
-			this.aheadParamCount = aheadParamCount;
+			throw new NullPointerException();
 		}
+		this.template = template;
+		this.aheadParamCount = aheadParamCount;
+	}
 
-		public PartSQL copy(boolean clear, DaoManager manager)
+	public PartSQL copy(boolean clear, DaoManager manager)
+	{
+		SubPart other = new SubPart(this.template, this.aheadParamCount);
+		other.subIndex = this.subIndex;
+		other.insertString = clear ? null : this.insertString;
+		other.backupString = clear ? null : this.backupString;
+		if (this.parts != null)
 		{
-			SubPart other = new SubPart(this.template, this.aheadParamCount);
-			other.subIndex = this.subIndex;
-			other.insertString = clear ? null : this.insertString;
-			other.backupString = clear ? null : this.backupString;
-			if (this.parts != null)
-			{
-				other.flagPartIndex = this.flagPartIndex;
-				other.parts = new PartSQL[this.parts.length];
-				for (int i = 0; i < this.parts.length; i++)
-				{
-					other.parts[i] = this.parts[i].copy(clear, manager);
-				}
-			}
-			return other;
-		}
-
-		public void initialize(EternaFactory factory)
-				throws EternaException
-		{
-			if (this.parts == null)
-			{
-				super.initialize(factory);
-				ArrayList partList = new ArrayList();
-				ArrayList paramList = new ArrayList();
-				ArrayList subSQLList = new ArrayList();
-				ArrayList subList = new ArrayList();
-				DaoManager.parse(this.template, true, partList, paramList, subSQLList, subList);
-
-				if (paramList.size() > 0)
-				{
-					throw new EternaException(
-							"The parameter flag '?' can't int the sub SQL tamplet:"
-							+ this.template + ".");
-				}
-				if (subList.size() != 1)
-				{
-					throw new EternaException(
-							"Error sub SQL flag in template:" + this.template + ".");
-				}
-				this.parts = new PartSQL[partList.size()];
-				Iterator itr = partList.iterator();
-				for (int i = 0; i < this.parts.length; i++)
-				{
-					PartSQL ps = (PartSQL) itr.next();
-					ps.initialize(factory);
-					this.parts[i] = ps;
-				}
-				SubFlagPart flagPart = (SubFlagPart) subList.get(0);
-
-				for (int i = 0; i < this.parts.length; i++)
-				{
-					if (this.parts[i] == flagPart)
-					{
-						this.flagPartIndex = i;
-						break;
-					}
-				}
-			}
-		}
-
-		public int getAheadParamCount()
-		{
-			return this.aheadParamCount;
-		}
-
-		public void setSubPart(String subPart)
-		{
-			this.insertString = subPart;
-			((SubFlagPart) this.parts[this.flagPartIndex]).setSubPart(subPart);
-		}
-
-		public boolean checkSubPartSame(String subPart)
-		{
-			return this.insertString == subPart;
-		}
-
-		public int getLength()
-				throws EternaException
-		{
-			if (this.insertString == null)
-			{
-				throw new EternaException("Sub SQL unsetted, subsql:[" + this.template + "].");
-			}
-
-			if (this.insertString.length() == 0)
-			{
-				return 0;
-			}
-			else
-			{
-				int size = 0;
-				for (int i = 0; i < this.parts.length; i++)
-				{
-					size += this.parts[i].getLength();
-				}
-				return size;
-			}
-		}
-
-		public String getSQL() throws EternaException
-		{
-			if (this.insertString == null)
-			{
-				throw new EternaException("Sub SQL unsetted, index:[" + this.subIndex
-						+ "], subsql:[" + this.template + "].");
-			}
-
-			if (this.insertString.length() == 0)
-			{
-				return "";
-			}
-
-			StringAppender temp = StringTool.createStringAppender(this.getLength());
+			other.flagPartIndex = this.flagPartIndex;
+			other.parts = new PartSQL[this.parts.length];
 			for (int i = 0; i < this.parts.length; i++)
 			{
-				temp.append(this.parts[i].getSQL());
-			}
-			return temp.toString();
-		}
-
-		public int getSubIndex()
-		{
-			return this.subIndex;
-		}
-
-		public void setSubIndex(int subIndex)
-		{
-			this.subIndex = subIndex;
-		}
-
-		public void backup()
-		{
-			this.backupString = this.insertString;
-		}
-
-		public void recover()
-		{
-			if (this.backupString != null)
-			{
-				this.insertString = this.backupString;
-				this.backupString = null;
+				other.parts[i] = this.parts[i].copy(clear, manager);
 			}
 		}
-
+		return other;
 	}
 
-	protected static class ConstantSQL extends PartSQL
+	public void initialize(EternaFactory factory)
+			throws EternaException
 	{
-		private final String name;
-
-		private String value = null;
-
-		public ConstantSQL(String name)
+		if (this.parts == null)
 		{
-			if (name == null)
+			super.initialize(factory);
+			ArrayList partList = new ArrayList();
+			ArrayList paramList = new ArrayList();
+			ArrayList subSQLList = new ArrayList();
+			ArrayList subList = new ArrayList();
+			DaoManager.parse(this.template, true, partList, paramList, subSQLList, subList);
+
+			if (paramList.size() > 0)
 			{
-				throw new NullPointerException();
+				throw new EternaException(
+						"The parameter flag '?' can't int the sub SQL tamplet:"
+						+ this.template + ".");
 			}
-			this.name = StringTool.intern(name);
-		}
-
-		public void initialize(EternaFactory factory)
-				throws EternaException
-		{
-			if (this.value == null)
+			if (subList.size() != 1)
 			{
-				super.initialize(factory);
-				String temp = factory.getConstantValue(this.name);
-				if (temp == null)
+				throw new EternaException(
+						"Error sub SQL flag in template:" + this.template + ".");
+			}
+			this.parts = new PartSQL[partList.size()];
+			Iterator itr = partList.iterator();
+			for (int i = 0; i < this.parts.length; i++)
+			{
+				PartSQL ps = (PartSQL) itr.next();
+				ps.initialize(factory);
+				this.parts[i] = ps;
+			}
+			SubFlagPart flagPart = (SubFlagPart) subList.get(0);
+
+			for (int i = 0; i < this.parts.length; i++)
+			{
+				if (this.parts[i] == flagPart)
 				{
-					throw new EternaException("The constant '" + this.name + "' not found.");
+					this.flagPartIndex = i;
+					break;
 				}
-				this.value = temp;
-
-				ArrayList partList = new ArrayList();
-				ArrayList paramList = new ArrayList();
-				ArrayList subSQLList = new ArrayList();
-				ArrayList subList = new ArrayList();
-				DaoManager.parse(this.value, true, partList, paramList, subSQLList, subList);
-
-				if (paramList.size() > 0)
-				{
-					throw new EternaException(
-							"The parameter flag '?' can't int the sub SQL tamplet:"
-							+ this.value + ".");
-				}
-				StringAppender buf = StringTool.createStringAppender(this.value.length() + 16);
-				Iterator itr = partList.iterator();
-				for (int i = 0; i < partList.size(); i++)
-				{
-					PartSQL ps = (PartSQL) itr.next();
-					ps.initialize(factory);
-					buf.append(ps.getSQL());
-				}
-				this.value = StringTool.intern(buf.toString(), true);
 			}
 		}
-
-		public PartSQL copy(boolean clear, DaoManager manager)
-		{
-			return this;
-		}
-
-		public String getName()
-		{
-			return this.name;
-		}
-
-		public void setValue(String value)
-		{
-			if (value != null)
-			{
-				this.value = value;
-			}
-		}
-
-		public int getLength()
-		{
-			return this.value.length();
-		}
-
-		public String getSQL()
-		{
-			if (this.value == null)
-			{
-				throw new NullPointerException();
-			}
-			return this.value;
-		}
-
 	}
 
-	protected static class NormalSQL extends PartSQL
+	public int getAheadParamCount()
 	{
-		private final String sql;
+		return this.aheadParamCount;
+	}
 
-		public NormalSQL(String sql)
+	public void setSubPart(String subPart)
+	{
+		this.insertString = subPart;
+		((SubFlagPart) this.parts[this.flagPartIndex]).setSubPart(subPart);
+	}
+
+	public boolean checkSubPartSame(String subPart)
+	{
+		return this.insertString == subPart;
+	}
+
+	public int getLength()
+			throws EternaException
+	{
+		if (this.insertString == null)
 		{
-			if (sql == null)
+			throw new EternaException("Sub SQL unsetted, subsql:[" + this.template + "].");
+		}
+
+		if (this.insertString.length() == 0)
+		{
+			return 0;
+		}
+		else
+		{
+			int size = 0;
+			for (int i = 0; i < this.parts.length; i++)
 			{
-				throw new NullPointerException();
+				size += this.parts[i].getLength();
 			}
-			// 这里的sql大部分是intern处理过的字符串的字串
-			this.sql = sql;
+			return size;
 		}
+	}
 
-		public PartSQL copy(boolean clear, DaoManager manager)
+	public String getSQL() throws EternaException
+	{
+		if (this.insertString == null)
 		{
-			return this;
+			throw new EternaException("Sub SQL unsetted, index:[" + this.subIndex
+					+ "], subsql:[" + this.template + "].");
 		}
 
-		public int getLength()
+		if (this.insertString.length() == 0)
 		{
-			return this.sql.length();
+			return "";
 		}
 
-		public String getSQL()
+		StringAppender temp = StringTool.createStringAppender(this.getLength());
+		for (int i = 0; i < this.parts.length; i++)
 		{
-			return this.sql;
+			temp.append(this.parts[i].getSQL());
 		}
+		return temp.toString();
+	}
 
+	public int getSubIndex()
+	{
+		return this.subIndex;
+	}
+
+	public void setSubIndex(int subIndex)
+	{
+		this.subIndex = subIndex;
+	}
+
+	public void backup()
+	{
+		this.backupString = this.insertString;
+	}
+
+	public void recover()
+	{
+		if (this.backupString != null)
+		{
+			this.insertString = this.backupString;
+			this.backupString = null;
+		}
+	}
+
+}
+
+class ConstantSQL extends PartSQL
+{
+	private final String name;
+
+	private String value = null;
+
+	public ConstantSQL(String name)
+	{
+		if (name == null)
+		{
+			throw new NullPointerException();
+		}
+		this.name = StringTool.intern(name);
+	}
+
+	public void initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (this.value == null)
+		{
+			super.initialize(factory);
+			String temp = factory.getConstantValue(this.name);
+			if (temp == null)
+			{
+				throw new EternaException("The constant '" + this.name + "' not found.");
+			}
+			this.value = temp;
+
+			ArrayList partList = new ArrayList();
+			ArrayList paramList = new ArrayList();
+			ArrayList subSQLList = new ArrayList();
+			ArrayList subList = new ArrayList();
+			DaoManager.parse(this.value, true, partList, paramList, subSQLList, subList);
+
+			if (paramList.size() > 0)
+			{
+				throw new EternaException(
+						"The parameter flag '?' can't int the sub SQL tamplet:"
+						+ this.value + ".");
+			}
+			StringAppender buf = StringTool.createStringAppender(this.value.length() + 16);
+			Iterator itr = partList.iterator();
+			for (int i = 0; i < partList.size(); i++)
+			{
+				PartSQL ps = (PartSQL) itr.next();
+				ps.initialize(factory);
+				buf.append(ps.getSQL());
+			}
+			this.value = StringTool.intern(buf.toString(), true);
+		}
+	}
+
+	public PartSQL copy(boolean clear, DaoManager manager)
+	{
+		return this;
+	}
+
+	public String getName()
+	{
+		return this.name;
+	}
+
+	public void setValue(String value)
+	{
+		if (value != null)
+		{
+			this.value = value;
+		}
+	}
+
+	public int getLength()
+	{
+		return this.value.length();
+	}
+
+	public String getSQL()
+	{
+		if (this.value == null)
+		{
+			throw new NullPointerException();
+		}
+		return this.value;
+	}
+
+}
+
+class NormalSQL extends PartSQL
+{
+	private final String sql;
+
+	public NormalSQL(String sql)
+	{
+		if (sql == null)
+		{
+			throw new NullPointerException();
+		}
+		// 这里的sql大部分是intern处理过的字符串的字串
+		this.sql = sql;
+	}
+
+	public PartSQL copy(boolean clear, DaoManager manager)
+	{
+		return this;
+	}
+
+	public int getLength()
+	{
+		return this.sql.length();
+	}
+
+	public String getSQL()
+	{
+		return this.sql;
 	}
 
 }

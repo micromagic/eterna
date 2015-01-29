@@ -18,7 +18,6 @@ package self.micromagic.eterna.model;
 
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import self.micromagic.eterna.dao.Dao;
@@ -30,44 +29,28 @@ import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 public class ParamSetManager
 {
-	private final Dao sql;
-	private final Parameter[] params;
-	private final boolean[] paramsSetted;
-	private final Object[] paramsValues;
+	private final Dao dao;
+	private final int paramCount;
 	private Map paramsCacheValues;
 
-	public ParamSetManager(Dao sql)
+	public ParamSetManager(Dao dao)
 			throws EternaException
 	{
-		this.sql = sql;
-		Iterator itr = sql.getParameterIterator();
-		int count = sql.getParameterCount();
-		this.params = new Parameter[count];
-		this.paramsSetted = new boolean[count];
-		this.paramsValues = new Object[count];
-		for (int i = 0; i < count; i++)
-		{
-			Parameter param = (Parameter) itr.next();
-			// 因为parameter的index从1开始，所以要减1
-			int paramIndex = param.getIndex() - 1;
-			this.params[paramIndex] = param;
-			this.paramsSetted[paramIndex] = false;
-			this.paramsValues[paramIndex] = null;
-		}
+		this.dao = dao;
+		this.paramCount = dao.getParameterCount();
 	}
 
 	/**
-	 * 获取当前参数管理器所管理的SQLAdapter.
+	 * 获取当前参数管理器所管理的Dao.
 	 */
 	public Dao getSQLAdapter()
 	{
-		return this.sql;
+		return this.dao;
 	}
 
 	private Object getValues(Name[] names)
@@ -152,91 +135,51 @@ public class ParamSetManager
 	public void setSubSQL(int index, String subSQL, PreparerManager pm)
 			throws EternaException
 	{
-		this.sql.setSubSQL(index, subSQL, pm);
+		this.dao.setSubSQL(index, subSQL, pm);
 	}
 
 	public void setSubSQL(int index, String subSQL)
 			throws EternaException
 	{
-		this.sql.setSubSQL(index, subSQL);
+		this.dao.setSubSQL(index, subSQL);
 	}
 
 	public void setParam(int index, Object value)
 			throws EternaException
 	{
-		// 因为parameter的index从1开始，所以要减1
-		Parameter param = this.params[index - 1];
-		preparerValue(this.sql, param, value);
-		this.paramsSetted[index - 1] = true;
-		this.paramsValues[index - 1] = value;
+		Parameter param = this.dao.getParameter(index);
+		preparerValue(this.dao, param, value);
 	}
 
 	public void setIgnore(int index)
 			throws EternaException
 	{
-		// 因为parameter的index从1开始，所以要减1
-		Parameter param = this.params[index - 1];
-		this.sql.setIgnore(param.getIndex());
-		this.paramsSetted[index - 1] = true;
-		this.paramsValues[index - 1] = null;
-	}
-
-	public Object getParamValue(int index)
-			throws EternaException
-	{
-		return this.paramsValues[index - 1];
-	}
-
-	public boolean isParamSetted(int index)
-			throws EternaException
-	{
-		return this.paramsSetted[index - 1];
+		Parameter param = this.dao.getParameter(index);
+		if (this.dao.isDynamicParameter(index))
+		{
+			this.dao.setIgnore(index);
+		}
+		else
+		{
+			ValuePreparer p = CreaterManager.createNullPreparer(
+					dao.getFactory(), param.getType());
+			p.setRelativeIndex(index);
+			dao.setValuePreparer(p);
+		}
 	}
 
 	public void setParam(String name, Object value)
 			throws EternaException
 	{
-		Parameter param = this.sql.getParameter(name);
-		preparerValue(this.sql, param, value);
-		// 因为parameter的index从1开始，所以要减1
-		int paramIndex = param.getIndex() - 1;
-		this.paramsSetted[paramIndex] = true;
-		this.paramsValues[paramIndex] = value;
+		Parameter param = this.dao.getParameter(name);
+		preparerValue(this.dao, param, value);
 	}
 
 	public void setIgnore(String name)
 			throws EternaException
 	{
-		Parameter param = this.sql.getParameter(name);
-		if (this.sql.isDynamicParameter(param.getIndex()))
-		{
-			this.sql.setIgnore(param.getIndex());
-		}
-		else
-		{
-			ValuePreparer p = CreaterManager.createNullPreparer(
-					sql.getFactory(), param.getType());
-			p.setRelativeIndex(param.getIndex());
-			sql.setValuePreparer(p);
-		}
-		// 因为parameter的index从1开始，所以要减1
-		int paramIndex = param.getIndex() - 1;
-		this.paramsSetted[paramIndex] = true;
-		this.paramsValues[paramIndex] = null;
-	}
-
-	public Object getParamValue(String name)
-			throws EternaException
-	{
-		Parameter param = this.sql.getParameter(name);
-		return this.paramsValues[param.getIndex() - 1];
-	}
-
-	public boolean isParamSetted(String name)
-			throws EternaException
-	{
-		Parameter param = this.sql.getParameter(name);
-		return this.paramsSetted[param.getIndex() - 1];
+		Parameter param = this.dao.getParameter(name);
+		this.setIgnore(param.getIndex());
 	}
 
 	/**
@@ -247,27 +190,11 @@ public class ParamSetManager
 	public void setIgnores(boolean settedFlag)
 			throws EternaException
 	{
-		for (int i = 0; i < this.params.length; i++)
+		for (int i = 1; i <= this.paramCount; i++)
 		{
-			if (!this.paramsSetted[i])
+			if (!this.dao.isParameterSetted(i))
 			{
-				Parameter param = this.params[i];
-				if (this.sql.isDynamicParameter(param.getIndex()))
-				{
-					this.sql.setIgnore(param.getIndex());
-				}
-				else
-				{
-					ValuePreparer p = CreaterManager.createNullPreparer(
-							sql.getFactory(), param.getType());
-					p.setRelativeIndex(param.getIndex());
-					sql.setValuePreparer(p);
-				}
-				this.paramsSetted[i] = settedFlag;
-				if (settedFlag)
-				{
-					this.paramsValues[i] = null;
-				}
+				this.setIgnore(i);
 			}
 		}
 	}
@@ -275,11 +202,11 @@ public class ParamSetManager
 	public void setParams(Map values)
 			throws EternaException
 	{
-		for (int i = 0; i < this.params.length; i++)
+		for (int i = 1; i <= this.paramCount; i++)
 		{
-			if (!this.paramsSetted[i])
+			if (!this.dao.isParameterSetted(i))
 			{
-				Parameter param = this.params[i];
+				Parameter param = this.dao.getParameter(i);
 				Object value = values.get(param.getName());
 				if (value != null)
 				{
@@ -290,14 +217,12 @@ public class ParamSetManager
 						{
 							continue;
 						}
-						preparerValue(this.sql, param, strs[0]);
+						preparerValue(this.dao, param, strs[0]);
 					}
 					else
 					{
-						preparerValue(this.sql, param, value);
+						preparerValue(this.dao, param, value);
 					}
-					this.paramsSetted[i] = true;
-					this.paramsValues[i] = value;
 				}
 			}
 		}
@@ -320,8 +245,8 @@ public class ParamSetManager
 		int loopCount = -1;
 		for (int i = 0; i < names.length; i++)
 		{
-			Parameter param = names[i].sqlIndex == -1 ?
-					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
+			Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
+					: this.dao.getParameter(names[i].daoIndex);
 			Object[] array = null;
 			if (index == 0)
 			{
@@ -352,10 +277,7 @@ public class ParamSetManager
 			if (array != null)
 			{
 				loopCount = array.length;
-				preparerValue(this.sql, param, array[index]);
-				int paramIndex = param.getIndex() - 1;
-				this.paramsSetted[paramIndex] = true;
-				this.paramsValues[paramIndex] = array[index];
+				preparerValue(this.dao, param, array[index]);
 			}
 			else
 			{
@@ -370,8 +292,8 @@ public class ParamSetManager
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			Parameter param = names[i].sqlIndex == -1 ?
-					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
+			Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
+					: this.dao.getParameter(names[i].daoIndex);
 			Object value = values.get(names[i].srcName);
 			if (value != null)
 			{
@@ -382,15 +304,12 @@ public class ParamSetManager
 					{
 						continue;
 					}
-					preparerValue(this.sql, param, strs[0]);
+					preparerValue(this.dao, param, strs[0]);
 				}
 				else
 				{
-					preparerValue(this.sql, param, value);
+					preparerValue(this.dao, param, value);
 				}
-				int paramIndex = param.getIndex() - 1;
-				this.paramsSetted[paramIndex] = true;
-				this.paramsValues[paramIndex] = value;
 			}
 			else
 			{
@@ -402,11 +321,11 @@ public class ParamSetManager
 	public void setParams(ResultRow values)
 			throws EternaException, SQLException
 	{
-		for (int i = 0; i < this.params.length; i++)
+		for (int i = 1; i <= this.paramCount; i++)
 		{
-			if (!this.paramsSetted[i])
+			if (!this.dao.isParameterSetted(i))
 			{
-				Parameter param = this.params[i];
+				Parameter param = this.dao.getParameter(i);
 				int colIndex = -1;
 				try
 				{
@@ -417,9 +336,7 @@ public class ParamSetManager
 				if (colIndex != -1)
 				{
 					Object value = values.getObject(colIndex);
-					preparerValue(this.sql, param, value);
-					this.paramsSetted[i] = true;
-					this.paramsValues[i] = value;
+					preparerValue(this.dao, param, value);
 				}
 			}
 		}
@@ -445,8 +362,8 @@ public class ParamSetManager
 			ResultRow row = ritr.nextRow();
 			for (int i = 0; i < names.length; i++)
 			{
-				Parameter param = names[i].sqlIndex == -1 ?
-						this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
+				Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
+						: this.dao.getParameter(names[i].daoIndex);
 				int colIndex = -1;
 				try
 				{
@@ -457,10 +374,7 @@ public class ParamSetManager
 				if (colIndex != -1)
 				{
 					Object value = row.getObject(colIndex);
-					preparerValue(this.sql, param, value);
-					int paramIndex = param.getIndex() - 1;
-					this.paramsSetted[paramIndex] = true;
-					this.paramsValues[paramIndex] = value;
+					preparerValue(this.dao, param, value);
 				}
 				else
 				{
@@ -480,8 +394,8 @@ public class ParamSetManager
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			Parameter param = names[i].sqlIndex == -1 ?
-					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
+			Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
+					: this.dao.getParameter(names[i].daoIndex);
 			int colIndex = -1;
 			try
 			{
@@ -492,10 +406,7 @@ public class ParamSetManager
 			if (colIndex != -1)
 			{
 				Object value = values.getObject(colIndex);
-				preparerValue(this.sql, param, value);
-				int paramIndex = param.getIndex() - 1;
-				this.paramsSetted[paramIndex] = true;
-				this.paramsValues[paramIndex] = value;
+				preparerValue(this.dao, param, value);
 			}
 			else
 			{
@@ -507,17 +418,15 @@ public class ParamSetManager
 	public void setParams(SearchManager searchManager)
 			throws EternaException, SQLException
 	{
-		for (int i = 0; i < this.params.length; i++)
+		for (int i = 1; i < this.paramCount; i++)
 		{
-			if (!this.paramsSetted[i])
+			if (!this.dao.isParameterSetted(i))
 			{
-				Parameter param = this.params[i];
+				Parameter param = this.dao.getParameter(i);
 				SearchManager.ConditionInfo con = searchManager.getCondition(param.getName());
 				if (con != null)
 				{
-					preparerValue(this.sql, param, con.value);
-					this.paramsSetted[i] = true;
-					this.paramsValues[i] = con.value;
+					preparerValue(this.dao, param, con.value);
 				}
 			}
 		}
@@ -528,14 +437,12 @@ public class ParamSetManager
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			Parameter param = names[i].sqlIndex == -1 ?
-					this.sql.getParameter(names[i].sqlName) : this.params[names[i].sqlIndex - 1];
+			Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
+					: this.dao.getParameter(names[i].daoIndex);
 			SearchManager.ConditionInfo con = searchManager.getCondition(names[i].srcName);
 			if (con != null)
 			{
-				preparerValue(this.sql, param, con.value);
-				this.paramsSetted[i] = true;
-				this.paramsValues[i] = con.value;
+				preparerValue(this.dao, param, con.value);
 			}
 			else
 			{
@@ -547,20 +454,17 @@ public class ParamSetManager
 	private void dealNull(Parameter param)
 			throws EternaException
 	{
-		if (this.sql.isDynamicParameter(param.getIndex()))
+		if (this.dao.isDynamicParameter(param.getIndex()))
 		{
-			this.sql.setIgnore(param.getIndex());
+			this.dao.setIgnore(param.getIndex());
 		}
 		else
 		{
 			ValuePreparer p = CreaterManager.createNullPreparer(
-					sql.getFactory(), param.getType());
+					dao.getFactory(), param.getType());
 			p.setRelativeIndex(param.getIndex());
-			sql.setValuePreparer(p);
+			dao.setValuePreparer(p);
 		}
-		int paramIndex = param.getIndex() - 1;
-		this.paramsSetted[paramIndex] = true;
-		this.paramsValues[paramIndex] = null;
 	}
 
 	public int setParams(Name[] names, int index)
@@ -588,36 +492,36 @@ public class ParamSetManager
 	public static class Name
 	{
 		public final String srcName;
-		public final String sqlName;
-		public final int sqlIndex;
+		public final String daoName;
+		public final int daoIndex;
 
 		public Name(String srcName, String sqlName)
 		{
-			this.sqlIndex = -1;
+			this.daoIndex = -1;
 			this.srcName = StringTool.intern(srcName);
 			if (srcName == sqlName)
 			{
 				// 如果两个值相同, 第二个值就不做处理了
-				this.sqlName = this.srcName;
+				this.daoName = this.srcName;
 			}
 			else
 			{
-				this.sqlName = StringTool.intern(sqlName);
+				this.daoName = StringTool.intern(sqlName);
 			}
 		}
 
 		public Name(Name other, int sqlIndex)
 		{
-			this.sqlIndex = sqlIndex;
+			this.daoIndex = sqlIndex;
 			if (other != null)
 			{
 				this.srcName = other.srcName;
-				this.sqlName = other.sqlName;
+				this.daoName = other.daoName;
 			}
 			else
 			{
 				this.srcName = null;
-				this.sqlName = null;
+				this.daoName = null;
 			}
 		}
 

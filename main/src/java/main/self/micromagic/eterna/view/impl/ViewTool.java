@@ -80,8 +80,8 @@ public class ViewTool
 	{
 		try
 		{
-			ViewTool.grammerManager = new GrammerManager();
-			ViewTool.grammerManager.init(ViewTool.class.getClassLoader().getResource(
+			grammerManager = new GrammerManager();
+			grammerManager.init(ViewTool.class.getClassLoader().getResource(
 					"self/micromagic/eterna/view/grammer.xml").openStream());
 			Utility.addFieldPropertyManager(CHECK_GRAMMER_FLAG, ViewTool.class, "checkGrammer");
 		}

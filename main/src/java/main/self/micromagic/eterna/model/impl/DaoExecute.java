@@ -31,7 +31,7 @@ import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.share.EternaFactory;
 
-public abstract class SQLExecute extends AbstractExecute
+public abstract class DaoExecute extends AbstractExecute
 		implements Execute
 {
 	protected List binds = new LinkedList();
@@ -60,7 +60,7 @@ public abstract class SQLExecute extends AbstractExecute
 		this.binds = tmpList;
 	}
 
-	protected abstract Dao getSQL() throws EternaException;
+	protected abstract Dao getDao() throws EternaException;
 
 	public boolean isPushResult()
 	{

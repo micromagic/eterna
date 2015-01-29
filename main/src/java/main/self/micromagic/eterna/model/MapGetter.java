@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.model.impl;
+package self.micromagic.eterna.model;
 
 import java.util.Map;
 import java.util.HashMap;
 
-import self.micromagic.eterna.model.AppData;
 import self.micromagic.util.container.ValueContainerMap;
 import self.micromagic.util.container.RequestHeaderContainer;
 import self.micromagic.util.container.CookieContainer;

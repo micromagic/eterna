@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<grammer-config>
+
+   <!-- 表达式检测 -->
+   <list name="expression_checker">
+      <list-cell refName="expression"/>
+      <list-cell refName="end"/>
+   </list>
+
+   <!-- 表达式 -->
+   <list name="expression">
+      <list-cell opt="*">
+         <list>
+            <list-cell refName="blank"/>
+            <list-cell refName="expression_cell" opt="?"/>
+            <list-cell opt="?">
+               <list type="egroup">
+                  <list-cell refName="blank"/>
+                  <list-cell>
+                     <node name="s_block_b" type="operator"><true-set chars="("/></node>
+                  </list-cell>
+                  <list-cell refName="expression" opt="?"/>
+                  <list-cell refName="blank"/>
+                  <list-cell>
+                     <node name="s_block_e" type="operator"><true-set chars=")"/></node>
+                  </list-cell>
+               </list>
+            </list-cell>
+         </list>
+      </list-cell>
+   </list>
+
+   <!-- 表达式单元 -->
+   <group name="expression_cell">
+      <group-cell refName="name"/>
+      <group-cell refName="refName"/>
+      <group-cell refName="opt_group"/>
+      <group-cell refName="object_group"/>
+   </group>
+
+   <!-- 运算符组 -->
+   <group name="opt_group" type="operator">
+      <group-cell><node><true-set chars="!.+-*\/%&amp;^|=?:;,&gt;&lt;@"/></node></group-cell>
+   </group>
+
+   <!-- 文件结束标志 -->
+   <node name="end" end="true" type="operator"/>
+
+   <!-- 空白部分 -->
+   <list name="blank" type="blank">
+      <list-cell opt="*">
+         <node><true-set chars=" &#x9;&#xA;&#xD;"/></node>
+      </list-cell>
+   </list>
+   <list name="blank_need" type="blank">
+      <list-cell opt="+">
+         <node><true-set chars=" &#x9;&#xA;&#xD;"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 名称 -->
+   <list name="name" type="name">
+      <list-cell>
+         <node><true-set chars="_$"/><true-range begin="a" end="z"/><true-range begin="A" end="Z"/></node>
+      </list-cell>
+      <list-cell opt="*">
+         <node><true-set chars="_$"/><true-range begin="a" end="z"/><true-range begin="A" end="Z"/><true-range begin="0" end="9"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 数据引用的定义 -->
+   <list name="refName" type="name">
+      <list-cell refName="name"/>
+      <list-cell refName="subName" opt="*"/>
+   </list>
+   <!-- 数据引用的子名称 -->
+   <group name="subName" type="name">
+      <group-cell>
+         <list>
+            <list-cell>
+               <node name="subBegin" type="operator"><true-set chars="."/></node>
+            </list-cell>
+            <list-cell refName="name"/>
+         </list>
+      </group-cell>
+      <group-cell>
+         <list>
+            <list-cell>
+               <node name="m_block_b" type="operator"><true-set chars="["/></node>
+            </list-cell>
+            <list-cell>
+               <group>
+                  <group-cell refName="name"/>
+                  <group-cell refName="string"/>
+               </group>
+            </list-cell>
+            <list-cell>
+               <node name="m_block_e" type="operator"><true-set chars="]"/></node>
+            </list-cell>
+         </list>
+      </group-cell>
+   </group>
+
+   <!-- 整型 -->
+   <list name="int" type="int">
+      <list-cell refName="digits"/>
+   </list>
+
+   <!-- 数字 -->
+   <list name="digits">
+      <list-cell opt="?">
+         <node><true-set chars="+-"/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="9"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 8进制整型 -->
+   <list name="int8" type="int8">
+      <list-cell>
+         <node><true-set chars="0"/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="7"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 16进制整型 -->
+   <list name="int16" type="int16">
+      <list-cell>
+         <node><true-set chars="0"/></node>
+      </list-cell>
+      <list-cell>
+         <node><true-set chars="xX"/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="9"/><true-range begin="a" end="f"/><true-range begin="A" end="F"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 浮点型 -->
+   <group name="float" type="float">
+      <group-cell>
+         <list>
+            <list-cell refName="digits"/>
+            <list-cell refName="float_frac" opt="?"/>
+            <list-cell refName="float_exp" opt="?"/>
+         </list>
+      </group-cell>
+      <group-cell>
+         <list>
+            <list-cell refName="float_frac"/>
+            <list-cell refName="float_exp" opt="?"/>
+         </list>
+      </group-cell>
+   </group>
+
+   <!-- 浮点型小数部分 -->
+   <list name="float_frac">
+      <list-cell>
+         <node><true-set chars="."/></node>
+      </list-cell>
+      <list-cell opt="+">
+         <node><true-range begin="0" end="9"/></node>
+      </list-cell>
+   </list>
+
+   <!-- 浮点型指数部分 -->
+   <list name="float_exp">
+      <list-cell>
+         <node><true-set chars="eE"/></node>
+      </list-cell>
+      <list-cell refName="digits"/>
+   </list>
+
+   <!-- 数字 -->
+   <group name="number">
+      <group-cell refName="int16"/>
+      <group-cell refName="int8"/>
+      <group-cell refName="int"/>
+      <group-cell refName="float"/>
+   </group>
+
+   <!-- 对象组 -->
+   <group name="object_group">
+      <group-cell refName="string"/>
+      <group-cell refName="name"/>
+      <group-cell refName="number"/>
+   </group>
+
+   <!-- 字符串1 双引号的字符串 -->
+   <list name="string">
+      <list-cell>
+         <node type="operator"><true-set chars="&quot;"/></node>
+      </list-cell>
+      <list-cell refName="stringBody1" opt="*"/>
+      <list-cell>
+         <node type="operator"><true-set chars="&quot;"/></node>
+      </list-cell>
+   </list>
+   <list name="chars1" type="text">
+      <list-cell opt="*">
+         <node other="true">
+            <false-set chars="&quot;\&#xA;&#xD;"/>
+         </node>
+      </list-cell>
+   </list>
+   <list name="stringBody1">
+      <list-cell refName="chars1"/>
+      <list-cell refName="escape" opt="*"/>
+   </list>
+
+   <!-- 转义符 -->
+   <list name="escape" type="escape">
+      <list-cell>
+         <node><true-set chars="\"/></node>
+      </list-cell>
+      <list-cell>
+         <group>
+            <group-cell><node><true-set chars="t"/></node></group-cell>
+            <group-cell><node><true-set chars="f"/></node></group-cell>
+            <group-cell><node><true-set chars="r"/></node></group-cell>
+            <group-cell><node><true-set chars="n"/></node></group-cell>
+            <group-cell><node><true-set chars="b"/></node></group-cell>
+            <group-cell><node><true-set chars="\"/></node></group-cell>
+            <group-cell><node><true-set chars="'"/></node></group-cell>
+            <group-cell><node><true-set chars="&quot;"/></node></group-cell>
+            <group-cell>
+               <list>
+                  <list-cell><node><true-set chars="u"/></node></list-cell>
+                  <list-cell min="4" max="4"><node><true-range begin="0" end="9"/><true-range begin="a" end="f"/><true-range begin="A" end="F"/></node></list-cell>
+               </list>
+            </group-cell>
+         </group>
+      </list-cell>
+   </list>
+
+</grammer-config>

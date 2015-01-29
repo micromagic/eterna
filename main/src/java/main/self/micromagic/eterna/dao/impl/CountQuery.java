@@ -215,6 +215,16 @@ class CountQuery
 		return this.query.getPreparerManager();
 	}
 
+	public boolean isParameterSetted(int index)
+	{
+		return this.query.isParameterSetted(index);
+	}
+
+	public boolean isParameterSetted(String name)
+	{
+		return this.query.isParameterSetted(name);
+	}
+
 	public boolean isDynamicParameter(int index)
 			throws EternaException
 	{

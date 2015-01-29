@@ -58,7 +58,7 @@ import self.micromagic.util.logging.MemoryLogger;
  */
 public class Jdk14Factory extends LogFactory
 {
-	public static final String USE_ETERNA_LOG = "self.micromagic.useEternaLog";
+	public static final String USE_JDK_LOG_FLAG = "useJdkLog";
 
 	private static ConsoleFlushTimer consoleFlushTimer;
 	private static int consoleFlushDelay = 5000;

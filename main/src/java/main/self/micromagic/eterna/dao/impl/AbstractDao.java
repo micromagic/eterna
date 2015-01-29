@@ -255,6 +255,23 @@ public abstract class AbstractDao extends AbstractGenerator
 		return this.preparerManager;
 	}
 
+	public boolean isParameterSetted(int index)
+			throws EternaException
+	{
+		if (this.daoManager == null)
+		{
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
+		}
+		return this.daoManager.isParamSetted(index);
+	}
+
+	public boolean isParameterSetted(String name)
+			throws EternaException
+	{
+		return this.isParameterSetted(this.getParameterIndex(name));
+	}
+
 	public boolean isDynamicParameter(int index)
 			throws EternaException
 	{

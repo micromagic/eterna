@@ -22,12 +22,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Method;
-import java.net.URL;
 import java.rmi.server.UID;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.sql.DataSource;
 
@@ -90,22 +86,14 @@ public class Utility
 	 */
 	static boolean SHOW_RDP_FAIL = false;
 
-	private static PropertiesManager propertiesManager = new PropertiesManager();
-	private static URL properties_URL;
-	private static Map classLoaderPropsMap = new WeakHashMap();
-	private static Map propertiesMap = new HashMap();
-	private static Map dataSourceMap = new HashMap();
+	private static PropertiesManager propertiesManager;
+	private static DataSource dataSource;
 
 	static
 	{
 		try
 		{
-			ClassLoader cl = propertiesManager.getClass().getClassLoader();
-			properties_URL = cl.getResource(PROPERTIES_NAME);
-			Map tmpMap = new HashMap(2);
-			tmpMap.put(PROPERTIES_NAME, properties_URL);
-			classLoaderPropsMap.put(cl, tmpMap);
-			propertiesMap.put(properties_URL, propertiesManager);
+			propertiesManager = new PropertiesManager();
 		}
 		catch (Throwable ex)
 		{
@@ -147,7 +135,7 @@ public class Utility
 
 	public static Log createLog(String name)
 	{
-		if ("true".equalsIgnoreCase(propertiesManager.getProperty(Jdk14Factory.USE_ETERNA_LOG)))
+		if ("true".equalsIgnoreCase(propertiesManager.getProperty(Jdk14Factory.USE_JDK_LOG_FLAG)))
 		{
 			return new Jdk14Factory().getInstance(name);
 		}
@@ -157,6 +145,10 @@ public class Utility
 		}
 	}
 
+	/**
+	 * 从当前线程的上下文环境中获取ClassLoader, 如果不存在则给出Utility类
+	 * 所属的ClassLoader.
+	 */
 	public static ClassLoader getContextClassLoader()
 	{
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -166,105 +158,6 @@ public class Utility
 	public static Integer createInteger(int i)
 	{
 		return i >= 0 && i <= 15 ? INTEGER_ARRAY[i] : new Integer(i);
-	}
-
-	/**
-	 * 根据ClassLoader获得本上下文中的配置文件.
-	 */
-	public static PropertiesManager getProperties(ClassLoader cl, ObjectRef prop_URL)
-	{
-		return getProperties(cl, prop_URL, null);
-	}
-
-	/**
-	 * 根据ClassLoader获得本上下文中的指定的配置文件.
-	 */
-	public static synchronized PropertiesManager getProperties(ClassLoader cl, ObjectRef prop_URL,
-			String propLocal)
-	{
-		String tmpLocal = propLocal == null ? PROPERTIES_NAME : propLocal;
-		try
-		{
-			// 根据ClassLoader获取配置表
-			Map urlMap = (Map) classLoaderPropsMap.get(cl);
-			if (urlMap == null)
-			{
-				urlMap = new HashMap();
-				classLoaderPropsMap.put(cl, urlMap);
-			}
-			// 在配置表中获取对应的配置文件的URL
-			URL tempURL = (URL) urlMap.get(tmpLocal);
-			PropertiesManager tmpProps = null;
-			if (tempURL != null)
-			{
-				// 根据配置文件的URL在属性表中获取属性
-				tmpProps = (PropertiesManager) propertiesMap.get(tempURL);
-				if (tmpProps != null)
-				{
-					if (prop_URL != null) prop_URL.setObject(tempURL);
-					return tmpProps;
-				}
-			}
-			// 没有对应的属性, 则根据配置从ClassLoader获取URL资源
-			Enumeration e = cl.getResources(tmpLocal);
-			if (e == null)
-			{
-				// 获取不到URL资源, 则返回默认的
-				if (propLocal == null || tmpLocal.equals(PROPERTIES_NAME))
-				{
-					urlMap.put(tmpLocal, properties_URL);
-					if (prop_URL != null) prop_URL.setObject(properties_URL);
-					return propertiesManager;
-				}
-				return null;
-			}
-
-			while (e.hasMoreElements())
-			{
-				// 对每个URL在属性表中获取属性, 如果存在属性, 则作为备选
-				tempURL = (URL) e.nextElement();
-				tmpProps = (PropertiesManager) propertiesMap.get(tempURL);
-				if (tmpProps != null)
-				{
-					if (prop_URL != null) prop_URL.setObject(tempURL);
-				}
-				else
-				{
-					// 资源中不存在属性, 则读取此属性并返回
-					tmpProps = new PropertiesManager(propLocal, cl);
-					urlMap.put(tmpLocal, tempURL);
-					propertiesMap.put(tempURL, tmpProps);
-					if (prop_URL != null)
-					{
-						prop_URL.setObject(tempURL);
-					}
-					return tmpProps;
-				}
-			}
-			// 能执行到这里表示没有获取到新的属性, 使用备选属性
-			if (tmpProps != null)
-			{
-				urlMap.put(tmpLocal, tempURL);
-				return tmpProps;
-			}
-			// 获取不到属性, 则返回默认的
-			if (propLocal == null || tmpLocal.equals(PROPERTIES_NAME))
-			{
-				urlMap.put(tmpLocal, properties_URL);
-				if (prop_URL != null)
-				{
-					prop_URL.setObject(properties_URL);
-				}
-				return propertiesManager;
-			}
-		}
-		catch (Throwable ex)
-		{
-			System.err.println(FormatTool.getCurrentDatetimeString()
-					+ ": Error when getProperties in Utility.");
-			ex.printStackTrace(System.err);
-		}
-		return null;
 	}
 
 	public static String getProperty(String key)
@@ -300,11 +193,6 @@ public class Utility
 	{
 		return obj1 == obj2 || (obj1 != null && obj2 != null && obj1.equals(obj2));
 	}
-
-	/**
-	 * 单个String类型的参数.
-	 */
-	static Class[] STR_PARAM = {String.class};
 
 	/**
 	 * 添加一个配置监控者, 当配置的值改变时, 它会自动更新指定类的静态属性成员, 该属性
@@ -636,39 +524,21 @@ public class Utility
 
 	public static DataSource getDataSource()
 	{
-		ClassLoader cl = getContextClassLoader();
-		if (cl == null)
+		DataSource tmpDS = dataSource;
+		if (tmpDS != null)
 		{
-			cl = propertiesManager.getClass().getClassLoader();
+			return tmpDS;
 		}
-		ObjectRef urlRef = new ObjectRef();
-		URL prop_URL;
-		PropertiesManager prop = getProperties(cl, urlRef);
-		if (prop == null)
+		synchronized (Utility.class)
 		{
-			prop = propertiesManager;
-			prop_URL = properties_URL;
-		}
-		else
-		{
-			prop_URL = (URL) urlRef.getObject();
-		}
-		DataSource dataSource = (DataSource) dataSourceMap.get(prop_URL);
-		if (dataSource != null)
-		{
-			return dataSource;
-		}
-
-		synchronized (dataSourceMap)
-		{
-			dataSource = (DataSource) dataSourceMap.get(prop_URL);
-			if (dataSource != null)
+			tmpDS = dataSource;
+			if (tmpDS != null)
 			{
-				return dataSource;
+				return tmpDS;
 			}
-			System.out.println("Start creat datasource, URL:" + prop_URL);
+			System.out.println("Start creat datasource.");
 
-			String className = prop.getProperty("dataSource.className");
+			String className = getProperty("dataSource.className");
 			if (className != null && className.length() > 0)
 			{
 				System.out.println("Creat datasource:" + className + ".");
@@ -682,15 +552,14 @@ public class Utility
 			try
 			{
 				Class c = Class.forName(className);
-				dataSource = (DataSource) c.newInstance();
-				setDataSourceProperties(dataSource, prop);
+				tmpDS = (DataSource) c.newInstance();
+				setDataSourceProperties(dataSource, propertiesManager);
 			}
 			catch (Exception ex)
 			{
 				System.out.println("Error! Creat datasource:" + className + " message:" + ex.getMessage());
 			}
-			dataSourceMap.put(prop_URL, dataSource);
-			return dataSource;
+			return dataSource = tmpDS;
 		}
 	}
 
@@ -698,6 +567,10 @@ public class Utility
 		"description", "String", "driverClass", "String", "maxCount", "int", "minCount", "int",
 		"url", "String", "user", "String", "password", "String", "autoCommit", "boolean"
 	};
+	/**
+	 * 单个String类型的参数.
+	 */
+	static Class[] STR_PARAM = {String.class};
 
 	private static void setDataSourceProperties(DataSource dataSource, PropertiesManager prop)
 			throws Exception

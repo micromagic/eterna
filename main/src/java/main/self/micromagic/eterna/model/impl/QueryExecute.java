@@ -36,7 +36,7 @@ import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.share.EternaException;
 
-public class QueryExecute extends SQLExecute
+public class QueryExecute extends DaoExecute
 		implements Execute, QueryExecuteGenerator
 {
 	private int start = 1;
@@ -55,7 +55,7 @@ public class QueryExecute extends SQLExecute
 		this.queryAdapterIndex = this.factory.findObjectId(this.getName());
 	}
 
-	protected Dao getSQL()
+	protected Dao getDao()
 			throws EternaException
 	{
 		return this.queryAdapterIndex == -1 ? this.factory.createQueryAdapter(this.getName())

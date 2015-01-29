@@ -29,8 +29,9 @@ public class ThreadCache
 	 *
 	 * 新版本中取消了这种实现方式.
 	 * 因为在应用服务器会使用线程缓冲池, 这样线程是不会被释放的, 那缓存在线程
-	 * 中的对象也不会被释放. 当应用被重新加载的时候, 原来的应用就无法被释放,
-	 * 因为新的应用产生了新的ThreadLocal, 不会覆盖原来的, 从而造成内存的泄漏.
+	 * 中的(子ClassLoader载入)对象也不会被释放. 当应用被重新加载的时候, 原来
+	 * 的应用就无法被释放, 因为新的应用产生了新的ThreadLocal, 不会覆盖原来的,
+	 * 从而造成内存的泄漏.
 	 */
 	//private static final ThreadLocal localCache = new ThreadLocalCache();
 
@@ -40,7 +41,7 @@ public class ThreadCache
 	private static final Map threadCaches = new SynHashMap(32, SynHashMap.WEAK);
 
 
-	private Map propertys;
+	private final Map propertys;
 
 	private ThreadCache()
 	{
@@ -64,6 +65,11 @@ public class ThreadCache
 		ThreadCache threadCache = (ThreadCache) threadCaches.get(t);
 		if (threadCache == null)
 		{
+			// 这里是以当前线程作为主键, 所以可以直接创建并放入到threadCaches
+			// 因为其它线程中不会产生相同的主键
+			threadCache = new ThreadCache();
+			threadCaches.put(t, threadCache);
+			/*
 			synchronized (threadCaches)
 			{
 				// 在同步的环境下再判断是否存在, 不存在的话再生成
@@ -74,6 +80,7 @@ public class ThreadCache
 					threadCaches.put(t, threadCache);
 				}
 			}
+			*/
 		}
 		return threadCache;
 	}

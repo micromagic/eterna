@@ -268,11 +268,7 @@ public class ContainerManager
 		}
 		if (loader == null)
 		{
-			loader = Thread.currentThread().getContextClassLoader();
-			if (loader == null)
-			{
-				loader = ContainerManager.class.getClassLoader();
-			}
+			loader = Utility.getContextClassLoader();
 		}
 		fc.setClassLoader(loader);
 		if (share != null)
