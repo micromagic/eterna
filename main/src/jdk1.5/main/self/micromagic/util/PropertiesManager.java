@@ -55,7 +55,7 @@ public class PropertiesManager
 	 * 默认的配置文件名.
 	 * 注: 配置文件都必须在classpath下.
 	 */
-	public static final String PROPERTIES_NAME = "micromagic_config.properties";
+	public static final String PROPERTIES_NAME = "eterna.config";
 
 	/**
 	 * 存放父配置文件名的属性.
