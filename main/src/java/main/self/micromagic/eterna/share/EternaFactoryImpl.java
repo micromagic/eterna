@@ -36,10 +36,12 @@ import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultFormat;
 import self.micromagic.eterna.dao.SpecialLog;
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.digester2.ParseException;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.ModelCallerImpl;
@@ -272,16 +274,9 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 
 		// 初始化, model-caller
-		if (this.modelCaller == this.defaultModelCaller && this.shareEternaFactory != null)
-		{
-			// 如果未设置过model-caller且有共享工厂, 则使用共享工厂的
-			this.modelCaller = this.shareEternaFactory.getModelCaller();
-		}
-		else
-		{
-			ParseException.setContextInfo("modelCaller");
-			this.modelCaller.initModelCaller(this);
-		}
+		// model-caller不能使用共享工厂中的对象.
+		ParseException.setContextInfo("modelCaller");
+		this.modelCaller.initModelCaller(this);
 
 		// 初始化, string-coder
 		ParseException.setContextInfo("stringCoder");
@@ -400,25 +395,25 @@ public class EternaFactoryImpl extends AbstractFactory
 		return (ResultFormat) this.createObject(name);
 	}
 
-	public Query createQueryAdapter(String name)
+	public Query createQuery(String name)
 			throws EternaException
 	{
 		return (Query) this.createObject(name);
 	}
 
-	public Query createQueryAdapter(int id)
+	public Query createQuery(int id)
 			throws EternaException
 	{
 		return (Query) this.createObject(id);
 	}
 
-	public Update createUpdateAdapter(String name)
+	public Update createUpdate(String name)
 			throws EternaException
 	{
 		return (Update) this.createObject(name);
 	}
 
-	public Update createUpdateAdapter(int id)
+	public Update createUpdate(int id)
 			throws EternaException
 	{
 		return (Update) this.createObject(id);
@@ -428,6 +423,13 @@ public class EternaFactoryImpl extends AbstractFactory
 			throws EternaException
 	{
 		return (PreparerCreater) this.createObject(name);
+	}
+
+	public ValuePreparer createValuePreparer(int type, Object value)
+			throws EternaException
+	{
+		PreparerCreater pc = CreaterManager.createPrepare(type, null, this);
+		return pc.createPreparer(value);
 	}
 
 	//----------------------------------  search  --------------------------------------
@@ -447,13 +449,13 @@ public class EternaFactoryImpl extends AbstractFactory
 		return (List) this.createObject(name);
 	}
 
-	public Search createSearchAdapter(String name)
+	public Search createSearch(String name)
 			throws EternaException
 	{
 		return (Search) this.createObject(name);
 	}
 
-	public Search createSearchAdapter(int id)
+	public Search createSearch(int id)
 			throws EternaException
 	{
 		return (Search) this.createObject(id);
@@ -568,16 +570,16 @@ public class EternaFactoryImpl extends AbstractFactory
 		return (ModelExport) this.createObject(exportName);
 	}
 
-	public ModelAdapter createModelAdapter(String name)
+	public Model createModel(String name)
 			throws EternaException
 	{
-		return (ModelAdapter) this.createObject(name);
+		return (Model) this.createObject(name);
 	}
 
-	public ModelAdapter createModelAdapter(int id)
+	public Model createModel(int id)
 			throws EternaException
 	{
-		return (ModelAdapter) this.createObject(id);
+		return (Model) this.createObject(id);
 	}
 
 
@@ -643,13 +645,13 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 	}
 
-	public View createViewAdapter(String name)
+	public View createView(String name)
 			throws EternaException
 	{
 		return (View) this.createObject(name);
 	}
 
-	public View createViewAdapter(int id)
+	public View createView(int id)
 			throws EternaException
 	{
 		return (View) this.createObject(id);

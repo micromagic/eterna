@@ -137,27 +137,27 @@ public interface Query extends Dao
 	/**
 	 * 获取该查询对象是从第几条记录开始读取, 默认值为"1".
 	 */
-	int getStartRow() throws SQLException;
+	int getStartRow() throws EternaException, SQLException;
 
 	/**
 	 * 设置从第几条记录开始取值(从1开始计数).
 	 *
 	 * @param startRow   起始行号
 	 */
-	void setStartRow(int startRow) throws SQLException;
+	void setStartRow(int startRow) throws EternaException, SQLException;
 
 	/**
 	 * 获取该查询对象读取的最大记录数, 默认值为"-1", 表示
 	 * 取完为止.
 	 */
-	int getMaxRows() throws SQLException;
+	int getMaxRows() throws EternaException, SQLException;
 
 	/**
 	 * 设置取出的最大记录数，-1表示取完为止.
 	 *
 	 * @param maxRows   取出的最大记录数
 	 */
-	void setMaxRows(int maxRows) throws SQLException;
+	void setMaxRows(int maxRows) throws EternaException, SQLException;
 
 	/**
 	 * 获取该查询对象设置的总记录数.
@@ -181,21 +181,21 @@ public interface Query extends Dao
 	/**
 	 * 设置该查询对象的记录数. <p>
 	 *
-	 * @param totalCount   总记录数.
-	 * @param ext          扩展信息, 只有在totalCount的值设为0-N时才有效.
+	 * @param totalCount  总记录数.
+	 * @param info        相关信息, 只有在totalCount的值设为0-N时才有效.
 	 *
 	 * @see #setTotalCount(int)
 	 * @see #TOTAL_COUNT_AUTO
 	 * @see #TOTAL_COUNT_NONE
 	 * @see #TOTAL_COUNT_COUNT
 	 */
-	void setTotalCount(int totalCount, TotalCountExt ext) throws EternaException;
+	void setTotalCount(int totalCount, TotalCountInfo info) throws EternaException;
 
 	/**
-	 * 获取该查询对象设置的总记录数扩展信息. <p>
+	 * 获取该查询对象设置的总记录数的相关信息. <p>
 	 * 只有在totalCount的值设为0-N时, 该值才有效.
 	 */
-	TotalCountExt getTotalCountExt() throws EternaException;
+	TotalCountInfo getTotalCountInfo() throws EternaException;
 
 	/**
 	 * 获得查询的结果, 用于少量(100条左右)数据的查询.
@@ -226,9 +226,9 @@ public interface Query extends Dao
 			throws EternaException, SQLException;
 
 	/**
-	 * 设置总记录数的扩展信息.
+	 * 总记录数的相关信息.
 	 */
-	static final class TotalCountExt
+	static final class TotalCountInfo
 	{
 		/**
 		 * 是否还有更多记录.
@@ -238,12 +238,12 @@ public interface Query extends Dao
 		/**
 		 * 总记录数是否可用.
 		 */
-		public final boolean realRecordCountAvailable;
+		public final boolean totalCountAvailable;
 
-		public TotalCountExt(boolean hasMoreRecord, boolean realRecordCountAvailable)
+		public TotalCountInfo(boolean hasMoreRecord, boolean totalCountAvailable)
 		{
 			this.hasMoreRecord = hasMoreRecord;
-			this.realRecordCountAvailable = realRecordCountAvailable;
+			this.totalCountAvailable = totalCountAvailable;
 		}
 
 		public boolean equals(Object obj)
@@ -252,11 +252,11 @@ public interface Query extends Dao
 			{
 				return true;
 			}
-			if (obj instanceof TotalCountExt)
+			if (obj instanceof TotalCountInfo)
 			{
-				TotalCountExt other = (TotalCountExt) obj;
+				TotalCountInfo other = (TotalCountInfo) obj;
 				return this.hasMoreRecord == other.hasMoreRecord
-						&& this.realRecordCountAvailable == other.realRecordCountAvailable;
+						&& this.totalCountAvailable == other.totalCountAvailable;
 			}
 			return false;
 		}

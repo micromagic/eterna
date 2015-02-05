@@ -50,6 +50,104 @@ public class StringTool
 	public static final int MAX_INTERN_SIZE = 1024 * 8;
 
 	/**
+	 * 处理字符串, 将其转换为HTML格式的代码.
+	 */
+	public static String dealString2HTML(String str)
+	{
+		return dealString2HTML(str, false);
+	}
+
+	/**
+	 * 处理字符串, 将其转换为HTML格式的代码.
+	 *
+	 * @param dealNewLine  是否要将换行"\n"处理成"<br>"
+	 */
+	public static String dealString2HTML(String str, boolean dealNewLine)
+	{
+		if (str == null)
+		{
+			return "";
+		}
+		StringAppender temp = null;
+		int modifyCount = 0;
+		boolean preSpace = true;
+		for (int i = 0; i < str.length(); i++)
+		{
+			char c = str.charAt(i);
+			String appendStr = null;
+			switch (c)
+			{
+				case '<':
+					appendStr = "&lt;";
+					modifyCount++;
+					break;
+				case '>':
+					appendStr = "&gt;";
+					modifyCount++;
+					break;
+				case '&':
+					appendStr = "&amp;";
+					modifyCount++;
+					break;
+				case '"':
+					appendStr = "&quot;";
+					modifyCount++;
+					break;
+				case '\'':
+					appendStr = "&#39;";
+					modifyCount++;
+					break;
+				case '\n':
+					if (dealNewLine)
+					{
+						appendStr = "\n<br>";
+						modifyCount++;
+						preSpace = true;
+					}
+					break;
+				case ' ':
+					if (dealNewLine)
+					{
+						if (preSpace)
+						{
+							appendStr = "&nbsp;";
+							modifyCount++;
+							preSpace = false;
+						}
+						else
+						{
+							preSpace = true;
+						}
+					}
+					break;
+			}
+			if (c > ' ')
+			{
+				preSpace = false;
+			}
+			if (modifyCount == 1)
+			{
+				temp = StringTool.createStringAppender(str.length() + 16);
+				temp.append(str.substring(0, i));
+				//这里将modifyCount的个数增加, 防止下一次调用使他继续进入这个初始化
+				modifyCount++;
+			}
+			if (modifyCount > 0)
+			{
+				if (appendStr == null)
+				{
+					temp.append(c);
+				}
+				else
+				{
+					temp.append(appendStr);
+				}
+			}
+		}
+		return temp == null ? str : temp.toString();
+	}
+
+	/**
 	 * 处理字符串, 将其转换为可放入双引号内赋值的字符串.
 	 * 同时会将小于空格的代码(不包括:\r,\n,\t), 转换为空格.
 	 */

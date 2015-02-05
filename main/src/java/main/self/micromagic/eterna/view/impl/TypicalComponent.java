@@ -62,12 +62,12 @@ public class TypicalComponent extends AbstractGenerator
 		return false;
 	}
 
-	public void setComponent(Component com)
+	public void addComponent(Component com)
 			throws EternaException
 	{
 		if (this.component != null)
 		{
-			throw new EternaException("The component has setted.");
+			throw new EternaException("The component has setted in typical [" + this.getName() + "].");
 		}
 		this.component = com;
 	}

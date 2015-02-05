@@ -26,7 +26,7 @@ import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.model.UpdateExecuteGenerator;
@@ -38,7 +38,7 @@ public class UpdateExecute extends DaoExecute
 	protected boolean multiType = false;
 	protected int updateAdapterIndex = -1;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)
@@ -52,8 +52,8 @@ public class UpdateExecute extends DaoExecute
 	protected Dao getDao()
 			throws EternaException
 	{
-		return this.updateAdapterIndex == -1 ? this.factory.createUpdateAdapter(this.getName())
-				: this.factory.createUpdateAdapter(this.updateAdapterIndex);
+		return this.updateAdapterIndex == -1 ? this.factory.createUpdate(this.getName())
+				: this.factory.createUpdate(this.updateAdapterIndex);
 	}
 
 	public String getExecuteType()
@@ -89,7 +89,7 @@ public class UpdateExecute extends DaoExecute
 		}
 		if (update == null)
 		{
-			update = this.factory.createUpdateAdapter(this.updateAdapterIndex);
+			update = this.factory.createUpdate(this.updateAdapterIndex);
 			if (this.sqlCacheIndex != -1)
 			{
 				data.caches[this.sqlCacheIndex] = update;

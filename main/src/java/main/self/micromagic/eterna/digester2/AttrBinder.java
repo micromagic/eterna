@@ -27,6 +27,7 @@ import self.micromagic.cg.CellAccessInfo;
 import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 /**
  * 通过名称来的设置来绑定配置与对象的属性.
@@ -148,6 +149,10 @@ public class AttrBinder
 				{
 					sag.setIntern(ParseRule.booleanConverter.convertToBoolean(bStr));
 				}
+				if ((bStr = (String) params.get("r")) != null)
+				{
+					sag.setResolve(ParseRule.booleanConverter.convertToBoolean(bStr));
+				}
 				if ((bStr = (String) params.get("m")) != null)
 				{
 					sag.setMustExists(ParseRule.booleanConverter.convertToBoolean(bStr));
@@ -237,6 +242,12 @@ class StandardAttrGetter
 	}
 	private boolean intern = true;
 
+	public void setResolve(boolean b)
+	{
+		this.resolve = b;
+	}
+	private boolean resolve;
+
 	public Object get(Element el)
 	{
 		String r = el.attributeValue(this.flag);
@@ -248,6 +259,10 @@ class StandardAttrGetter
 			}
 			throw new ParseException("Not found attribute [" + this.flag
 					+ "] at tag [" + el.getName() + "].");
+		}
+		if (this.resolve)
+		{
+			r = Utility.resolveDynamicPropnames(r);
 		}
 		return this.intern ? StringTool.intern(r) : r;
 	}

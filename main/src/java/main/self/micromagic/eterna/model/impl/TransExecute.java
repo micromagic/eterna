@@ -35,7 +35,7 @@ import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.TransExecuteGenerator;
 import self.micromagic.eterna.model.TransOperator;
@@ -67,7 +67,7 @@ public class TransExecute extends AbstractExecute
 	protected TransOperator opt;
 	protected boolean pushResult = false;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)

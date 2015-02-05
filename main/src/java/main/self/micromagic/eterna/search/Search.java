@@ -48,6 +48,21 @@ public interface Search
 	String SINGLE_ORDER_TYPE = ".orderType";
 
 	/**
+	 * 在item的arrtibute中设置使用prepare的名称.
+	 */
+	public static final String PREPARE_FLAG = "prepare";
+
+	/**
+	 * 在item的arrtibute中设置输入类型的名称.
+	 */
+	public static final String INPUT_TYPE_FLAG = "inputType";
+
+	/**
+	 * 在item的arrtibute中设置默认条件构造器的名称.
+	 */
+	public static final String DEFAULT_BUILDER_FLAG = "defaultBuilder";
+
+	/**
 	 * 设置默认每页行数的属性名称. <p>
 	 * 可在配置中按如下方法设置:
 	 * <search>
@@ -155,8 +170,6 @@ public interface Search
 	 * @return  如果未绑定则返回null, 如果已绑定则返回参数设置器
 	 */
 	ParameterSetting getParameterSetting() throws EternaException;
-
-	String getParentConditionPropretyName() throws EternaException;
 
 	String getConditionPropertyOrder() throws EternaException;
 

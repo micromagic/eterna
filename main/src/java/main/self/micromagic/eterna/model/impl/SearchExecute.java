@@ -16,23 +16,25 @@
 
 package self.micromagic.eterna.model.impl;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.io.IOException;
 import java.util.Map;
 
-import self.micromagic.eterna.model.DataHandler;
-import self.micromagic.eterna.model.SearchExecuteGenerator;
-import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
-import self.micromagic.eterna.model.ModelExport;
+import org.dom4j.Element;
+
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.model.DataHandler;
+import self.micromagic.eterna.model.Execute;
+import self.micromagic.eterna.model.Model;
+import self.micromagic.eterna.model.ModelExport;
+import self.micromagic.eterna.model.SearchExecuteGenerator;
 import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import org.dom4j.Element;
+import self.micromagic.util.StringTool;
 
 
 public class SearchExecute extends AbstractExecute
@@ -46,9 +48,9 @@ public class SearchExecute extends AbstractExecute
 	{
 		try
 		{
-			DEFAULT_QUERY_RESULT.setConfig("data:queryResult");
-			DEFAULT_SEARCH_MANAGER.setConfig("data:searchManager");
-			DEFAULT_SEARCH_COUNT.setConfig("data:searchCount");
+			DEFAULT_QUERY_RESULT.setConfig("data.queryResult");
+			DEFAULT_SEARCH_MANAGER.setConfig("data.searchManager");
+			DEFAULT_SEARCH_COUNT.setConfig("data.searchCount");
 		}
 		catch (EternaException ex)
 		{
@@ -72,7 +74,7 @@ public class SearchExecute extends AbstractExecute
 	private boolean holdConnection = false;
 	protected boolean doExecute = true;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)
@@ -111,15 +113,10 @@ public class SearchExecute extends AbstractExecute
 	public void setQueryResultName(String config)
 			throws EternaException
 	{
-		if (config == null || config.length() == 0)
+		if (StringTool.isEmpty(config))
 		{
 			this.queryResult = null;
 			return;
-		}
-		if (config.indexOf(':') == -1)
-		{
-			// 如果配置格式中没有":", 说明是用旧的配置格式, 前面补上"data:"
-			config = "data:" + config;
 		}
 		this.queryResult = new DataHandler("queryResult", true, false);
 		this.queryResult.setConfig(config);
@@ -128,17 +125,12 @@ public class SearchExecute extends AbstractExecute
 	public void setSearchManagerName(String config)
 			throws EternaException
 	{
-		if (config == null || config.length() == 0)
+		if (StringTool.isEmpty(config))
 		{
 			this.searchManager = null;
 			return;
 		}
-		if (config.indexOf(':') == -1)
-		{
-			// 如果配置格式中没有":", 说明是用旧的配置格式, 前面补上"data:"
-			config = "data:" + config;
-		}
-		this.searchManager = new DataHandler("searchManager", true, false);
+		this.searchManager = new DataHandler("condition", true, false);
 		this.searchManager.setConfig(config);
 	}
 
@@ -230,7 +222,7 @@ public class SearchExecute extends AbstractExecute
 					nowNode.addAttribute("doExecute", String.valueOf(this.doExecute));
 				}
 			}
-			Search search = f.createSearchAdapter(searchName);
+			Search search = f.createSearch(searchName);
 			if (this.searchCacheIdnex != -1)
 			{
 				data.caches[this.searchCacheIdnex] = search;

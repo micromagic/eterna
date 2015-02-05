@@ -31,7 +31,7 @@ import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.security.EmptyPermission;
@@ -69,7 +69,7 @@ public class SearchExecute extends AbstractExecute
 				.addAttribute("caption", "group 1").addAttribute("name", "0");
 	}
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)
@@ -122,12 +122,12 @@ public class SearchExecute extends AbstractExecute
 
 		if ("load".equals(action))
 		{
-			Query query = this.factory.createQueryAdapter(this.sql_get_setting_id);
+			Query query = this.factory.createQuery(this.sql_get_setting_id);
 			query.setString(1, username);
 			query.setString(2, search);
 			query.setString(3, id);
 			ResultIterator ritr = query.executeQuery(conn);
-			if (ritr.getRecordCount() == 0)
+			if (ritr.getCount() == 0)
 			{
 				MemoryChars mc = new MemoryChars();
 				Writer out = mc.getWriter();
@@ -138,7 +138,7 @@ public class SearchExecute extends AbstractExecute
 			{
 				MemoryChars mc = new MemoryChars();
 				Writer out = mc.getWriter();
-				while (ritr.hasMoreRow())
+				while (ritr.hasNextRow())
 				{
 					out.write(ritr.nextRow().getString("settingXML"));
 				}
@@ -147,12 +147,12 @@ public class SearchExecute extends AbstractExecute
 		}
 		else if ("save".equals(action))
 		{
-			Update update = this.factory.createUpdateAdapter(this.sql_delete_setting_id);
+			Update update = this.factory.createUpdate(this.sql_delete_setting_id);
 			update.setString(1, username);
 			update.setString(2, search);
 			update.setString(3, id);
 			update.executeUpdate(conn);
-			update = this.factory.createUpdateAdapter(this.sql_add_setting_id);
+			update = this.factory.createUpdate(this.sql_add_setting_id);
 			update.setString(1, username);
 			update.setString(2, search);
 			update.setString(3, id);
@@ -187,7 +187,7 @@ public class SearchExecute extends AbstractExecute
 		}
 		else // default  get ConditionProperty
 		{
-			Search sa = this.factory.createSearchAdapter(search);
+			Search sa = this.factory.createSearch(search);
 			Reader reader = sa.getConditionDocument(permission);
 			data.caches[this.resultCacheIndex] = reader;
 		}

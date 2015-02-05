@@ -34,7 +34,7 @@ public interface Dao
 	/**
 	 * 配置中设置日志方式的标识.
 	 */
-	String LOG_TYPE_FLAG = "eterna.base.logType";
+	String LOG_TYPE_FLAG = "eterna.dao.logType";
 	/**
 	 * 日志等级, 不记录.
 	 */

@@ -44,7 +44,7 @@ public interface ModelCaller
 
 	void initModelCaller(EternaFactory factory) throws EternaException;
 
-	Connection getConnection(ModelAdapter model) throws SQLException, EternaException;
+	Connection getConnection(Model model) throws SQLException, EternaException;
 
 	void closeConnection(Connection conn);
 
@@ -56,7 +56,7 @@ public interface ModelCaller
 	ModelExport callModel(AppData data, ObjectRef preConn)
 			throws EternaException, SQLException, IOException;
 
-	ModelExport callModel(AppData data, ModelAdapter model, ModelExport export, int tType, ObjectRef preConn)
+	ModelExport callModel(AppData data, Model model, ModelExport export, int tType, ObjectRef preConn)
 			throws EternaException, SQLException, IOException;
 
 	/**

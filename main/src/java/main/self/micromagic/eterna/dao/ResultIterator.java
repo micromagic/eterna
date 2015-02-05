@@ -38,9 +38,9 @@ public interface ResultIterator extends Iterator
 	ResultMetaData getMetaData() throws SQLException, EternaException;
 
 	/**
-	 * 判断是否还有更多的记录.
+	 * 判断是否还有下一条的记录.
 	 */
-	boolean hasMoreRow() throws SQLException, EternaException;
+	boolean hasNextRow() throws SQLException, EternaException;
 
 	/**
 	 * 预取下一个<code>ResultRow</code>. <p>
@@ -93,30 +93,31 @@ public interface ResultIterator extends Iterator
 	ResultIterator copy() throws EternaException;
 
 	/**
-	 * 取得结果集中实际的记录数. <p>
+	 * 取得查询的结果集中的总记录数. <p>
 	 */
-	int getRealRecordCount() throws SQLException, EternaException;
+	int getTotalCount() throws SQLException, EternaException;
 
 	/**
-	 * 取得从结果集中获取的记录数. <p>
-	 * 如果获取的是所有记录，则返回的记录数与方法{@link #getRealRecordCount}
-	 * 返回的记录数相同。反之，获取的记录数总是比实际的记录数小。
+	 * 取得结果集中的记录数. <p>
+	 * 如果获取的是所有记录，则返回的记录数与方法{@link #getTotalCount}
+	 * 返回的记录数相同。反之，获取的记录数比总记录数小。
 	 */
-	int getRecordCount() throws SQLException, EternaException;
+	int getCount() throws SQLException, EternaException;
 
 	/**
-	 * {@link #getRealRecordCount}中得到结果集中实际的记录数是否有效. <p>
-	 * 当结果集的类型是<code>TYPE_SCROLL_INSENSITIVE</code>，或获取所有的记录是
-	 * 就会返回true。如果返回false，则{@link #getRealRecordCount}返回的个数并
-	 * 不是实际的记录个数。
+	 * {@link #getTotalCount}中得到查询的结果集中的总记录数是否有效. <p>
+	 * 当查询的计数方式为{@link Query#TOTAL_COUNT_AUTO}或
+	 * {@link Query#TOTAL_COUNT_COUNT}时, 总记录数会是有效的.
+	 * 如果总记录数无效，则{@link #getTotalCount}返回的个数并
+	 * 不是实际的总记录数。
 	 */
-	boolean isRealRecordCountAvailable() throws SQLException, EternaException;
+	boolean isTotalCountAvailable() throws SQLException, EternaException;
 
 	/**
 	 * 实际结果集中是否还有更多的记录. <p>
 	 * 如果获取的不是所有的记录, 则可通过这个方法来判断实际的结果集中是否还有
 	 * 更多的记录.
 	 */
-	boolean isHasMoreRecord() throws SQLException, EternaException;
+	boolean hasMoreRecord() throws SQLException, EternaException;
 
 }

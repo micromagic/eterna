@@ -31,7 +31,7 @@ import javax.sql.DataSource;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.DataSourceManager;
@@ -70,7 +70,7 @@ public class ModelCallerImpl
 		this.dataSourceMap = null;
 	}
 
-	public Connection getConnection(ModelAdapter model)
+	public Connection getConnection(Model model)
 			throws SQLException, EternaException
 	{
 		DataSource ds;
@@ -119,11 +119,11 @@ public class ModelCallerImpl
 	public ModelExport callModel(AppData data)
 			throws EternaException, SQLException, IOException
 	{
-		ObjectRef preConn = (ObjectRef) data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN);
+		ObjectRef preConn = (ObjectRef) data.getSpcialData(Model.MODEL_CACHE, Model.PRE_CONN);
 		if (preConn == null)
 		{
 			preConn = new ObjectRef();
-			data.addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN, preConn);
+			data.addSpcialData(Model.MODEL_CACHE, Model.PRE_CONN, preConn);
 		}
 
 		Element beginNode = null;
@@ -214,10 +214,10 @@ public class ModelCallerImpl
 			}
 		}
 
-		ModelAdapter model = null;
+		Model model = null;
 		try
 		{
-			model = factory.createModelAdapter(data.modelName);
+			model = factory.createModel(data.modelName);
 		}
 		catch (EternaException ex)
 		{
@@ -276,7 +276,7 @@ public class ModelCallerImpl
 		}
 	}
 
-	public ModelExport callModel(AppData data, ModelAdapter model, ModelExport export, int tType, ObjectRef preConn)
+	public ModelExport callModel(AppData data, Model model, ModelExport export, int tType, ObjectRef preConn)
 			throws EternaException, SQLException, IOException
 	{
 		String dsName = model.getDataSourceName();
@@ -316,7 +316,7 @@ public class ModelCallerImpl
 		Object oldHoldedFlag = null;
 		switch (tType)
 		{
-			case ModelAdapter.T_REQUARED:
+			case Model.T_REQUARED:
 				if (oldConn == null)
 				{
 					oldConn = this.getConnection(model);
@@ -325,27 +325,27 @@ public class ModelCallerImpl
 				}
 				myConn = oldConn;
 				break;
-			case ModelAdapter.T_NEW:
+			case Model.T_NEW:
 				myConn = this.getConnection(model);
 				myConn.setAutoCommit(false);
 				// 这里不需要判断oldConn, 后面的model如果是requared的话, 将使用这个conn
 				this.setPreConnection(myConn, preConn, dsName);
 				break;
-			case ModelAdapter.T_NONE:
+			case Model.T_NONE:
 				myConn = this.getConnection(model);
 				myConn.setAutoCommit(true);
 				break;
-			case ModelAdapter.T_HOLD:
+			case Model.T_HOLD:
 				myConn = this.getConnection(model);
 				myConn.setAutoCommit(true);
 				// 将原来的链接保持标志保存下来
-				oldHoldedFlag = data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED);
-				data.addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, "0");
+				oldHoldedFlag = data.getSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED);
+				data.addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "0");
 				break;
-			case ModelAdapter.T_IDLE:
+			case Model.T_IDLE:
 				myConn = this.getConnection(model);
 				break;
-			case ModelAdapter.T_NOTNEED:
+			case Model.T_NOTNEED:
 				myConn = oldConn;
 		}
 
@@ -375,7 +375,7 @@ public class ModelCallerImpl
 				if (tmpExport.isErrorExport())
 				{
 					// 如果是错误的出口, 并且有下一个要执行的model, 则回滚
-					if (tType == ModelAdapter.T_REQUARED || tType == ModelAdapter.T_NEW)
+					if (tType == Model.T_REQUARED || tType == Model.T_NEW)
 					{
 						myConn.rollback();
 					}
@@ -391,13 +391,13 @@ public class ModelCallerImpl
 		{
 			switch (tType)
 			{
-				case ModelAdapter.T_REQUARED:
+				case Model.T_REQUARED:
 					if (!executed)
 					{
 						myConn.rollback();
 					}
 					break;
-				case ModelAdapter.T_NEW:
+				case Model.T_NEW:
 					if (!executed)
 					{
 						myConn.rollback();
@@ -413,22 +413,22 @@ public class ModelCallerImpl
 						this.setPreConnection(oldConn, preConn, dsName);
 					}
 					break;
-				case ModelAdapter.T_NONE:
+				case Model.T_NONE:
 					this.closeConnection(myConn);
 					break;
-				case ModelAdapter.T_HOLD:
-					if (!"1".equals(data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED)))
+				case Model.T_HOLD:
+					if (!"1".equals(data.getSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED)))
 					{
 						// 如果数据库链接保持标志不为"1", 表示业务没有接管数据库链接, 这里需要将其释放
 						this.closeConnection(myConn);
 					}
 					// 恢复原来的链接保持标志
-					data.addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, oldHoldedFlag);
+					data.addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, oldHoldedFlag);
 					break;
-				case ModelAdapter.T_IDLE:
+				case Model.T_IDLE:
 					this.closeConnection(myConn);
 					break;
-				case ModelAdapter.T_NOTNEED:
+				case Model.T_NOTNEED:
 					break;
 			}
 		}

@@ -353,7 +353,7 @@ public class DataPrinterImpl extends AbstractGenerator
 			}
 		}
 		out.write("},rowCount:");
-		out.write(Integer.toString(ritr.getRecordCount()));
+		out.write(Integer.toString(ritr.getCount()));
 		out.write(",rows:[");
 		boolean nextRow = false;
 		while (ritr.hasNext())

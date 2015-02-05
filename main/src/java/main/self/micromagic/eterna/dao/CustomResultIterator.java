@@ -80,22 +80,22 @@ public class CustomResultIterator extends AbstractResultIterator
 		this.recordCount = this.result.size();
 	}
 
-	public int getRealRecordCount()
+	public int getTotalCount()
 	{
 		return this.recordCount;
 	}
 
-	public int getRecordCount()
+	public int getCount()
 	{
 		return this.recordCount;
 	}
 
-	public boolean isRealRecordCountAvailable()
+	public boolean isTotalCountAvailable()
 	{
 		return true;
 	}
 
-	public boolean isHasMoreRecord()
+	public boolean hasMoreRecord()
 	{
 		return false;
 	}

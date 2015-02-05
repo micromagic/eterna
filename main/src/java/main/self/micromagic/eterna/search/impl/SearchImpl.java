@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,9 +35,12 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
 
+import self.micromagic.eterna.dao.EntityItem;
+import self.micromagic.eterna.dao.EntityRef;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultReaderManager;
+import self.micromagic.eterna.dao.impl.EntityImpl;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.ColumnSetting;
@@ -52,6 +56,7 @@ import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.ObjectCreater;
@@ -70,9 +75,6 @@ public class SearchImpl extends AbstractGenerator
 	private static final int[] conditionDocumentCounts = {1, 3, 7};
 
 	private int maxPageSize = -1;
-
-	private String parentName;
-	private Search[] parents;
 
 	private String sessionQueryTag;
 	private String searchManagerName = null;
@@ -97,7 +99,7 @@ public class SearchImpl extends AbstractGenerator
 	private String conditionPropertyOrder = null;
 	private PermissionSet[] permissionSets = null;
 	private final Map conditionPropertyMap =  new HashMap();
-	private final List conditionProperties = new LinkedList();
+	private List conditionProperties = new LinkedList();
 	private ConditionProperty[] allConditionProperties = null;
 	private ConditionProperty[] allConditionPropertiesWithOther = null;
 	private int conditionDocumentCount = 1;
@@ -120,40 +122,14 @@ public class SearchImpl extends AbstractGenerator
 			return true;
 		}
 		this.initialized = true;
-		this.sessionQueryTag = "s:" + this.getName() + ":" + factory.getFactoryContainer().getId();
-		if (this.parentName != null)
-		{
-			if (this.parentName.indexOf(',') == -1)
-			{
-				this.parents = new Search[1];
-				this.parents[0] = factory.createSearchAdapter(this.parentName);
-				if (this.parents[0] == null)
-				{
-					log.warn("The search parent [" + this.parentName + "] not found.");
-				}
-			}
-			else
-			{
-				StringTokenizer token = new StringTokenizer(this.parentName, ",");
-				this.parents = new Search[token.countTokens()];
-				for (int i = 0; i < this.parents.length; i++)
-				{
-					String temp = token.nextToken().trim();
-					this.parents[i] = factory.createSearchAdapter(temp);
-					if (this.parents[i] == null)
-					{
-						log.warn("The search parent [" + temp + "] not found.");
-					}
-				}
-			}
-		}
+		this.sessionQueryTag = "s:" + factory.getFactoryContainer().getId() + ":" + this.getName();
 
 		if (this.otherName != null)
 		{
 			if (this.otherName.indexOf(',') == -1)
 			{
 				this.others = new Search[1];
-				this.others[0] = factory.createSearchAdapter(this.otherName);
+				this.others[0] = factory.createSearch(this.otherName);
 				if (this.others[0] == null)
 				{
 					log.warn("The search parent [" + this.otherName + "] not found.");
@@ -166,7 +142,7 @@ public class SearchImpl extends AbstractGenerator
 				for (int i = 0; i < this.others.length; i++)
 				{
 					String temp = token.nextToken().trim();
-					this.others[i] = factory.createSearchAdapter(temp);
+					this.others[i] = factory.createSearch(temp);
 					if (this.others[i] == null)
 					{
 						log.warn("The search parent [" + temp + "] not found.");
@@ -194,12 +170,37 @@ public class SearchImpl extends AbstractGenerator
 			this.countSearchIndex = this.getFactory().findObjectId(this.countSearchName);
 		}
 
-		Iterator cps = this.conditionProperties.iterator();
+		List tmpList = new ArrayList();
+		Iterator itr = this.conditionProperties.iterator();
+		while (itr.hasNext())
+		{
+			Object tmp = itr.next();
+			if (tmp instanceof ConditionProperty)
+			{
+				tmpList.add(tmp);
+			}
+			else
+			{
+				EntityRef ref = (EntityRef) tmp;
+				ConditionContainer cc = new ConditionContainer(this.getName(),
+						this.conditionPropertyMap, tmpList);
+				EntityImpl.addItems(factory, ref, cc);
+			}
+		}
+		Iterator cps = tmpList.iterator();
 		while (cps.hasNext())
 		{
 			ConditionProperty cp = (ConditionProperty) cps.next();
 			cp.initialize(factory);
 		}
+		if (this.conditionPropertyOrder != null)
+		{
+			tmpList = OrderManager.doOrder(tmpList,
+					this.conditionPropertyOrder, new ConditionNameHandler());
+		}
+		this.conditionProperties = tmpList;
+		this.allConditionProperties = new ConditionProperty[tmpList.size()];
+		tmpList.toArray(this.allConditionProperties);
 
 		if (this.parameterSetting != null)
 		{
@@ -561,16 +562,6 @@ public class SearchImpl extends AbstractGenerator
 		return ps.checkPermission(permission);
 	}
 
-	public String getParentConditionPropretyName()
-	{
-		return this.parentName;
-	}
-
-	public void setParentConditionPropretyName(String parentName)
-	{
-		this.parentName = parentName;
-	}
-
 	public String getConditionPropertyOrder()
 	{
 		return this.conditionPropertyOrder;
@@ -599,17 +590,30 @@ public class SearchImpl extends AbstractGenerator
 		this.conditionPropertyMap.put(cp.getName(), cp);
 	}
 
+	/**
+	 * 添加一个实体的引用.
+	 */
+	public void addEntityRef(EntityRef ref)
+			throws EternaException
+	{
+		if (this.initialized)
+		{
+			throw new EternaException("You can't invoke addEntityRef after initialized.");
+		}
+		this.conditionProperties.add(ref);
+	}
+
 	public int getConditionPropertyCount()
 			throws EternaException
 	{
 		return this.getConditionPropertys0().length;
 	}
 
-	public ConditionProperty getConditionProperty(int colId)
+	public ConditionProperty getConditionProperty(int index)
 			throws EternaException
 	{
 		ConditionProperty[] temp = this.getConditionPropertys0();
-		return temp[colId];
+		return temp[index];
 	}
 
 	public ConditionProperty getConditionProperty(String name)
@@ -793,7 +797,7 @@ public class SearchImpl extends AbstractGenerator
 		{
 			if (this.countSearchIndex != -1)
 			{
-				Search tmpSearch = this.getFactory().createSearchAdapter(this.countSearchIndex);
+				Search tmpSearch = this.getFactory().createSearch(this.countSearchIndex);
 				Object oldObj = raMap.get(READ_ROW_START_AND_COUNT);
 				raMap.put(READ_ROW_START_AND_COUNT, new StartAndCount(1, 1));
 				countRitr = tmpSearch.doSearch(data, conn).queryResult;
@@ -894,7 +898,7 @@ public class SearchImpl extends AbstractGenerator
 		Map raMap = data.getRequestAttributeMap();
 		if ("1".equals(raMap.get(FORCE_LOAD_COLUMN_SETTING)) && columnSetting != null)
 		{
-			query = search.getFactory().createQueryAdapter(queryIndex);
+			query = search.getFactory().createQuery(queryIndex);
 			String[] colSetting = columnSetting.getColumnSetting(columnType, query, search, true, data, conn);
 			if (colSetting != null)
 			{
@@ -942,7 +946,7 @@ public class SearchImpl extends AbstractGenerator
 		if (isFirst || qc == null)
 		{
 			isFirst = true;
-			query = search.getFactory().createQueryAdapter(queryIndex);
+			query = search.getFactory().createQuery(queryIndex);
 			UserManager um = search.getFactory().getUserManager();
 			if (um != null)
 			{
@@ -997,14 +1001,6 @@ public class SearchImpl extends AbstractGenerator
 	private ConditionProperty[] getConditionPropertys0()
 			throws EternaException
 	{
-		if (this.allConditionProperties != null)
-		{
-			return this.allConditionProperties;
-		}
-		OrderManager om = new OrderManager();
-		List resultList = om.getOrder(new MyOrderItem(), this.parents, this.conditionPropertyOrder,
-				this.conditionProperties, this.conditionPropertyMap);
-		this.allConditionProperties = (ConditionProperty[]) resultList.toArray(new ConditionProperty[0]);
 		return this.allConditionProperties;
 	}
 
@@ -1028,6 +1024,55 @@ public class SearchImpl extends AbstractGenerator
 	 */
 	public void destroy()
 	{
+	}
+
+	/**
+	 * 将一个实体元素转换成condition对象.
+	 *
+	 * @param item        需要转换的实体元素
+	 * @param tableAlias  数据库表的别名
+	 */
+	public static ConditionProperty item2Condition(EntityItem item, String tableAlias)
+	{
+		ConditionPropertyImpl condition = new ConditionPropertyImpl();
+		if (item.getCaption() != null)
+		{
+			condition.columnCaption = item.getCaption();
+		}
+		condition.name = item.getName();
+		condition.columnType = item.getType();
+		String colName = item.getColumnName();
+		if (tableAlias != null)
+		{
+			colName = tableAlias.concat(".").concat(colName);
+		}
+		condition.columnName = colName;
+		condition.inputType = "text";
+		condition.attributes = new AttributeManager();
+		String[] attrNames = item.getAttributeNames();
+		for (int i = 0; i < attrNames.length; i++)
+		{
+			String n = attrNames[i];
+			if (PREPARE_FLAG.equals(n))
+			{
+				condition.prepareName = (String) item.getAttribute(n);
+			}
+			else if (INPUT_TYPE_FLAG.equals(n))
+			{
+				condition.inputType = (String) item.getAttribute(n);
+			}
+			else if (DEFAULT_BUILDER_FLAG.equals(n))
+			{
+				condition.defaultBuilderName = (String) item.getAttribute(n);
+			}
+			else
+			{
+				condition.attributes.setAttribute(n, item.getAttribute(n));
+			}
+		}
+		condition.listName = PropertyGenerator.getListName(
+				condition.inputType, item.getType());
+		return condition;
 	}
 
 	private static class MyOrderItem extends OrderManager.OrderItem
@@ -1125,3 +1170,53 @@ public class SearchImpl extends AbstractGenerator
 
 }
 
+
+/**
+ * 处理EntityRef的容器.
+ */
+class ConditionContainer
+		implements EntityImpl.Container
+{
+	public ConditionContainer(String name, Map nameCache, List itemList)
+	{
+		this.name = name;
+		this.nameCache = nameCache;
+		this.itemList = itemList;
+	}
+	private final Map nameCache;
+	private final List itemList;
+	private final String name;
+
+	public String getName()
+	{
+		return this.name;
+	}
+
+	public String getType()
+	{
+		return "Search";
+	}
+
+	public boolean contains(String name)
+	{
+		return this.nameCache.containsKey(name);
+	}
+
+	public void add(EntityItem item, String tableAlias)
+	{
+		ConditionProperty condition = SearchImpl.item2Condition(item, tableAlias);
+		this.nameCache.put(item.getName(), condition);
+		this.itemList.add(condition);
+	}
+
+}
+
+class ConditionNameHandler
+		implements OrderManager.NameHandler
+{
+	public String getName(Object obj)
+	{
+		return ((ConditionProperty) obj).getName();
+	}
+
+}

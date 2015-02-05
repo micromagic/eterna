@@ -27,7 +27,7 @@ import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.model.QueryExecuteGenerator;
@@ -44,7 +44,7 @@ public class QueryExecute extends DaoExecute
 	private int countType = Query.TOTAL_COUNT_NONE;
 	protected int queryAdapterIndex = -1;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)
@@ -58,8 +58,8 @@ public class QueryExecute extends DaoExecute
 	protected Dao getDao()
 			throws EternaException
 	{
-		return this.queryAdapterIndex == -1 ? this.factory.createQueryAdapter(this.getName())
-				: this.factory.createQueryAdapter(this.queryAdapterIndex);
+		return this.queryAdapterIndex == -1 ? this.factory.createQuery(this.getName())
+				: this.factory.createQuery(this.queryAdapterIndex);
 	}
 
 	public String getExecuteType()
@@ -121,7 +121,7 @@ public class QueryExecute extends DaoExecute
 		}
 		if (query == null)
 		{
-			query = this.factory.createQueryAdapter(this.queryAdapterIndex);
+			query = this.factory.createQuery(this.queryAdapterIndex);
 			if (this.sqlCacheIndex != -1)
 			{
 				data.caches[this.sqlCacheIndex] = query;

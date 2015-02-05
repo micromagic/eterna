@@ -41,6 +41,6 @@ public interface ModelAdapterGenerator extends ObjectCreater
 
 	void setAllowPosition(String positions) throws EternaException;
 
-	ModelAdapter createModelAdapter() throws EternaException;
+	Model createModelAdapter() throws EternaException;
 
 }

@@ -144,10 +144,10 @@ public class QueryHelper
 	/**
 	 * 获取该查询对象设置的总记录数扩展信息.
 	 */
-	public Query.TotalCountExt getTotalCountExt()
+	public Query.TotalCountInfo getTotalCountExt()
 			throws EternaException
 	{
-		return this.query.getTotalCountExt();
+		return this.query.getTotalCountInfo();
 	}
 
 	/**
@@ -298,14 +298,14 @@ public class QueryHelper
 	/**
 	 * 当totalCount为0-N时设置总记录数等信息.
 	 */
-	protected void setTotalCountInfo(int totalCount, Query.TotalCountExt ext)
+	protected void setTotalCountInfo(int totalCount, Query.TotalCountInfo ext)
 	{
 		this.realRecordCount = totalCount;
 		this.realRecordCountAvailable = true;
 		if (ext != null)
 		{
 			this.hasMoreRecord = ext.hasMoreRecord;
-			this.realRecordCountAvailable = ext.realRecordCountAvailable;
+			this.realRecordCountAvailable = ext.totalCountAvailable;
 		}
 	}
 
@@ -364,7 +364,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 	protected int nowStartRow = 1;
 	protected int nowMaxRows = -1;
 	protected int nowTotalCount = Query.TOTAL_COUNT_NONE;
-	protected Query.TotalCountExt nowTotalCountExt;
+	protected Query.TotalCountInfo nowTotalCountExt;
 	protected String oldPreparedSQL;
 	protected String cacheSQL;
 	protected boolean useOldSQL;
@@ -389,7 +389,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 			{
 				if (this.oldPreparedSQL != preparedSQL || this.nowStartRow != query.getStartRow()
 						|| this.nowMaxRows != query.getMaxRows() || this.nowTotalCount != query.getTotalCount()
-						|| !Utility.objectEquals(this.nowTotalCountExt, query.getTotalCountExt()))
+						|| !Utility.objectEquals(this.nowTotalCountExt, query.getTotalCountInfo()))
 				{
 					this.cacheSQL = null;
 				}
@@ -407,7 +407,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 				this.nowStartRow = query.getStartRow();
 				this.nowMaxRows = query.getMaxRows();
 				this.nowTotalCount = query.getTotalCount();
-				this.nowTotalCountExt = query.getTotalCountExt();
+				this.nowTotalCountExt = query.getTotalCountInfo();
 			}
 			catch (SQLException ex)
 			{

@@ -22,7 +22,7 @@ import java.sql.SQLException;
 
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExecuteGenerator;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.EternaException;
@@ -38,7 +38,7 @@ public class ModelExecute extends AbstractExecute
 	protected int exeModelIndex = -1;
 	protected int transactionType = -1;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)
@@ -91,7 +91,7 @@ public class ModelExecute extends AbstractExecute
 	public void setTransactionType(String tType)
 			throws EternaException
 	{
-		this.transactionType = ModelAdapterImpl.parseTransactionType(tType);
+		this.transactionType = ModelImpl.parseTransactionType(tType);
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
@@ -100,8 +100,8 @@ public class ModelExecute extends AbstractExecute
 		if (this.exeModelIndex != -1)
 		{
 			EternaFactory f = this.getModelAdapter().getFactory();
-			ObjectRef preConn = (ObjectRef) data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN);
-			ModelAdapter tmpModel = f.createModelAdapter(this.exeModelIndex);
+			ObjectRef preConn = (ObjectRef) data.getSpcialData(Model.MODEL_CACHE, Model.PRE_CONN);
+			Model tmpModel = f.createModel(this.exeModelIndex);
 			int tType = this.transactionType == -1 ? tmpModel.getTransactionType() : this.transactionType;
 			if (this.noJump)
 			{

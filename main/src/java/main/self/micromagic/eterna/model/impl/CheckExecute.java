@@ -28,7 +28,7 @@ import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.CheckExecuteGenerator;
 import self.micromagic.eterna.model.CheckOperator;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -73,7 +73,7 @@ public class CheckExecute extends AbstractExecute
 	private int obj2Index = -1;
 	private CheckOperator checkOpt = null;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)
@@ -141,7 +141,7 @@ public class CheckExecute extends AbstractExecute
 	{
 		boolean checkResult;
 		ModelExport export;
-		ObjectRef preConn = (ObjectRef) data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN);
+		ObjectRef preConn = (ObjectRef) data.getSpcialData(Model.MODEL_CACHE, Model.PRE_CONN);
 		int loopCount = 0;
 		EternaFactory f = this.getModelAdapter().getFactory();
 		do
@@ -175,7 +175,7 @@ public class CheckExecute extends AbstractExecute
 			{
 				if (this.trueModelIndex != -1)
 				{
-					ModelAdapter tmpModel = f.createModelAdapter(this.trueModelIndex);
+					Model tmpModel = f.createModel(this.trueModelIndex);
 					int tType = this.trueTransactionType == -1 ? tmpModel.getTransactionType() : this.trueTransactionType;
 					export = f.getModelCaller().callModel(data, tmpModel, this.trueExport, tType, preConn);
 				}
@@ -188,7 +188,7 @@ public class CheckExecute extends AbstractExecute
 			{
 				if (this.falseModelIndex != -1)
 				{
-					ModelAdapter tmpModel = f.createModelAdapter(this.falseModelIndex);
+					Model tmpModel = f.createModel(this.falseModelIndex);
 					int tType = this.falseTransactionType == -1 ? tmpModel.getTransactionType() : this.falseTransactionType;
 					export = f.getModelCaller().callModel(data, tmpModel, this.falseExport, tType, preConn);
 				}
@@ -319,13 +319,13 @@ public class CheckExecute extends AbstractExecute
 	public void setTrueTransactionType(String tType)
 			throws EternaException
 	{
-		this.trueTransactionType = ModelAdapterImpl.parseTransactionType(tType);
+		this.trueTransactionType = ModelImpl.parseTransactionType(tType);
 	}
 
 	public void setFalseTransactionType(String tType)
 			throws EternaException
 	{
-		this.falseTransactionType = ModelAdapterImpl.parseTransactionType(tType);
+		this.falseTransactionType = ModelImpl.parseTransactionType(tType);
 	}
 
 	public void setTrueModelName(String name)

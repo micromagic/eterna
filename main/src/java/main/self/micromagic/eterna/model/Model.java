@@ -26,7 +26,7 @@ import self.micromagic.eterna.share.EternaFactory;
 /**
  * @author micromagic@sina.com
  */
-public interface ModelAdapter
+public interface Model
 {
 	/**
 	 * model缓存的名称.

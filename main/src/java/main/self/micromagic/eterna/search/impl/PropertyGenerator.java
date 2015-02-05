@@ -106,25 +106,26 @@ public class PropertyGenerator extends AbstractGenerator
 		this.conditionProperty.inputType = this.inputType == null ? "text" : this.inputType;
 		if (this.conditionProperty.listName == null)
 		{
-			if (this.conditionProperty.inputType != null
-					&& this.conditionProperty.inputType.toLowerCase().startsWith("select"))
-			{
-				this.conditionProperty.listName = "cbl_List";
-			}
-			else
-			{
-				if (TypeManager.isString(this.conditionProperty.columnType))
-				{
-					this.conditionProperty.listName = "cbl_String";
-				}
-				else
-				{
-					this.conditionProperty.listName = "cbl_Other";
-				}
-			}
+			this.conditionProperty.listName = getListName(
+					this.conditionProperty.inputType, this.conditionProperty.columnType);
 		}
 		this.conditionProperty.attributes = this.attributes;
 		return this.conditionProperty;
+	}
+
+	/**
+	 * 根据输入的类型选择条件构造列表.
+	 */
+	public static String getListName(String inputType, int columnType)
+	{
+		if (inputType != null && inputType.toLowerCase().startsWith("select"))
+		{
+			return "cbl_List";
+		}
+		else
+		{
+			return TypeManager.isString(columnType) ? "cbl_String" : "cbl_Other";
+		}
 	}
 
 }

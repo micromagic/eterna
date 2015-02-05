@@ -22,7 +22,7 @@ import self.micromagic.eterna.share.EternaException;
 
 public interface ParamBind
 {
-	void initialize(ModelAdapter model, Execute execute) throws EternaException;
+	void initialize(Model model, Execute execute) throws EternaException;
 
 	public int setParam(AppData data, ParamSetManager psm, int loopIndex)
 			throws EternaException, SQLException;

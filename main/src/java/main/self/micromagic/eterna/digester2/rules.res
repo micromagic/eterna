@@ -24,7 +24,22 @@ sub:{factory}
 factory
 log:{$factory}
 create:{type,${factory},1}
-sub:{objs,factoryAttributes}
+sub:{include,objs,factoryAttributes}
+
+
+## include
+include
+log:{$include}
+create:{,${include},0}
+attr:{src}
+sub:{includeParam}
+method:{registerInclude}
+
+
+## includeParam
+param
+log:{$include.param}
+method:{addParam,name(i=0),$body(attr=value)}
 
 
 ## factoryAttributes
@@ -46,7 +61,10 @@ method:{setAttribute,name,$body(attr=value,i=1)}
 
 ## objs
 objs
-sub:{query,update,format,prepare,entity,dataPrinter}
+sub:{
+	query,update,format,prepare,entity,search,builderList,builder,
+	model,export,dataPrinter,typicalComponent,view,function,resource
+}
 
 
 ## format
@@ -152,6 +170,97 @@ sub:{attribute}
 stack:{addParameter,n:0,g:0}
 
 
+## builder
+builder
+same:{name}
+log:{name}
+create:{generator,${builder}}
+attr:{name,caption(m=0),operator(m=0)}
+sub:{attribute}
+stack:{registerObject,n:0,g:1}
+
+
+## builderList
+builder-list
+same:{name}
+log:{name}
+create:{generator,${builderList}}
+attr:{name}
+sub:{builderName}
+stack:{registerObject,n:0,g:0}
+
+
+## builderName
+builder-name
+method:{addBuilder,name}
+
+
+## search
+search
+same:{name}
+log:{name}
+create:{generator,${search}}
+attr:{name,queryName,pageSize(m=0,i=0),countType(m=0,i=0),conditionIndex(d=1,i=0)}
+sub:{conditions,attribute}
+stack:{registerObject,n:0,g:0}
+
+
+## conditions
+conditions
+sub:{condition,entityRef}
+
+
+## condition
+condition
+log:{$}
+create:{generator,${condition}}
+attr:{
+	name,colName(m=0):columnName,caption(m=0):columnCaption,colType(i=0):columnType,
+	prepare(m=0):prepareName,inputType(m=0):conditionInputType,defaultValue(m=0),
+	permissions(m=0),useDefaultBuilder(m=0,i=0):useDefaultConditionBuilder,
+	defaultBuilder(m=0):defaultConditionBuilderName,visible(d=1,i=0),
+	builderList(m=0):conditionBuilderListName
+}
+sub:{attribute}
+stack:{addConditionProperty,n:0,g:1}
+
+
+## model
+model
+same:{name}
+log:{name}
+create:{generator,${model}}
+attr:{
+	name,needFrontModel(d=0,i=0),frontModelName(m=0),modelExportName(m=0),
+	errorExportName(m=0),transactionType(m=0,i=0),dataSourceName(m=0),
+	position(m=0):allowPosition
+}
+sub:{searchExecute,attribute}
+stack:{registerObject,n:0,g:0}
+
+
+## export
+export
+same:{name}
+log:{name}
+create:{generator,${export}}
+attr:{
+	name,viewName(m=0),modelName(m=0),path(m=0,r=1),redirect(m=0,i=0),
+	errorExport(m=0,i=0)
+}
+stack:{registerObject,n:0,g:1}
+
+
+## searchExecute
+search-execute
+log:{$}
+create:{generator,${searchExecute}}
+attr:{
+	searchName,queryResultTo(m=0):queryResultName,conditionTo(m=0):searchManagerName
+}
+stack:{addExecute,n:0,g:1}
+
+
 ## dataPrinter
 data-printer
 same:{name}
@@ -159,3 +268,182 @@ log:{name}
 create:{generator}
 attr:{name}
 stack:{registerObject,n:0,g:0}
+
+
+## view
+view
+same:{name}
+log:{name}
+create:{generator,${view}}
+attr:{
+	name,dataPrinterName(m=0,i=0),defaultDataType(m=0,i=0)
+}
+sub:{${comSub}}
+stack:{registerObject,n:0,g:0}
+
+
+## typicalComponent
+typical-component
+same:{name}
+log:{name}
+create:{generator,${typicalComponent}}
+attr:{name}
+sub:{${comSub}}
+stack:{registerObject,n:0,g:0}
+
+
+## component
+component
+log:{$}
+create:{generator,${component}}
+attr:{
+	name(d=),type,ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam
+}
+sub:{${comSub}}
+stack:{addComponent,n:0,g:0}
+
+
+## replacement
+replacement
+log:{$}
+create:{generator,${replacement}}
+attr:{
+	name(d=),baseComponentName,ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam
+}
+sub:{${comSub}}
+stack:{addComponent,n:0,g:0}
+
+
+##events
+events
+sub:{event}
+
+
+## event
+event
+log:{$}
+create:{generator,${event}}
+attr:{name,scriptParam(m=0,i=0),$body(m=0):scriptBody}
+stack:{addEvent,n:0,g:0}
+
+
+
+## tr
+tr
+log:{$}
+create:{generator,${tr}}
+attr:{
+	name(d=),type(d=tr),ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam
+}
+sub:{${comSub}}
+stack:{setTR,n:0,g:0}
+
+
+## tableList
+table-list
+log:{$}
+create:{generator,${tableList}}
+attr:{
+	name(d=),dataName(m=0),ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	autoArrange(m=0,i=0),percentWidth(m=0,i=0),
+	caculateWidth(m=0,i=0),caculateWidthFix(m=0,i=0),
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam
+}
+sub:{tr,columns,events,attributes}
+stack:{addComponent,n:0,g:0}
+
+
+## columns
+columns
+attr:{columnOrder(m=0,i=0)}
+sub:{column,entityRef}
+
+
+## column
+column
+create:{generator,${column}}
+attr:{
+	name(d=),width(m=0),ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	ignoreGlobalTitle(m=0,i=0):ignoreGlobalTitleParam
+	caption(m=0),typicalComponentName(m=0),cloneInitParam(m=0,i=0),
+	defaultValue(m=0,i=0),srcName(m=0),
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam,
+	$body(attr=titleParam,body=title-param,m=0):titleParam,
+	$body(attr=initParam,body=init-param,m=0):initParam
+}
+sub:{${comSub}}
+stack:{addColumn,n:0,g:0}
+
+
+## tableForm
+table-form
+log:{$}
+create:{generator,${tableForm}}
+attr:{
+	name(d=),dataName(m=0),ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	autoArrange(m=0,i=0),percentWidth(m=0,i=0),columns,
+	caculateWidth(m=0,i=0),caculateWidthFix(m=0,i=0),
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam
+}
+sub:{tr,cells,events,attributes}
+stack:{addComponent,n:0,g:0}
+
+
+## cells
+cells
+attr:{cellOrder(m=0,i=0)}
+sub:{cell,entityRef}
+
+
+## cell
+cell
+create:{generator,${cell}}
+attr:{
+	name(d=),width(m=0),ignoreGlobal(m=0,i=0):ignoreGlobalParam,
+	ignoreGlobalTitle(m=0,i=0):ignoreGlobalTitleParam,required(m=0,i=0),
+	caption(m=0),typicalComponentName(m=0),needIndex(m=0,i=0),
+	defaultValue(m=0,i=0),srcName(m=0),titleSize(m=0,i=0),
+	containerSize(m=0,i=0),rowSpan(m=0,i=0),newRow(m=0,i=0),
+	$body(attr=beforeInit,body=before-init,m=0):beforeInit,
+	$body(attr=initScript,body=init-script,m=0):initScript,
+	$body(attr=comParam,body=component-param,m=0):componentParam,
+	$body(attr=titleParam,body=title-param,m=0):titleParam,
+	$body(attr=initParam,body=init-param,m=0):initParam
+}
+sub:{${comSub}}
+stack:{addCell,n:0,g:0}
+
+
+## function
+function
+same:{name}
+log:{name}
+create:{generator,${function}}
+attr:{name,param(m=0,i=0),$body(m=0):body}
+stack:{registerObject,n:0,g:1}
+
+
+## resource
+resource
+same:{name}
+log:{name}
+create:{generator,${resource}}
+attr:{name,$body(m=0,r=1):resourceText}
+stack:{registerObject,n:0,g:1}
+
+

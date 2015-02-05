@@ -33,7 +33,7 @@ import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.logging.TimeLogger;
 
@@ -56,7 +56,7 @@ public class QueryImpl extends AbstractQuery
 	private int startRow = 1;
 	private int maxRows = -1;
 	private int totalCount = TOTAL_COUNT_NONE;
-	private TotalCountExt totalCountExt;
+	private TotalCountInfo totalCountExt;
 
 
 	public int getStartRow()
@@ -96,7 +96,7 @@ public class QueryImpl extends AbstractQuery
 		this.setTotalCount(totalCount, null);
 	}
 
-	public void setTotalCount(int totalCount, TotalCountExt ext)
+	public void setTotalCount(int totalCount, TotalCountInfo ext)
 			throws EternaException
 	{
 		if (this.totalCount < -3)
@@ -107,7 +107,7 @@ public class QueryImpl extends AbstractQuery
 		this.totalCountExt = ext;
 	}
 
-	public TotalCountExt getTotalCountExt()
+	public TotalCountInfo getTotalCountInfo()
 	{
 		return this.totalCountExt;
 	}
@@ -277,7 +277,7 @@ public class QueryImpl extends AbstractQuery
 			List readerList = rm.getReaderList(this.getPermission0());
 			result = new ResultSetIteratorImpl(conn, stmt, rs, rm, readerList, this);
 			// 查询执行完成, 表示已接管了数据库链接的控制, 可以设置链接接管标志
-			AppData.getCurrentData().addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, "1");
+			AppData.getCurrentData().addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "1");
 			return result;
 		}
 		catch (EternaException ex)
@@ -355,22 +355,22 @@ class ResultIteratorImpl extends AbstractResultIterator
 		this.resultItr = this.result.iterator();
 	}
 
-	public int getRealRecordCount()
+	public int getTotalCount()
 	{
 		return this.realRecordCount;
 	}
 
-	public int getRecordCount()
+	public int getCount()
 	{
 		return this.recordCount;
 	}
 
-	public boolean isRealRecordCountAvailable()
+	public boolean isTotalCountAvailable()
 	{
 		return this.realRecordCountAvailable;
 	}
 
-	public boolean isHasMoreRecord()
+	public boolean hasMoreRecord()
 	{
 		return this.hasMoreRecord;
 	}

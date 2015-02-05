@@ -1014,7 +1014,7 @@ class SubPart extends PartSQL
 			if (subList.size() != 1)
 			{
 				throw new EternaException(
-						"Error sub SQL flag in template:" + this.template + ".");
+						"Error sub flag count in template [" + this.template + "].");
 			}
 			this.parts = new PartSQL[partList.size()];
 			Iterator itr = partList.iterator();

@@ -570,7 +570,7 @@ public class ReplacementImpl extends ComponentImpl
 			{
 				throw new EternaException("Error base name expression [" + nameExp + "].");
 			}
-			View view = factory.createViewAdapter(bName);
+			View view = factory.createView(bName);
 			tmpCom = new ViewWrapComponent(view);
 		}
 		else

@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -152,7 +153,7 @@ public class ContainerManager
 		}
 		return r;
 	}
-	private static final Map fcCache = new HashMap();
+	private static final Map fcCache = new LinkedHashMap();
 
 	/**
 	 * 注销一个工厂容器.
@@ -724,6 +725,14 @@ class ClassPathResource extends AbstractResource
 
 	public InputStream getAsStream()
 	{
+		if (this.resFile != null)
+		{
+			try
+			{
+				return new FileInputStream(this.resFile);
+			}
+			catch (IOException ex) {}
+		}
 		return this.loader.getResourceAsStream(this.path);
 	}
 

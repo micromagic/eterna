@@ -21,11 +21,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Resource;
-import self.micromagic.eterna.view.ResourceGenerator;
 import self.micromagic.grammer.ParserData;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -36,7 +35,7 @@ import self.micromagic.util.container.PreFetchIterator;
  * @author micromagic@sina.com
  */
 public class ResourceImpl extends AbstractGenerator
-		implements Resource, ResourceGenerator
+		implements Resource
 {
 	private static final String[] EMPTY_RESOURCE = {""};
 
@@ -46,19 +45,23 @@ public class ResourceImpl extends AbstractGenerator
 	protected Object[] resArray;
 	protected int estimateResSize = 128;
 
-	public void initialize(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.resArray != null)
+		{
+			return true;
+		}
 		if (this.text == null)
 		{
 			this.resArray = EMPTY_RESOURCE;
-			return;
 		}
 		this.estimateResSize = this.text.length() + 32;
 		List resCelllist = ViewTool.parseResourceText(this.trimText(this.text));
 		List rList = new LinkedList();
 		this.parseResCell(resCelllist, rList);
 		this.resArray = rList.toArray();
+		return false;
 	}
 
 	/**
@@ -158,16 +161,10 @@ public class ResourceImpl extends AbstractGenerator
 		this.trimLine = trimLine;
 	}
 
-	public Resource createResource()
-			throws EternaException
-	{
-		return this;
-	}
-
 	public Object create()
 			throws EternaException
 	{
-		return this.createResource();
+		return this;
 	}
 
 }

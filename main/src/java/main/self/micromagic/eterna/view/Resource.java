@@ -20,16 +20,17 @@ import java.util.Iterator;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 
 /**
  * 文本资源
  */
-public interface Resource
+public interface Resource extends EternaObject
 {
 	/**
 	 * 初始化此文本资源.
 	 */
-	void initialize(EternaFactory factory) throws EternaException;
+	boolean initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获取此文本资源的名称. <p>

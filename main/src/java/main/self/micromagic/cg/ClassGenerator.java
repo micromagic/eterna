@@ -631,7 +631,10 @@ public class ClassGenerator
 			}
 			else if (COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
 			{
-				CG.log.warn("AntCG init error, message is [" + ex + "].");
+				if (!(ex instanceof NoClassDefFoundError))
+				{
+					CG.log.warn("AntCG init error, message is [" + ex + "].");
+				}
 			}
 		}
 		try

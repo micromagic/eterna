@@ -67,8 +67,8 @@ public class ComponentImpl extends AbstractGenerator
 		{
 			return;
 		}
-		this.eternaFactory = factory;
 		this.initialized = true;
+		this.eternaFactory = factory;
 		this.stringCoder = factory.getStringCoder();
 		this.parent = parent;
 

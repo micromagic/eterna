@@ -436,7 +436,7 @@ public class AppDataLogExecute extends AbstractExecute
 				throws Exception
 		{
 			parent.addAttribute("type", "ResultIterator");
-			int rowCount = ritr.getRecordCount();
+			int rowCount = ritr.getCount();
 			parent.addAttribute("rowCount", Integer.toString(rowCount));
 			int printCount = 5;
 			if (rowCount < printCount)
@@ -545,16 +545,16 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("pageNum", Integer.toString(result.pageNum));
 				parent.addAttribute("pageSize", Integer.toString(result.pageSize));
 				parent.addAttribute("searchName", result.searchName);
-				if (result.queryResult.isRealRecordCountAvailable())
+				if (result.queryResult.isTotalCountAvailable())
 				{
-					parent.addAttribute("totalCount", Integer.toString(result.queryResult.getRealRecordCount()));
+					parent.addAttribute("totalCount", Integer.toString(result.queryResult.getTotalCount()));
 				}
 				if (result.singleOrderName != null)
 				{
 					parent.addAttribute("orderName", result.singleOrderName);
 					parent.addAttribute("orderDesc", String.valueOf(result.singleOrderDesc));
 				}
-				parent.addAttribute("hasNextPage", String.valueOf(result.queryResult.isHasMoreRecord()));
+				parent.addAttribute("hasNextPage", String.valueOf(result.queryResult.hasMoreRecord()));
 				Element vNode = parent.addElement("value");
 				printResultIterator(vNode, result.queryResult);
 			}

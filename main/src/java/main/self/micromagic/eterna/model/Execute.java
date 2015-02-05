@@ -24,11 +24,11 @@ import self.micromagic.eterna.share.EternaException;
 
 public interface Execute
 {
-	void initialize(ModelAdapter model) throws EternaException;
+	void initialize(Model model) throws EternaException;
 
 	String getName() throws EternaException;
 
-	ModelAdapter getModelAdapter() throws EternaException;
+	Model getModelAdapter() throws EternaException;
 
 	String getExecuteType() throws EternaException;
 

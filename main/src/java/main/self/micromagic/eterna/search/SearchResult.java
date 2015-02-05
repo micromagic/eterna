@@ -113,16 +113,16 @@ public final class SearchResult
 			p.printPairWithoutCheck(out, "pageNum", this.pageNum, false);
 			p.printPairWithoutCheck(out, "pageSize", this.pageSize, false);
 			p.printPairWithoutCheck(out, "searchName", this.searchName, false);
-			if (this.queryResult.isRealRecordCountAvailable())
+			if (this.queryResult.isTotalCountAvailable())
 			{
-				p.printPairWithoutCheck(out, "totalCount", this.queryResult.getRealRecordCount(), false);
+				p.printPairWithoutCheck(out, "totalCount", this.queryResult.getTotalCount(), false);
 			}
 			if (this.singleOrderName != null)
 			{
 				p.printPairWithoutCheck(out, "orderName", this.singleOrderName, false);
 				p.printPairWithoutCheck(out, "orderDesc", this.singleOrderDesc ? 1 : 0, false);
 			}
-			p.printPairWithoutCheck(out, "hasNextPage", this.queryResult.isHasMoreRecord() ? 1 : 0, false);
+			p.printPairWithoutCheck(out, "hasNextPage", this.queryResult.hasMoreRecord() ? 1 : 0, false);
 			p.printObjectEnd(out);
 		}
 		catch (SQLException ex)

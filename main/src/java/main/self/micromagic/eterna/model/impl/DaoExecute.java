@@ -26,7 +26,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.share.EternaFactory;
@@ -40,7 +40,7 @@ public abstract class DaoExecute extends AbstractExecute
 	protected boolean doExecute = true;
 	protected EternaFactory factory;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		if (this.initialized)

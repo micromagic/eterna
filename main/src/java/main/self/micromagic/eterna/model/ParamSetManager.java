@@ -356,7 +356,7 @@ public class ParamSetManager
 			ritr = (ResultIterator) this.getValues(names);
 		}
 
-		int loopCount = ritr.getRecordCount();
+		int loopCount = ritr.getCount();
 		if (loopCount > 0)
 		{
 			ResultRow row = ritr.nextRow();
@@ -461,9 +461,9 @@ public class ParamSetManager
 		else
 		{
 			ValuePreparer p = CreaterManager.createNullPreparer(
-					dao.getFactory(), param.getType());
+					this.dao.getFactory(), param.getType());
 			p.setRelativeIndex(param.getIndex());
-			dao.setValuePreparer(p);
+			this.dao.setValuePreparer(p);
 		}
 	}
 

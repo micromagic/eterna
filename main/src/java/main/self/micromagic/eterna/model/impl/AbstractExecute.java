@@ -19,16 +19,16 @@ package self.micromagic.eterna.model.impl;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.share.EternaException;
 
 public abstract class AbstractExecute extends AbstractGenerator
 		implements Execute, Generator
 {
-	protected ModelAdapter model;
+	protected Model model;
 	protected boolean initialized = false;
 
-	public void initialize(ModelAdapter model)
+	public void initialize(Model model)
 			throws EternaException
 	{
 		this.initialized = true;
@@ -47,7 +47,7 @@ public abstract class AbstractExecute extends AbstractGenerator
 		return this;
 	}
 
-	public ModelAdapter getModelAdapter()
+	public Model getModelAdapter()
 			throws EternaException
 	{
 		return this.model;

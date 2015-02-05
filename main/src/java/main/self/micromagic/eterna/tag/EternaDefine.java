@@ -160,7 +160,7 @@ public class EternaDefine extends InitBaseTag
 					}
 				}
 			}
-			View view = f.createViewAdapter(tmpViewName);
+			View view = f.createView(tmpViewName);
 			JspWriter out = this.pageContext.getOut();
 			String dataType = view.getDataType(nowData);
 			if (View.DATA_TYPE_WEB.equals(dataType))

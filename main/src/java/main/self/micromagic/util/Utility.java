@@ -553,7 +553,7 @@ public class Utility
 			{
 				Class c = Class.forName(className);
 				tmpDS = (DataSource) c.newInstance();
-				setDataSourceProperties(dataSource, propertiesManager);
+				setDataSourceProperties(tmpDS, propertiesManager);
 			}
 			catch (Exception ex)
 			{

@@ -130,6 +130,19 @@
 			<!-- 给标签库使用的默认空界面 -->
 			<view name="empty.view"/>
 
+			<!-- 单个空格 -->
+			<typical-component name="nbsp">
+				<component type="span">
+					<component-param><![CDATA[html:"&nbsp;"]]></component-param>
+				</component>
+			</typical-component>
+			<!-- 2个空格 -->
+			<typical-component name="nbsp2">
+				<component type="span">
+					<component-param><![CDATA[html:"&nbsp; "]]></component-param>
+				</component>
+			</typical-component>
+			
 		</objs>
 	</factory>
 </eterna-config>

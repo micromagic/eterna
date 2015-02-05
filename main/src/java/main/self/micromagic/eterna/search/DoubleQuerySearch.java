@@ -107,7 +107,7 @@ public class DoubleQuerySearch extends SearchImpl
 			throw new EternaException("Not found attribute [keyNameList].");
 		}
 		String[] keyList = StringTool.separateString(tmp, ",", true);
-		Query keyQuery = factory.createQueryAdapter(this.getQueryName());
+		Query keyQuery = factory.createQuery(this.getQueryName());
 		ResultReaderManager keyReaders = keyQuery.getReaderManager();
 		this.keyIndexs = new int[keyList.length];
 		this.colNames = new String[keyList.length];
@@ -181,7 +181,7 @@ public class DoubleQuerySearch extends SearchImpl
 		if (this.sameSearch || this.assistSearchIndex != -1)
 		{
 			Search assistSearch = this.sameSearch ? this
-					: this.getFactory().createSearchAdapter(this.assistSearchIndex);
+					: this.getFactory().createSearch(this.assistSearchIndex);
 			BooleanRef first = new BooleanRef();
 			SearchManager manager = assistSearch.getSearchManager(data);
 			nextQuery = getQueryAdapter(data, conn, assistSearch, first, this.sessionNextQueryTag, manager,
@@ -211,7 +211,7 @@ public class DoubleQuerySearch extends SearchImpl
 		}
 		else
 		{
-			nextQuery = this.getFactory().createQueryAdapter(this.nextQueryIndex);
+			nextQuery = this.getFactory().createQuery(this.nextQueryIndex);
 			UserManager um = this.getFactory().getUserManager();
 			if (um != null)
 			{
@@ -233,8 +233,8 @@ public class DoubleQuerySearch extends SearchImpl
 				nextQuery.setSingleOrder(result.singleOrderName, result.singleOrderDesc ? -1 : 1);
 			}
 		}
-		nextQuery.setTotalCount(ritr.getRealRecordCount(),
-				new Query.TotalCountExt(ritr.isHasMoreRecord(), ritr.isRealRecordCountAvailable()));
+		nextQuery.setTotalCount(ritr.getTotalCount(),
+				new Query.TotalCountInfo(ritr.hasMoreRecord(), ritr.isTotalCountAvailable()));
 		this.setNextQueryCondition(ritr, nextQuery);
 		return new SearchResult(result, nextQuery.getName(), nextQuery.executeQuery(conn));
 	}
@@ -246,18 +246,18 @@ public class DoubleQuerySearch extends SearchImpl
 			throws EternaException, SQLException
 	{
 		boolean multiKey = this.keyIndexs.length > 1;
-		if (keyIterator.getRecordCount() == 0)
+		if (keyIterator.getCount() == 0)
 		{
 			nextQuery.setSubSQL(this.keyConditionIndex, "(" + this.colNames[0] + " = null)");
 		}
 		else
 		{
 			StringAppender buf = StringTool.createStringAppender(
-					this.conditionItemSize * keyIterator.getRecordCount());
+					this.conditionItemSize * keyIterator.getCount());
 			List vpList = new LinkedList();
 			int vpIndex = 0;
 			buf.append('(');
-			while (keyIterator.hasMoreRow())
+			while (keyIterator.hasNextRow())
 			{
 				if (multiKey)
 				{
@@ -288,7 +288,7 @@ public class DoubleQuerySearch extends SearchImpl
 				{
 					buf.append(')');
 				}
-				if (keyIterator.hasMoreRow())
+				if (keyIterator.hasNextRow())
 				{
 					buf.append(" OR ");
 				}

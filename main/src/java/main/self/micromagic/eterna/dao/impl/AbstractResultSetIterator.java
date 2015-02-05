@@ -74,27 +74,27 @@ public abstract class AbstractResultSetIterator
 		this.hasNext = this.resultSet.next();
 	}
 
-	public int getRealRecordCount() throws SQLException
+	public int getTotalCount() throws SQLException
 	{
 		return -1;
 	}
 
-	public int getRecordCount() throws SQLException
+	public int getCount() throws SQLException
 	{
 		return -1;
 	}
 
-	public boolean isRealRecordCountAvailable() throws SQLException
+	public boolean isTotalCountAvailable() throws SQLException
 	{
 		return false;
 	}
 
-	public boolean isHasMoreRecord() throws SQLException
+	public boolean hasMoreRecord() throws SQLException
 	{
 		return false;
 	}
 
-	public boolean hasMoreRow()
+	public boolean hasNextRow()
 			throws SQLException
 	{
 		this.idleTime = 0;
@@ -162,7 +162,7 @@ public abstract class AbstractResultSetIterator
 			this.currentRow  = (ResultRow) this.preFetchList.remove(0);
 			return this.currentRow;
 		}
-		if (this.hasMoreRow())
+		if (this.hasNextRow())
 		{
 			this.isMovedNext = false;
 			this.rowNum++;
@@ -221,7 +221,7 @@ public abstract class AbstractResultSetIterator
 	{
 		try
 		{
-			return this.hasMoreRow();
+			return this.hasNextRow();
 		}
 		catch (SQLException ex)
 		{

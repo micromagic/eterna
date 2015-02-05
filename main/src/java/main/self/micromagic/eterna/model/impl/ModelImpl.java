@@ -29,7 +29,7 @@ import org.dom4j.Element;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
@@ -40,8 +40,8 @@ import self.micromagic.util.ObjectRef;
 /**
  * @author micromagic@sina.com
  */
-public class ModelAdapterImpl extends AbstractGenerator
-		implements ModelAdapter, ObjectCreater
+public class ModelImpl extends AbstractGenerator
+		implements Model, ObjectCreater
 {
 	private boolean needFrontModel = true;
 	private boolean keepCaches = false;
@@ -194,7 +194,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 				if (tmp == null)
 				{
 					data.addSpcialData(MODEL_CACHE, "frontModel.executeIn", this);
-					ModelAdapter tmpModel = this.getFactory().createModelAdapter(this.frontModelIndex);
+					Model tmpModel = this.getFactory().createModel(this.frontModelIndex);
 					ObjectRef preConn = (ObjectRef) data.getSpcialData(MODEL_CACHE, PRE_CONN);
 					ModelExport export = this.getFactory().getModelCaller().callModel(
 							data, tmpModel, null, tmpModel.getTransactionType(), preConn);
@@ -416,7 +416,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 		return this.createModelAdapter();
 	}
 
-	public ModelAdapter createModelAdapter()
+	public Model createModelAdapter()
 	{
 		return this;
 	}
@@ -454,7 +454,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 
 	public Class getObjectType()
 	{
-		return ModelAdapterImpl.class;
+		return ModelImpl.class;
 	}
 
 	public boolean isSingleton()

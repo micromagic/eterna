@@ -24,7 +24,8 @@ import self.micromagic.eterna.dao.ResultFormat;
 import self.micromagic.eterna.dao.SpecialLog;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.search.ConditionBuilder;
@@ -136,37 +137,44 @@ public interface EternaFactory extends Factory
 	 *
 	 * @param name       <code>Query</code>的名称.
 	 */
-	Query createQueryAdapter(String name) throws EternaException;
+	Query createQuery(String name) throws EternaException;
 
 	/**
 	 * 生成一个<code>Query</code>的实例.
 	 *
 	 * @param id         <code>Query</code>的id.
 	 */
-	Query createQueryAdapter(int id) throws EternaException;
+	Query createQuery(int id) throws EternaException;
 
 	/**
 	 * 生成一个<code>Update</code>的实例.
 	 *
 	 * @param name       <code>Update</code>的名称.
 	 */
-	Update createUpdateAdapter(String name) throws EternaException;
+	Update createUpdate(String name) throws EternaException;
 
 	/**
 	 * 生成一个<code>Update</code>的实例.
 	 *
 	 * @param id         <code>Update</code>的id.
 	 */
-	Update createUpdateAdapter(int id) throws EternaException;
+	Update createUpdate(int id) throws EternaException;
 
 	/**
 	 * 生成一个<code>PreparerCreater</code>的实例.
 	 *
 	 * @param name       PreparerCreater的名称.
 	 */
-	PreparerCreater getPrepare(String name)
-			throws EternaException;
+	PreparerCreater getPrepare(String name) throws EternaException;
 
+	/**
+	 * 根据指定的类型及给出的值创建一个ValuePreparer.
+	 *
+	 * @param type   值的类型
+	 * @param value  需要设置的值
+	 */
+	ValuePreparer createValuePreparer(int type, Object value)
+			throws EternaException;
 
 	//----------------------------------  search  --------------------------------------
 
@@ -195,14 +203,14 @@ public interface EternaFactory extends Factory
 	 *
 	 * @param id         <code>Search</code>的名称.
 	 */
-	Search createSearchAdapter(String name) throws EternaException;
+	Search createSearch(String name) throws EternaException;
 
 	/**
 	 * 生成一个<code>Search</code>的实例.
 	 *
 	 * @param id         <code>Search</code>的id.
 	 */
-	Search createSearchAdapter(int id) throws EternaException;
+	Search createSearch(int id) throws EternaException;
 
 	void registerSearchManager(SearchManagerGenerator generator)
 			throws EternaException;
@@ -236,14 +244,14 @@ public interface EternaFactory extends Factory
 	 *
 	 * @param id         <code>Model</code>的名称.
 	 */
-	ModelAdapter createModelAdapter(String name) throws EternaException;
+	Model createModel(String name) throws EternaException;
 
 	/**
 	 * 生成一个<code>Model</code>的实例.
 	 *
 	 * @param id         <code>Model</code>的id.
 	 */
-	ModelAdapter createModelAdapter(int id) throws EternaException;
+	Model createModel(int id) throws EternaException;
 
 	//----------------------------------  view  --------------------------------------
 
@@ -280,14 +288,14 @@ public interface EternaFactory extends Factory
 	 *
 	 * @param id         <code>View</code>的名称.
 	 */
-	View createViewAdapter(String name) throws EternaException;
+	View createView(String name) throws EternaException;
 
 	/**
 	 * 生成一个<code>View</code>的实例.
 	 *
 	 * @param id         <code>View</code>的id.
 	 */
-	View createViewAdapter(int id) throws EternaException;
+	View createView(int id) throws EternaException;
 
 	/**
 	 * 获取一个可在界面或后端程序中使用的资源对象.

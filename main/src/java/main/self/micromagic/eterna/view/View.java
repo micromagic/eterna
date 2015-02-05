@@ -175,7 +175,7 @@ public interface View extends ObjectCreater
 
 	/**
 	 * 输出控件的事件定义.
-	 * 由于要根据debug的等级，在事件脚本中加入调试代码，所以此功能在ViewAdapter中实现.
+	 * 由于要根据debug的等级，在事件脚本中加入调试代码，所以此功能在View中实现.
 	 */
 	void printEvent(Writer out, AppData data, Event event) throws IOException, EternaException;
 

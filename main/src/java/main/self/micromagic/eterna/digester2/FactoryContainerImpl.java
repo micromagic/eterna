@@ -18,6 +18,7 @@ package self.micromagic.eterna.digester2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.StringTokenizer;
 import org.dom4j.DocumentException;
 
 import self.micromagic.eterna.share.AttributeManager;
+import self.micromagic.eterna.share.ConfigInclude;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Factory;
 import self.micromagic.eterna.share.FactoryContainer;
@@ -191,20 +193,56 @@ public class FactoryContainerImpl
 				}
 				ContainerManager.setCurrentResource(cr);
 				ParseException.setContextInfo(cr.getURI(), temp);
-				try
-				{
-					this.digester.parse(in);
-					in.close();
-				}
-				finally
-				{
-					ParseException.clearContextInfo();
-				}
+				this.parseXML(in, cr);
 			}
 			else
 			{
 				Digester.log.info("The config \"" + temp + "\" isn't avilable.");
 			}
+		}
+	}
+	/**
+	 * 根据给出的InputStream或Reader进行xml解析.
+	 *
+	 * @param src  InputStream或Reader
+	 */
+	protected void parseXML(Object src, ConfigResource res)
+			throws IOException, EternaException, DocumentException
+	{
+		try
+		{
+			if (src instanceof InputStream)
+			{
+				InputStream in = (InputStream) src;
+				this.digester.parse(in);
+				in.close();
+			}
+			else
+			{
+				Reader reader = (Reader) src;
+				this.digester.parse(reader);
+				reader.close();
+			}
+			// 处理需要引用的配置.
+			List includes = (List) this.getAttribute(ConfigInclude.INCLUDE_LIST_FLAG);
+			if (includes != null)
+			{
+				this.removeAttribute(ConfigInclude.INCLUDE_LIST_FLAG);
+				int count = includes.size();
+				Iterator itr = includes.iterator();
+				for (int i = 0; i < count; i++)
+				{
+					ConfigInclude include = (ConfigInclude) itr.next();
+					Object tmp = include.getIncludeRes(res);
+					ConfigResource cr = ContainerManager.getCurrentResource();
+					ParseException.setContextInfo(cr.getURI(), include.getSrc());
+					this.parseXML(tmp, cr);
+				}
+			}
+		}
+		finally
+		{
+			ParseException.clearContextInfo();
 		}
 	}
 	private final List resources = new ArrayList(6);

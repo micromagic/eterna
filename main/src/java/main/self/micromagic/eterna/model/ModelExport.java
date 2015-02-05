@@ -16,15 +16,19 @@
 
 package self.micromagic.eterna.model;
 
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
+
 public class ModelExport
+		implements EternaObject
 {
 	public static final String DEFAULT_NAME = "[default]";
 
-	private String name;
+	private final String name;
 	private String modelName;
 	private String viewName;
 	private String path;
-	private boolean redirect;
+	private final boolean redirect;
 	private boolean nextModel;
 	private boolean errorExport = false;
 
@@ -145,5 +149,11 @@ public class ModelExport
 	{
 		return nextModel;
 	}
+
+	public boolean initialize(EternaFactory factory)
+	{
+		return false;
+	}
+
 
 }

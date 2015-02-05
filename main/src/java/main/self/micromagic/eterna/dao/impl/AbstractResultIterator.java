@@ -77,7 +77,7 @@ public abstract class AbstractResultIterator
 		return this.metaData;
 	}
 
-	public boolean hasMoreRow()
+	public boolean hasNextRow()
 	{
 		if (this.preFetchList != null && this.preFetchList.size() > 0)
 		{
@@ -185,7 +185,7 @@ public abstract class AbstractResultIterator
 
 	public boolean hasNext()
 	{
-		return this.hasMoreRow();
+		return this.hasNextRow();
 	}
 
 	public Object next()

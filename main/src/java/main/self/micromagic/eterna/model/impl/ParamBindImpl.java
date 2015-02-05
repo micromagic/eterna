@@ -27,7 +27,7 @@ import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.model.Execute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ParamBindGenerator;
 import self.micromagic.eterna.model.ParamSetManager;
@@ -56,7 +56,7 @@ public class ParamBindImpl extends AbstractGenerator
 	protected boolean loop = false;
 	protected boolean subSQL = false;
 
-	public void initialize(ModelAdapter model, Execute execute)
+	public void initialize(Model model, Execute execute)
 			throws EternaException
 	{
 		if (this.loop && this.names == null)
@@ -292,7 +292,7 @@ public class ParamBindImpl extends AbstractGenerator
 					else if (tempValue instanceof ResultIterator)
 					{
 						ResultIterator ritr = (ResultIterator) tempValue;
-						if (ritr.hasMoreRow())
+						if (ritr.hasNextRow())
 						{
 							psm.setParams(ritr.nextRow(), this.names);
 						}
@@ -300,7 +300,7 @@ public class ParamBindImpl extends AbstractGenerator
 					else if (tempValue instanceof SearchResult)
 					{
 						ResultIterator ritr = ((SearchResult) tempValue).queryResult;
-						if (ritr.hasMoreRow())
+						if (ritr.hasNextRow())
 						{
 							psm.setParams(ritr.nextRow(), this.names);
 						}
@@ -357,7 +357,7 @@ public class ParamBindImpl extends AbstractGenerator
 				else if (tempValue instanceof ResultIterator)
 				{
 					ResultIterator ritr = (ResultIterator) tempValue;
-					if (ritr.hasMoreRow())
+					if (ritr.hasNextRow())
 					{
 						psm.setParams(ritr.nextRow());
 					}
@@ -365,7 +365,7 @@ public class ParamBindImpl extends AbstractGenerator
 				else if (tempValue instanceof SearchResult)
 				{
 					ResultIterator ritr = ((SearchResult) tempValue).queryResult;
-					if (ritr.hasMoreRow())
+					if (ritr.hasNextRow())
 					{
 						psm.setParams(ritr.nextRow());
 					}

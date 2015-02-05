@@ -18,6 +18,7 @@ package self.micromagic.eterna.digester2;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -208,6 +209,20 @@ public class Digester
 	 * @throws DocumentException
 	 */
 	void parse(InputStream in)
+			throws DocumentException
+	{
+		EternaSAXReader reader = new EternaSAXReader(new EternaDocumentFactory());
+		Document doc = reader.read(in);
+		this.parse(doc);
+	}
+
+	/**
+	 * 对一个xml数据流进行解析.
+	 *
+	 * @param in  xml数据流
+	 * @throws DocumentException
+	 */
+	void parse(Reader in)
 			throws DocumentException
 	{
 		EternaSAXReader reader = new EternaSAXReader(new EternaDocumentFactory());

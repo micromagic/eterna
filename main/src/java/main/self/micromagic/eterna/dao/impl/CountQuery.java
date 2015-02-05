@@ -43,7 +43,7 @@ import self.micromagic.eterna.dao.reader.ObjectReader;
 import self.micromagic.eterna.dao.reader.ReaderFactory;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.model.ModelAdapter;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -267,7 +267,7 @@ class CountQuery
 		ResultIterator ritr = this.executeQuery(conn);
 		conn.close();
 		// 查询执行完成, 并关闭了链接, 可以设置链接接管标志
-		AppData.getCurrentData().addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, "1");
+		AppData.getCurrentData().addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "1");
 		return ritr;
 	}
 
@@ -357,7 +357,7 @@ class CountQuery
 		return 1;
 	}
 
-	public TotalCountExt getTotalCountExt()
+	public TotalCountInfo getTotalCountInfo()
 	{
 		return null;
 	}
@@ -377,7 +377,7 @@ class CountQuery
 		throw new UnsupportedOperationException();
 	}
 
-	public void setTotalCount(int totalCount, TotalCountExt ext)
+	public void setTotalCount(int totalCount, TotalCountInfo ext)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -612,22 +612,22 @@ class CountQuery
 			this.resultItr = this.result.iterator();
 		}
 
-		public int getRealRecordCount()
+		public int getTotalCount()
 		{
 			return 1;
 		}
 
-		public int getRecordCount()
+		public int getCount()
 		{
 			return 1;
 		}
 
-		public boolean isRealRecordCountAvailable()
+		public boolean isTotalCountAvailable()
 		{
 			return true;
 		}
 
-		public boolean isHasMoreRecord()
+		public boolean hasMoreRecord()
 		{
 			return false;
 		}
