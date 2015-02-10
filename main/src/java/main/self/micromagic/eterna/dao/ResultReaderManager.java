@@ -35,6 +35,16 @@ public interface ResultReaderManager
 	String ALIAS_FLAG = "alias";
 
 	/**
+	 * 在reader的名称前设置降序排序的标记.
+	 */
+	char ORDER_FLAG_DESC = '-';
+
+	/**
+	 * 在reader的名称前设置升序排序的标记.
+	 */
+	char ORDER_FLAG_ASC = '+';
+
+	/**
 	 * 获取本ResultReaderManager的名称.
 	 */
 	String getName() throws EternaException;
@@ -71,13 +81,13 @@ public interface ResultReaderManager
 	/**
 	 * 设置需要的<code>ResultReader</code>, 及排列顺序和查询的排序规则.
 	 *
-	 * @param names     存放<code>ResultReader</code>的名称级排序的数组,
+	 * @param names     存放<code>ResultReader</code>的名称及排序的数组,
 	 *                  <code>ResultReader</code>将按这个数组所指定的顺序排列,
-	 *                  并根据他来设置排序.
-	 *                  列名及排序的格式为[名称][排序方式(1个字符)].
-	 *                  排序方式分别为: "-"无, "A"升序, "D"降序.
-	 *
-	 * @throws EternaException  当相关配置出错时
+	 *                  并根据排序标记来设置排序.
+	 *                  排序标记有:
+	 *                  {@link #ORDER_FLAG_DESC}"-name" 表示此列降序
+	 *                  {@link #ORDER_FLAG_ASC}"+name" 表示此列升序
+	 *                  没有任何排序标记, 如"name" 表示此列不排序
 	 */
 	void setReaderList(String[] names) throws EternaException;
 
@@ -87,8 +97,9 @@ public interface ResultReaderManager
 	 * @param name      reader的名称
 	 * @param notThrow  设为<code>true<code>时, 当对应名称的reader不存在时
 	 *                  不会抛出异常, 而只是返回-1
-	 * @return  reader所在的索引值, 或-1(当对应名称的reader不存在时)
-	 *          第一个值为0, 第二个值为1, ...
+	 * @return  reader所在的索引值, 第一个值为0, 第二个值为1, ...
+	 *          或-1(当对应名称的reader不存在时)
+	 *
 	 */
 	int getReaderIndex(String name, boolean notThrow) throws EternaException;
 
@@ -96,8 +107,7 @@ public interface ResultReaderManager
 	 * 通过reader的名称获取该reader对象所在的索引值.
 	 *
 	 * @param name      reader的名称
-	 * @return  reader所在的索引值, 或-1(当对应名称的reader不存在时)
-	 *          第一个值为0, 第二个值为1, ...
+	 * @return  reader所在的索引值, 第一个为0, 第二个为1, ...
 	 * @throws EternaException  当对应名称的reader不存在时
 	 */
 	int getReaderIndex(String name) throws EternaException;

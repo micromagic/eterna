@@ -33,7 +33,7 @@ public class FormatTool
 	/**
 	 * 完整的日期类型的格式化.
 	 */
-	public static final DateFormat dateFullFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S Z");
+	public static final DateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S Z");
 
 	private static final DateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -109,6 +109,14 @@ public class FormatTool
 	public static String formatCurrency2(double number)
 	{
 		return currency2Format.format(number);
+	}
+
+	/**
+	 * 格式化输出完整的日期-时间, 包括毫秒和时区
+	 */
+	public static String formatFullDate(Object datetime)
+	{
+		return datetime == null ? "" : getThreadFormat(fullDateFormat).format(datetime);
 	}
 
 	/**

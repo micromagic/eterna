@@ -81,6 +81,11 @@ public interface SearchManager
 	int getPageSize(int defaultSize);
 
 	/**
+	 * 获取排序的配置.
+	 */
+	String getOrderConfig(AppData data);
+
+	/**
 	 * 是否存在查询标志.
 	 */
 	boolean hasQueryType(AppData data) throws EternaException;

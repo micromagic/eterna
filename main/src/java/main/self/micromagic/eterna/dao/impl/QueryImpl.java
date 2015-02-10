@@ -72,7 +72,7 @@ public class QueryImpl extends AbstractQuery
 		this.startRow = startRow < 1 ? 1 : startRow;
 	}
 
-	public int getMaxRows()
+	public int getMaxCount()
 	{
 		return this.maxRows;
 	}
@@ -80,7 +80,7 @@ public class QueryImpl extends AbstractQuery
 	/**
 	 * 设置取出几条记录，-1表示取完为止
 	 */
-	public void setMaxRows(int maxRows)
+	public void setMaxCount(int maxRows)
 	{
 		this.maxRows = maxRows < -1 ? -1 : maxRows;
 	}

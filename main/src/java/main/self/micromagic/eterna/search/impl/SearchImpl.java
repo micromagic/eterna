@@ -64,6 +64,7 @@ import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.BooleanRef;
 import self.micromagic.util.MemoryChars;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.SessionCache;
 
 /**
@@ -736,7 +737,7 @@ public class SearchImpl extends AbstractGenerator
 				}
 			}
 		}
-		query.setMaxRows(maxRow);
+		query.setMaxCount(maxRow);
 		query.setStartRow(startRow + 1);
 		dealOthers(data, conn, this.others, query, isFirst.value);
 		if (this.conditionIndex > 0)
@@ -757,28 +758,18 @@ public class SearchImpl extends AbstractGenerator
 		{
 			this.parameterSetting.setParameter(query, this, isFirst.value, data, conn);
 		}
-		String singleOrederName = null;
-		boolean singleOrederDesc = false;
+		String orderConfig = null;
 		if (query.canOrder())
 		{
-			String orderStr = data.getRequestParameter(this.getName() + SINGLE_ORDER_SUFIX);
-			if (orderStr != null)
+			orderConfig = manager.getOrderConfig(data);
+			if (orderConfig != null)
 			{
-				int orderType = 0;
-				String orderTypeStr = data.getRequestParameter(this.getName() + SINGLE_ORDER_TYPE);
-				if (orderTypeStr != null)
-				{
-					try
-					{
-						orderType = Integer.parseInt(orderTypeStr);
-					}
-					catch (Exception ex) {}
-				}
-				query.setSingleOrder(orderStr, orderType);
+				query.setMultipleOrder(StringTool.separateString(orderConfig, ",", true));
 			}
-			BooleanRef tmp = new BooleanRef();
-			singleOrederName = query.getSingleOrder(tmp);
-			singleOrederDesc = tmp.value;
+			else
+			{
+				orderConfig = query.getOrderConfig();
+			}
 		}
 
 		if (log.isDebugEnabled())
@@ -819,8 +810,8 @@ public class SearchImpl extends AbstractGenerator
 			}
 			ritr = query.executeQuery(conn);
 		}
-		SearchResult result = new SearchResult(this.name, this.queryName, ritr, countRitr, maxRow, pageNum,
-				singleOrederName, singleOrederDesc);
+		SearchResult result = new SearchResult(this.name, this.queryName, ritr,
+				countRitr, maxRow, pageNum, orderConfig);
 		if (log.isDebugEnabled())
 		{
 			log.debug("End execute query:" + System.currentTimeMillis());

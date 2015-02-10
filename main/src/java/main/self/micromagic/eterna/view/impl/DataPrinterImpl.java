@@ -51,7 +51,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		implements DataPrinter
 {
 	protected StringCoder stringCoder;
-	protected DateFormat dateFormat = FormatTool.dateFullFormat;
+	protected DateFormat dateFormat = FormatTool.fullDateFormat;
 
 	public DataPrinterImpl()
 	{
@@ -229,7 +229,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		}
 		else if (value instanceof Date)
 		{
-			this.print(out, this.dateFormat.format((Date) value));
+			this.print(out, FormatTool.getThreadFormat(this.dateFormat).format((Date) value));
 		}
 		else if (Tool.isBean(value.getClass()))
 		{
@@ -241,7 +241,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		else if (value instanceof Calendar)
 		{
 			Date d = ((Calendar) value).getTime();
-			this.print(out, this.dateFormat.format(d));
+			this.print(out, FormatTool.getThreadFormat(this.dateFormat).format(d));
 		}
 		else if (value instanceof Map.Entry)
 		{

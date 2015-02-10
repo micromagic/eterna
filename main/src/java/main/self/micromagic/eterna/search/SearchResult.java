@@ -62,17 +62,12 @@ public final class SearchResult
 	public final ResultIterator searchCount;
 
 	/**
-	 * 设置的单列排序的reader名称.
+	 * 排序的配置.
 	 */
-	public final String singleOrderName;
+	public final String orderConfig;
 
-	/**
-	 * 单列排序是否为降序.
-	 */
-	public final boolean singleOrderDesc;
-
-	public SearchResult(String searchName, String queryName, ResultIterator queryResult, ResultIterator searchCount,
-			int pageSize, int pageNum, String singleOrderName, boolean singleOrderDesc)
+	public SearchResult(String searchName, String queryName, ResultIterator queryResult,
+			ResultIterator searchCount, int pageSize, int pageNum, String orderConfig)
 	{
 		this.pageSize = pageSize;
 		this.pageNum = pageNum;
@@ -80,8 +75,7 @@ public final class SearchResult
 		this.queryName = queryName;
 		this.queryResult = queryResult;
 		this.searchCount = searchCount;
-		this.singleOrderName = singleOrderName;
-		this.singleOrderDesc = singleOrderDesc;
+		this.orderConfig = orderConfig;
 	}
 
 	/**
@@ -99,8 +93,7 @@ public final class SearchResult
 		this.queryName = queryName;
 		this.queryResult = queryResult;
 		this.searchCount = old.searchCount;
-		this.singleOrderName = old.singleOrderName;
-		this.singleOrderDesc = old.singleOrderDesc;
+		this.orderConfig = old.orderConfig;
 	}
 
 	public void print(DataPrinter p, Writer out, Object bean)
@@ -117,12 +110,11 @@ public final class SearchResult
 			{
 				p.printPairWithoutCheck(out, "totalCount", this.queryResult.getTotalCount(), false);
 			}
-			if (this.singleOrderName != null)
+			if (this.orderConfig != null)
 			{
-				p.printPairWithoutCheck(out, "orderName", this.singleOrderName, false);
-				p.printPairWithoutCheck(out, "orderDesc", this.singleOrderDesc ? 1 : 0, false);
+				p.printPairWithoutCheck(out, "orderConfig", this.orderConfig, false);
 			}
-			p.printPairWithoutCheck(out, "hasNextPage", this.queryResult.hasMoreRecord() ? 1 : 0, false);
+			p.printPairWithoutCheck(out, "hasMoreRecord", this.queryResult.hasMoreRecord() ? 1 : 0, false);
 			p.printObjectEnd(out);
 		}
 		catch (SQLException ex)

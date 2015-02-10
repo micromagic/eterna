@@ -134,7 +134,7 @@ public class QueryExecute extends DaoExecute
 		}
 		if (this.count != -1)
 		{
-			query.setMaxRows(this.count);
+			query.setMaxCount(this.count);
 		}
 		query.setTotalCount(this.countType);
 		UserManager um = this.factory.getUserManager();

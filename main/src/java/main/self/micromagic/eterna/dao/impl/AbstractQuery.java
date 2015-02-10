@@ -39,8 +39,8 @@ import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.BooleanRef;
 import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
 
@@ -335,7 +335,7 @@ public abstract class AbstractQuery extends BaseDao
 		}
 	}
 
-	public void setSingleOrder(String readerName, int orderType)
+	public void setSingleOrder(String readerName, int orderFlag)
 			throws EternaException
 	{
 		if (this.orderIndex != -1)
@@ -348,28 +348,32 @@ public abstract class AbstractQuery extends BaseDao
 				return;
 			}
 			String orderStr = reader.getColumnName();
-			if (orderType == 0)
+			if (orderFlag == 0)
 			{
+				String flag;
 				if (this.orderStrs != null && orderStr.equals(this.orderStrs[0]))
 				{
 					orderStr = orderStr + " DESC";
-					this.orderNames = new String[]{readerName + "D"};
+					flag = String.valueOf(ResultReaderManager.ORDER_FLAG_DESC);
 				}
 				else
 				{
-					this.orderNames = new String[]{readerName + "A"};
+					flag = String.valueOf(ResultReaderManager.ORDER_FLAG_ASC);
 				}
+				this.orderNames = new String[]{flag.concat(readerName)};
 			}
 			else
 			{
-				orderStr = orderType < 0 ? orderStr + " DESC" : orderStr;
-				this.orderNames = orderType < 0 ?
-						new String[]{readerName + "D"} : new String[]{readerName + "A"};
+				orderStr = orderFlag < 0 ? orderStr + " DESC" : orderStr;
+				char tmpChar = orderFlag < 0 ? ResultReaderManager.ORDER_FLAG_DESC
+						: ResultReaderManager.ORDER_FLAG_ASC;
+				this.orderNames = new String[]{String.valueOf(tmpChar).concat(readerName)};;
 			}
 			this.orderStrs = new String[]{orderStr};
 			String settingOrder = this.readerManager.getOrderByString();
-			if (settingOrder != null && settingOrder.length() > 0)
+			if (!StringTool.isEmpty(settingOrder))
 			{
+				// 与readerManager中设置的排序合并
 				orderStr = orderStr + ", " + settingOrder;
 			}
 			if (log.isDebugEnabled())
@@ -380,53 +384,57 @@ public abstract class AbstractQuery extends BaseDao
 		}
 	}
 
-	public String getSingleOrder(BooleanRef desc)
+	public String getOrderConfig()
 	{
-		if (this.orderNames == null)
-		{
-			return null;
-		}
-		int index = this.orderNames[0].length() - 1;
-		if (desc != null)
-		{
-			desc.value = this.orderNames[0].charAt(index) == 'D';
-		}
-		return this.orderNames[0].substring(0, index);
+		return StringTool.linkStringArr(this.orderNames, ", ");
 	}
 
 	public void setMultipleOrder(String[] orderNames)
 			throws EternaException
 	{
-		if (orderNames == null || orderNames.length == 0)
+		if (orderNames == null)
 		{
-			this.orderNames = null;
-			this.orderStrs = null;
+			orderNames = StringTool.EMPTY_STRING_ARRAY;
 		}
 		if (this.orderIndex != -1)
 		{
-			this.orderNames = new String[orderNames.length];
-			this.orderStrs = new String[orderNames.length];
+			List tmpOrderNames = new ArrayList();
+			List tmpOrderStrs = new ArrayList();
 			for (int i = 0; i < orderNames.length; i++)
 			{
-				String readerName = orderNames[i].substring(0, orderNames[i].length() - 1);
-				char orderType = orderNames[i].charAt(orderNames[i].length() - 1);
-				ResultReader reader = this.readerManager.getReader(readerName);
-				if (reader == null)
+				StringRef name = new StringRef(orderNames[i]);
+				int orderFlag = ReaderManagerImpl.checkOrderFlag(name);
+				ResultReader reader = this.readerManager.getReader(name.getString());
+				if (reader == null || orderFlag == 0)
 				{
-					log.error("Multiple order, not found the reader: [" + readerName
-							+ "] in query[" + this.getName() + "].");
-					return;
+					log.error("Multiple order, not found the reader [" + name
+							+ "] or order flag in query [" + this.getName() + "].");
+					continue;
 				}
 				String orderStr = reader.getColumnName();
-				orderStr = orderType == 'D' ? orderStr + " DESC" : orderStr;
-				this.orderNames[i] = orderNames[i];
-				this.orderStrs[i] = orderStr;
+				orderStr = orderFlag < 0 ? orderStr + " DESC" : orderStr;
+				tmpOrderNames.add(orderNames[i]);
+				tmpOrderStrs.add(orderStr);
+			}
+			int count = tmpOrderNames.size();
+			if (count > 0)
+			{
+				this.orderNames = new String[count];
+				this.orderStrs = new String[count];
+				tmpOrderNames.toArray(this.orderNames);
+				tmpOrderStrs.toArray(this.orderStrs);
+			}
+			else
+			{
+				this.orderNames = null;
+				this.orderStrs = null;
 			}
 
 			String realOrderStr = StringTool.linkStringArr(this.orderStrs, ", ");
 			String settingOrder = this.readerManager.getOrderByString();
-			if (settingOrder != null && settingOrder.length() > 0)
+			if (!StringTool.isEmpty(settingOrder))
 			{
+				// 与readerManager中设置的排序合并
 				realOrderStr = realOrderStr + ", " + settingOrder;
 			}
 			if (log.isDebugEnabled())

@@ -21,7 +21,6 @@ import java.sql.SQLException;
 
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.BooleanRef;
 
 /**
  * 数据库的查询对象.
@@ -92,7 +91,7 @@ public interface Query extends Dao
 
 	/**
 	 * 是否可设置排序. <p>
-	 * 如果在定义时设置了orderIndex这该query是可设置排序的.
+	 * 如果在定义时设置了orderIndex, 则此query是可设置排序的.
 	 */
 	boolean canOrder() throws EternaException;
 
@@ -106,26 +105,27 @@ public interface Query extends Dao
 	/**
 	 * 设置单列排序的列.
 	 *
-	 * @param orderType   0    表示自动选择顺序, 同{@link #setSingleOrder(String)}
-	 *                    负数 表示使用降序
-	 *                    正数 表示使用升序
+	 * @param orderFlag   0    表示自动选择升降序, 同{@link #setSingleOrder(String)}
+	 *                    -1 表示使用降序
+	 *                    1 表示使用升序
 	 */
-	void setSingleOrder(String readerName, int orderType) throws EternaException;
+	void setSingleOrder(String readerName, int orderFlag) throws EternaException;
 
 	/**
-	 * 获取单列排序的列名, 该名称为某个reader的名称. <p>
-	 * 如果尚未设置单列排序, 则返回null.
+	 * 获取排序的配置字符串, 每个排序配置间用","分隔
 	 *
-	 * @param desc  表示是否为降序, true表示是降序
+	 * @see #setMultipleOrder(String[])
 	 */
-	String getSingleOrder(BooleanRef desc) throws EternaException;
+	String getOrderConfig() throws EternaException;
 
 	/**
 	 * 设置多列排序. <p>
-	 * 注: 多列排序设置的不是reader的名称, 而是reader的名称再加上排序符.
-	 * 如: 升序 readerName + 'A', 降序 readerName + 'D'
+	 * 注: 多列排序设置的不只是reader的名称, 而是reader的名称再加上排序标记.
+	 * 排序标记有:
+	 * {@link ResultReaderManager#ORDER_FLAG_DESC}"-name" 表示此列降序
+	 * {@link ResultReaderManager#ORDER_FLAG_ASC}"+name" 表示此列升序
 	 *
-	 * @param orderNames   多列排序排序名称数组
+	 * @param orderNames  带有排序标记的reader名称列表
 	 */
 	void setMultipleOrder(String[] orderNames) throws EternaException;
 
@@ -135,12 +135,13 @@ public interface Query extends Dao
 	boolean isForwardOnly() throws EternaException;
 
 	/**
-	 * 获取该查询对象是从第几条记录开始读取, 默认值为"1".
+	 * 获取该查询对象是从第几条记录开始读取, 默认值为"1",
+	 * 即从第一条记录.
 	 */
 	int getStartRow() throws EternaException, SQLException;
 
 	/**
-	 * 设置从第几条记录开始取值(从1开始计数).
+	 * 设置从第几条记录开始取值(从1开始).
 	 *
 	 * @param startRow   起始行号
 	 */
@@ -148,16 +149,16 @@ public interface Query extends Dao
 
 	/**
 	 * 获取该查询对象读取的最大记录数, 默认值为"-1", 表示
-	 * 取完为止.
+	 * 读取起始行之后所有的记录.
 	 */
-	int getMaxRows() throws EternaException, SQLException;
+	int getMaxCount() throws EternaException, SQLException;
 
 	/**
-	 * 设置取出的最大记录数，-1表示取完为止.
+	 * 设置读取的最大记录数，-1表示读取起始行之后所有的记录.
 	 *
-	 * @param maxRows   取出的最大记录数
+	 * @param maxCount   读取的最大记录数
 	 */
-	void setMaxRows(int maxRows) throws EternaException, SQLException;
+	void setMaxCount(int maxCount) throws EternaException, SQLException;
 
 	/**
 	 * 获取该查询对象设置的总记录数.
@@ -165,21 +166,19 @@ public interface Query extends Dao
 	int getTotalCount() throws EternaException;
 
 	/**
-	 * 设置该查询对象的记录数. <p>
-	 * 默认值为<code>TOTAL_COUNT_AUTO(-1)</code>.
+	 * 设置该查询对象的总记录数. <p>
+	 * 默认值为{@link #TOTAL_COUNT_NONE}(-2)</code>.
 	 *
 	 * @param totalCount   总记录数.
-	 *                     <code>TOTAL_COUNT_AUTO(-1)</code>, <code>TOTAL_COUNT_NONE(-2)</code>,
-	 *                     <code>TOTAL_COUNT_COUNT(-3)</code>为特殊的设置. 0-N为直接设置总记录数.
-	 *
-	 * @see #TOTAL_COUNT_AUTO
-	 * @see #TOTAL_COUNT_NONE
-	 * @see #TOTAL_COUNT_COUNT
+	 *                     {@link #TOTAL_COUNT_AUTO}(-1)将游标滚到最后获取总记录数
+	 *                     {@link #TOTAL_COUNT_NONE}(-2)不获取总记录数
+	 *                     {@link #TOTAL_COUNT_COUNT}(-3)通过执行一个统计查询获取总记录数
+	 *                     0-N为直接设置总记录数
 	 */
 	void setTotalCount(int totalCount) throws EternaException;
 
 	/**
-	 * 设置该查询对象的记录数. <p>
+	 * 设置该查询对象的总记录数. <p>
 	 *
 	 * @param totalCount  总记录数.
 	 * @param info        相关信息, 只有在totalCount的值设为0-N时才有效.
@@ -194,6 +193,8 @@ public interface Query extends Dao
 	/**
 	 * 获取该查询对象设置的总记录数的相关信息. <p>
 	 * 只有在totalCount的值设为0-N时, 该值才有效.
+	 *
+	 * @see #setTotalCount(int, TotalCountInfo)
 	 */
 	TotalCountInfo getTotalCountInfo() throws EternaException;
 

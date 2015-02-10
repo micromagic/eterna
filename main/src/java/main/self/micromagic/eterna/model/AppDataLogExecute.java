@@ -21,37 +21,38 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Enumeration;
-import java.util.Date;
-import java.util.Calendar;
 
 import org.dom4j.Element;
+
+import self.micromagic.cg.ArrayTool;
 import self.micromagic.cg.BeanMethodInfo;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.cg.ClassKeyCache;
-import self.micromagic.cg.ArrayTool;
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.impl.AbstractExecute;
-import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.SearchResult;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.container.SessionCache;
-import self.micromagic.util.container.PreFetchIterator;
-import self.micromagic.util.container.ThreadCache;
-import self.micromagic.util.FormatTool;
 import self.micromagic.util.BooleanRef;
+import self.micromagic.util.FormatTool;
+import self.micromagic.util.container.PreFetchIterator;
+import self.micromagic.util.container.SessionCache;
+import self.micromagic.util.container.ThreadCache;
 
 /**
  * @author micromagic@sina.com
@@ -223,8 +224,8 @@ public class AppDataLogExecute extends AbstractExecute
 	private static class BeanPrinterImpl
 			implements BeanPrinter
 	{
-		private Field[] fields;
-		private BeanMethodInfo[] methods;
+		private final Field[] fields;
+		private final BeanMethodInfo[] methods;
 
 		public BeanPrinterImpl(Class c)
 		{
@@ -285,7 +286,7 @@ public class AppDataLogExecute extends AbstractExecute
 	 */
 	public static class Printer
 	{
-		private ArrayList cStack = new ArrayList();
+		private final ArrayList cStack = new ArrayList();
 		private int idIndex = 1;
 
 		public void printAppData(AppData data)
@@ -549,10 +550,9 @@ public class AppDataLogExecute extends AbstractExecute
 				{
 					parent.addAttribute("totalCount", Integer.toString(result.queryResult.getTotalCount()));
 				}
-				if (result.singleOrderName != null)
+				if (result.orderConfig != null)
 				{
-					parent.addAttribute("orderName", result.singleOrderName);
-					parent.addAttribute("orderDesc", String.valueOf(result.singleOrderDesc));
+					parent.addAttribute("orderConfig", result.orderConfig);
 				}
 				parent.addAttribute("hasNextPage", String.valueOf(result.queryResult.hasMoreRecord()));
 				Element vNode = parent.addElement("value");
@@ -635,13 +635,13 @@ public class AppDataLogExecute extends AbstractExecute
 			else if (value instanceof Date)
 			{
 				parent.addAttribute("type", "Date");
-				parent.addAttribute("value", FormatTool.dateFullFormat.format((Date) value));
+				parent.addAttribute("value", FormatTool.formatFullDate(value));
 			}
 			else if (value instanceof Calendar)
 			{
 				parent.addAttribute("type", "Calendar");
 				Date d = ((Calendar) value).getTime();
-				parent.addAttribute("value", FormatTool.dateFullFormat.format(d));
+				parent.addAttribute("value", FormatTool.formatFullDate(d));
 			}
 			else if (value instanceof BeanPrinter)
 			{

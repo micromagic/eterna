@@ -61,14 +61,9 @@ public final class SearchAttributes
 	public final String queryTypeReset;
 
 	/**
-	 * 单列排序的参数名称.
+	 * 设置排序配置的参数名称.
 	 */
-	public final String singleOrderTag;
-
-	/**
-	 * 单列排序方式的参数名称.
-	 */
-	public final String singleOrderTypeTag;
+	public final String orderConfigTag;
 
 	public SearchAttributes(Map attrs)
 	{
@@ -90,9 +85,7 @@ public final class SearchAttributes
 		tmp = (String) attrs.get("queryTypeReset");
 		this.queryTypeReset = tmp == null ? "set" : tmp;
 		tmp = (String) attrs.get("singleOrderTag");
-		this.singleOrderTag = tmp == null ? "$order" : tmp;
-		tmp = (String) attrs.get("singleOrderTypeTag");
-		this.singleOrderTypeTag = tmp == null ? "$orderType" : tmp;
+		this.orderConfigTag = tmp == null ? "$order" : tmp;
 	}
 
 	public void print(DataPrinter p, Writer out, Object bean)
@@ -105,8 +98,7 @@ public final class SearchAttributes
 		p.printPairWithoutCheck(out, "queryTypeClear", this.queryTypeClear, false);
 		p.printPairWithoutCheck(out, "queryTypeReset", this.queryTypeReset, false);
 		p.printPairWithoutCheck(out, "queryTypeTag", this.queryTypeTag, false);
-		p.printPairWithoutCheck(out, "singleOrderTag", this.singleOrderTag, false);
-		p.printPairWithoutCheck(out, "singleOrderTypeTag", this.singleOrderTypeTag, false);
+		p.printPairWithoutCheck(out, "orderConfigTag", this.orderConfigTag, false);
 		p.printObjectEnd(out);
 	}
 

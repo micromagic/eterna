@@ -129,7 +129,7 @@ public class QueryHelper
 	public int getMaxRows()
 			throws SQLException
 	{
-		return this.query.getMaxRows();
+		return this.query.getMaxCount();
 	}
 
 	/**
@@ -388,7 +388,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 			try
 			{
 				if (this.oldPreparedSQL != preparedSQL || this.nowStartRow != query.getStartRow()
-						|| this.nowMaxRows != query.getMaxRows() || this.nowTotalCount != query.getTotalCount()
+						|| this.nowMaxRows != query.getMaxCount() || this.nowTotalCount != query.getTotalCount()
 						|| !Utility.objectEquals(this.nowTotalCountExt, query.getTotalCountInfo()))
 				{
 					this.cacheSQL = null;
@@ -405,7 +405,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 			try
 			{
 				this.nowStartRow = query.getStartRow();
-				this.nowMaxRows = query.getMaxRows();
+				this.nowMaxRows = query.getMaxCount();
 				this.nowTotalCount = query.getTotalCount();
 				this.nowTotalCountExt = query.getTotalCountInfo();
 			}

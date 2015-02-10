@@ -228,9 +228,10 @@ public class DoubleQuerySearch extends SearchImpl
 		}
 		if (nextQuery.canOrder())
 		{
-			if (result.singleOrderName != null)
+			if (result.orderConfig != null)
 			{
-				nextQuery.setSingleOrder(result.singleOrderName, result.singleOrderDesc ? -1 : 1);
+				nextQuery.setMultipleOrder(
+						StringTool.separateString(result.orderConfig, ",", true));
 			}
 		}
 		nextQuery.setTotalCount(ritr.getTotalCount(),

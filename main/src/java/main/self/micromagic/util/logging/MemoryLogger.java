@@ -176,7 +176,7 @@ public class MemoryLogger
 			}
 			logNode.addAttribute("message", msg);
 		}
-		logNode.addAttribute("time", FormatTool.dateFullFormat.format(new Date(System.currentTimeMillis())));
+		logNode.addAttribute("time", FormatTool.formatFullDate(new Date(System.currentTimeMillis())));
 		if (ex != null)
 		{
 			logNode.addAttribute("exClass", ClassGenerator.getClassName(ex.getClass()));

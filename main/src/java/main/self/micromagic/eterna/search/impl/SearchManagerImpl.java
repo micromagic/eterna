@@ -34,11 +34,11 @@ import org.dom4j.Element;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.Condition;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.search.Search;
+import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.share.AbstractGenerator;
@@ -80,6 +80,11 @@ public class SearchManagerImpl extends AbstractGenerator
 	public int getPageSize(int defaultSize)
 	{
 		return this.pageSize == -1 ? defaultSize : this.pageSize;
+	}
+
+	public String getOrderConfig(AppData data)
+	{
+		return data.getRequestParameter(this.attributes.orderConfigTag);
 	}
 
 	public boolean hasQueryType(AppData data)

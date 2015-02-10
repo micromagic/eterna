@@ -47,7 +47,6 @@ import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.util.BooleanRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.logging.TimeLogger;
@@ -243,10 +242,10 @@ class CountQuery
 		return this.query.getReaderOrder();
 	}
 
-	public String getSingleOrder(BooleanRef desc)
+	public String getOrderConfig()
 			throws EternaException
 	{
-		return this.query.getSingleOrder(desc);
+		return this.query.getOrderConfig();
 	}
 
 	public boolean canOrder()
@@ -347,7 +346,7 @@ class CountQuery
 	{
 		return 1;
 	}
-	public int getMaxRows()
+	public int getMaxCount()
 	{
 		return -1;
 	}
@@ -367,7 +366,7 @@ class CountQuery
 		throw new UnsupportedOperationException();
 	}
 
-	public void setMaxRows(int maxRows)
+	public void setMaxCount(int maxRows)
 	{
 		throw new UnsupportedOperationException();
 	}

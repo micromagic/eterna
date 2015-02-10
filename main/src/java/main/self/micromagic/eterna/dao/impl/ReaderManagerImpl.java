@@ -37,6 +37,7 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 
@@ -302,18 +303,17 @@ public class ReaderManagerImpl
 		this.orderStr = null;
 		for (int i = 0; i < names.length; i++)
 		{
-			String name = names[i];
-			char orderType = name.charAt(name.length() - 1);
-			name = name.substring(0, name.length() - 1);
-			ResultReader reader = this.getReader(name);
+			StringRef name = new StringRef(names[i]);
+			int orderFlag = checkOrderFlag(name);
+			ResultReader reader = this.getReader(name.getString());
 			if (reader == null)
 			{
 				throw new EternaException("Invalid ResultReader name [" + name
 						+ "] at ReaderManager [" + this.getName() + "].");
 			}
-			if (orderType != '-')
+			if (orderFlag != 0)
 			{
-				this.orderList.add(reader.getColumnName() + (orderType == 'D' ? " DESC" : "" ));
+				this.orderList.add(reader.getColumnName() + (orderFlag < 0 ? " DESC" : "" ));
 			}
 			this.readerList.add(reader);
 			if (this.colNameSensitive)
@@ -327,6 +327,39 @@ public class ReaderManagerImpl
 						Utility.createInteger(this.readerList.size()));
 			}
 		}
+	}
+
+	/**
+	 * 检查名称前的排序标记, 如果有排序标记, 会将名称前的排序标记去除.
+	 *
+	 * @param name  需要判断是否有排序标记的名称
+	 * @return  0 无排序 1 升序 -1 降序
+	 */
+	public static int checkOrderFlag(StringRef name)
+			throws EternaException
+	{
+		String tmp = name.getString();
+		if (tmp.length() >= 1)
+		{
+			char flag = tmp.charAt(0);
+			int result = 0;
+			if (flag == ORDER_FLAG_ASC)
+			{
+				// 有升序排序标记
+				result = 1;
+			}
+			else if (flag == ORDER_FLAG_DESC)
+			{
+				// 有降序排序标记
+				result = -1;
+			}
+			if (result != 0)
+			{
+				name.setString(tmp.substring(1));
+			}
+			return result;
+		}
+		return 0;
 	}
 
 	public int getReaderIndex(String name, boolean notThrow)
