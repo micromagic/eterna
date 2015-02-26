@@ -111,14 +111,6 @@ public interface EternaFactory extends Factory
 	String getConstantValue(String name) throws EternaException;
 
 	/**
-	 * 添加一个常量的值.
-	 *
-	 * @param name       常量的名称.
-	 * @param value      常量的值.
-	 */
-	void addConstantValue(String name, String value) throws EternaException;
-
-	/**
 	 * 获得一个实体对象.
 	 *
 	 * @param name       实体的名称.

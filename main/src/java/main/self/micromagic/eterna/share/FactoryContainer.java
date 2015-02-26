@@ -45,6 +45,11 @@ public interface FactoryContainer
 	String RELOAD_TIME_FLAG = "eterna.reload.time";
 
 	/**
+	 * 在attribute中存放已被载入的资源的URI的集合的键值.
+	 */
+	String URIS_FLAG = "eterna.uris";
+
+	/**
 	 * 获得工厂容器实例的id.
 	 */
 	String getId();

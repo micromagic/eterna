@@ -96,7 +96,7 @@ public abstract class AbstractDao extends AbstractGenerator
 			String tmpSQL = this.daoManager.frontParse(this.preparedSQL, this);
 			this.daoManager.parse(tmpSQL);
 			this.preparerManager = new PreparerManager(this, paramArray);
-			this.daoManager.initialize(this.getFactory());
+			this.daoManager.initialize(this);
 
 			this.parameterNameMap = new HashMap();
 			for (int i = 0; i < paramArray.length; i++)

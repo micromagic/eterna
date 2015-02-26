@@ -32,8 +32,10 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.BooleanRef;
+import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.converter.BooleanConverter;
 
 /**
  * 数据库操作语句的管理者.
@@ -49,6 +51,7 @@ public class DaoManager
 	public static final char EXTEND_NAME_END = ')';
 
 	public static final String AUTO_NAME = "auto";
+	public static final String CHECK_NAME = "check";
 	public static final String SUBSQL_NAME = "sub";
 	public static final String PARAMETER_NAME = "param";
 	public static final String CONSTANT_NAME = "const";
@@ -61,13 +64,22 @@ public class DaoManager
 	public static final String AUTO_TYPE_SELECT = "select";
 
 	public static final String AUTO_OPT_DYNAMIC = "dynamic";
-	public static final String AUTO_OPT_CHECK_FIRST = "checkFirst";
+	public static final String AUTO_OPT_DYNAMIC_S= "d";
 
 	public static final char TEMPLATE_BEGIN = '[';
 	public static final char TEMPLATE_END = ']';
 
 	protected static final Log log = Tool.log;
 
+	/**
+	 * 在attribute中设置别名外使用怎样的引号的键值.
+	 */
+	public static final String NAME_QUOTE_FLAG = "dao.name.qoute";
+
+	/**
+	 * 生成的select部分的别名外需要使用的引号.
+	 */
+	private String nameQuote = "\"";
 
 	private PartSQL[] partSQLs = new PartSQL[0];
 
@@ -76,10 +88,20 @@ public class DaoManager
 
 	private boolean changed = true;
 	private String cacheSQL;
+	private Dao dao;
 
-	public void initialize(EternaFactory factory)
+	public void initialize(Dao dao)
 			throws EternaException
 	{
+		this.dao = dao;
+		EternaFactory factory = dao.getFactory();
+		// 设置别名使用的引号
+		String tmpQuote;
+		if ((tmpQuote = (String) dao.getAttribute(NAME_QUOTE_FLAG)) != null
+				|| (tmpQuote = (String) factory.getAttribute(NAME_QUOTE_FLAG)) != null)
+		{
+			this.nameQuote = tmpQuote;
+		}
 		int subIndex = 1;
 		for (int i = 0; i < this.partSQLs.length; i++)
 		{
@@ -100,17 +122,17 @@ public class DaoManager
 	{
 		if (this.changed)
 		{
-			int size = 0;
-			for (int i = 0; i < this.partSQLs.length; i++)
+			IntegerRef size = new IntegerRef();
+			try
 			{
-				size += this.partSQLs[i].getLength();
+				this.cacheSQL = this.buildePreparedSQL(size);
 			}
-			StringAppender temp = StringTool.createStringAppender(size);
-			for (int i = 0; i < this.partSQLs.length; i++)
+			catch (Exception ex)
 			{
-				temp.append(this.partSQLs[i].getSQL());
+				String msg = "Error in " + this.dao.getType() + " ["
+						+ this.dao.getName() + "]'s SQL.";
+				throw new EternaException(msg, ex);
 			}
-			this.cacheSQL = temp.toString().trim();
 			this.changed = false;
 			if (log.isDebugEnabled())
 			{
@@ -119,7 +141,6 @@ public class DaoManager
 		}
 		return this.cacheSQL;
 	}
-
 	public String getTempPreparedSQL(int[] indexs, String[] subParts)
 			throws EternaException
 	{
@@ -127,27 +148,56 @@ public class DaoManager
 		try
 		{
 			this.setSubParts(indexs, subParts);
-			int size = 0;
-			for (int i = 0; i < this.partSQLs.length; i++)
-			{
-				size += this.partSQLs[i].getLength();
-			}
-			StringAppender temp = StringTool.createStringAppender(size);
-			for (int i = 0; i < this.partSQLs.length; i++)
-			{
-				temp.append(this.partSQLs[i].getSQL());
-			}
-			return temp.toString().trim();
+			return this.buildePreparedSQL(null);
 		}
 		finally
 		{
 			this.recoverSubParts();
 		}
 	}
+	private String buildePreparedSQL(IntegerRef bufSize)
+	{
+		int size = 0;
+		for (int i = 0; i < this.partSQLs.length; i++)
+		{
+			size += this.partSQLs[i].getLength();
+		}
+		if (bufSize != null)
+		{
+			bufSize.value = size;
+		}
+		StringAppender temp = StringTool.createStringAppender(size);
+		CheckContainer currentCheck = new CheckContainer();
+		for (int i = 0; i < this.partSQLs.length; i++)
+		{
+			CheckPart check = currentCheck.checkPart;
+			if (check == null)
+			{
+				if (this.partSQLs[i] instanceof CheckPart)
+				{
+					currentCheck.checkPart = (CheckPart) this.partSQLs[i];
+				}
+				else
+				{
+					temp.append(this.partSQLs[i].getSQL());
+				}
+			}
+			else
+			{
+				temp.append(check.doCheck(this.partSQLs[i], currentCheck));
+			}
+		}
+		if (currentCheck.checkPart != null)
+		{
+			temp.append(currentCheck.checkPart.doCheck(null, currentCheck));
+		}
+		return temp.toString().trim();
+	}
 
 	public DaoManager copy(boolean clear)
 	{
 		DaoManager other = new DaoManager();
+		other.dao = this.dao;
 		other.parameterManagers = new ParameterManager[this.parameterManagers.length];
 		for (int i = 0; i < this.parameterManagers.length; i++)
 		{
@@ -218,8 +268,7 @@ public class DaoManager
 				try
 				{
 					BooleanRef dynamic = new BooleanRef();
-					BooleanRef checkFirst = new BooleanRef();
-					String type = this.getAutoType(optParam, dynamic, checkFirst);
+					String type = this.getAutoType(optParam, dynamic);
 					if (AUTO_TYPE_SELECT.equals(type))
 					{
 						if (!(dao instanceof Query))
@@ -257,7 +306,8 @@ public class DaoManager
 							}
 							first = false;
 							buf.append(readerArray[i].getColumnName()).append(" as ")
-									.append(readerArray[i].getAlias());
+									.append(this.nameQuote).append(readerArray[i].getAlias())
+									.append(this.nameQuote);
 						}
 					}
 					else
@@ -334,9 +384,8 @@ public class DaoManager
 	 * 解析自动生成的类型.
 	 *
 	 * @param dynamic     是否生成动态参数
-	 * @param checkFirst  动态参数是, 是否检测是否为第一个参数
 	 */
-	private String getAutoType(String optParam, BooleanRef dynamic, BooleanRef checkFirst)
+	private String getAutoType(String optParam, BooleanRef dynamic)
 	{
 		String type = null;
 		String[] arr = StringTool.separateString(optParam, ",", true);
@@ -346,9 +395,9 @@ public class DaoManager
 			{
 				dynamic.value = true;
 			}
-			else if (AUTO_OPT_CHECK_FIRST.equals(arr[i]))
+			else if (AUTO_OPT_DYNAMIC_S.equals(arr[i]))
 			{
-				checkFirst.value = true;
+				dynamic.value = true;
 			}
 			else if (type != null)
 			{
@@ -553,16 +602,34 @@ public class DaoManager
 					dealedSql = dealedSql.substring(CONSTANT_NAME.length());
 					if (dealedSql.length() == 0 || dealedSql.charAt(0) != EXTEND_NAME_BEGIN)
 					{
-						throw new EternaException("Not found constant name, sql:" + sql + ".");
+						throw new EternaException("Not found constant name [" + sql + "].");
 					}
 					index = dealedSql.indexOf(EXTEND_NAME_END);
 					if (index == -1)
 					{
-						throw new EternaException("Not end constant name, sql:" + sql + ".");
+						throw new EternaException("Not end constant name [" + sql + "].");
 					}
 					partSQL = new ConstantSQL(dealedSql.substring(1, index));
 					partList.add(partSQL);
 					dealedSql = dealedSql.substring(index + 1);
+				}
+				else if (checked == CHECK_NAME)
+				{
+					// 是一个检测标识
+					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
+					dealedSql = dealedSql.substring(CHECK_NAME.length());
+					if (dealedSql.length() > 0 && dealedSql.charAt(0) == TEMPLATE_BEGIN)
+					{
+						index = getEndTemplateIndex(dealedSql);
+						partSQL = new CheckPart(dealedSql.substring(1, index));
+						dealedSql = dealedSql.substring(index + 1);
+					}
+					else
+					{
+						// 这里不需要对dealedSql截取子串
+						partSQL = new CheckPart(null);
+					}
+					partList.add(partSQL);
 				}
 				else
 				{
@@ -721,6 +788,15 @@ public class DaoManager
 			if (CONSTANT_NAME.equals(tempStr))
 			{
 				return CONSTANT_NAME;
+			}
+		}
+		tempLimit = CHECK_NAME.length() + 1;
+		if (extendFlagIndex + tempLimit <= size)
+		{
+			tempStr = dealedSql.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
+			if (CHECK_NAME.equals(tempStr))
+			{
+				return CHECK_NAME;
 			}
 		}
 		return null;
@@ -1147,7 +1223,7 @@ class ConstantSQL extends PartSQL
 			String temp = factory.getConstantValue(this.name);
 			if (temp == null)
 			{
-				throw new EternaException("The constant '" + this.name + "' not found.");
+				throw new EternaException("The constant [" + this.name + "] not found.");
 			}
 			this.value = temp;
 
@@ -1160,8 +1236,8 @@ class ConstantSQL extends PartSQL
 			if (paramList.size() > 0)
 			{
 				throw new EternaException(
-						"The parameter flag '?' can't int the sub SQL tamplet:"
-						+ this.value + ".");
+						"The parameter flag [?] can't int the constant ["
+						+ this.value + "].");
 			}
 			StringAppender buf = StringTool.createStringAppender(this.value.length() + 16);
 			Iterator itr = partList.iterator();
@@ -1206,6 +1282,317 @@ class ConstantSQL extends PartSQL
 		}
 		return this.value;
 	}
+
+}
+
+class CheckPart extends PartSQL
+{
+	private String hasSubStr;
+	private String noneSubStr;
+	private boolean checkNormal;
+	private boolean end;
+
+	public CheckPart(String params)
+	{
+		this.paramStr = params;
+	}
+	private String paramStr;
+
+	private CheckPart(boolean waitEnd)
+	{
+		this.waitEnd = waitEnd;
+	}
+	private boolean waitEnd;
+
+	public void initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (this.paramStr != null)
+		{
+			String tmpStr = this.paramStr;
+			this.paramStr = null;
+			super.initialize(factory);
+			ArrayList partList = new ArrayList();
+			ArrayList paramList = new ArrayList();
+			ArrayList subSQLList = new ArrayList();
+			ArrayList subList = new ArrayList();
+			DaoManager.parse(tmpStr, true, partList, paramList, subSQLList, subList);
+
+			if (paramList.size() > 0)
+			{
+				throw new EternaException(
+						"The parameter flag '?' can't int the check param ["
+						+ tmpStr + "].");
+			}
+			StringAppender buf = StringTool.createStringAppender();
+			int count = partList.size();
+			Iterator itr = partList.iterator();
+			for (int i = 0; i < count; i++)
+			{
+				PartSQL ps = (PartSQL) itr.next();
+				ps.initialize(factory);
+				buf.append(ps.getSQL());
+			}
+
+			BooleanConverter booleanConverter = new BooleanConverter();
+			Map map = StringTool.string2Map(buf.toString(), ";", '=', true, false, null, null);
+			String tmp;
+			if ((tmp = (String) map.get("hasSub")) != null)
+			{
+				this.hasSubStr = tmp;
+			}
+			if ((tmp = (String) map.get("noneSub")) != null)
+			{
+				this.noneSubStr = tmp;
+			}
+			if ((tmp = (String) map.get("checkNormal")) != null)
+			{
+				this.checkNormal = booleanConverter.convertToBoolean(tmp);
+			}
+			if ((tmp = (String) map.get("end")) != null)
+			{
+				this.end = booleanConverter.convertToBoolean(tmp);
+			}
+		}
+	}
+
+	/**
+	 * 对脚本片段进行检查.
+	 *
+	 * @param part          需要检查的脚本片段
+	 * @param currentCheck  当前的检查片段的引用
+	 * @return  经过检查后需要输出的脚本片段
+	 */
+	public String doCheck(PartSQL part, CheckContainer currentCheck)
+	{
+		if (this.end)
+		{
+			// 不能直接设置一个结束
+			throw new EternaException("Error nesting check.");
+		}
+		StringAppender currentBuf = currentCheck.buf;
+		if (part instanceof CheckPart)
+		{
+			CheckPart other = (CheckPart) part;
+			if (!other.end)
+			{
+				// 不是结束标记, 作为新的检查, 当前检查保存至parent
+				currentCheck.setCheckPart(other, true);
+				return "";
+			}
+			currentCheck.setCheckPart(null, true);
+			if (this.waitEnd)
+			{
+				String result = other.hasSubStr;
+				return result != null ? result : "";
+			}
+			else
+			{
+				// 不是等待结束标记, 那就是无子句
+				String partStr = this.buildResult(
+						this.noneSubStr, other.noneSubStr, currentBuf);
+				return this.buildParentCheck(partStr, currentCheck);
+			}
+		}
+		if (this.waitEnd)
+		{
+			String partStr = part == null ? "" : part.getSQL();
+			if (partStr.trim().length() == 0)
+			{
+				// 等待结束标记时, 空白片段原样输出
+				return partStr;
+			}
+			if (!(part instanceof SubPart || part instanceof ParameterPart))
+			{
+				// 遇到非空的非子句, 取消waitEnd
+				currentCheck.setCheckPart(null, false);
+			}
+			return partStr;
+		}
+		if (part instanceof SubPart || part instanceof ParameterPart)
+		{
+			String partStr = part.getSQL();
+			if (partStr.length() == 0)
+			{
+				return "";
+			}
+			// 存在子句, 结束当前的检查
+			currentCheck.setCheckPart(new CheckPart(true), false);
+			String resultStr = this.buildResult(
+					this.hasSubStr, this.removeFirst(partStr), currentBuf);
+			return this.buildParentCheck(resultStr, currentCheck.parent);
+		}
+		String partStr = part == null ? "" : part.getSQL();
+		if (part != null && partStr.trim().length() == 0)
+		{
+			if (currentCheck.buf == null)
+			{
+				currentCheck.buf = StringTool.createStringAppender();
+			}
+			currentCheck.buf.append(partStr);
+			return "";
+		}
+		String beginStr = this.noneSubStr;
+		if (part != null && this.checkNormal)
+		{
+			beginStr = this.hasSubStr;
+			partStr = this.removeFirst(partStr);
+		}
+		// 遇到Normal部分就不需要等待结束标记了
+		currentCheck.setCheckPart(null, false);
+		return this.buildResult(beginStr, partStr, currentBuf);
+	}
+
+	/**
+	 * 检查CheckContainer的parent属性并构造子语句.
+	 */
+	private String buildParentCheck(String part, CheckContainer pCheck)
+	{
+		if (pCheck == null)
+		{
+			return part;
+		}
+		CheckPart cPart = pCheck.checkPart;
+		if (cPart == null || cPart.waitEnd)
+		{
+			// 没有parent或parent为等待, 则返回子语句
+			return part;
+		}
+		if (part.trim().length() > 0)
+		{
+			String partStr = this.buildResult(
+					cPart.hasSubStr, this.removeFirst(part), pCheck.buf);
+			pCheck.checkPart = new CheckPart(true);
+			pCheck.buf = null;
+			return this.buildParentCheck(partStr, pCheck.parent);
+		}
+		else
+		{
+			if (pCheck.buf == null)
+			{
+				pCheck.buf = StringTool.createStringAppender();
+			}
+			pCheck.buf.append(part);
+			return "";
+		}
+	}
+
+	private String buildResult(String begin, String part, StringAppender currentBuf)
+	{
+		StringAppender buf = StringTool.createStringAppender();
+		if (begin != null)
+		{
+			buf.append(begin);
+		}
+		if (currentBuf != null)
+		{
+			// 如果中间有缓存的字符, 需要在中间输出
+			buf.append(currentBuf.toString());
+		}
+		if (part != null)
+		{
+			buf.append(part);
+		}
+		return buf.toString();
+	}
+
+	private String removeFirst(String part)
+	{
+		int count = part.length();
+		int begin = 0;
+		for (; begin < count; begin++)
+		{
+			// 忽略起始部分的空格
+			if (part.charAt(begin) > ' ')
+			{
+				break;
+			}
+		}
+		if (begin < count && part.charAt(begin) == ',')
+		{
+			// 是","就作为第一个字符去除
+			return part.substring(begin + 1);
+		}
+		for (; begin < count; begin++)
+		{
+			char c = part.charAt(begin);
+			if (c <= ' ' || c == ',')
+			{
+				// 遇到第一个特殊字符, 将前面的字符去除
+				break;
+			}
+		}
+		return part.substring(begin);
+	}
+
+	public PartSQL copy(boolean clear, DaoManager manager)
+	{
+		return this;
+	}
+
+	public int getLength()
+	{
+		return 0;
+	}
+
+	public String getSQL()
+	{
+		return "";
+	}
+
+}
+/**
+ * 存放CheckPart的容器.
+ */
+class CheckContainer
+{
+	/**
+	 * 存放中间输出的字符的缓存.
+	 */
+	public StringAppender buf;
+	public CheckPart checkPart;
+
+	public void setCheckPart(CheckPart other, boolean dealStack)
+	{
+		if (dealStack)
+		{
+			if (other == null)
+			{
+				if (this.parent != null)
+				{
+					this.checkPart = this.parent.checkPart;
+					this.buf = this.parent.buf;
+					this.parent = this.parent.parent;
+				}
+				else
+				{
+					this.checkPart = null;
+					this.buf = null;
+				}
+			}
+			else
+			{
+				CheckContainer tmp = new CheckContainer();
+				tmp.checkPart = this.checkPart;
+				tmp.buf = this.buf;
+				tmp.parent = this.parent;
+				this.parent = tmp;
+				this.checkPart = other;
+				this.buf = null;
+			}
+		}
+		else
+		{
+			if (other == null && this.parent != null)
+			{
+				// 遇到清空当前CheckPart且不需要处理堆栈时, 堆栈必须是空的
+				throw new EternaException("Error nesting check.");
+			}
+			this.checkPart = other;
+			this.buf = other == null ? null : this.buf;
+		}
+	}
+	CheckContainer parent = null;
 
 }
 

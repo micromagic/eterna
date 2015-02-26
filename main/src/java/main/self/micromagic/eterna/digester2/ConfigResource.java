@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -364,6 +365,7 @@ class ClassPathResource extends AbstractResource
 		}
 		try
 		{
+			// path中最后的"/"会被去掉, 这里需要补上
 			String tmpRoot = this.path.length() == 0 ? "" : this.path.concat("/");
 			Enumeration resources = this.loader.getResources(this.path);
 			Map result = new HashMap();
@@ -393,6 +395,7 @@ class ClassPathResource extends AbstractResource
 			int count = result.size();
 			ConfigResource[] arr = new ConfigResource[count];
 			Iterator itr = result.keySet().iterator();
+			// tmpRoot中没有起始的"/", 这里需要在前缀补上
 			String tmpPrefix = this.prefix.concat("/");
 			for (int i = 0; i < count; i++)
 			{
@@ -602,8 +605,7 @@ class FileResource extends AbstractResource
 		{
 			List result = new ArrayList();
 			this.findResources(result, this.resFile, recursive, this.config);
-			int count = result.size();
-			ConfigResource[] arr = new ConfigResource[count];
+			ConfigResource[] arr = new ConfigResource[result.size()];
 			result.toArray(arr);
 			return arr;
 		}
@@ -699,7 +701,7 @@ class WebResource extends AbstractResource
 		WebResource res = new WebResource();
 		res.prefix = config.substring(0, index + 1);
 		res.path = config.substring(index + 1);
-		if (res.path.charAt(0) != '/')
+		if (!res.path.startsWith("/"))
 		{
 			throw new EternaException("Error path [" + res.path + "] for web.");
 		}
@@ -757,7 +759,31 @@ class WebResource extends AbstractResource
 
 	public ConfigResource[] listResources(boolean recursive)
 	{
-		return null;
+		if (this.getType() != RES_TYPE_DIR)
+		{
+			return null;
+		}
+		Set paths = this.context.getResourcePaths(this.path);
+		List result = new ArrayList();
+		this.findResources(result, paths, recursive, this.prefix);
+		ConfigResource[] arr = new ConfigResource[result.size()];
+		result.toArray(arr);
+		return arr;
+	}
+	private void findResources(List result, Set paths, boolean recursive, String prefix)
+	{
+		Iterator itr = paths.iterator();
+		while (itr.hasNext())
+		{
+			String name = (String) itr.next();
+			String nowConfig = prefix.concat(name);
+			result.add(this.create(nowConfig, this.container));
+			if (recursive && name.endsWith("/"))
+			{
+				Set tmp = this.context.getResourcePaths(name);
+				this.findResources(result, tmp, recursive, nowConfig);
+			}
+		}
 	}
 
 	public ConfigResource getResource(String path)

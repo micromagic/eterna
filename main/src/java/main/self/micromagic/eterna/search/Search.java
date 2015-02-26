@@ -34,25 +34,6 @@ public interface Search
 	String SESSION_SEARCH_QUERY = "ETERNA_SESSION_SEARCH_QUERY";
 
 	/**
-	 * 设置单列排序的参数名后缀. <p>
-	 * 参数格式为: [searchName].order
-	 * 值为需要排序的reader名称.
-	 */
-	String SINGLE_ORDER_SUFIX = ".order";
-
-	/**
-	 * 设置单列排序的类型. <p>
-	 * 参数格式为: [searchName].orderType
-	 * 值可以分别为 0 自动切换升序及降序, 1 升序, -1 降序
-	 */
-	String SINGLE_ORDER_TYPE = ".orderType";
-
-	/**
-	 * 在item的arrtibute中设置使用prepare的名称.
-	 */
-	public static final String PREPARE_FLAG = "prepare";
-
-	/**
 	 * 在item的arrtibute中设置输入类型的名称.
 	 */
 	public static final String INPUT_TYPE_FLAG = "inputType";
@@ -63,15 +44,15 @@ public interface Search
 	public static final String DEFAULT_BUILDER_FLAG = "defaultBuilder";
 
 	/**
-	 * 设置默认每页行数的属性名称. <p>
+	 * 在factory的属性中设置默认每页行数的属性名称. <p>
 	 * 可在配置中按如下方法设置:
-	 * <search>
+	 * <factory>
 	 *    <attributes>
-	 *       <attribute name="SearchAdapter.Attribute.pageSize" value="10"/>
+	 *       <attribute name="pageSize" value="10"/>
 	 *    </attributes>
-	 * </search>
+	 * </factory>
 	 */
-	String PAGE_SIZE_ATTRIBUTE = "SearchAdapter.Attribute.pageSize";
+	String PAGE_SIZE_ATTRIBUTE = "search.pageSize";
 
 	/**
 	 * 用于标志是否要强制读取列设置. <p>

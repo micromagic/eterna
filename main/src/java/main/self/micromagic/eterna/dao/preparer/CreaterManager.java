@@ -67,7 +67,7 @@ public class CreaterManager extends AbstractGenerator
 		}
 		else
 		{
-			String checkStr = "pattern:";
+			String checkStr = Tool.PATTERN_PREFIX;
 			if (prepareName.startsWith(checkStr))
 			{
 				return CreaterManager.createPreparerCreater(

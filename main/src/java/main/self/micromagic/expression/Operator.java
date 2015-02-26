@@ -1,5 +1,5 @@
 
-package self.micromagic.eterna.model.expression;
+package self.micromagic.expression;
 
 import self.micromagic.eterna.model.AppData;
 

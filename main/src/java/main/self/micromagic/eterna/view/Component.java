@@ -29,51 +29,56 @@ public interface Component
 	/**
 	 * 在<code>EternaFactory</code>中设置view外覆控件的属性名称.
 	 */
-	public static final String VIEW_WRPA_TYPE_FLAG = "view.wrpa.type";
+	String VIEW_WRPA_TYPE_FLAG = "view.wrpa.type";
 
 	/**
 	 * 在<code>EternaFactory</code>中设置view外覆控件是否需要执行script的属性名称.
 	 */
-	public static final String VIEW_WRPA_NEED_SCRIPT_FLAG = "view.wrpa.needScript";
+	String VIEW_WRPA_NEED_SCRIPT_FLAG = "view.wrpa.needScript";
+
+	/**
+	 * 在item的arrtibute中设置使用控件名称的标识.
+	 */
+	String TYPICAL_COMPONENT_FLAG = "pattern";
 
 	/**
 	 * 不用处理子节点标识的标签.
 	 */
-	public static final String NO_SUB_FLAG = "noSub";
+	String NO_SUB_FLAG = "noSub";
 
 	/**
 	 * 普通的节点类型: div.
 	 */
-	public static final String NORMAL_TYPE_DIV = "div";
+	String NORMAL_TYPE_DIV = "div";
 
 	/**
 	 * 特殊的节点类型: none. <p>
 	 * 一个空节点, 此节点不会生成, 会将其子节点直接挂到它的父节点上.
 	 */
-	public static final String SPECIAL_TYPE_NONE = "none";
+	String SPECIAL_TYPE_NONE = "none";
 
 	/**
 	 * 特殊的节点类型: loop. <p>
 	 * 一个循环节点, 此节点不会生成, 会将其子节点循环生成并挂到它
 	 * 的父节点上.
 	 */
-	public static final String SPECIAL_TYPE_LOOP = "loop";
+	String SPECIAL_TYPE_LOOP = "loop";
 
 	/**
 	 * 特殊的节点类型: inherit. <p>
 	 * 此节点的类型会自动设为模板节点中的对应类型.
 	 */
-	public static final String SPECIAL_TYPE_INHERIT = "inherit";
+	String SPECIAL_TYPE_INHERIT = "inherit";
 
 	/**
 	 * 用于存放标签名称的属性.
 	 */
-	public static final String FLAG_TAG = "eFlag";
+	String FLAG_TAG = "eFlag";
 
 	/**
 	 * 对于inherit类型, 需要进行全局查找模板节点的标志.
 	 */
-	public static final String INHERIT_GLOBAL_SEARCH = "inheritGlobalSearch";
+	String INHERIT_GLOBAL_SEARCH = "inheritGlobalSearch";
 
 	/**
 	 * 初始化页面控件对象.

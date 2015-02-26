@@ -96,8 +96,9 @@ public abstract class AbstractGenerator
 		if (!this.checkName(name))
 		{
 			throw new EternaException("The name [" + name
-					+ "] can't use (\",\", \";\", \"#\", \"$\", \"?\", \":\", \"/\","
-					+ " \"{\", \"}\", \"[\", \"]\", \"(\", \")\", \"[space]\").");
+					+ "] can't use (\",\", \";\", \"#\", \"$\", \"?\", \":\", \"/\", "
+					+ "\"{\", \"}\", \"[\", \"]\", \"(\", \")\", \"\"\", \"\'\""
+					+ "\"[space]\").");
 		}
 		this.name = name;
 	}
@@ -111,7 +112,7 @@ public abstract class AbstractGenerator
 		{
 			return true;
 		}
-		StringTokenizer st = new StringTokenizer(name, ",;#$?:/{}[]() \t\r\n", true);
+		StringTokenizer st = new StringTokenizer(name, ",;#$?:/{}[]()\"\' \t\r\n", true);
 		return st.countTokens() <= 1;
 	}
 

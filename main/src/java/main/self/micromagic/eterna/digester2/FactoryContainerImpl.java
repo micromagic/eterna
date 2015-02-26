@@ -158,6 +158,8 @@ public class FactoryContainerImpl
 		}
 		finally
 		{
+			// 清除已加载的资源地址缓存
+			this.removeAttribute(URIS_FLAG);
 			currentThread.setContextClassLoader(oldCL);
 		}
 	}
@@ -179,6 +181,11 @@ public class FactoryContainerImpl
 				continue;
 			}
 			ConfigResource cr = ContainerManager.createResource(temp, this);
+			if (ContainerManager.checkResourceURI(cr.getURI()))
+			{
+				// 如果资源已被加载过, 则不进行初始化.
+				continue;
+			}
 			if (this.reloadTime != -1L)
 			{
 				// 如果需要检查并重新载入, 需要保存配置资源

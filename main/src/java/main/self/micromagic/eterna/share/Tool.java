@@ -48,6 +48,11 @@ public class Tool
 	public static final String CAPTION_TRANSLATE_MAP_FACTORY_TAG = "caption.translate.map.factory";
 
 	/**
+	 * 标识后面是模式字符串的前缀.
+	 */
+	public static final String PATTERN_PREFIX = "pattern:";
+
+	/**
 	 * 根据标题翻译列表的配置进行翻译.
 	 */
 	public static String translateCaption(EternaFactory factory, String name)

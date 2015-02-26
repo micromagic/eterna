@@ -35,6 +35,7 @@ import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringRef;
@@ -550,16 +551,25 @@ public class ReaderManagerImpl
 		}
 		reader.setColumnName(colName);
 		String[] attrNames = item.getAttributeNames();
+		boolean hasFormat = false;
 		for (int i = 0; i < attrNames.length; i++)
 		{
 			String n = attrNames[i];
 			if (FORMAT_FLAG.equals(n))
 			{
+				hasFormat = true;
 				reader.setFormatName((String) item.getAttribute(n));
 			}
 			else if (ALIAS_FLAG.equals(n))
 			{
 				reader.setAlias((String) item.getAttribute(n));
+			}
+			else if (PATTERN_FLAG.equals(n))
+			{
+				if (!hasFormat)
+				{
+					reader.setFormatName(Tool.PATTERN_PREFIX.concat((String) item.getAttribute(n)));
+				}
 			}
 			else
 			{

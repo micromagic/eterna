@@ -62,9 +62,18 @@ method:{setAttribute,name,$body(attr=value,i=1)}
 ## objs
 objs
 sub:{
-	query,update,format,prepare,entity,search,builderList,builder,
+	query,update,format,prepare,entity,constant,search,builderList,builder,
 	model,export,dataPrinter,typicalComponent,view,function,resource
 }
+
+
+## constant
+constant
+same:{name}
+log:{name}
+create:{generator,${constant}}
+attr:{name,$body(attr=value):value}
+stack:{registerObject,n:0,g:1}
 
 
 ## format

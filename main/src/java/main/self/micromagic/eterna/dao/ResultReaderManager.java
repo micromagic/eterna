@@ -30,6 +30,11 @@ public interface ResultReaderManager
 	String FORMAT_FLAG = "format";
 
 	/**
+	 * 在item的arrtibute中设置使用格式化模式的名称.
+	 */
+	String PATTERN_FLAG = "pattern";
+
+	/**
 	 * 在item的arrtibute中设置读取的列表别名的名称.
 	 */
 	String ALIAS_FLAG = "alias";

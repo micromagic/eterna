@@ -16,12 +16,15 @@
 
 package self.micromagic.eterna.digester2.dom;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.dom4j.DocumentFactory;
 import org.dom4j.io.SAXContentHandler;
 import org.dom4j.io.SAXReader;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 public class EternaSAXReader extends SAXReader
@@ -29,6 +32,8 @@ public class EternaSAXReader extends SAXReader
 	public EternaSAXReader(DocumentFactory factory)
 	{
 		super(factory);
+		this.setValidation(false);
+		this.setEntityResolver(new EmptyEntityResolver());
 	}
 
 	protected SAXContentHandler createContentHandler(XMLReader reader)
@@ -148,5 +153,15 @@ public class EternaSAXReader extends SAXReader
 		return null;
 	}
 	private static final int MAX_MARK_COUNT = 128;
+
+}
+
+class EmptyEntityResolver
+		implements EntityResolver
+{
+	public InputSource resolveEntity(String publicId, String systemId)
+	{
+		return new InputSource(new ByteArrayInputStream(new byte[0]));
+	}
 
 }

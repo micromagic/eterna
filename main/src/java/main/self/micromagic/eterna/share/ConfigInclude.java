@@ -56,6 +56,11 @@ public class ConfigInclude
 		ParamText pt = new ParamText();
 		pt.parse(in);
 		Parameter[] params = pt.getParams();
+		if (params.length == 0 && ContainerManager.checkResourceURI(res.getURI()))
+		{
+			// 如果没设置参数且以被加载过了, 则不再初始化
+			return null;
+		}
 		for (int i = 0; i < params.length; i++)
 		{
 			String v = (String) this.params.getAttribute(params[i].getName());

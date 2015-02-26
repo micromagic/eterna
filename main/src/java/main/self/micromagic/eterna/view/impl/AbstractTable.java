@@ -21,6 +21,7 @@ import java.io.Writer;
 
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
@@ -110,6 +111,7 @@ public abstract class AbstractTable extends ComponentImpl
 			sub.setCaption(item.getCaption());
 		}
 		String[] names = item.getAttributeNames();
+		boolean hasTypical = false;
 		for (int i = 0; i < names.length; i++)
 		{
 			String name = names[i];
@@ -117,9 +119,17 @@ public abstract class AbstractTable extends ComponentImpl
 			{
 				sub.srcName = (String) item.getAttribute(name);
 			}
-			else if ("inputType".equals(name))
+			else if (Component.TYPICAL_COMPONENT_FLAG.equals(name))
 			{
+				hasTypical = true;
 				sub.typicalComponentName = (String) item.getAttribute(name);
+			}
+			else if (Search.INPUT_TYPE_FLAG.equals(name))
+			{
+				if (!hasTypical)
+				{
+					sub.typicalComponentName = (String) item.getAttribute(name);
+				}
 			}
 			else if ("initParam".equals(name))
 			{

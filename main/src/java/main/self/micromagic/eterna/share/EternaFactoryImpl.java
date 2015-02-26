@@ -31,6 +31,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 
+import self.micromagic.eterna.dao.Constant;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultFormat;
@@ -322,35 +323,15 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 
-	//----------------------------------  db  --------------------------------------
+	//----------------------------------  dao  --------------------------------------
 
-	private final Map constantMap = new HashMap();
 	private SpecialLog specialLog = null;
 
 	public String getConstantValue(String name)
 			throws EternaException
 	{
-		String result = (String) this.constantMap.get(name);
-		if (result == null && this.shareEternaFactory != null)
-		{
-			result = this.shareEternaFactory.getConstantValue(name);
-		}
-		return result;
-	}
-
-	public void addConstantValue(String name, String value)
-	{
-		if (this.constantMap.containsKey(name))
-		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate ConstantValue [" + name + "].");
-			}
-		}
-		else if (value != null)
-		{
-			this.constantMap.put(name, value);
-		}
+		Constant constant = (Constant) this.createObject(name);
+		return constant.getValue();
 	}
 
 	public SpecialLog getSpecialLog()

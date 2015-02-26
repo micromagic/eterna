@@ -41,6 +41,7 @@ import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.impl.EntityImpl;
+import self.micromagic.eterna.dao.impl.ParameterGroup;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.ColumnSetting;
@@ -61,7 +62,9 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.ObjectCreater;
 import self.micromagic.eterna.share.OrderManager;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.view.Component;
 import self.micromagic.util.BooleanRef;
 import self.micromagic.util.MemoryChars;
 import self.micromagic.util.StringTool;
@@ -75,19 +78,19 @@ public class SearchImpl extends AbstractGenerator
 {
 	private static final int[] conditionDocumentCounts = {1, 3, 7};
 
-	private int maxPageSize = -1;
+	private int pageSize = -1;
 
 	private String sessionQueryTag;
 	private String searchManagerName = null;
 	private String queryName;
-	private int queryIndex;
+	private int queryId;
 	private String columnType;
 	private ColumnSetting columnSetting = null;
 	private ParameterSetting parameterSetting = null;
 	private int countType = Query.TOTAL_COUNT_AUTO;
 	private String countReaderName = null;
 	private String countSearchName = null;
-	private int countSearchIndex = -1;
+	private int countSearchId = -1;
 
 	private String otherName;
 	private Search[] others = null;
@@ -154,12 +157,12 @@ public class SearchImpl extends AbstractGenerator
 
 		if (this.queryName != null && !NONE_QUERY_NAME.equals(this.queryName))
 		{
-			this.queryIndex = this.getFactory().findObjectId(this.queryName);
+			this.queryId = this.getFactory().findObjectId(this.queryName);
 		}
 		else
 		{
 			this.queryName = NONE_QUERY_NAME;
-			this.queryIndex = -1;
+			this.queryId = -1;
 		}
 
 		if (this.searchManagerName == null)
@@ -168,7 +171,7 @@ public class SearchImpl extends AbstractGenerator
 		}
 		if (this.countSearchName != null)
 		{
-			this.countSearchIndex = this.getFactory().findObjectId(this.countSearchName);
+			this.countSearchId = this.getFactory().findObjectId(this.countSearchName);
 		}
 
 		List tmpList = new ArrayList();
@@ -627,7 +630,7 @@ public class SearchImpl extends AbstractGenerator
 	public int getPageSize()
 			throws EternaException
 	{
-		if (this.maxPageSize == -1)
+		if (this.pageSize == -1)
 		{
 			int tempSize = -1;
 			Object size = this.getFactory().getAttribute(PAGE_SIZE_ATTRIBUTE);
@@ -639,16 +642,16 @@ public class SearchImpl extends AbstractGenerator
 				}
 				catch (NumberFormatException ex) {}
 			}
-			this.maxPageSize = tempSize < 1 ? 10 : tempSize;
+			this.pageSize = tempSize < 1 ? 10 : tempSize;
 		}
-		return this.maxPageSize;
+		return this.pageSize;
 	}
 
 	public void setPageSize(int pageSize)
 	{
 		if (pageSize > 0)
 		{
-			this.maxPageSize = pageSize;
+			this.pageSize = pageSize;
 		}
 	}
 
@@ -702,7 +705,7 @@ public class SearchImpl extends AbstractGenerator
 		BooleanRef isFirst = new BooleanRef();
 		SearchManager manager = this.getSearchManager0(data.getSessionAttributeMap());
 		Query query = getQueryAdapter(data, conn, this, isFirst, this.sessionQueryTag, manager,
-				this.queryIndex, onlySearch ? null : this.columnSetting, onlySearch ? null : this.columnType);
+				this.queryId, onlySearch ? null : this.columnSetting, onlySearch ? null : this.columnType);
 		manager.setPageNumAndCondition(data, this);
 
 		if (query == null)
@@ -786,9 +789,9 @@ public class SearchImpl extends AbstractGenerator
 		}
 		else
 		{
-			if (this.countSearchIndex != -1)
+			if (this.countSearchId != -1)
 			{
-				Search tmpSearch = this.getFactory().createSearch(this.countSearchIndex);
+				Search tmpSearch = this.getFactory().createSearch(this.countSearchId);
 				Object oldObj = raMap.get(READ_ROW_START_AND_COUNT);
 				raMap.put(READ_ROW_START_AND_COUNT, new StartAndCount(1, 1));
 				countRitr = tmpSearch.doSearch(data, conn).queryResult;
@@ -1041,16 +1044,34 @@ public class SearchImpl extends AbstractGenerator
 		condition.inputType = "text";
 		condition.attributes = new AttributeManager();
 		String[] attrNames = item.getAttributeNames();
+		boolean hasInput = false;
+		boolean hasPrepare = false;
 		for (int i = 0; i < attrNames.length; i++)
 		{
 			String n = attrNames[i];
-			if (PREPARE_FLAG.equals(n))
+			if (ParameterGroup.PREPARE_FLAG.equals(n))
 			{
+				hasPrepare = true;
 				condition.prepareName = (String) item.getAttribute(n);
+			}
+			else if (ParameterGroup.PATTERN_FLAG.equals(n))
+			{
+				if (!hasPrepare)
+				{
+					condition.prepareName = Tool.PATTERN_PREFIX.concat((String) item.getAttribute(n));
+				}
 			}
 			else if (INPUT_TYPE_FLAG.equals(n))
 			{
+				hasInput = true;
 				condition.inputType = (String) item.getAttribute(n);
+			}
+			else if (Component.TYPICAL_COMPONENT_FLAG.equals(n))
+			{
+				if (!hasInput)
+				{
+					condition.inputType = (String) item.getAttribute(n);
+				}
 			}
 			else if (DEFAULT_BUILDER_FLAG.equals(n))
 			{

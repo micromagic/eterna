@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.share.EternaException;
@@ -376,6 +377,43 @@ public class ContainerManager
 	 * 在线程中存储当前FactoryContainer的键值.
 	 */
 	private static final String THREAD_COONTAINER_KEY = "eterna.current.container";
+
+	/**
+	 * 检查给出的URI定义是否已被载入过.
+	 */
+	public static boolean checkResourceURI(String uri)
+	{
+		FactoryContainer fc = getCurrentContainer();
+		if (fc == null)
+		{
+			return false;
+		}
+		synchronized (fc)
+		{
+			Object obj = fc.getAttribute(FactoryContainer.URIS_FLAG);
+			if (obj == null)
+			{
+				obj = new HashMap();
+				fc.setAttribute(FactoryContainer.URIS_FLAG, obj);
+			}
+			boolean exists = false;
+			if (obj instanceof Map)
+			{
+				if (!(exists = ((Map) obj).containsKey(uri)))
+				{
+					((Map) obj).put(uri, Boolean.TRUE);
+				}
+			}
+			else if (obj instanceof Set)
+			{
+				if (!(exists = ((Set) obj).contains(uri)))
+				{
+					((Set) obj).add(uri);
+				}
+			}
+			return exists;
+		}
+	}
 
 	/**
 	 * 获取当前的EternaFactory.

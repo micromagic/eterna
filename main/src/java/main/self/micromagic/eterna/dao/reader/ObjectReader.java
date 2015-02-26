@@ -88,7 +88,7 @@ public class ObjectReader
 		}
 		if (this.formatName != null)
 		{
-			String checkStr = "pattern:";
+			String checkStr = Tool.PATTERN_PREFIX;
 			if (this.formatName.startsWith(checkStr))
 			{
 				this.format = FormatGenerator.createFormat(
