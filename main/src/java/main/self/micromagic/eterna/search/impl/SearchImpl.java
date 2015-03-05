@@ -65,10 +65,10 @@ import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.view.Component;
-import self.micromagic.util.BooleanRef;
 import self.micromagic.util.MemoryChars;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.SessionCache;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * @author micromagic@sina.com

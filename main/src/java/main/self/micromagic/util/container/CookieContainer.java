@@ -32,7 +32,7 @@ import javax.servlet.http.Cookie;
 import org.apache.commons.collections.iterators.IteratorEnumeration;
 import self.micromagic.coder.Base64;
 import self.micromagic.util.Utility;
-import self.micromagic.util.BooleanRef;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * cookie信息的容器.

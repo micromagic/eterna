@@ -21,8 +21,8 @@ import java.util.List;
 
 import org.dom4j.Element;
 
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 进行处理到的节点日志记录.

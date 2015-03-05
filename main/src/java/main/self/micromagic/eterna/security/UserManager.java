@@ -20,8 +20,8 @@ import org.apache.commons.logging.Log;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.StringRef;
 
 public interface UserManager
 {

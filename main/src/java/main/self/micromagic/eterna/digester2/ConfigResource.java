@@ -34,9 +34,9 @@ import java.util.zip.ZipInputStream;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 配置资源及其位置描述对象.

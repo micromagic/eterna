@@ -30,8 +30,8 @@ import self.micromagic.grammer.GrammerManager;
 import self.micromagic.grammer.ParserData;
 import self.micromagic.grammer.ParserData.GrammerCell;
 import self.micromagic.util.StringAppender;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 数据处理者.

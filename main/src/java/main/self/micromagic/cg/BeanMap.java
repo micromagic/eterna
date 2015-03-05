@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import self.micromagic.eterna.dao.ResultRow;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * bean和map的转换工具. <p>

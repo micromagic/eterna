@@ -36,8 +36,8 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.ref.StringRef;
 
 public class FormatGenerator extends AbstractGenerator
 {

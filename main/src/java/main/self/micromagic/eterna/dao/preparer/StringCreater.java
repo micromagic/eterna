@@ -38,27 +38,27 @@ class StringCreater extends AbstractPreparerCreater
 	int caseType = 0;
 	boolean emptyToNull = true;
 
-	public void setFormat(String formatStr)
+	public void setPattern(String pattern)
 	{
-		if (formatStr.startsWith("#lower#"))
+		if (pattern.startsWith("#lower#"))
 		{
 			this.caseType = -1;
-			formatStr = formatStr.substring(7);
+			pattern = pattern.substring(7);
 		}
-		else if (formatStr.startsWith("#upper#"))
+		else if (pattern.startsWith("#upper#"))
 		{
 			this.caseType = 1;
-			formatStr = formatStr.substring(7);
+			pattern = pattern.substring(7);
 		}
-		int index = formatStr.indexOf('$');
+		int index = pattern.indexOf('$');
 		if (index != -1)
 		{
-			this.beginStr = formatStr.substring(0, index);
-			this.endStr = formatStr.substring(index + 1);
+			this.beginStr = pattern.substring(0, index);
+			this.endStr = pattern.substring(index + 1);
 		}
 		else
 		{
-			this.endStr = formatStr;
+			this.endStr = pattern;
 		}
 		this.appendLength = this.beginStr.length() + this.endStr.length();
 	}

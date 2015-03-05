@@ -23,7 +23,7 @@ import java.io.IOException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.DataSourceManager;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.ObjectRef;
+import self.micromagic.util.ref.ObjectRef;
 
 public interface ModelCaller
 {

@@ -40,10 +40,20 @@ public class CreaterManager extends AbstractGenerator
 	}
 	private String type;
 
+	public void setPattern(String pattern)
+	{
+		this.pattern = pattern;
+	}
+	private String pattern;
+
 	public Object create()
 			throws EternaException
 	{
 		PreparerCreater creater = createPreparerCreater(this.type, this.name);
+		if (this.pattern != null)
+		{
+			creater.setPattern(this.pattern);
+		}
 		((AbstractPreparerCreater) creater).setAttributes(this.attributes);
 		return creater;
 	}
@@ -141,7 +151,7 @@ public class CreaterManager extends AbstractGenerator
 		cm.setName(name);
 		if (pattern != null)
 		{
-			cm.setAttribute(PreparerCreater.PATTERN, pattern);
+			cm.setPattern(pattern);
 		}
 		creater = (PreparerCreater) cm.create();
 		creater.initialize(factory);

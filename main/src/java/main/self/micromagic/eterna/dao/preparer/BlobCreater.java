@@ -38,10 +38,6 @@ class BlobCreater extends AbstractPreparerCreater
 		throw new ClassCastException("Can't cast String to Blob.");
 	}
 
-	public void setFormat(String format)
-	{
-	}
-
 }
 
 class BlobPreparer extends AbstractValuePreparer

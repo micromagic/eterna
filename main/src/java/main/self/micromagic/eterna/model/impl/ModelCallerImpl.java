@@ -37,10 +37,11 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.DataSourceManager;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.View;
-import self.micromagic.util.ObjectRef;
 import self.micromagic.util.Utility;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.ObjectRef;
+
 import org.dom4j.Element;
 
 public class ModelCallerImpl

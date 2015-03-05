@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package self.micromagic.util;
+package self.micromagic.util.ref;
 
 import java.io.Serializable;
 

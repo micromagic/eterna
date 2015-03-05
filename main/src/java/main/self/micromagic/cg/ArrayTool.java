@@ -23,8 +23,8 @@ import java.util.Iterator;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.IntegerRef;
 import self.micromagic.eterna.dao.ResultRow;
 
 /**

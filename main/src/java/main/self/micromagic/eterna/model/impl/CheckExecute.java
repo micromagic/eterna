@@ -33,10 +33,10 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.ObjectRef;
 
 public class CheckExecute extends AbstractExecute
 		implements Execute, CheckExecuteGenerator

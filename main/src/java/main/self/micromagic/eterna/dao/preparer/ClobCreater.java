@@ -38,10 +38,6 @@ class ClobCreater extends AbstractPreparerCreater
 		throw new ClassCastException("Can't cast String to Clob.");
 	}
 
-	public void setFormat(String format)
-	{
-	}
-
 }
 
 class ClobPreparer extends AbstractValuePreparer

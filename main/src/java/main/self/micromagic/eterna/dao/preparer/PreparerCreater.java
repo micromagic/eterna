@@ -26,11 +26,6 @@ import self.micromagic.eterna.share.EternaObject;
 public interface PreparerCreater extends EternaObject
 {
 	/**
-	 * 在属性中设置, 模式字符串.
-	 */
-	public static final String PATTERN = "pattern";
-
-	/**
 	 * 在属性中设置, 是否要将空字符串变为null, 默认值为true.
 	 */
 	public static final String EMPTY_TO_NULL = "emptyToNull";
@@ -44,6 +39,11 @@ public interface PreparerCreater extends EternaObject
 	 * 获取值准备器创建者的名称.
 	 */
 	String getName();
+
+	/**
+	 * 设置preparer的模式.
+	 */
+	void setPattern(String pattern) throws EternaException;
 
 	/**
 	 * 获得一个配置的属性.

@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.share;
 
-import self.micromagic.util.StringRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 一个工厂实例的容器.

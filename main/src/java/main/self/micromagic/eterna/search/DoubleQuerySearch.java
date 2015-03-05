@@ -37,9 +37,9 @@ import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.util.BooleanRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * 两次查询的搜索.

@@ -102,7 +102,7 @@ public final class SearchResult
 		try
 		{
 			p.printObjectBegin(out);
-			p.printResultIterator(out, this.queryResult);
+			p.printResultIterator(out, this.queryResult, false);
 			p.printPairWithoutCheck(out, "pageNum", this.pageNum, false);
 			p.printPairWithoutCheck(out, "pageSize", this.pageSize, false);
 			p.printPairWithoutCheck(out, "searchName", this.searchName, false);

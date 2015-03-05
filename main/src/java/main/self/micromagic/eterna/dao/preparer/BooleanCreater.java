@@ -33,9 +33,9 @@ class BooleanCreater extends AbstractPreparerCreater
 	private static final BooleanConverter convert = new BooleanConverter();
 	private String[] trueValues = null;
 
-	public void setFormat(String formatStr)
+	public void setPattern(String pattern)
 	{
-		this.trueValues = StringTool.separateString(formatStr, ";", true);
+		this.trueValues = StringTool.separateString(pattern, ";", true);
 	}
 
 	public ValuePreparer createPreparer(Object value)

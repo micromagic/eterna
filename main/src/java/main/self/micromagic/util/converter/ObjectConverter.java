@@ -20,8 +20,8 @@ import java.beans.PropertyEditor;
 
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.StringRef;
-import self.micromagic.util.ObjectRef;
+import self.micromagic.util.ref.ObjectRef;
+import self.micromagic.util.ref.StringRef;
 
 public class ObjectConverter
 		implements ValueConverter, Cloneable

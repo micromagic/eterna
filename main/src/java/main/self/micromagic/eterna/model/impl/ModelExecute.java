@@ -27,7 +27,7 @@ import self.micromagic.eterna.model.ModelExecuteGenerator;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.util.ObjectRef;
+import self.micromagic.util.ref.ObjectRef;
 
 public class ModelExecute extends AbstractExecute
 		implements Execute, ModelExecuteGenerator

@@ -24,8 +24,8 @@ import java.util.TimeZone;
 
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.StringRef;
 
 abstract class AbstractDateCreater extends AbstractPreparerCreater
 {
@@ -40,9 +40,9 @@ abstract class AbstractDateCreater extends AbstractPreparerCreater
 	protected Locale[] locales;
 	protected TimeZone timeZone = null;
 
-	public void setFormat(String formatStr)
+	public void setPattern(String pattern)
 	{
-		String[] fArr = StringTool.separateString(formatStr, ";", true);
+		String[] fArr = StringTool.separateString(pattern, ";", true);
 		this.formats = new DateFormat[fArr.length];
 		this.locales = new Locale[fArr.length];
 		for (int i = 0; i < fArr.length; i++)

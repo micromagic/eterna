@@ -13,96 +13,112 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package self.micromagic.util;
+package self.micromagic.util.ref;
 
 import java.io.Serializable;
 
-import self.micromagic.util.converter.BooleanConverter;
-
-public class BooleanRef extends ObjectRef
+public class DoubleRef extends ObjectRef
 		implements Serializable
 {
-	public boolean value;
+	public double value;
 
-	public BooleanRef()
+	public DoubleRef()
 	{
-		this.value = false;
+		this.value = 0.0;
 	}
 
-	public BooleanRef(boolean value)
+	public DoubleRef(double value)
 	{
 		this.value = value;
 	}
 
-	public BooleanRef(Boolean value)
+	public DoubleRef(Double value)
 	{
-		this.value = value.booleanValue();
+		this.value = value.doubleValue();
 	}
 
-	public boolean isBoolean()
+	public boolean isNumber()
 	{
 		return true;
 	}
 
-	public boolean booleanValue()
+	public int intValue()
+	{
+		return (int) this.value;
+	}
+
+	public long longValue()
+	{
+		return (long) this.value;
+	}
+
+	public double doubleValue()
 	{
 		return this.value;
 	}
 
-	public static boolean getBooleanValue(Object obj)
+	public static double getDoubleValue(Object obj)
 	{
 		if (obj == null)
 		{
-			return false;
+			return 0.0;
 		}
-		if (obj instanceof Boolean)
+		else if (obj instanceof Number)
 		{
-			return ((Boolean) obj).booleanValue();
+			return ((Number) obj).doubleValue();
 		}
-		if (obj instanceof Number)
+		else if (obj instanceof String)
 		{
-			return ((Number) obj).intValue() != 0;
+			try
+			{
+				return Double.parseDouble((String) obj);
+			}
+			catch (NumberFormatException e) {}
 		}
-		if (obj instanceof String)
-		{
-			return (new BooleanConverter()).convertToBoolean((String) obj);
-		}
-		return false;
+		return 0.0;
 	}
 
 	public void setObject(Object obj)
 	{
-		this.value = BooleanRef.getBooleanValue(obj);
+		this.value = DoubleRef.getDoubleValue(obj);
+		super.setObject(null);
 	}
 
 	public Object getObject()
 	{
-		return this.value ? Boolean.TRUE : Boolean.FALSE;
+		Object obj = super.getObject();
+		if (obj == null || ((Double) obj).doubleValue() != this.value)
+		{
+			obj = new Double(this.value);
+			super.setObject(obj);
+		}
+		return obj;
 	}
 
-	public void setBoolean(boolean value)
+	public void setDouble(double value)
 	{
 		this.value = value;
+		super.setObject(null);
 	}
 
-	public boolean getBoolean()
+	public double getDouble()
 	{
 		return this.value;
 	}
 
 	public String toString()
 	{
-		return String.valueOf(this.value);
+		return Double.toString(this.value);
 	}
 
 	public boolean equals(Object other)
 	{
-		int result = this.shareEqual(other, BooleanRef.class);
+		int result = this.shareEqual(other, DoubleRef.class);
 		if (result != MORE_EQUAL)
 		{
 			return result == TRUE_EQUAL;
 		}
-		return this.value == ((BooleanRef) other).value;
+		return this.value == ((DoubleRef) other).value;
 	}
 
 	private static final long serialVersionUID = 1L;

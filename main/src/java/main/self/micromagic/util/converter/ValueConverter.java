@@ -18,7 +18,7 @@ package self.micromagic.util.converter;
 
 import java.beans.PropertyEditor;
 
-import self.micromagic.util.StringRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 值转换器.

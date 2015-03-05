@@ -44,10 +44,6 @@ class CharsCreater extends AbstractPreparerCreater
 		return new CharsPreparer(this, convert.convertToReader(value));
 	}
 
-	public void setFormat(String format)
-	{
-	}
-
 }
 
 class CharsPreparer extends AbstractValuePreparer

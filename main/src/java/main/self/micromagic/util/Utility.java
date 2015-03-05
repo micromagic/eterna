@@ -30,6 +30,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import self.micromagic.util.ref.StringRef;
+
 /**
  * @author micromagic@sina.com
  */

@@ -22,7 +22,7 @@ import java.util.Map;
 
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 生成对bean属性设置的属性单元处理者.

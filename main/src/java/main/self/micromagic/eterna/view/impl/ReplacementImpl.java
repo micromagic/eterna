@@ -36,8 +36,8 @@ import self.micromagic.eterna.view.View;
 import self.micromagic.util.container.MultiIterator;
 import self.micromagic.util.container.UnmodifiableIterator;
 import self.micromagic.util.container.PreFetchIterator;
-import self.micromagic.util.StringRef;
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
+import self.micromagic.util.ref.StringRef;
 import self.micromagic.util.StringTool;
 
 /**

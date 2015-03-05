@@ -50,6 +50,29 @@ public class StringTool
 	public static final int MAX_INTERN_SIZE = 1024 * 8;
 
 	/**
+	 * 计算一个字符串中某个字符出现的次数.
+	 *
+	 * @param str  需要被计数的字符串
+	 * @param c    需要计数的字符
+	 * @return  指定字符出现的次数
+	 */
+	public static int countChar(String str, char c)
+	{
+		if (str == null)
+		{
+			return 0;
+		}
+		int count = 0;
+		int index = str.indexOf(c);
+		while (index != -1)
+		{
+			count++;
+			index = str.indexOf(c, index);
+		}
+		return count;
+	}
+
+	/**
 	 * 处理字符串, 将其转换为HTML格式的代码.
 	 */
 	public static String dealString2HTML(String str)
@@ -60,7 +83,7 @@ public class StringTool
 	/**
 	 * 处理字符串, 将其转换为HTML格式的代码.
 	 *
-	 * @param dealNewLine  是否要将换行"\n"处理成"<br>"
+	 * @param dealNewLine  是否要将换行"\n"处理成"<br />"
 	 */
 	public static String dealString2HTML(String str, boolean dealNewLine)
 	{
@@ -100,7 +123,7 @@ public class StringTool
 				case '\n':
 					if (dealNewLine)
 					{
-						appendStr = "\n<br>";
+						appendStr = "\n<br />";
 						modifyCount++;
 						preSpace = true;
 					}

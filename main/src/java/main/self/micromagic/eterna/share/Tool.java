@@ -28,10 +28,10 @@ import org.apache.commons.logging.Log;
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.eterna.digester2.ParseException;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ConverterFinder;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 框架中需要用到的一些公共方法.

@@ -48,11 +48,11 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.BooleanRef;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.container.PreFetchIterator;
 import self.micromagic.util.container.SessionCache;
 import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * @author micromagic@sina.com

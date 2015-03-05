@@ -20,8 +20,8 @@ import org.dom4j.Element;
 
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 创建一个对象.

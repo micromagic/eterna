@@ -37,9 +37,9 @@ import self.micromagic.eterna.digester2.dom.EternaDocumentFactory;
 import self.micromagic.eterna.digester2.dom.EternaSAXReader;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.ResManager;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 文档的解析工具.

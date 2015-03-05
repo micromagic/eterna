@@ -20,9 +20,9 @@ import java.io.Reader;
 import java.io.IOException;
 
 import self.micromagic.util.MemoryChars;
-import self.micromagic.util.StringRef;
-import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.ObjectRef;
+import self.micromagic.util.ref.StringRef;
 import self.micromagic.eterna.share.TypeManager;
 
 public class StringConverter extends ObjectConverter

@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 一个类的自动编译及生成工具.

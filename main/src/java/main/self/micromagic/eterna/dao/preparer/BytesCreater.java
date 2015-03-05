@@ -56,10 +56,6 @@ class BytesCreater extends AbstractPreparerCreater
 		}
 	}
 
-	public void setFormat(String format)
-	{
-	}
-
 }
 
 class BytesPreparer extends AbstractValuePreparer

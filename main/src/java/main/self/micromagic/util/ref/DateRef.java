@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package self.micromagic.util;
+package self.micromagic.util.ref;
 
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+
+import self.micromagic.util.FormatTool;
 
 public class DateRef extends ObjectRef
 		implements Serializable

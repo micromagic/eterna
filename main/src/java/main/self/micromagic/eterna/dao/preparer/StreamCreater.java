@@ -61,10 +61,6 @@ class StreamCreater extends AbstractPreparerCreater
 		}
 	}
 
-	public void setFormat(String format)
-	{
-	}
-
 }
 
 class StreamPreparer extends AbstractValuePreparer

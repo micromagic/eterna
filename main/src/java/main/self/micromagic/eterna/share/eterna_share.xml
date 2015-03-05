@@ -70,15 +70,9 @@
 				</parameters>
 			</update>
 
-			<vpc name="str_begin.vpc">
-				<attribute name="stringFormat" value="$%"/>
-			</vpc>
-			<vpc name="str_end.vpc">
-				<attribute name="stringFormat" value="%$"/>
-			</vpc>
-			<vpc name="str_include.vpc">
-				<attribute name="stringFormat" value="%$%"/>
-			</vpc>
+			<prepare name="strBegin" type="String" pattern="$%"/>
+			<prepare name="strEnd" type="String" pattern="%$"/>
+			<prepare name="strInclude" type="String" pattern="%$%"/>
 
 			<builder name="isNull" operator="isNull" caption="为空"/>
 			<builder name="notNull" operator="notNull" caption="不为空"/>

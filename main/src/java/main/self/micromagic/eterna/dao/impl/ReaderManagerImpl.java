@@ -38,9 +38,9 @@ import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.StringRef;
 
 public class ReaderManagerImpl
 		implements ResultReaderManager

@@ -18,7 +18,7 @@ package self.micromagic.coder;
 
 import java.util.Arrays;
 
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 public class TimeRandomShift extends AbstractCoder
 		implements Coder

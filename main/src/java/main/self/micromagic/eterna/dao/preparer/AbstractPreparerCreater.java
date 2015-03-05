@@ -21,11 +21,6 @@ public abstract class AbstractPreparerCreater
 	protected void setAttributes(AttributeManager attributes)
 	{
 		this.attributes = attributes;
-		String fStr = (String) attributes.getAttribute(PATTERN);
-		if (fStr != null)
-		{
-			this.setFormat(fStr);
-		}
 	}
 	private AttributeManager attributes = new AttributeManager();
 
@@ -34,7 +29,10 @@ public abstract class AbstractPreparerCreater
 		return this.attributes.getAttribute(name);
 	}
 
-	public abstract void setFormat(String format) throws EternaException;
+	public void setPattern(String pattern)
+			throws EternaException
+	{
+	}
 
 	public boolean initialize(EternaFactory factory)
 			throws EternaException

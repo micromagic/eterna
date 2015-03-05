@@ -3,9 +3,9 @@ package self.micromagic.coder;
 
 import java.io.UnsupportedEncodingException;
 
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * Copyright (c) 2006 Damien Miller <djm@mindrot.org>

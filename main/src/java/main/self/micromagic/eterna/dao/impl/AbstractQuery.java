@@ -39,10 +39,10 @@ import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.ObjectRef;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.ref.ObjectRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * @author micromagic@sina.com

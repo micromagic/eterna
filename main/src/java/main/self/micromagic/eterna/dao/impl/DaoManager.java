@@ -31,11 +31,11 @@ import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.BooleanRef;
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.ref.BooleanRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 数据库操作语句的管理者.

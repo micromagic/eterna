@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.dom4j.Element;
 
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 调用子规则.

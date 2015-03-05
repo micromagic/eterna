@@ -24,10 +24,10 @@ import org.dom4j.Element;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.CellAccessInfo;
-import self.micromagic.util.IntegerRef;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.IntegerRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 通过名称来的设置来绑定配置与对象的属性.

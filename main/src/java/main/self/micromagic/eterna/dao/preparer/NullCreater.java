@@ -35,6 +35,10 @@ class NullCreater implements PreparerCreater
 		return this.name;
 	}
 
+	public void setPattern(String pattern)
+	{
+	}
+
 	public Object getAttribute(String name)
 	{
 		return null;

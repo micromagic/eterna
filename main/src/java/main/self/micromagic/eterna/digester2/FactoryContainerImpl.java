@@ -35,10 +35,10 @@ import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.share.InitializeListener;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.StringAppender;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.LongConverter;
+import self.micromagic.util.ref.StringRef;
 
 /**
  *

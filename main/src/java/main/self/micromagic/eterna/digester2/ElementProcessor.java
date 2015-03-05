@@ -18,7 +18,7 @@ package self.micromagic.eterna.digester2;
 
 import org.dom4j.Element;
 
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * xml元素节点的处理器.

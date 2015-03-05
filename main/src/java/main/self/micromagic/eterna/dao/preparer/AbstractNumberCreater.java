@@ -22,7 +22,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.StringRef;
+import self.micromagic.util.ref.StringRef;
 
 abstract class AbstractNumberCreater extends AbstractPreparerCreater
 {
@@ -33,13 +33,13 @@ abstract class AbstractNumberCreater extends AbstractPreparerCreater
 
 	protected NumberFormat format = null;
 
-	public void setFormat(String formatStr)
+	public void setPattern(String pattern)
 	{
 		StringRef realPattern = new StringRef();
-		Locale locale = Tool.parseLocal(formatStr, realPattern);
+		Locale locale = Tool.parseLocal(pattern, realPattern);
 		if (locale == null)
 		{
-			format = new DecimalFormat(formatStr);
+			format = new DecimalFormat(pattern);
 		}
 		else
 		{

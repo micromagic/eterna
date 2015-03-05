@@ -133,8 +133,9 @@ public interface DataPrinter extends EternaObject
 	 *
 	 * @param out          输出流
 	 * @param ritr         结果集迭代器
+	 * @param wrapper      是否要把对象包装起来, 即加上"{}"
 	 */
-	void printResultIterator(Writer out, ResultIterator ritr)
+	void printResultIterator(Writer out, ResultIterator ritr, boolean wrapper)
 			throws IOException, EternaException, SQLException;
 
 	/**
@@ -142,8 +143,9 @@ public interface DataPrinter extends EternaObject
 	 *
 	 * @param out          输出流
 	 * @param row          行结果集
+	 * @param wrapper      是否要把对象包装起来, 即加上"{}"
 	 */
-	void printResultRow(Writer out, ResultRow row)
+	void printResultRow(Writer out, ResultRow row, boolean wrapper)
 			throws IOException, EternaException, SQLException;
 
 	/**

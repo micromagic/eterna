@@ -29,11 +29,11 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Factory;
 import self.micromagic.eterna.share.FactoryContainer;
-import self.micromagic.util.IntegerRef;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.ref.IntegerRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * FactoryContainer对象的管理者.

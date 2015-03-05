@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import self.micromagic.util.StringTool;
-import self.micromagic.util.ObjectRef;
+import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.BeanMap;
 

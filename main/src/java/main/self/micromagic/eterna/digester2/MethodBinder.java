@@ -23,7 +23,7 @@ import org.dom4j.Element;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 通过方法调用的设置来绑定配置与对象的属性.

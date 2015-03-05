@@ -20,7 +20,7 @@ import java.lang.reflect.Field;
 
 import org.dom4j.Element;
 
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 将当前规则注入到原有规则的子规则列表中.

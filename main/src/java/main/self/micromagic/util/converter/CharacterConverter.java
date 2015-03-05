@@ -16,7 +16,7 @@
 
 package self.micromagic.util.converter;
 
-import self.micromagic.util.StringRef;
+import self.micromagic.util.ref.StringRef;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
 

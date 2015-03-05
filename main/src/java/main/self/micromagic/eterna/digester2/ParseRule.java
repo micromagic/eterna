@@ -24,9 +24,9 @@ import java.util.Map;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 对文档的一个解析规则.

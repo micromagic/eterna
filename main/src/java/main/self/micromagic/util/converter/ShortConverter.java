@@ -18,9 +18,9 @@ package self.micromagic.util.converter;
 
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.ObjectRef;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
+import self.micromagic.util.ref.ObjectRef;
+import self.micromagic.util.ref.StringRef;
 
 public class ShortConverter extends ObjectConverter
 {

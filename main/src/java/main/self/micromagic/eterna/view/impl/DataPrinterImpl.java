@@ -138,7 +138,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		{
 			try
 			{
-				this.printResultRow(out, (ResultRow) value);
+				this.printResultRow(out, (ResultRow) value, true);
 			}
 			catch (SQLException ex)
 			{
@@ -147,16 +147,14 @@ public class DataPrinterImpl extends AbstractGenerator
 		}
 		else if (value instanceof ResultIterator)
 		{
-			out.write('{');
 			try
 			{
-				this.printResultIterator(out, (ResultIterator) value);
+				this.printResultIterator(out, (ResultIterator) value, true);
 			}
 			catch (SQLException ex)
 			{
 				throw new EternaException(ex);
 			}
-			out.write('}');
 		}
 		else if (value instanceof Iterator)
 		{
@@ -299,40 +297,43 @@ public class DataPrinterImpl extends AbstractGenerator
 		}
 	}
 
-	public void printResultRow(Writer out, ResultRow row)
+	public void printResultRow(Writer out, ResultRow row, boolean wrapper)
 			throws IOException, EternaException, SQLException
 	{
-		out.write('{');
+		if (wrapper)
+		{
+			out.write('{');
+		}
+		this.printPairWithoutCheck(out, "$type", "single", true);
 		ResultMetaData rmd = row.getResultIterator().getMetaData();
 		int count = rmd.getColumnCount();
-		boolean firstSetted = false;
 		for (int i = 1; i <= count; i++)
 		{
 			if (rmd.getColumnReader(i).isValid())
 			{
-				if (firstSetted)
-				{
-					out.write(",\"");
-				}
-				else
-				{
-					firstSetted = true;
-					out.write('"');
-				}
+				out.write(",\"");
 				this.stringCoder.toJsonString(out, rmd.getColumnName(i));
 				out.write("\":");
 				this.print(out, row.getFormated(i));
 			}
 		}
-		out.write('}');
+		if (wrapper)
+		{
+			out.write('}');
+		}
 	}
 
-	public void printResultIterator(Writer out, ResultIterator ritr)
+	public void printResultIterator(Writer out, ResultIterator ritr, boolean wrapper)
 			throws IOException, EternaException, SQLException
 	{
+		if (wrapper)
+		{
+			out.write('{');
+		}
+		this.printPairWithoutCheck(out, "$type", "multiple", true);
 		ResultMetaData rmd = ritr.getMetaData();
 		int count = rmd.getColumnCount();
-		out.write("names:{");
+		out.write(",names:{");
 		boolean firstSetted = false;
 		for (int i = 1; i <= count; i++)
 		{
@@ -349,12 +350,12 @@ public class DataPrinterImpl extends AbstractGenerator
 				}
 				this.stringCoder.toJsonString(out, rmd.getColumnName(i));
 				out.write("\":");
-				out.write(Integer.toString(i));
+				out.write(Integer.toString(i - 1));
 			}
 		}
-		out.write("},rowCount:");
+		out.write("},count:");
 		out.write(Integer.toString(ritr.getCount()));
-		out.write(",rows:[");
+		out.write(",data:[");
 		boolean nextRow = false;
 		while (ritr.hasNext())
 		{
@@ -379,6 +380,10 @@ public class DataPrinterImpl extends AbstractGenerator
 			out.write(']');
 		}
 		out.write(']');
+		if (wrapper)
+		{
+			out.write('}');
+		}
 	}
 
 	public void printEnumeration(Writer out, Enumeration e)

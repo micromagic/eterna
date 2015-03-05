@@ -35,7 +35,7 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.ObjectCreater;
-import self.micromagic.util.ObjectRef;
+import self.micromagic.util.ref.ObjectRef;
 
 /**
  * @author micromagic@sina.com

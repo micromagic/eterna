@@ -20,10 +20,10 @@ import java.util.Map;
 
 import org.dom4j.Element;
 
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.MultiLineText;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 获取属性或body中的值.

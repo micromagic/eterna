@@ -43,7 +43,6 @@ import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.PreFetchIterator;
 import self.micromagic.util.converter.DateConverter;
@@ -54,6 +53,7 @@ import self.micromagic.util.converter.StringConverter;
 import self.micromagic.util.converter.TimeConverter;
 import self.micromagic.util.converter.TimestampConverter;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.StringRef;
 
 public class TransExecute extends AbstractExecute
 		implements Execute, TransExecuteGenerator

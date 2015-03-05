@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import self.micromagic.util.StringRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 用于存放自定义变量的缓存.

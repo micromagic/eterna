@@ -21,8 +21,8 @@ import java.util.Map;
 
 import org.dom4j.Element;
 
-import self.micromagic.util.IntegerRef;
 import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 检查父配置中的对象是否与子配置中相同.

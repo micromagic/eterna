@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.util.BooleanRef;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * 可预取的迭代器.

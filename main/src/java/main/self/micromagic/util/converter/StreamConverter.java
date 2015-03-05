@@ -24,9 +24,10 @@ import java.io.IOException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryStream;
-import self.micromagic.util.StringRef;
-import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.ObjectRef;
+import self.micromagic.util.ref.StringRef;
+
 import org.apache.commons.fileupload.FileItem;
 
 public class StreamConverter extends ObjectConverter

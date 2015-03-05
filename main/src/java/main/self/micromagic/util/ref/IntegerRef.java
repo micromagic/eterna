@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package self.micromagic.util;
+
+package self.micromagic.util.ref;
 
 import java.io.Serializable;
 
-public class DoubleRef extends ObjectRef
+public class IntegerRef extends ObjectRef
 		implements Serializable
 {
-	public double value;
+	public int value;
 
-	public DoubleRef()
+	public IntegerRef()
 	{
-		this.value = 0.0;
+		this.value = 0;
 	}
 
-	public DoubleRef(double value)
+	public IntegerRef(int value)
 	{
 		this.value = value;
 	}
 
-	public DoubleRef(Double value)
+	public IntegerRef(Integer value)
 	{
-		this.value = value.doubleValue();
+		this.value = value.intValue();
 	}
 
 	public boolean isNumber()
@@ -44,12 +45,12 @@ public class DoubleRef extends ObjectRef
 
 	public int intValue()
 	{
-		return (int) this.value;
+		return this.value;
 	}
 
 	public long longValue()
 	{
-		return (long) this.value;
+		return this.value;
 	}
 
 	public double doubleValue()
@@ -57,68 +58,68 @@ public class DoubleRef extends ObjectRef
 		return this.value;
 	}
 
-	public static double getDoubleValue(Object obj)
+	public static int getIntegerValue(Object obj)
 	{
 		if (obj == null)
 		{
-			return 0.0;
+			return 0;
 		}
 		else if (obj instanceof Number)
 		{
-			return ((Number) obj).doubleValue();
+			return ((Number) obj).intValue();
 		}
 		else if (obj instanceof String)
 		{
 			try
 			{
-				return Double.parseDouble((String) obj);
+				return Integer.parseInt((String) obj);
 			}
 			catch (NumberFormatException e) {}
 		}
-		return 0.0;
+		return 0;
 	}
 
 	public void setObject(Object obj)
 	{
-		this.value = DoubleRef.getDoubleValue(obj);
+		this.value = IntegerRef.getIntegerValue(obj);
 		super.setObject(null);
 	}
 
 	public Object getObject()
 	{
 		Object obj = super.getObject();
-		if (obj == null || ((Double) obj).doubleValue() != this.value)
+		if (obj == null || ((Integer) obj).intValue() != this.value)
 		{
-			obj = new Double(this.value);
+			obj = new Integer(this.value);
 			super.setObject(obj);
 		}
 		return obj;
 	}
 
-	public void setDouble(double value)
+	public void setInt(int value)
 	{
 		this.value = value;
 		super.setObject(null);
 	}
 
-	public double getDouble()
+	public int getInt()
 	{
 		return this.value;
 	}
 
 	public String toString()
 	{
-		return Double.toString(this.value);
+		return Integer.toString(this.value);
 	}
 
 	public boolean equals(Object other)
 	{
-		int result = this.shareEqual(other, DoubleRef.class);
-		if (result != MORE_EQUAL)
+		int result = this.shareEqual(other, IntegerRef.class);
+		if (result != ObjectRef.MORE_EQUAL)
 		{
-			return result == TRUE_EQUAL;
+			return result == ObjectRef.TRUE_EQUAL;
 		}
-		return this.value == ((DoubleRef) other).value;
+		return this.value == ((IntegerRef) other).value;
 	}
 
 	private static final long serialVersionUID = 1L;

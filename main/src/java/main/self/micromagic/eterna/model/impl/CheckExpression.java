@@ -31,12 +31,12 @@ import self.micromagic.grammer.GrammerException;
 import self.micromagic.grammer.GrammerManager;
 import self.micromagic.grammer.ParserData;
 import self.micromagic.grammer.ParserData.GrammerCell;
-import self.micromagic.util.BooleanRef;
-import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ConverterFinder;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.BooleanRef;
+import self.micromagic.util.ref.ObjectRef;
 
 /**
  * 用于判断的表达式对象.

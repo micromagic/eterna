@@ -21,7 +21,7 @@ import org.dom4j.Element;
 import self.micromagic.cg.BeanMap;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.util.IntegerRef;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 调用堆栈中的对象的方法, 设置堆栈中的值.

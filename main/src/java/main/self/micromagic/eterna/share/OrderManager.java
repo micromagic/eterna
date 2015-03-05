@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import self.micromagic.util.ObjectRef;
+import self.micromagic.util.ref.ObjectRef;
 
 /**
  * 容器中对象排序的管理器.
