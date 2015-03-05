@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ConverterFinder;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 配置属性的管理器.
