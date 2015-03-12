@@ -19,8 +19,8 @@ package self.micromagic.eterna.search;
 import java.util.List;
 
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 /**
@@ -40,11 +40,6 @@ public interface ConditionProperty
 	 * 获取这个ConditionProperty对应列的数据类型.
 	 */
 	int getColumnType() throws EternaException;
-
-	/**
-	 * 获取这个ConditionProperty对应列的纯数据类型.
-	 */
-	int getColumnPureType() throws EternaException;
 
 	/**
 	 * 获取这个ConditionProperty对应列的数据类型名称.

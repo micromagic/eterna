@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<tx:eterna-config xmlns="eterna"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:test="test1" xmlns:tx="test2">
+	<factory>
+		
+		<include src="d_test2.xml">
+			<param name="firstItem" value="tmp1"/>
+		</include>
+		<include src="d_test2.xml">
+			<param name="entityName" value="entity5"/>
+			<param name="firstItem" value="tmp2"/>
+			<param name="value" value="v"/>
+		</include>
+		
+		<objs>
+
+			<entity name="e1" order="i2,i1">
+				<item name="i1" colName="c1" type="Blob"/>
+				<item name="i2" type="Stream">
+					<attribute name="a" value="2"/>
+				</item>
+				<item name="p3" colName="c3" type="int"/>
+				<item name="i5" type="int"/>
+				<item name="i6" type="int"/>
+			</entity>
+
+			<entity name="e2">
+				<entity-ref entityName="e1" include="p3,i2,i5,i6"/>
+				<item name="i2_1" colName="c1" type="Blob"/>
+				<item name="i2_2" type="Stream">
+					<attribute name="a" value="2"/>
+					<attribute name="alias" value="test2"/>
+				</item>
+				<item name="i6" type="int"/>
+			</entity>
+			
+			<format name="f1" type="Date">
+				<pattern>yyyy</pattern>
+				<attribute name="1" value="a"/>
+				<attribute name="2" trimLine="true">
+					b
+					c
+				</attribute>
+			</format>
+
+			<constant name="c.test" value="123"/>
+			<query name="q1">
+				<prepared-sql>
+					sql #const(c.test) ? ? ? ? ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="p1" type="String"/>
+					<entity-ref entityName="e1" exclude="i5,i6"/>
+					<parameter name="p2" type="Datetime" prepare="pattern:yyyy"/>
+					<parameter name="p3" type="Datetime" prepare="myDate"/>
+				</parameters>
+				<readers>
+					<reader name="r1" type="double" format="pattern:locale:en,#,###.0"/>
+					<reader name="r2" colIndex="3" colName="c1" type="double" caption="test">
+						<attribute name="1" value="a"/>
+						<test:config id="b" text2="s"><![CDATA[
+							1
+							3
+						]]></test:config>
+					</reader>
+					<entity-ref entityName="e2"/>
+					<reader name="r3" alias="c2" type="BigString"/>
+				</readers>
+			</query>
+
+			<query name="q2">
+				<prepared-sql>
+					select #auto[select]
+					where id = ? and (#auto[or;2,i=p2]) #auto[and,dynamic;i+p2]
+				</prepared-sql>
+				<readers readerOrder=";r3,i6,p3;rEnd">
+					<reader name="r1" type="double"/>
+					<entity-ref entityName="e2" tableAlias="Tx"/>
+					<reader name="rEnd" alias="cEnd" colName="t.end" type="int"/>
+					<reader name="r3" alias="c3" colName="t.x1" type="BigString"/>
+					<reader name="r2" alias="c2" colName="t.x2" type="BigString"/>
+				</readers>
+				<parameters>
+					<parameter name="p1" type="String"/>
+					<entity-ref entityName="e1" exclude="i5,i6"/>
+					<parameter name="p2" type="Datetime"/>
+					<parameter name="p3" type="Datetime" prepare="myDate"/>
+					<parameter name="pEnd" colName="t.x2" type="int"/>
+				</parameters>
+			</query>
+
+			<update name="update1">
+				<prepared-sql>
+					update T set #check #auto[update,dynamic;1,i-k1]
+					where #auto[and;i=k1]
+				</prepared-sql>
+				<parameters>
+					<parameter name="p1" type="String"/>
+					<parameter name="p2" type="String"/>
+					<parameter name="p3" type="String"/>
+					<parameter name="k1" type="String"/>
+					<parameter name="k2" type="String"/>
+				</parameters>
+			</update>
+			<update name="update2">
+				<prepared-sql>
+					#check[hasSub=where]#auto[and,dynamic]#sub[ or $]
+				</prepared-sql>
+				<parameters>
+					<parameter name="k1" type="String"/>
+					<parameter name="k2" type="String"/>
+				</parameters>
+			</update>
+			<update name="update3">
+				<prepared-sql>
+					#check[hasSub=and (;noneSub=test]
+					#auto[and,dynamic]#sub[ or $]
+					#check[hasSub=);noneSub=T2;end=1]
+					#check[hasSub=X;noneSub=Y]#sub[, $]
+				</prepared-sql>
+				<parameters>
+					<parameter name="k1" type="String"/>
+					<parameter name="k2" type="String"/>
+				</parameters>
+			</update>
+			<update name="update5">
+				<prepared-sql>
+					#check[hasSub=where] #sub[and $]
+					#check[hasSub=and (;noneSub=tt1 tt2] #auto[or,dynamic] 
+					#check[hasSub=);end=1] 
+					#check[end=1]
+					#check[hasSub=X;noneSub=Y]#sub[, $]
+				</prepared-sql>
+				<parameters>
+					<parameter name="k1" type="String"/>
+					<parameter name="k2" type="String"/>
+				</parameters>
+			</update>
+			<update name="update6">
+				<prepared-sql>
+					s
+					#check[hasSub=where] #sub[and $]
+					#check[hasSub=and (] #auto[or,dynamic] 
+					#check[hasSub=);end=1] 
+					#check[hasSub=endW;end=1]
+					#check[hasSub=X;noneSub=Y]#sub[, $]
+				</prepared-sql>
+				<parameters>
+					<parameter name="k1" type="String"/>
+					<parameter name="k2" type="String"/>
+				</parameters>
+			</update>
+
+			<search name="s1" queryName="q2" conditionIndex="2">
+				<conditions>
+					<condition name="c2" colType="int"/>
+					<entity-ref entityName="e1" include="i6"/>
+					<condition name="c1" colType="String"/>
+				</conditions>
+			</search>
+			<search name="s2" queryName="q2">
+				<other-search-manager otherName="s3,s1"/>
+			</search>
+			<search name="s3" queryName="q2">
+			</search>
+
+			<prepare name="myDate" type="Datetime">
+				<pattern>yyyy-MM</pattern>
+			</prepare>
+
+			<builder-list name="cbl_String">
+				<builder-name name="equal"/>
+			</builder-list>
+			<builder-list name="cbl_Other">
+				<builder-name name="equal"/>
+			</builder-list>
+			<builder name="equal" operator="equal" caption="等于"/>
+
+			<model name="m1">
+				<search-execute searchName="s1"/>
+			</model>
+
+			<data-printer name="dataPrinter" generator="self.micromagic.eterna.view.impl.DataPrinterImpl"/>
+
+			<typical-component name="tc01">
+				<component type="div">
+					<init-script>
+						{$ef:fun01}();
+					</init-script>
+					<component type="span"/>
+				</component>
+			</typical-component>
+			<function name="fun01">
+				alert(1);
+			</function>
+			<view name="v1">
+				<component type="div">
+					<replacement baseComponentName="tc01"/>
+					<component type="div">
+						<table-list>
+							<columns>
+								<column name="c1"/>
+								<entity-ref entityName="e2"/>
+								<column name="c2"/>
+							</columns>
+						</table-list>
+					</component>
+					<component type="div">
+						<table-form columns="50,50">
+							<cells>
+								<cell name="c1"/>
+								<entity-ref entityName="e2"/>
+								<cell name="c2"/>
+							</cells>
+						</table-form>
+					</component>
+				</component>
+			</view>
+
+			<export name="export" path="${test.page}" viewName="v1"/>
+			
+			<resource name="testR">begin${test.page}end</resource>
+
+		</objs>
+
+		<attributes>
+			<attribute name="1" value="a"/>
+			<test:config id="3" text1="x">x</test:config>
+		</attributes>
+
+	</factory>
+</tx:eterna-config>

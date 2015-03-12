@@ -46,10 +46,10 @@ public interface ConditionBuilder extends EternaObject
 	/**
 	 * 生成一个SQL条件.
 	 *
-	 * @param colName  要生成的条件的名称.
-	 * @param value    要生成的条件的值.
-	 * @param cp       与此条件生成器的相对应的ConditionProperty.
-	 * @return         所生成的条件, 及相关参数.
+	 * @param colName  要生成的条件的名称
+	 * @param value    要生成的条件的值
+	 * @param cp       与此条件生成器的相对应的ConditionProperty
+	 * @return         所生成的条件, 及相关参数
 	 */
 	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
 			throws EternaException;

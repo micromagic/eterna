@@ -183,11 +183,9 @@ public class ParamSetManager
 	}
 
 	/**
-	 * 将所有的动态参数设为忽略非动态参数设为null. <p>
-	 *
-	 * @param settedFlag   设置完后是否要置上已设置标志
+	 * 将所有的动态参数设为忽略非动态参数设为null.
 	 */
-	public void setIgnores(boolean settedFlag)
+	public void setIgnores()
 			throws EternaException
 	{
 		for (int i = 1; i <= this.paramCount; i++)

@@ -16,12 +16,12 @@
 
 package self.micromagic.util.container;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
-import java.util.Arrays;
 
 import javax.servlet.ServletRequest;
 
@@ -52,7 +52,7 @@ public class RequestParameterMap extends AbstractContainerSetting
 	}
 
 	private Map paramMap;
-	private Map originParamMap;
+	private final Map originParamMap;
 	private boolean readOnly = true;
 	private boolean selfMap = false;
 
@@ -210,7 +210,7 @@ public class RequestParameterMap extends AbstractContainerSetting
 				}
 				if (value instanceof String[])
 				{
-					return (String[]) value;
+					return value;
 				}
 				if (value instanceof String)
 				{

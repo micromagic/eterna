@@ -67,7 +67,7 @@ public class StringTool
 		while (index != -1)
 		{
 			count++;
-			index = str.indexOf(c, index);
+			index = str.indexOf(c, index + 1);
 		}
 		return count;
 	}

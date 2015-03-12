@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+$define${
+test:{{{
+1 a
+2
+3
+}}};
+memo:text
+}
+<eterna-config xmlns="eterna"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:test="test"
+   xsi:schemaLocation="eterna tmp1 test tmp2">
+	<factory>
+
+		<objs>
+
+			<entity name="$param${entityName,name,e3}" order="i6">
+				<item name="$param${firstItem}" type="int">
+					<attribute name="x">
+						$param${value,$memo,$test}
+					</attribute>
+				</item>
+				<entity-ref entityName="e2" include="p3,i5,i6"/>
+				<item name="i8" type="String"/>
+			</entity>
+
+		</objs>
+
+	</factory>
+</eterna-config>

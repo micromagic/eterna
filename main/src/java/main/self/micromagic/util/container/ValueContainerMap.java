@@ -16,25 +16,26 @@
 
 package self.micromagic.util.container;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Enumeration;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
 import java.sql.SQLException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.collections.iterators.IteratorEnumeration;
 
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.share.EternaException;
-import org.apache.commons.collections.iterators.IteratorEnumeration;
 
 /**
  * 注: 使用时需注意, 如果没有通过ValueContainerMap而是直接对
@@ -86,20 +87,6 @@ public class ValueContainerMap extends AbstractMap
 			return null;
 		}
 		ValueContainer vContainer = new RequestAttributeContainer(request);
-		return new ValueContainerMap(vContainer);
-	}
-
-	/**
-	 * @deprecated
-	 * @see #createSessionAttributeMap(HttpServletRequest)
-	 */
-	public static ValueContainerMap createSessionAttributeMap(HttpSession session)
-	{
-		if (session == null)
-		{
-			return null;
-		}
-		ValueContainer vContainer = new SessionAttributeContainer(session);
 		return new ValueContainerMap(vContainer);
 	}
 
@@ -199,7 +186,7 @@ public class ValueContainerMap extends AbstractMap
 	public static class ResultRowContainer
 			implements ValueContainer
 	{
-		private ResultRow row;
+		private final ResultRow row;
 
 		public ResultRowContainer(ResultRow row)
 		{
@@ -295,7 +282,7 @@ public class ValueContainerMap extends AbstractMap
 	public static class RequestAttributeContainer
 			implements ValueContainer
 	{
-		private ServletRequest request;
+		private final ServletRequest request;
 
 		public RequestAttributeContainer(ServletRequest request)
 		{
@@ -460,7 +447,7 @@ public class ValueContainerMap extends AbstractMap
 	public static class ApplicationAttributeContainer
 			implements ValueContainer
 	{
-		private ServletContext context;
+		private final ServletContext context;
 
 		public ApplicationAttributeContainer(ServletContext context)
 		{

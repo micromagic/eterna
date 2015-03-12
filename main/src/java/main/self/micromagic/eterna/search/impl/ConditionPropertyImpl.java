@@ -122,11 +122,6 @@ class ConditionPropertyImpl
 		return TypeManager.getTypeName(this.columnType);
 	}
 
-	public int getColumnPureType()
-	{
-		return TypeManager.getPureType(this.columnType);
-	}
-
 	public int getColumnType()
 	{
 		return this.columnType;

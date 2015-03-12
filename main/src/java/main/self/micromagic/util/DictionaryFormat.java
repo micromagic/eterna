@@ -30,6 +30,12 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
+/**
+ * 可设置属性的说明.
+ *
+ * start    起始数值
+ * gap      数值的递增值
+ */
 public class DictionaryFormat extends AbstractGenerator
 		implements ResultFormat
 {
@@ -128,44 +134,48 @@ public class DictionaryFormat extends AbstractGenerator
 			this.start = Integer.parseInt((String) this.getAttribute("start"), 0);
 			this.gap = Integer.parseInt((String) this.getAttribute("gap"), 1);
 		}
-		this.words = (String[]) dictionaryCache.get(this.pattern);
-		if (this.words == null)
+		synchronized (dictionaryCache)
 		{
-			String str = this.pattern;
-			ArrayList temp = new ArrayList();
-			int wsLength = this.wordSplit.length();
-			int index = str.indexOf(this.wordSplit);
-			while (index != -1)
+			this.words = (String[]) dictionaryCache.get(this.pattern);
+			if (this.words == null)
 			{
-				temp.add(str.substring(0, index));
-				str = str.substring(index + wsLength);
-				index = str.indexOf(this.wordSplit);
+				String str = this.pattern;
+				ArrayList temp = new ArrayList();
+				int wsLength = this.wordSplit.length();
+				int index = str.indexOf(this.wordSplit);
+				while (index != -1)
+				{
+					temp.add(str.substring(0, index));
+					str = str.substring(index + wsLength);
+					index = str.indexOf(this.wordSplit);
+				}
+				temp.add(str);
+				this.words = (String[]) temp.toArray(new String[temp.size()]);
+				dictionaryCache.put(this.pattern, this.words);
 			}
-			temp.add(str);
-			this.words = (String[]) temp.toArray(new String[temp.size()]);
-			dictionaryCache.put(this.pattern, this.words);
-		}
-		if (this.codeTrans)
-		{
-			this.transMap = (Map) dictionaryCache.get(this.words);
-			if (this.transMap == null)
+			if (this.codeTrans)
 			{
-				if (this.words.length % 2 != 0)
+				this.transMap = (Map) dictionaryCache.get(this.words);
+				if (this.transMap == null)
 				{
-					throw new EternaException("The words count must be an even number, but the count is:"
-							+ this.words.length + ".");
-				}
-				this.transMap = new HashMap();
-				for (int i = 0; i < this.words.length; i += 2)
-				{
-					String key = this.words[i];
-					String value = this.words[i + 1];
-					if (this.transMap.put(key, value) != null)
+					if (this.words.length % 2 != 0)
 					{
-						throw new EternaException("The key words:[" + key + "] appeared more than once.");
+						String msg = "The words count must be an even number, "
+								+ "but the count is:" + this.words.length + ".";
+						throw new EternaException(msg);
 					}
+					this.transMap = new HashMap();
+					for (int i = 0; i < this.words.length; i += 2)
+					{
+						String key = this.words[i];
+						String value = this.words[i + 1];
+						if (this.transMap.put(key, value) != null)
+						{
+							throw new EternaException("The key words:[" + key + "] appeared more than once.");
+						}
+					}
+					dictionaryCache.put(this.words, this.transMap);
 				}
-				dictionaryCache.put(this.words, this.transMap);
 			}
 		}
 	}

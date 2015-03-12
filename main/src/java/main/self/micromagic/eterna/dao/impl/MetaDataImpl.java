@@ -173,7 +173,8 @@ public class MetaDataImpl
 	{
 		if (this.nameToIndexMap == null)
 		{
-			return this.readerManager.getReaderIndex(columnName, notThrow);
+			// reader中是从0开始
+			return this.readerManager.getReaderIndex(columnName, notThrow) + 1;
 		}
 		else
 		{

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="GBK"?>
+<!--
+  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<eterna-config>
+   <factory>
+
+      <objs>
+
+         <KV key="k1" value="v1"/>
+         <KV key="k2" value="$useBodyText">
+            the value2
+            line2<![CDATA[  ]]></KV>
+         <KV key="k3" value="$useBodyText.NO_line">
+            the value3
+            line1<![CDATA[  ]]>
+         </KV>
+
+      </objs>
+
+      <attributes>
+
+         <attribute name="a1" value="av1"/>
+         <attribute name="a2" value="$useBodyText.NO_trimLine">
+   av2 <![CDATA[  ]]>
+  test2
+         </attribute>
+
+      </attributes>
+
+   </factory>
+</eterna-config>

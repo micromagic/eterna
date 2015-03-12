@@ -210,8 +210,13 @@ same:{name}
 log:{name}
 create:{generator,${search}}
 attr:{name,queryName,pageSize(m=0,i=0),countType(m=0,i=0),conditionIndex(d=1,i=0)}
-sub:{conditions,attribute}
+sub:{otherManager,conditions,attribute}
 stack:{registerObject,n:0,g:0}
+
+
+## otherManager
+other-search-manager
+attr:{otherName(m=0):otherSearchManagerName}
 
 
 ## conditions

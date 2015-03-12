@@ -127,7 +127,7 @@ public class DoubleQuerySearch extends SearchImpl
 				colN = str.substring(tmpI + 1);
 			}
 			this.keyIndexs[i] = keyReaders.getReaderIndex(keyN);
-			int typeId = keyReaders.getReader(this.keyIndexs[i] - 1).getType();
+			int typeId = keyReaders.getReader(this.keyIndexs[i]).getType();
 			this.prepares[i] = CreaterManager.createPrepare(typeId, null, factory);
 			this.colNames[i] = colN;
 			this.conditionItemSize += colN.length() + 4;
