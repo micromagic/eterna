@@ -37,7 +37,6 @@ public interface Entity extends EternaObject
 	 */
 	String getName() throws EternaException;
 
-
 	/**
 	 * 获取生成本实体对象的工厂.
 	 */

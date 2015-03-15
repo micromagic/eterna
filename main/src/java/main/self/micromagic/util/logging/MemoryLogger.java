@@ -36,6 +36,7 @@ import self.micromagic.util.FormatTool;
  * 将日志以XML的形式记录在内存中.
  */
 public class MemoryLogger
+		implements LoggerListener
 {
 	/**
 	 * 获取一个全局的内存日志实例.
@@ -191,19 +192,7 @@ public class MemoryLogger
 		}
 	}
 
-	/**
-	 * 添加一条日志信息.
-	 *
-	 * @param msg         日志的文本信息
-	 * @param ex          异常信息
-	 * @param level       日志的等级
-	 * @param threadName  记录日志的所在线程
-	 * @param className   记录日志的所在类
-	 * @param methodName  记录日志的所在方法
-	 * @param fileName    记录日志的所在文件
-	 * @param lineNumber  记录日志的所在行
-	 */
-	public void addLog(String msg, Throwable ex, String level, String threadName, String className,
+	public void afterLog(String msg, Throwable ex, String level, String threadName, String className,
 			String methodName, String fileName, String lineNumber)
 	{
 		if (!this.logValid)
@@ -231,23 +220,6 @@ public class MemoryLogger
 			}
 		}
 		this.addLogNode(logNode);
-	}
-
-	/**
-	 * 添加一条日志信息.
-	 *
-	 * @param msg         日志的文本信息
-	 * @param level       日志的等级
-	 * @param threadName  记录日志的所在线程
-	 * @param className   记录日志的所在类
-	 * @param methodName  记录日志的所在方法
-	 * @param fileName    记录日志的所在文件
-	 * @param lineNumber  记录日志的所在行
-	 */
-	public void addLog(String msg, String level, String threadName, String className, String methodName,
-			String fileName, String lineNumber)
-	{
-		this.addLog(msg, null, level, threadName, className, methodName, fileName, lineNumber);
 	}
 
 	/**

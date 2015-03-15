@@ -425,6 +425,22 @@ public class DataHandler
 	}
 
 	/**
+	 * 注册一个AppData中各类map的获取工具.
+	 *
+	 * @param name    map的标识
+	 * @param getter  map的获取工具
+	 * @return  是否覆盖了现有的注册, 如果已有注册则返回true
+	 */
+	public static boolean registerMapGetter(String name, MapGetter getter)
+	{
+		if (name != null && getter != null)
+		{
+			return mapNameIndex.put(name, getter) != null;
+		}
+		return false;
+	}
+
+	/**
 	 * 存放名称与AppData中map索引值的对应表.
 	 */
 	private static final Map mapNameIndex = new HashMap();

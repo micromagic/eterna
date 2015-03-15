@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ConverterFinder;
+import self.micromagic.util.converter.ValueConverter;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -43,8 +45,17 @@ public class Tool
 	 */
 	public static final Log log = Utility.createLog("eterna.share");
 
+	/**
+	 * 存放翻译字典配置的属性名.
+	 */
 	public static final String CAPTION_TRANSLATE_TAG = "caption.translate";
+	/**
+	 * 存放生成的翻译字典的属性名.
+	 */
 	public static final String CAPTION_TRANSLATE_MAP_TAG = "caption.translate.map";
+	/**
+	 * 存放用于标识是否为当前工厂的属性名.
+	 */
 	public static final String CAPTION_TRANSLATE_MAP_FACTORY_TAG = "caption.translate.map.factory";
 
 	/**
@@ -62,6 +73,7 @@ public class Tool
 		Object checkFactory = factory.getAttribute(CAPTION_TRANSLATE_MAP_FACTORY_TAG);
 		if (translateMap == null || checkFactory != factory)
 		{
+			// 获取的工厂不是当前工厂, 则要生成翻译字典表
 			translateMap = getCaptionTranslateMap(factory);
 			if (translateMap == null)
 			{
@@ -86,6 +98,7 @@ public class Tool
 		Object checkFactory = factory.getAttribute(CAPTION_TRANSLATE_MAP_FACTORY_TAG);
 		if (translateMap == null || checkFactory != factory)
 		{
+			// 获取的工厂不是当前工厂, 则要生成翻译字典表
 			EternaFactory share = factory.getShareFactory();
 			boolean needTranslate = true;
 			if (share != null)
@@ -132,6 +145,166 @@ public class Tool
 		return translateMap;
 	}
 
+	/**
+	 * 存放属性名与类型对应关系的属性名.
+	 */
+	public static final String ATTR_TYPE_DEF_FLAG = "attribute.type.def";
+	/**
+	 * 所有对象类型的标识.
+	 */
+	private static final String ALL_OBJ_TYPE = "$all";
+
+	/**
+	 * 根据定义表转换属性的类型.
+	 *
+	 * @param factory    当前的工厂
+	 * @param objType    属性所在对象的类型
+	 * @param attrName   属性的名称
+	 * @param attrValue  属性的值
+	 */
+	public static Object transAttrType(EternaFactory factory, String objType,
+			String attrName, Object attrValue)
+	{
+		Map typeMap = (Map) factory.getFactoryContainer().getAttribute(ATTR_TYPE_DEF_FLAG);
+		if (typeMap == null)
+		{
+			typeMap = getAllAttrTypeDefMap0(factory);
+		}
+		ValueConverter converter = getValueConverter(typeMap, objType, attrName);
+		if (converter != null)
+		{
+			return converter.convert(attrValue);
+		}
+		return attrValue;
+	}
+	private static ValueConverter getValueConverter(Map typeMap,
+			String objType, String attrName)
+	{
+		if (typeMap == null)
+		{
+			return null;
+		}
+		ValueConverter converter = null;
+		Map typeDef = (Map) typeMap.get(objType);
+		if (typeDef != null)
+		{
+			converter = (ValueConverter) typeDef.get(attrName);
+			if (converter == null)
+			{
+				Map allDef = (Map) typeMap.get(ALL_OBJ_TYPE);
+				if (allDef != null)
+				{
+					converter = (ValueConverter) allDef.get(attrName);
+				}
+			}
+		}
+		else
+		{
+			Map allDef = (Map) typeMap.get(ALL_OBJ_TYPE);
+			if (allDef != null)
+			{
+				converter = (ValueConverter) allDef.get(attrName);
+			}
+		}
+		return converter;
+	}
+
+	/**
+	 * 获取各个对象类型的属性类型定义.
+	 */
+	private static synchronized Map getAllAttrTypeDefMap0(EternaFactory factory)
+	{
+		Map typeMap = (Map) factory.getFactoryContainer().getAttribute(ATTR_TYPE_DEF_FLAG);
+		if (typeMap == null)
+		{
+			String defStr = (String) factory.getAttribute(ATTR_TYPE_DEF_FLAG);
+			if (defStr == null)
+			{
+				return null;
+			}
+			EternaFactory share = factory.getShareFactory();
+			if (share != null)
+			{
+				String shareStr = (String) share.getAttribute(ATTR_TYPE_DEF_FLAG);
+				if (shareStr != null)
+				{
+					if (shareStr == defStr)
+					{
+						// 如果定义字符串与共享工厂中的相同, 这直接获取共享工厂中的
+						typeMap = getAllAttrTypeDefMap0(share);
+					}
+					else
+					{
+						typeMap = makeAllAttrTypeDefMap(
+								defStr, getAllAttrTypeDefMap0(share));
+					}
+				}
+			}
+			if (typeMap == null)
+			{
+				typeMap = makeAllAttrTypeDefMap(defStr, null);
+			}
+			factory.getFactoryContainer().setAttribute(ATTR_TYPE_DEF_FLAG, typeMap);
+		}
+		return typeMap;
+	}
+
+	private static final char OBJ_TYPE_SPLIT = '/';
+	private static Map makeAllAttrTypeDefMap(String defStr, Map share)
+	{
+		Map result = new HashMap();
+		Map tmpMap = StringTool.string2Map(defStr, ";", '=');
+		Iterator itr = tmpMap.entrySet().iterator();
+		while (itr.hasNext())
+		{
+			Map.Entry e = (Map.Entry) itr.next();
+			String name = (String) e.getKey();
+			int index = name.indexOf(OBJ_TYPE_SPLIT);
+			String objType, attrName;
+			if (index == -1)
+			{
+				objType = ALL_OBJ_TYPE;
+				attrName = name;
+			}
+			else
+			{
+				objType = name.substring(0, index);
+				attrName = name.substring(index + 1);
+			}
+			int typeId = TypeManager.getPureType(
+					TypeManager.getTypeId((String) e.getValue()));
+			ValueConverter converter = TypeManager.getConverter(typeId);
+			Map defMap = (Map) result.get(objType);
+			if (defMap == null)
+			{
+				if (share != null && share.containsKey(objType))
+				{
+					// 如果共享工厂中存在对象类型, 则要复制过来
+					defMap = new HashMap((Map) share.get(objType));
+				}
+				else
+				{
+					defMap = new HashMap();
+				}
+				result.put(objType, defMap);
+			}
+			defMap.put(attrName, converter);
+		}
+		if (share != null)
+		{
+			// 如果存在共享工厂的类型定义表, 则要将未定义的对象类型添加进来
+			itr = share.entrySet().iterator();
+			while (itr.hasNext())
+			{
+				Map.Entry e = (Map.Entry) itr.next();
+				if (!result.containsKey(e.getKey()))
+				{
+					result.put(e.getKey(), e.getValue());
+				}
+			}
+		}
+		return result;
+	}
 	/**
 	 * 在factory中注册bean名称的属性名.
 	 */

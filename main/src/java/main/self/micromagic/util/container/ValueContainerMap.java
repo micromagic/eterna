@@ -31,11 +31,11 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.collections.iterators.IteratorEnumeration;
 
+import self.micromagic.eterna.dao.ModifiableResultRow;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.share.EternaException;
 
 /**
  * 注: 使用时需注意, 如果没有通过ValueContainerMap而是直接对
@@ -222,10 +222,6 @@ public class ValueContainerMap extends AbstractMap
 			{
 				return null;
 			}
-			catch (EternaException ex)
-			{
-				return null;
-			}
 		}
 
 		public boolean containsKey(Object key)
@@ -238,14 +234,15 @@ public class ValueContainerMap extends AbstractMap
 			{
 				return false;
 			}
-			catch (EternaException ex)
-			{
-				return false;
-			}
 		}
 
 		public void setValue(Object key, Object value)
 		{
+			if (this.row instanceof ModifiableResultRow)
+			{
+				((ModifiableResultRow) this.row).setValue(
+						key == null ? null : key.toString(), value);
+			}
 			throw new UnsupportedOperationException();
 		}
 
@@ -268,10 +265,6 @@ public class ValueContainerMap extends AbstractMap
 				return new IteratorEnumeration(names.iterator());
 			}
 			catch (SQLException ex)
-			{
-				return null;
-			}
-			catch (EternaException ex)
 			{
 				return null;
 			}

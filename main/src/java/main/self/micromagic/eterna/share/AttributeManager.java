@@ -18,6 +18,7 @@ package self.micromagic.eterna.share;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,6 +27,27 @@ import self.micromagic.util.StringTool;
 public class AttributeManager
 {
 	protected Map attributes = null;
+
+	/**
+	 * 对属性的类型进行转换.
+	 *
+	 * @param factory  属性所在的工厂
+	 * @param objType  属性所在对象的类型
+	 */
+	public void convertType(EternaFactory factory, String objType)
+	{
+		if (this.attributes == null)
+		{
+			return;
+		}
+		Iterator itr = this.attributes.entrySet().iterator();
+		while (itr.hasNext())
+		{
+			Map.Entry e = (Map.Entry) itr.next();
+			e.setValue(Tool.transAttrType(factory, objType,
+					(String) e.getKey(), e.getValue()));
+		}
+	}
 
 	public Object getAttribute(String name)
 	{

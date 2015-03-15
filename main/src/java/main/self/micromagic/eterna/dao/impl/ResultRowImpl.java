@@ -23,13 +23,13 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import self.micromagic.eterna.dao.ModifiableResultRow;
 import self.micromagic.eterna.dao.ResultFormat;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultReader;
-import self.micromagic.eterna.dao.ResultRow;
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
@@ -47,17 +47,17 @@ import self.micromagic.util.converter.StringConverter;
 import self.micromagic.util.converter.TimeConverter;
 import self.micromagic.util.converter.TimestampConverter;
 
-public class ResultRowImpl implements ResultRow
+public class ResultRowImpl implements ModifiableResultRow
 {
 	private static final Object NULL_FLAG = new Object();
 
-	private Object[] values;
-	private Permission permission;
-	private ResultMetaData metaData;
-	private ResultIterator resultIterator;
-	private int rowNum;
+	private final Object[] values;
+	private final Permission permission;
+	private final ResultMetaData metaData;
+	private final ResultIterator resultIterator;
+	private final int rowNum;
 
-	private Object[] formateds;
+	private final Object[] formateds;
 	private boolean wasNull;
 
 	public ResultRowImpl(Object[] values, ResultIterator resultIterator, int rowNum, Permission permission)
@@ -95,6 +95,21 @@ public class ResultRowImpl implements ResultRow
 	public int getRowNum()
 	{
 		return this.rowNum;
+	}
+
+	public void setValue(int columnIndex, Object v)
+			throws EternaException
+	{
+		this.wasNull = v == null;
+		this.values[columnIndex - 1] = v;
+		this.formateds[columnIndex - 1] = null;
+	}
+
+	public void setValue(String columnName, Object v)
+			throws EternaException
+	{
+		int index = this.metaData.findColumn(columnName, false);
+		this.setValue(index, v);
 	}
 
 	public Object getSmartValue(int columnIndex)

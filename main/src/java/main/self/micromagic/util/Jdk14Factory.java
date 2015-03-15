@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.container.SynHashMap;
+import self.micromagic.util.logging.LoggerListener;
 import self.micromagic.util.logging.MemoryLogger;
 
 /**
@@ -72,6 +73,7 @@ public class Jdk14Factory extends LogFactory
 	public static final String EXCEPTION_LOG_PROPERTY = "self.micromagic.eterna.exception.logType";
 	protected static int EXCEPTION_LOG_TYPE = 0;
 	private static MemoryLogger memoryLogger = MemoryLogger.getInstance();
+	private static LoggerListener[] loggerListeners = new LoggerListener[]{memoryLogger};
 
 	/**
 	 * 设置使用的MemoryLogger的名称.
@@ -79,6 +81,7 @@ public class Jdk14Factory extends LogFactory
 	public static void setMemoryLogger(String name)
 	{
 		memoryLogger = MemoryLogger.getInstance(name);
+		loggerListeners[0] = memoryLogger;
 	}
 
 	public static void printException(Writer out, boolean clear)
@@ -99,6 +102,27 @@ public class Jdk14Factory extends LogFactory
 			ex.printStackTrace();
 		}
 
+		try
+		{
+			String listeners = Utility.getProperty("logger.listeners");
+			if (!StringTool.isEmpty(listeners))
+			{
+				String[] lNames = StringTool.separateString(listeners, ",", true);
+				loggerListeners = new LoggerListener[lNames.length + 1];
+				loggerListeners[0] = memoryLogger;
+				for (int i = 0; i < lNames.length; i++)
+				{
+					Object o = Class.forName(lNames[i]).newInstance();
+					loggerListeners[i + 1] = (LoggerListener) o;
+				}
+			}
+		}
+		catch (Throwable ex)
+		{
+			loggerListeners = new LoggerListener[]{memoryLogger};
+			System.err.println("Error in init logger listeners.");
+			ex.printStackTrace();
+		}
 		initLog(null, true);
 		String lognames = Utility.getProperty("self.micromagic.logger.names");
 		if (lognames != null)
@@ -527,11 +551,20 @@ public class Jdk14Factory extends LogFactory
 					fileName = caller.getFileName();
 					lineNumber = caller.getLineNumber();
 				}
-				if (EXCEPTION_LOG_TYPE > 0)
+				int begin = EXCEPTION_LOG_TYPE > 0 ? 0 : 1;
+				if (begin == 0)
 				{
 					memoryLogger.setLogValid(true);
-					memoryLogger.addLog(msg, ex, level.getName(), Thread.currentThread().getName(),
-							cname, method, fileName, lineNumber == -1 ? "unknow" : String.valueOf(lineNumber));
+				}
+				if (begin == 0 || loggerListeners.length > 1)
+				{
+					String threadName = Thread.currentThread().getName();
+					String lineNumStr = lineNumber == -1 ? "unknow" : String.valueOf(lineNumber);
+					for (int i = begin; i < loggerListeners.length; i++)
+					{
+						loggerListeners[i].afterLog(msg, ex, level.getName(), threadName,
+								cname, method, fileName, lineNumStr);
+					}
 				}
 				if (ex == null)
 				{

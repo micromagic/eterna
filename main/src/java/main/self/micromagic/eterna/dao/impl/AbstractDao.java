@@ -70,6 +70,7 @@ public abstract class AbstractDao extends AbstractGenerator
 				throw new EternaException( "Can't initialize without preparedSQL.");
 			}
 			this.initialized = true;
+			this.attributes.convertType(factory, this.getType());
 
 			List paramList = new ArrayList();
 			if (this.paramGroup != null)

@@ -75,6 +75,7 @@ class EntityItemImpl
 	public void initialize(Entity entity)
 			throws EternaException
 	{
+		this.attrs.convertType(entity.getFactory(), "item");
 		this.entity = entity;
 	}
 	private Entity entity;

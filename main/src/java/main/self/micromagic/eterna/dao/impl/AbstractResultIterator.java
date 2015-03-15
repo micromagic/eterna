@@ -16,18 +16,19 @@
 
 package self.micromagic.eterna.dao.impl;
 
-import java.util.List;
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.sql.SQLException;
+import java.util.List;
 
+import self.micromagic.eterna.dao.ModifiableResultRow;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.ResultRow;
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * @author micromagic@sina.com
@@ -149,7 +150,14 @@ public abstract class AbstractResultIterator
 			}
 			else
 			{
-				row = new ResultRowWrapper(this, row);
+				if (row instanceof ModifiableResultRow)
+				{
+					row = new ModifiableResultRowWrapper(this, (ModifiableResultRow) row);
+				}
+				else
+				{
+					row = new ResultRowWrapper(this, row);
+				}
 			}
 		}
 		return row;

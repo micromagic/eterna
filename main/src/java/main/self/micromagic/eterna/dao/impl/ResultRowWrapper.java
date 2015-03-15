@@ -16,13 +16,14 @@
 
 package self.micromagic.eterna.dao.impl;
 
-import java.sql.SQLException;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Date;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 
+import self.micromagic.eterna.dao.ModifiableResultRow;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.share.EternaException;
@@ -30,7 +31,7 @@ import self.micromagic.eterna.share.EternaException;
 /**
  * ResultRow的包装类, 用于修改所属的ResultIterator.
  */
-public class ResultRowWrapper
+class ResultRowWrapper
 		implements ResultRow
 {
 	public ResultRowWrapper(ResultIterator ritr, ResultRow base)
@@ -38,8 +39,8 @@ public class ResultRowWrapper
 		this.ritr = ritr;
 		this.base = base;
 	}
-	private ResultIterator ritr;
-	private ResultRow base;
+	private final ResultIterator ritr;
+	private final ResultRow base;
 
 	public ResultIterator getResultIterator()
 	{
@@ -278,6 +279,30 @@ public class ResultRowWrapper
 			throws SQLException, EternaException
 	{
 		return this.base.getCharacterStream(columnName);
+	}
+
+}
+
+class ModifiableResultRowWrapper extends ResultRowWrapper
+		implements ModifiableResultRow
+{
+	public ModifiableResultRowWrapper(ResultIterator ritr, ModifiableResultRow base)
+	{
+		super(ritr, base);
+		this.base = base;
+	}
+	private final ModifiableResultRow base;
+
+	public void setValue(int columnIndex, Object v)
+			throws EternaException
+	{
+		this.base.setValue(columnIndex, v);
+	}
+
+	public void setValue(String columnName, Object v)
+			throws EternaException
+	{
+		this.base.setValue(columnName, v);
 	}
 
 }

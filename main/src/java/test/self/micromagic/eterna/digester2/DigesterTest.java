@@ -31,6 +31,7 @@ import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.Resource;
 import self.micromagic.eterna.view.View;
+import self.micromagic.util.FormatTool;
 import self.micromagic.util.ref.StringRef;
 
 public class DigesterTest extends TestCase
@@ -47,6 +48,12 @@ public class DigesterTest extends TestCase
 			throws Exception
 	{
 		Query q1 = f.createQuery("q1");
+		assertEquals("0", q1.getAttribute("v"));
+		assertEquals(new Integer(-1), q1.getAttribute("i"));
+		java.sql.Timestamp st = new java.sql.Timestamp(
+				FormatTool.parseDatetime("2015-1-1 01:01:01").getTime());
+		assertEquals(st, q1.getAttribute("t"));
+
 		Query q2 = f.createQuery("q1");
 		assertFalse(q1 == q2);
 		assertTrue(q1.getPreparedSQL().startsWith("sql 123 "));
@@ -82,6 +89,8 @@ public class DigesterTest extends TestCase
 			throws Exception
 	{
 		Entity entity = f.getEntity("e1");
+		assertEquals("2015-1-1 01:01:01", entity.getItem("i2").getAttribute("t"));
+		assertEquals(Boolean.FALSE, entity.getItem("i2").getAttribute("v"));
 		assertEquals("2", entity.getItem("i2").getAttribute("a"));
 		assertEquals("c1", entity.getItem("i1").getColumnName());
 		assertEquals("i2", entity.getItem("i2").getColumnName());

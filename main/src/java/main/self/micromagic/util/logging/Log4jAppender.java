@@ -18,12 +18,12 @@ package self.micromagic.util.logging;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.Layout;
-import org.apache.log4j.spi.Filter;
-import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.ErrorHandler;
-import org.apache.log4j.spi.ThrowableInformation;
+import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LocationInfo;
+import org.apache.log4j.spi.LoggingEvent;
 import org.apache.log4j.spi.OptionHandler;
+import org.apache.log4j.spi.ThrowableInformation;
 
 /**
  * 在log4j中调用MemoryLogger进行日志记录.
@@ -36,24 +36,47 @@ public class Log4jAppender
 	private ErrorHandler errorHandler;
 	private Layout layout;
 
-	private MemoryLogger log;
+	private LoggerListener listener;
 
 	public Log4jAppender()
 	{
-		this.log = MemoryLogger.getInstance();
+		this.listener = MemoryLogger.getInstance();
 	}
 
 	public Log4jAppender(String name)
 	{
-		this.log = MemoryLogger.getInstance(name);
+		this.listener = createLoggerListener(name);
+	}
+
+	private static LoggerListener createLoggerListener(String name)
+	{
+		if (name == null)
+		{
+			return MemoryLogger.getInstance();
+		}
+		String prefix = "class:";
+		if (name.startsWith(prefix))
+		{
+			try
+			{
+				Object o = Class.forName(name.substring(prefix.length())).newInstance();
+				return (LoggerListener) o;
+			}
+			catch (Exception ex)
+			{
+				System.err.println("Create logger listener error, " + name + ".");
+				ex.printStackTrace();
+			}
+		}
+		return MemoryLogger.getInstance(name);
 	}
 
 	/**
-	 * 设置使用的MemoryLogger的名称.
+	 * 设置使用的LoggerListener的名称.
 	 */
-	public void setMemoryLogger(String name)
+	public void setLoggerListener(String name)
 	{
-		this.log = MemoryLogger.getInstance(name);
+		this.listener = createLoggerListener(name);
 	}
 
 	public void doAppend(LoggingEvent event)
@@ -65,8 +88,10 @@ public class Log4jAppender
 			ex = ti.getThrowable();
 		}
 		LocationInfo li = event.getLocationInformation();
-		this.log.addLog(String.valueOf(event.getMessage()), ex, String.valueOf(event.getLevel()),
-				event.getThreadName(), li.getClassName(), li.getMethodName(), li.getFileName(), li.getLineNumber());
+		this.listener.afterLog(String.valueOf(event.getMessage()), ex,
+				String.valueOf(event.getLevel()), event.getThreadName(),
+				li.getClassName(), li.getMethodName(), li.getFileName(),
+				li.getLineNumber());
 	}
 
 	public void setName(String initConfig)
