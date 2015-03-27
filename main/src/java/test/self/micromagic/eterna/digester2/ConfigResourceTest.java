@@ -29,11 +29,11 @@ public class ConfigResourceTest extends TestCase
 			throws Exception
 	{
 		FactoryContainer fc = new FactoryContainerImpl();
-		ConfigResource cr = ContainerManager.createResource("cp:javax/crypto/", fc);
-		ConfigResource[] arr = cr.listResources(true);
+		ConfigResource cr = ContainerManager.createResource("cp:/", fc);
+		ConfigResource[] arr = cr.listResources(false);
 		for (int i = 0; i < arr.length; i++)
 		{
-			//System.out.println(arr[i].getConfig() + ", " + arr[i].getURI());
+			System.out.println(arr[i].getConfig() + ", " + arr[i].getURI());
 		}
 	}
 

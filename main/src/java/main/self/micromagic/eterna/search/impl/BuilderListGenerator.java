@@ -24,13 +24,13 @@ import java.util.List;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 
 /**
  * 条件构造器列表的创建者.
  */
 public class BuilderListGenerator extends AbstractGenerator
-		implements ObjectCreater
+		implements EternaCreater
 {
 	/**
 	 * 添加一个条件构造者.

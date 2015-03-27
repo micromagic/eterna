@@ -136,7 +136,8 @@ public class SearchManagerImpl extends AbstractGenerator
 		}
 		try
 		{
-			this.pageNum = Integer.parseInt(data.getRequestParameter(this.attributes.pageNumTag));
+			String pn = data.getRequestParameter(this.attributes.pageNumTag);
+			this.pageNum = Integer.parseInt(pn) - this.attributes.pageStart;
 		}
 		catch (Exception ex) {}
 		try

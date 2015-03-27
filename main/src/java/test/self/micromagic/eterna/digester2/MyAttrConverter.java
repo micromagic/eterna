@@ -14,25 +14,41 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.share;
+package self.micromagic.eterna.digester2;
 
-/**
- * 一个eterna对象.
- * 可用于注册到工厂中.
- */
-public interface EternaObject
+import self.micromagic.util.converter.ObjectConverter;
+
+public class MyAttrConverter extends ObjectConverter
 {
-	/**
-	 * 执行初始化.
-	 *
-	 * @return  是否已初始化
-	 *          false表示是第一次初始化, true表示已执行过初始化
-	 */
-	boolean initialize(EternaFactory factory) throws EternaException;
+	public Object convert(Object value)
+	{
+		return this.convert((String) value);
+	}
 
-	/**
-	 * 获取对象的名称.
-	 */
-	String getName() throws EternaException;
+	public Object convert(String value)
+	{
+		return new MyType(value);
+	}
+
+}
+
+class MyType
+{
+	public String table;
+	public String type;
+
+	public MyType(String config)
+	{
+		int index = config.indexOf('/');
+		if (index == -1)
+		{
+			this.table = config;
+		}
+		else
+		{
+			this.table = config.substring(0, index);
+			this.type = config.substring(index + 1);
+		}
+	}
 
 }

@@ -304,6 +304,18 @@ class ClassPathResource extends AbstractResource
 {
 	public ConfigResource create(String config, FactoryContainer container)
 	{
+		this.container = container;
+		ClassLoader loader = (ClassLoader) container.getAttribute(
+				FactoryContainer.CLASSLOADER_FLAG);
+		return this.create0(config, container, loader);
+	}
+	public ConfigResource create(String config, ClassLoader loader)
+	{
+		return this.create0(config, ContainerManager.getGlobalContainer(), loader);
+	}
+	private ConfigResource create0(String config, FactoryContainer container,
+			ClassLoader loader)
+	{
 		int index = config.indexOf(':');
 		ClassPathResource res = new ClassPathResource();
 		res.prefix = config.substring(0, index + 1);
@@ -314,8 +326,6 @@ class ClassPathResource extends AbstractResource
 			throw new EternaException("Error classpath [" + config + "].");
 		}
 		res.path = trimBeginSplit(tmpPath);
-		ClassLoader loader = (ClassLoader) container.getAttribute(
-				FactoryContainer.CLASSLOADER_FLAG);
 		if (loader == null)
 		{
 			loader = this.getClass().getClassLoader();

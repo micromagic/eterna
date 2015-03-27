@@ -23,6 +23,7 @@ import junit.framework.TestCase;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReaderManager;
+import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.container.PreFetchIterator;
 
@@ -38,8 +39,8 @@ public class DaoManagerTest extends TestCase
 		paramArray = new Parameter[10];
 		for (int i = 0; i < paramArray.length; i++)
 		{
-			paramArray[i] = new ParameterImpl(
-					"name_" + i, "col_" + i, "String", i + 1, null);
+			paramArray[i] = new ParameterImpl( "name_" + i, "col_" + i, "String", i + 1,
+					null, new AttributeManager());
 		}
 		query = new TestQuery(paramArray);
 		//this.factory = EternaFactoryCreater.getEternaFactory(this.getClass());

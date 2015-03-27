@@ -27,6 +27,7 @@ import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultReaderManager;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.Utility;
@@ -195,6 +196,12 @@ public class MetaDataImpl
 			}
 			return i.intValue();
 		}
+	}
+
+	static
+	{
+		// 设置重新初始化时需要清理的属性名
+		ContainerManager.addContainerAttributeClearName(CATTR_RRM);
 	}
 
 }

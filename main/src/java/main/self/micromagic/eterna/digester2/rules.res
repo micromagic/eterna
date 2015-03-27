@@ -126,7 +126,7 @@ query
 same:{name}
 log:{name}
 create:{generator,${query}}
-attr:{name,logType(m=0,i=0),forwardOnly(m=0,i=0),orderIndex(m=0,i=0),$body(body=prepared-sql):preparedSQL}
+attr:{name,logType(m=0,i=0),forwardOnly(m=0,i=0),orderIndex(m=0,i=0),$body(body=prepared-sql,m=0):preparedSQL}
 sub:{readers,parameters,attribute}
 stack:{registerObject,n:0,g:0}
 
@@ -136,7 +136,7 @@ update
 same:{name}
 log:{name}
 create:{generator,${update}}
-attr:{name,logType(m=0,i=0),$body(body=prepared-sql):preparedSQL}
+attr:{name,logType(m=0,i=0),$body(body=prepared-sql,m=0):preparedSQL}
 sub:{parameters,attribute}
 stack:{registerObject,n:0,g:0}
 
@@ -271,6 +271,58 @@ log:{$}
 create:{generator,${searchExecute}}
 attr:{
 	searchName,queryResultTo(m=0):queryResultName,conditionTo(m=0):searchManagerName
+}
+stack:{addExecute,n:0,g:1}
+
+
+## queryExecute
+query-execute
+log:{$}
+create:{generator,${queryExecute}}
+attr:{
+	queryName,resultTo(m=0),start(m=0,i=0),count(m=0,i=0),countType(m=0,i=0)
+}
+sub:{paramBind}
+stack:{addExecute,n:0,g:1}
+
+
+## updateExecute
+update-execute
+log:{$}
+create:{generator,${updateExecute}}
+attr:{
+	updateName,resultTo(m=0),multiType(m=0,i=0)
+}
+sub:{paramBind}
+stack:{addExecute,n:0,g:1}
+
+
+## paramBind
+param-bind
+log:{$}
+create:{generator,${paramBind}}
+attr:{
+	src,names(m=0),loop(m=0,i=0),subSQL(m=0,i=0)
+}
+stack:{addParamBind,n:0,g:1}
+
+
+## transExecute
+trans-execute
+log:{$}
+create:{generator,${transExecute}}
+attr:{
+	from,removeFrom(m=0,i=0),mustExist(d=1,i=0),opt(m=0),to(m=0)
+}
+stack:{addExecute,n:0,g:1}
+
+
+## checkExecute
+check-execute
+log:{$}
+create:{generator,${checkExecute}}
+attr:{
+	checkPattern,loopType(m=0,i=0),trueModelName(m=0),falseModelName(m=0)
 }
 stack:{addExecute,n:0,g:1}
 

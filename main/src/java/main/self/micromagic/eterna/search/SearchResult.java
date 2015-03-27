@@ -66,8 +66,14 @@ public final class SearchResult
 	 */
 	public final String orderConfig;
 
+	/**
+	 * 搜索的属性配置.
+	 */
+	public final SearchAttributes searchAttrs;
+
 	public SearchResult(String searchName, String queryName, ResultIterator queryResult,
-			ResultIterator searchCount, int pageSize, int pageNum, String orderConfig)
+			ResultIterator searchCount, int pageSize, int pageNum, String orderConfig,
+			SearchAttributes searchAttrs)
 	{
 		this.pageSize = pageSize;
 		this.pageNum = pageNum;
@@ -76,6 +82,7 @@ public final class SearchResult
 		this.queryResult = queryResult;
 		this.searchCount = searchCount;
 		this.orderConfig = orderConfig;
+		this.searchAttrs = searchAttrs;
 	}
 
 	/**
@@ -94,6 +101,7 @@ public final class SearchResult
 		this.queryResult = queryResult;
 		this.searchCount = old.searchCount;
 		this.orderConfig = old.orderConfig;
+		this.searchAttrs = old.searchAttrs;
 	}
 
 	public void print(DataPrinter p, Writer out, Object bean)
@@ -101,20 +109,24 @@ public final class SearchResult
 	{
 		try
 		{
+
 			p.printObjectBegin(out);
 			p.printResultIterator(out, this.queryResult, false);
-			p.printPairWithoutCheck(out, "pageNum", this.pageNum, false);
-			p.printPairWithoutCheck(out, "pageSize", this.pageSize, false);
+			p.printPairWithoutCheck(out, this.searchAttrs.pageNumTag, this.pageNum, false);
+			p.printPairWithoutCheck(out, this.searchAttrs.pageSizeTag, this.pageSize, false);
 			p.printPairWithoutCheck(out, "searchName", this.searchName, false);
 			if (this.queryResult.isTotalCountAvailable())
 			{
-				p.printPairWithoutCheck(out, "totalCount", this.queryResult.getTotalCount(), false);
+				p.printPairWithoutCheck(out, this.searchAttrs.totalCountTag,
+						this.queryResult.getTotalCount(), false);
 			}
 			if (this.orderConfig != null)
 			{
-				p.printPairWithoutCheck(out, "orderConfig", this.orderConfig, false);
+				p.printPairWithoutCheck(out, this.searchAttrs.orderConfigTag,
+						this.orderConfig, false);
 			}
-			p.printPairWithoutCheck(out, "hasMoreRecord", this.queryResult.hasMoreRecord() ? 1 : 0, false);
+			p.printPairWithoutCheck(out, this.searchAttrs.hasMoreRecordTag,
+					this.queryResult.hasMoreRecord() ? 1 : 0, false);
 			p.printObjectEnd(out);
 		}
 		catch (SQLException ex)

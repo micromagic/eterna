@@ -409,7 +409,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public ValuePreparer createValuePreparer(int type, Object value)
 			throws EternaException
 	{
-		PreparerCreater pc = CreaterManager.createPrepare(type, null, this);
+		PreparerCreater pc = CreaterManager.createPrepareCreater(type, null, this);
 		return pc.createPreparer(value);
 	}
 
@@ -662,9 +662,9 @@ public class EternaFactoryImpl extends AbstractFactory
 			throw new ParseException(msg);
 		}
 		ObjectContainer container;
-		if (obj instanceof ObjectCreater)
+		if (obj instanceof EternaCreater)
 		{
-			container = new ObjectCreaterCon(id, (ObjectCreater) obj);
+			container = new ObjectCreaterCon(id, (EternaCreater) obj);
 		}
 		else if (obj instanceof EternaObject)
 		{
@@ -938,13 +938,13 @@ class EternaObjectCon extends ObjectContainer
  */
 class ObjectCreaterCon extends ObjectContainer
 {
-	ObjectCreaterCon(int id, ObjectCreater obj)
+	ObjectCreaterCon(int id, EternaCreater obj)
 	{
 		super(id);
 		this.obj = obj;
 		this.singleton = this.obj.isSingleton();
 	}
-	private final ObjectCreater obj;
+	private final EternaCreater obj;
 	private Object instance;
 	private final boolean singleton;
 

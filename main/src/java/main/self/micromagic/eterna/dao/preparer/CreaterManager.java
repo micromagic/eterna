@@ -66,7 +66,7 @@ public class CreaterManager extends AbstractGenerator
 	 * @param prepareName  值准备器创建者的名称
 	 * @see TypeManager
 	 */
-	public static PreparerCreater createPrepare(int type, String prepareName,
+	public static PreparerCreater createPrepareCreater(int type, String prepareName,
 			EternaFactory factory)
 			throws EternaException
 	{
@@ -148,7 +148,7 @@ public class CreaterManager extends AbstractGenerator
 		}
 		CreaterManager cm = new CreaterManager();
 		cm.setType(type);
-		cm.setName(name);
+		cm.setName("_auto");
 		if (pattern != null)
 		{
 			cm.setPattern(pattern);

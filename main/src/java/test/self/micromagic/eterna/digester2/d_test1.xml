@@ -38,10 +38,13 @@
 					<attribute name="a" value="2"/>
 					<attribute name="v" value="0"/>
 					<attribute name="t" value="2015-1-1 01:01:01"/>
+					<attribute name="myObj" value="abc"/>
 				</item>
 				<item name="p3" colName="c3" type="int"/>
 				<item name="i5" type="int"/>
-				<item name="i6" type="int"/>
+				<item name="i6" type="int">
+					<attribute name="myObj" value="abc/123"/>
+				</item>
 			</entity>
 
 			<entity name="e2">
@@ -65,9 +68,9 @@
 
 			<constant name="c.test" value="123"/>
 			<query name="q1">
-				<prepared-sql>
+				<prepared_sql>
 					sql #const(c.test) ? ? ? ? ?
-				</prepared-sql>
+				</prepared_sql>
 				<parameters>
 					<parameter name="p1" type="String"/>
 					<entity-ref entityName="e1" exclude="i5,i6"/>
@@ -176,7 +179,7 @@
 
 			<search name="s1" queryName="q2" conditionIndex="2">
 				<conditions>
-					<condition name="c2" colType="int"/>
+					<condition name="c2" colType="int" defaultValue=""/>
 					<entity-ref entityName="e1" include="i6"/>
 					<condition name="c1" colType="String"/>
 				</conditions>
@@ -252,6 +255,7 @@
 				item/v=boolean;
 				query/t=Datetime;
 				i=int;
+				item/myObj=class:self.micromagic.eterna.digester2.MyAttrConverter;
 			</attribute>
 			<test:config id="3" text1="x">x</test:config>
 		</attributes>

@@ -54,7 +54,7 @@ public abstract class AbstractQuery extends BaseDao
 	private ResultReaderManager readerManager;
 	private ReaderManagerImpl tmpReaderManager;
 	/**
-	 * 正对某个query的全局readerManager.
+	 * 单个query对象的全局readerManager.
 	 */
 	private ObjectRef globalReaderManager;
 	private boolean readerManagerSetted;

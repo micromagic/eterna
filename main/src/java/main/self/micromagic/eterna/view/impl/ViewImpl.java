@@ -29,7 +29,7 @@ import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.eterna.view.Event;
@@ -47,7 +47,7 @@ import self.micromagic.util.container.PreFetchIterator;
  * @author micromagic@sina.com
  */
 public class ViewImpl extends AbstractGenerator
-		implements View, ObjectCreater
+		implements View, EternaCreater
 {
 	private final List componentList = new LinkedList();
 	protected StringCoder stringCoder;

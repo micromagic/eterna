@@ -18,8 +18,8 @@ package self.micromagic.util.converter;
 
 import java.beans.PropertyEditor;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
@@ -63,6 +63,10 @@ public class ObjectConverter
 		if (value instanceof ObjectRef)
 		{
 			return this.convert(((ObjectRef) value).getObject());
+		}
+		if (value instanceof String)
+		{
+			return this.convert((String) value);
 		}
 		return this.changeByPropertyEditor(value);
 	}

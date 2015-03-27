@@ -17,9 +17,9 @@
 package self.micromagic.eterna.model;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 
-public interface ModelAdapterGenerator extends ObjectCreater
+public interface ModelAdapterGenerator extends EternaCreater
 {
 	void setName(String name) throws EternaException;
 

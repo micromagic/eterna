@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.BeanTool;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
@@ -62,6 +63,11 @@ public class Tool
 	 * 标识后面是模式字符串的前缀.
 	 */
 	public static final String PATTERN_PREFIX = "pattern:";
+
+	/**
+	 * 在arrtibute中设置使用格式化模式的名称.
+	 */
+	public static final String PATTERN_FLAG = "pattern";
 
 	/**
 	 * 根据标题翻译列表的配置进行翻译.
@@ -153,6 +159,11 @@ public class Tool
 	 * 所有对象类型的标识.
 	 */
 	private static final String ALL_OBJ_TYPE = "$all";
+
+	/**
+	 * 实现类的前缀.
+	 */
+	public static final String CLASS_PREFIX = "class:";
 
 	/**
 	 * 根据定义表转换属性的类型.
@@ -271,9 +282,25 @@ public class Tool
 				objType = name.substring(0, index);
 				attrName = name.substring(index + 1);
 			}
-			int typeId = TypeManager.getPureType(
-					TypeManager.getTypeId((String) e.getValue()));
-			ValueConverter converter = TypeManager.getConverter(typeId);
+			ValueConverter converter;
+			String typeDefStr = (String) e.getValue();
+			if (typeDefStr.startsWith(CLASS_PREFIX))
+			{
+				try
+				{
+					String className = typeDefStr.substring(CLASS_PREFIX.length());
+					converter = (ValueConverter) Class.forName(className).newInstance();
+				}
+				catch (Exception ex)
+				{
+					throw new EternaException(ex);
+				}
+			}
+			else
+			{
+				int typeId = TypeManager.getPureType(TypeManager.getTypeId(typeDefStr));
+				converter = TypeManager.getConverter(typeId);
+			}
 			Map defMap = (Map) result.get(objType);
 			if (defMap == null)
 			{
@@ -573,6 +600,12 @@ public class Tool
 			}
 		}
 		return null;
+	}
+
+	static
+	{
+		// 设置重新初始化时需要清理的属性名
+		ContainerManager.addContainerAttributeClearName(ATTR_TYPE_DEF_FLAG);
 	}
 
 }

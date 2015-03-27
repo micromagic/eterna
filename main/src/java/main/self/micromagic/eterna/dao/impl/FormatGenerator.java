@@ -134,6 +134,7 @@ public class FormatGenerator extends AbstractGenerator
 				return format;
 			}
 			FormatGenerator fg = new FormatGenerator();
+			fg.setName("_auto");
 			fg.setPattern(pattern);
 			if (TypeManager.isBoolean(type))
 			{

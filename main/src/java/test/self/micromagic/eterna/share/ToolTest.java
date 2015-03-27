@@ -32,6 +32,8 @@ public class ToolTest extends TestCase
 	public void testMakeAllAttrTypeDefMap()
 			throws Exception
 	{
+		System.out.println(Long.toHexString(System.currentTimeMillis()));
+		System.out.println(new java.util.Date(0xfffffffffffL));
 		String defStr = "t1/a=String;t2/a=int;t1/b=long;c=double";
 		Map share = makeShareMap();
 		Map result = (Map) PrivateAccessor.invoke(

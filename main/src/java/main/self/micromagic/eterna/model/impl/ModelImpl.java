@@ -34,14 +34,14 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.util.ref.ObjectRef;
 
 /**
  * @author micromagic@sina.com
  */
 public class ModelImpl extends AbstractGenerator
-		implements Model, ObjectCreater
+		implements Model, EternaCreater
 {
 	private boolean needFrontModel = true;
 	private boolean keepCaches = false;

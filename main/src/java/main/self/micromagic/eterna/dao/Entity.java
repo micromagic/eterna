@@ -43,6 +43,17 @@ public interface Entity extends EternaObject
 	EternaFactory getFactory() throws EternaException;
 
 	/**
+	 * 根据名称获取一个属性.
+	 */
+	Object getAttribute(String name) throws EternaException;
+
+	/**
+	 * 获取对象中的属性名称列表.
+	 * 如果没有任何属性则返回一个空的数组.
+	 */
+	String[] getAttributeNames() throws EternaException;
+
+	/**
 	 * 获得实体对象元素的排序配置.
 	 */
 	String getOrder() throws EternaException;

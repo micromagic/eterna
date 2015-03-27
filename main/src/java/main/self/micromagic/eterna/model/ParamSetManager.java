@@ -48,7 +48,7 @@ public class ParamSetManager
 	/**
 	 * 获取当前参数管理器所管理的Dao.
 	 */
-	public Dao getSQLAdapter()
+	public Dao getDao()
 	{
 		return this.dao;
 	}
@@ -230,14 +230,22 @@ public class ParamSetManager
 			throws EternaException
 	{
 		Object[][] arrays;
+		boolean needInitArray = false;;
 		if (index == 0)
 		{
 			arrays = new Object[names.length][];
 			this.setValues(names, arrays);
+			needInitArray = true;
 		}
 		else
 		{
 			arrays = (Object[][]) this.getValues(names);
+			if (arrays == null)
+			{
+				arrays = new Object[names.length][];
+				this.setValues(names, arrays);
+				needInitArray = true;
+			}
 		}
 
 		int loopCount = -1;
@@ -246,7 +254,7 @@ public class ParamSetManager
 			Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
 					: this.dao.getParameter(names[i].daoIndex);
 			Object[] array = null;
-			if (index == 0)
+			if (needInitArray)
 			{
 				Object value = values.get(names[i].srcName);
 				if (value != null)
@@ -352,6 +360,11 @@ public class ParamSetManager
 		else
 		{
 			ritr = (ResultIterator) this.getValues(names);
+			if (ritr == null)
+			{
+				ritr = values;
+				this.setValues(names, ritr);
+			}
 		}
 
 		int loopCount = ritr.getCount();
@@ -368,7 +381,6 @@ public class ParamSetManager
 					colIndex = row.findColumn(names[i].srcName, true);
 				}
 				catch (SQLException ex) {}
-				catch (EternaException ex) {}
 				if (colIndex != -1)
 				{
 					Object value = row.getObject(colIndex);
@@ -493,24 +505,39 @@ public class ParamSetManager
 		public final String daoName;
 		public final int daoIndex;
 
-		public Name(String srcName, String sqlName)
+		public Name(String srcName, String daoName)
 		{
 			this.daoIndex = -1;
 			this.srcName = StringTool.intern(srcName);
-			if (srcName == sqlName)
+			if (srcName == daoName)
 			{
 				// 如果两个值相同, 第二个值就不做处理了
 				this.daoName = this.srcName;
 			}
 			else
 			{
-				this.daoName = StringTool.intern(sqlName);
+				this.daoName = StringTool.intern(daoName);
 			}
 		}
 
-		public Name(Name other, int sqlIndex)
+		public Name(String srcName, String daoName, int daoIndex)
 		{
-			this.daoIndex = sqlIndex;
+			this.daoIndex = -1;
+			this.srcName = StringTool.intern(srcName);
+			if (srcName == daoName)
+			{
+				// 如果两个值相同, 第二个值就不做处理了
+				this.daoName = this.srcName;
+			}
+			else
+			{
+				this.daoName = StringTool.intern(daoName);
+			}
+		}
+
+		public Name(Name other, int daoIndex)
+		{
+			this.daoIndex = daoIndex;
 			if (other != null)
 			{
 				this.srcName = other.srcName;

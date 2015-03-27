@@ -20,6 +20,7 @@ import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
@@ -55,23 +56,19 @@ public interface Search
 	String PAGE_SIZE_ATTRIBUTE = "search.pageSize";
 
 	/**
-	 * 用于标志是否要强制读取列设置. <p>
-	 * 由于列设置的信息会做缓存, 所以需要强制读取列设置信息的话, 则可
+	 * 用于设置显示列的配置. <p>
 	 * 在调用前按如下方法设置:
-	 * request.setAttribute(SearchAdapter.FORCE_LOAD_COLUMN_SETTING, "1");
-	 * 此外, 如果需要把已设置的标志去除, 可以使用如下方法:
-	 * request.removeAttribute(SearchManager.FORCE_LOAD_COLUMN_SETTING);
+	 * request.setAttribute(Search.COLUMN_SETTING, String[]);
 	 *
-	 * 注: 使用此标志强制读取的列设置不会被缓存, 也就是说下次强制读取表示未
-	 *     设置的话, 读取的列设置仍然是前一次缓存的值
+	 * @see ResultReaderManager#setReaderList(String[])
 	 */
-	String FORCE_LOAD_COLUMN_SETTING = "ETERNA_FORCE_LOAD_COLUMN_SETTING";
+	String COLUMN_SETTING = "search.column.settion";
 
 	/**
 	 * 用于标志是否要读取所有的记录. <p>
 	 * 由于查询模块中设置了分页功能, 如果需要读取所有记录的话, 则可
 	 * 在调用前按如下方法设置:
-	 * request.setAttribute(SearchAdapter.READ_ALL_ROW, "1");
+	 * request.setAttribute(Search.READ_ALL_ROW, "1");
 	 * 此外, 如果需要把已设置的标志去除, 可以使用如下方法:
 	 * request.removeAttribute(SearchManager.READ_ALL_ROW);
 	 */
@@ -81,7 +78,7 @@ public interface Search
 	 * 用于标志读取的记录数. <p>
 	 * 由于查询模块中设置了分页功能, 在配置中设置了读取的记录数, 如果需要
 	 * 设置读取的起始记录和读取的记录数，则可在调用前按如下方法设置:
-	 * request.setAttribute(SearchAdapter.READ_ROW_START_AND_COUNT, new StartAndCount(start, count));
+	 * request.setAttribute(Search.READ_ROW_START_AND_COUNT, new StartAndCount(start, count));
 	 * 此外, 如果需要把已设置的标志去除, 可以使用如下方法:
 	 * request.removeAttribute(SearchManager.READ_ROW_START_AND_COUNT);
 	 */
@@ -92,7 +89,7 @@ public interface Search
 	 * 由于查询模块中设置了分页功能, 所以读取的数据内容会现取出来. 但是, 对于
 	 * 大量的数据的话, 采用现取出来的方式会占用大量的内存, 所以可以采用保持
 	 * 连接的方式, 需要设置的话可在调用前按如下方法设置:
-	 * request.setAttribute(SearchAdapter.HOLD_CONNECTION, "1");
+	 * request.setAttribute(Search.HOLD_CONNECTION, "1");
 	 * 此外, 如果需要把已设置的标志去除, 可以使用如下方法:
 	 * request.removeAttribute(SearchManager.HOLD_CONNECTION);
 	 */

@@ -28,6 +28,7 @@ import self.micromagic.eterna.dao.ParameterGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.container.UnmodifiableIterator;
 
 /**
@@ -39,11 +40,6 @@ public class ParameterGroup
 	 * 在item的arrtibute中设置使用prepare的名称.
 	 */
 	public static final String PREPARE_FLAG = "prepare";
-
-	/**
-	 * 在item的arrtibute中设置使用格式化模式的名称.
-	 */
-	public static final String PATTERN_FLAG = "pattern";
 
 	private boolean initialized;
 
@@ -148,6 +144,7 @@ public class ParameterGroup
 			colName = tableAlias.concat(".").concat(colName);
 		}
 		pg.setColumnName(colName);
+		pg.setParamType(TypeManager.getTypeName(item.getType()));
 		String[] attrNames = item.getAttributeNames();
 		boolean hasPrepare = false;
 		for (int i = 0; i < attrNames.length; i++)
@@ -158,7 +155,7 @@ public class ParameterGroup
 				hasPrepare = true;
 				pg.setPrepareName((String) item.getAttribute(n));
 			}
-			else if (PATTERN_FLAG.equals(n))
+			else if (Tool.PATTERN_FLAG.equals(n))
 			{
 				if (!hasPrepare)
 				{

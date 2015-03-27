@@ -94,7 +94,7 @@ class ConditionPropertyImpl
 					StringTool.separateString(this.permissions, ",", true));
 			this.permissionSet.initialize(factory);
 		}
-		this.prepare = CreaterManager.createPrepare(this.columnType, this.prepareName, factory);
+		this.prepare = CreaterManager.createPrepareCreater(this.columnType, this.prepareName, factory);
 
 		if (this.columnCaption == null)
 		{

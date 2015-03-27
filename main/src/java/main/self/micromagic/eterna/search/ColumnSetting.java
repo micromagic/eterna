@@ -18,9 +18,9 @@ package self.micromagic.eterna.search;
 
 import java.sql.Connection;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * @author micromagic@sina.com
@@ -45,4 +45,5 @@ public interface ColumnSetting
 	String[] getColumnSetting(String columnType, Query query, Search search,
 			boolean first, AppData data, Connection conn)
 			throws EternaException;
+
 }

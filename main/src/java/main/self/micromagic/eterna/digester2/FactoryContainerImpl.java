@@ -82,6 +82,7 @@ public class FactoryContainerImpl
 			this.destroy();
 			ParseException.clearContextInfo();
 			SameCheck.clearDealedMap();
+			ContainerManager.clearSettedAttribute(this);
 			this.resources.clear();
 			this.readReloadTime();
 			this.initializeXML();
@@ -362,8 +363,9 @@ public class FactoryContainerImpl
 
 	public Factory getFactory()
 	{
-		if (this.factory != null && this.reloadTime != -1)
+		if (this.reloadTime != -1L)
 		{
+			// 设置了重载时间需要进行重载检查
 			this.checkReload();
 		}
 		if (!this.initialized)

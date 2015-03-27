@@ -129,7 +129,6 @@ public class Utility
 		propertiesManager.reload(msg);
 	}
 
-
 	public static String getUID()
 	{
 		return new UID().toString().replace(':', '_').replace('-', '_');
@@ -137,7 +136,7 @@ public class Utility
 
 	public static Log createLog(String name)
 	{
-		if ("true".equalsIgnoreCase(propertiesManager.getProperty(Jdk14Factory.USE_JDK_LOG_FLAG)))
+		if ("true".equalsIgnoreCase(propertiesManager.getProperty(USE_JDK_LOG_FLAG)))
 		{
 			return new Jdk14Factory().getInstance(name);
 		}
@@ -146,6 +145,7 @@ public class Utility
 			return LogFactory.getLog(name);
 		}
 	}
+	public static final String USE_JDK_LOG_FLAG = "useJdkLog";
 
 	/**
 	 * 从当前线程的上下文环境中获取ClassLoader, 如果不存在则给出Utility类

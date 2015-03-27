@@ -17,12 +17,14 @@
 package self.micromagic.eterna.digester2;
 
 import junit.framework.TestCase;
+import self.micromagic.eterna.dao.CustomResultIterator;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultFormat;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.impl.MetaDataImpl;
 import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.search.Search;
@@ -36,6 +38,14 @@ import self.micromagic.util.ref.StringRef;
 
 public class DigesterTest extends TestCase
 {
+	public void testReInit()
+	{
+		new CustomResultIterator(f.getEntity("e1"), null);
+		assertNotNull(container.getAttribute(MetaDataImpl.CATTR_RRM));
+		container.reInit();
+		assertNull(container.getAttribute(MetaDataImpl.CATTR_RRM));
+	}
+
 	public void testFormat()
 			throws Exception
 	{
@@ -91,6 +101,14 @@ public class DigesterTest extends TestCase
 		Entity entity = f.getEntity("e1");
 		assertEquals("2015-1-1 01:01:01", entity.getItem("i2").getAttribute("t"));
 		assertEquals(Boolean.FALSE, entity.getItem("i2").getAttribute("v"));
+
+		MyType myType = (MyType) entity.getItem("i2").getAttribute("myObj");
+		assertEquals("abc", myType.table);
+		assertNull(myType.type);
+		myType = (MyType) entity.getItem("i6").getAttribute("myObj");
+		assertEquals("abc", myType.table);
+		assertEquals("123", myType.type);
+
 		assertEquals("2", entity.getItem("i2").getAttribute("a"));
 		assertEquals("c1", entity.getItem("i1").getColumnName());
 		assertEquals("i2", entity.getItem("i2").getColumnName());
@@ -222,7 +240,7 @@ public class DigesterTest extends TestCase
 		StringRef msg = new StringRef();
 		try
 		{
-			FactoryContainer container = ContainerManager.createFactoryContainer("tmp",
+			container = ContainerManager.createFactoryContainer("tmp",
 					"cp:self/micromagic/eterna/digester2/d_test1.xml",
 					null, null, null, null, null, false);
 			//container.reInit(msg);
@@ -244,6 +262,7 @@ public class DigesterTest extends TestCase
 			}
 		}
 	}
+	static FactoryContainer container;
 	static EternaFactory f;
 
 	static

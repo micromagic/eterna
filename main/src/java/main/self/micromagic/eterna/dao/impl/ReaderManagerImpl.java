@@ -564,7 +564,7 @@ public class ReaderManagerImpl
 			{
 				reader.setAlias((String) item.getAttribute(n));
 			}
-			else if (PATTERN_FLAG.equals(n))
+			else if (Tool.PATTERN_FLAG.equals(n))
 			{
 				if (!hasFormat)
 				{

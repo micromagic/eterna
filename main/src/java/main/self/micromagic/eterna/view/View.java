@@ -25,9 +25,9 @@ import java.util.Set;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 
-public interface View extends ObjectCreater
+public interface View extends EternaCreater
 {
 	/**
 	 * 默认的数据集输出器的名称

@@ -17,22 +17,38 @@
 package self.micromagic.eterna.share;
 
 /**
- * 一个eterna对象.
- * 可用于注册到工厂中.
+ * 对象构造器.
+ * 注册到工厂中用于创建对象.
  */
-public interface EternaObject
+public interface EternaCreater extends Generator
 {
 	/**
 	 * 执行初始化.
 	 *
+	 * @param factory  对象构造器所属的工厂
 	 * @return  是否已初始化
 	 *          false表示是第一次初始化, true表示已执行过初始化
 	 */
 	boolean initialize(EternaFactory factory) throws EternaException;
 
 	/**
-	 * 获取对象的名称.
+	 * 获取所创建的对象的类型.
 	 */
-	String getName() throws EternaException;
+	Class getObjectType();
+
+	/**
+	 * 所创建的对象是否为单例.
+	 */
+	boolean isSingleton();
+
+	/**
+	 * 获取对象构造器所属的工厂.
+	 */
+	EternaFactory getFactory();
+
+	/**
+	 * 销毁对象构造器.
+	 */
+	void destroy();
 
 }

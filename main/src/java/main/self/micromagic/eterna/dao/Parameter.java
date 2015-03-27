@@ -58,6 +58,17 @@ public interface Parameter
 	String getTypeName() throws EternaException;
 
 	/**
+	 * 根据名称获取一个属性.
+	 */
+	Object getAttribute(String name) throws EternaException;
+
+	/**
+	 * 获取对象中的属性名称列表.
+	 * 如果没有任何属性则返回一个空的数组.
+	 */
+	String[] getAttributeNames() throws EternaException;
+
+	/**
 	 * 通过String类型的数据构成一个ValuePreparer.
 	 */
 	ValuePreparer createValuePreparer(String value) throws EternaException;

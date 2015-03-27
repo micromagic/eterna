@@ -60,7 +60,7 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
@@ -74,7 +74,7 @@ import self.micromagic.util.ref.BooleanRef;
  * @author micromagic@sina.com
  */
 public class SearchImpl extends AbstractGenerator
-		implements Search, ObjectCreater
+		implements Search, EternaCreater
 {
 	private static final int[] conditionDocumentCounts = {1, 3, 7};
 
@@ -814,7 +814,7 @@ public class SearchImpl extends AbstractGenerator
 			ritr = query.executeQuery(conn);
 		}
 		SearchResult result = new SearchResult(this.name, this.queryName, ritr,
-				countRitr, maxRow, pageNum, orderConfig);
+				countRitr, maxRow, pageNum, orderConfig, manager.getAttributes());
 		if (log.isDebugEnabled())
 		{
 			log.debug("End execute query:" + System.currentTimeMillis());
@@ -890,16 +890,13 @@ public class SearchImpl extends AbstractGenerator
 		}
 		Query query = null;
 		Map raMap = data.getRequestAttributeMap();
-		if ("1".equals(raMap.get(FORCE_LOAD_COLUMN_SETTING)) && columnSetting != null)
+		String[] columns = (String[]) raMap.get(COLUMN_SETTING);
+		if (columns != null)
 		{
 			query = search.getFactory().createQuery(queryIndex);
-			String[] colSetting = columnSetting.getColumnSetting(columnType, query, search, true, data, conn);
-			if (colSetting != null)
-			{
-				ResultReaderManager readerManager = query.getReaderManager();
-				readerManager.setReaderList(colSetting);
-				query.setReaderManager(readerManager);
-			}
+			ResultReaderManager readerManager = query.getReaderManager();
+			readerManager.setReaderList(columns);
+			query.setReaderManager(readerManager);
 			UserManager um = search.getFactory().getUserManager();
 			if (um != null)
 			{
@@ -1054,7 +1051,7 @@ public class SearchImpl extends AbstractGenerator
 				hasPrepare = true;
 				condition.prepareName = (String) item.getAttribute(n);
 			}
-			else if (ParameterGroup.PATTERN_FLAG.equals(n))
+			else if (Tool.PATTERN_FLAG.equals(n))
 			{
 				if (!hasPrepare)
 				{

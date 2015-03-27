@@ -328,8 +328,11 @@ public class ContainerManager
 			}
 			Map attrs = new HashMap();
 			attrs.put(CreaterManager.ATTR_CREATER, new HashMap());
+			// 这里需要先生成, 再注册及初始化
+			// 可防止初始化时再调用getGlobalContainer时重复注册
 			globalContainer = createFactoryContainer(GLOBAL_ID, config, parents,
-					null, attrs, ContainerManager.class.getClassLoader(), null, true);
+					null, attrs, ContainerManager.class.getClassLoader(), null, false);
+			registerFactoryContainer(globalContainer);
 		}
 		return globalContainer;
 	}
@@ -454,6 +457,31 @@ public class ContainerManager
 	private static final String THREAD_RESOURCE_KEY = "eterna.current.resource";
 
 	/**
+	 * 添加一个在工厂容器重新初始化时需要清除的属性名.
+	 */
+	public static synchronized void addContainerAttributeClearName(String name)
+	{
+		// 复制后添加, 不影响读取
+		List tmp = new ArrayList(containerAttributeClearNames);
+		tmp.add(name);
+		containerAttributeClearNames = tmp;
+	}
+	private static List containerAttributeClearNames = new ArrayList();
+
+	/**
+	 * 从工厂容器中清除需要清除的属性.
+	 */
+	public static void clearSettedAttribute(FactoryContainer container)
+	{
+		List tmp = containerAttributeClearNames;
+		Iterator itr = tmp.iterator();
+		while (itr.hasNext())
+		{
+			container.removeAttribute((String) itr.next());
+		}
+	}
+
+	/**
 	 * 初始化父配置的level等级, 0为基本配置, 1为第一级, 2为第二级 ...
 	 */
 	public static int getSuperInitLevel()
@@ -512,6 +540,31 @@ public class ContainerManager
 			throw new EternaException("Can't create ConfigResource for flag [" + flag + "].");
 		}
 		return res.create(config, container);
+	}
+
+	/**
+	 * 根据配置字符串创建一个配置资源对象.
+	 *
+	 * @param config     资源的配置
+	 */
+	public static ConfigResource createResource(String config)
+	{
+		return createResource(config, getGlobalContainer());
+	}
+
+	/**
+	 * 根据配置字符串创建一个classpath中的配置资源对象.
+	 *
+	 * @param config     资源的配置
+	 * @param loader     用于获取classpath的ClassLoader
+	 */
+	public static ConfigResource createClassPathResource(String config, ClassLoader loader)
+	{
+		if (config.indexOf(':') == -1)
+		{
+			config = "cp:".concat(config);
+		}
+		return (new ClassPathResource()).create(config, loader);
 	}
 
 	/**

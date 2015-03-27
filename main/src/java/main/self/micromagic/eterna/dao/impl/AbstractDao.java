@@ -36,14 +36,14 @@ import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.ObjectCreater;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.util.container.PreFetchIterator;
 
 /**
  * @author micromagic@sina.com
  */
 public abstract class AbstractDao extends AbstractGenerator
-		implements Dao, ObjectCreater
+		implements Dao, EternaCreater
 {
 	private String preparedSQL;
 	private DaoManager daoManager;

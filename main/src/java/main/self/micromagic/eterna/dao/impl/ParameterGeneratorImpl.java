@@ -22,6 +22,7 @@ import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
@@ -57,8 +58,8 @@ public class ParameterGeneratorImpl extends AbstractGenerator
 	public Parameter createParameter(int paramIndex)
 			throws EternaException
 	{
-		return new ParameterImpl(this.getName(), this.colName,
-				this.type, paramIndex, this.prepareName);
+		return new ParameterImpl(this.getName(), this.colName, this.type,
+				paramIndex, this.prepareName, this.attributes);
 	}
 
 }
@@ -72,20 +73,23 @@ class ParameterImpl
 	protected PreparerCreater prepare;
 	protected int type;
 	protected int index;
+	protected AttributeManager attrs;
 
-	public ParameterImpl(String name, String colName, String typeName, int index, String prepareName)
+	public ParameterImpl(String name, String colName, String typeName,
+			int index, String prepareName, AttributeManager attrs)
 	{
 		this.name = name;
 		this.colName = colName == null ? name : colName;
 		this.type = TypeManager.getTypeId(typeName);
 		this.index = index;
 		this.prepareName = prepareName;
+		this.attrs = attrs;
 	}
 
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
-		this.prepare = CreaterManager.createPrepare(this.type, this.prepareName, factory);
+		this.prepare = CreaterManager.createPrepareCreater(this.type, this.prepareName, factory);
 	}
 
 	public String getName()
@@ -116,6 +120,16 @@ class ParameterImpl
 	public String getTypeName()
 	{
 		return TypeManager.getTypeName(this.type);
+	}
+
+	public Object getAttribute(String name)
+	{
+		return this.attrs.getAttribute(name);
+	}
+
+	public String[] getAttributeNames()
+	{
+		return this.attrs.getAttributeNames();
 	}
 
 	public ValuePreparer createValuePreparer(String value)
