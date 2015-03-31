@@ -85,7 +85,7 @@ public class ObjectCreater
 		{
 			cName = element.attributeValue(this.attrName);
 		}
-		if (cName == null)
+		if (StringTool.isEmpty(cName))
 		{
 			noAttr = true;
 			if (this.defaultValue == null)

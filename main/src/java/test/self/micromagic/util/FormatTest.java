@@ -54,7 +54,7 @@ public class FormatTest extends TestCase
 	static DecimalFormat f1 = new DecimalFormat("#,###.#");
 	static DecimalFormat f2 = new DecimalFormat("#");
 
-	public void xtest01()
+	public void test01()
 			throws Exception
 	{
 		int count = 3;
@@ -92,7 +92,7 @@ public class FormatTest extends TestCase
 		// 使用synchronized需要的时间
 		for (int i = 0; i < count; i++)
 		{
-			tArr[i] = new Thread(new T_SynTime("d1." + i));
+			tArr[i] = new Thread(new T_SynTime("  syn." + i));
 			tArr[i].start();
 		}
 		for (int i = 0; i < count; i++)
@@ -103,7 +103,7 @@ public class FormatTest extends TestCase
 		// 使用ThreadCache需要的时间
 		for (int i = 0; i < count; i++)
 		{
-			tArr[i] = new Thread(new T_ThreadCacheTime("d2." + i));
+			tArr[i] = new Thread(new T_ThreadCacheTime("cache." + i));
 			tArr[i].start();
 		}
 		for (int i = 0; i < count; i++)
@@ -114,7 +114,7 @@ public class FormatTest extends TestCase
 		// 使用Clone需要的时间
 		for (int i = 0; i < count; i++)
 		{
-			//tArr[i] = new Thread(new T_CloneTime("d3." + i));
+			//tArr[i] = new Thread(new T_CloneTime("clone." + i));
 			//tArr[i].start();
 		}
 		for (int i = 0; i < count; i++)
@@ -125,12 +125,62 @@ public class FormatTest extends TestCase
 		// 仅仅使用本地变量需要的时间
 		for (int i = 0; i < count; i++)
 		{
-			tArr[i] = new Thread(new T_LocaleTime("d4." + i));
+			tArr[i] = new Thread(new T_LocaleTime("  loc." + i));
 			tArr[i].start();
 		}
 		for (int i = 0; i < count; i++)
 		{
 			tArr[i].join();
+		}
+
+		// 每次创建一个新的需要的时间
+		for (int i = 0; i < count; i++)
+		{
+			tArr[i] = new Thread(new T_CreateTime("  new." + i));
+			tArr[i].start();
+		}
+		for (int i = 0; i < count; i++)
+		{
+			tArr[i].join();
+		}
+	}
+
+	class T_CreateTime
+			implements Runnable
+	{
+		public T_CreateTime(String name)
+		{
+			this.name = name;
+		}
+		private final String name;
+
+		private int errCount;
+		public void run()
+		{
+			try
+			{
+				DateFormat tf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Calendar c = Calendar.getInstance();
+				c.setTime(tf.parse("2015-01-20 11:12:11"));
+				DateFormat f;
+				long begin = System.currentTimeMillis();
+				for (int i = 0; i < 100000; i++)
+				{
+					f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					String s = "2015-01-2" + (i % 10) + " 11:12:11";
+					c.set(Calendar.DATE, 20 + (i % 10));
+					if (!s.equals(f.format(c.getTime())))
+					{
+						this.errCount++;
+					}
+				}
+				System.out.println("name:" + this.name + ", "
+						+ (System.currentTimeMillis() - begin) + ", " + this.errCount);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
 		}
 	}
 
