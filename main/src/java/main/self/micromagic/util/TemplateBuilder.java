@@ -292,7 +292,7 @@ public class TemplateBuilder extends AbstractGenerator
 		return subTemplate;
 	}
 
-	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
+	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
 		if (this.template.length() == 0)
@@ -360,7 +360,7 @@ public class TemplateBuilder extends AbstractGenerator
 	/**
 	 * 获取一个子模板的值.
 	 */
-	private String getSubValue(Object subTemplate, String value, ConditionProperty cp,
+	private String getSubValue(Object subTemplate, Object value, ConditionProperty cp,
 			String[] colNames, ObjectRef valueOut)
 	{
 		if (subTemplate instanceof String)
@@ -380,7 +380,7 @@ public class TemplateBuilder extends AbstractGenerator
 	 * @return  处理后的参数
 	 */
 	protected ValuePreparer[] specialParam(ValuePreparer[] old,
-			String colName, String value, ConditionProperty cp)
+			String colName, Object value, ConditionProperty cp)
 	{
 		return old;
 	}
@@ -388,32 +388,39 @@ public class TemplateBuilder extends AbstractGenerator
 	/**
 	 * 获取需要构成条件的数组.
 	 */
-	protected Object[] getValues(String value, ConditionProperty cp)
+	protected Object[] getValues(Object value, ConditionProperty cp)
 	{
 		Object[] values;
 		if (!this.arrayParam)
 		{
 			// 参数不是数组, 需要根据分隔符进行分割
-			values = StringTool.separateString(value, this.valueSplit);
+			values = StringTool.separateString((String) value, this.valueSplit);
 		}
 		else
 		{
-			Map pMap = AppData.getCurrentData().getRequestParameterMap();
-			if (pMap instanceof RequestParameterMap)
+			if (value instanceof Object[])
 			{
-				RequestParameterMap tmpMap = (RequestParameterMap) pMap;
-				if (tmpMap.isParseValue())
+				values = (Object[]) value;
+			}
+			else
+			{
+				Map pMap = AppData.getCurrentData().getRequestParameterMap();
+				if (pMap instanceof RequestParameterMap)
 				{
-					values = (Object[]) pMap.get(cp.getName().concat("[]"));
+					RequestParameterMap tmpMap = (RequestParameterMap) pMap;
+					if (tmpMap.isParseValue())
+					{
+						values = (Object[]) pMap.get(cp.getName().concat("[]"));
+					}
+					else
+					{
+						values = (Object[]) pMap.get(cp.getName());
+					}
 				}
 				else
 				{
 					values = (Object[]) pMap.get(cp.getName());
 				}
-			}
-			else
-			{
-				values = (Object[]) pMap.get(cp.getName());
 			}
 		}
 		return values;
@@ -434,7 +441,7 @@ class SubFlagTemplate
 	private final String beginStr;
 	private final String endStr;
 
-	public String getSub(String value, TemplateBuilder builder, ConditionProperty cp,
+	public String getSub(Object value, TemplateBuilder builder, ConditionProperty cp,
 			String[] colNames, ObjectRef valueOut)
 	{
 		Object[] values = builder.getValues(value, cp);

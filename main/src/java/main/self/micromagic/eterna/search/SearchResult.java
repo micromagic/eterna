@@ -109,16 +109,20 @@ public final class SearchResult
 	{
 		try
 		{
-
 			p.printObjectBegin(out);
 			p.printResultIterator(out, this.queryResult, false);
-			p.printPairWithoutCheck(out, this.searchAttrs.pageNumTag, this.pageNum, false);
+			p.printPairWithoutCheck(out, this.searchAttrs.pageNumTag, this.getPageNum(), false);
 			p.printPairWithoutCheck(out, this.searchAttrs.pageSizeTag, this.pageSize, false);
 			p.printPairWithoutCheck(out, "searchName", this.searchName, false);
 			if (this.queryResult.isTotalCountAvailable())
 			{
 				p.printPairWithoutCheck(out, this.searchAttrs.totalCountTag,
 						this.queryResult.getTotalCount(), false);
+				if (this.searchAttrs.totalPageTag != null)
+				{
+					p.printPairWithoutCheck(out, this.searchAttrs.totalPageTag,
+							this.getTotalPage(), false);
+				}
 			}
 			if (this.orderConfig != null)
 			{
@@ -133,6 +137,42 @@ public final class SearchResult
 		{
 			throw new EternaException(ex);
 		}
+	}
+
+	/**
+	 * 获取修正后的页码.
+	 */
+	public int getPageNum()
+	{
+		return this.pageNum + this.searchAttrs.pageStart;
+	}
+
+	/**
+	 * 获取总页数.
+	 */
+	public int getTotalPage()
+	{
+		try
+		{
+			return getTotalPage(this.queryResult.getTotalCount(), this.pageSize);
+		}
+		catch (SQLException ex)
+		{
+			throw new EternaException(ex);
+		}
+	}
+
+	/**
+	 * 根据总记录数和页面大小获取总页数.
+	 */
+	public static int getTotalPage(int totalCount, int pageSize)
+	{
+		if (totalCount >= 0 && pageSize > 0)
+		{
+			int r = totalCount / pageSize;
+			return r * pageSize == totalCount ? r : r + 1;
+		}
+		return -1;
 	}
 
 }

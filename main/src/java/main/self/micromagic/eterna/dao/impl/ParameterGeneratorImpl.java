@@ -92,6 +92,14 @@ class ParameterImpl
 		this.prepare = CreaterManager.createPrepareCreater(this.type, this.prepareName, factory);
 	}
 
+	/**
+	 * 获取值准备器的名称.
+	 */
+	String getPepareName()
+	{
+		return this.prepareName;
+	}
+
 	public String getName()
 	{
 		return this.name;

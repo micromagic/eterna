@@ -79,6 +79,11 @@ public final class SearchAttributes
 	public final String totalCountTag;
 
 	/**
+	 * 返回结果中总页数的名称.
+	 */
+	public final String totalPageTag;
+
+	/**
 	 * 返回结果中是否有更多记录的名称.
 	 */
 	public final String hasMoreRecordTag;
@@ -108,6 +113,8 @@ public final class SearchAttributes
 		this.orderConfigTag = tmp == null ? "$order" : tmp;
 		tmp = (String) attrs.get("totalCountTag");
 		this.totalCountTag = tmp == null ? "totalCount" : tmp;
+		tmp = (String) attrs.get("totalPageTag");
+		this.totalPageTag = tmp == null ? null : tmp;
 		tmp = (String) attrs.get("hasMoreRecordTag");
 		this.hasMoreRecordTag = tmp == null ? "hasMoreRecord" : tmp;
 	}

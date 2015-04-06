@@ -47,7 +47,7 @@ public class InjectSub
 			ParseRule tmpRule = digester.getRule(tmpStr);
 			if (tmpRule == null)
 			{
-				throw new ParseException("Not found rule [" + tmpStr + "], config [" + config + "] for SubRuleCaller.");
+				throw new ParseException("Not found rule [" + tmpStr + "], config [" + config + "] for InjectSub.");
 			}
 			this.doInject(tmpRule, rule);
 			position.value = tmpEnd + 1;

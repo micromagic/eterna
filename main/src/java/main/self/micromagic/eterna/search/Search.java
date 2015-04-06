@@ -65,6 +65,13 @@ public interface Search
 	String COLUMN_SETTING = "search.column.settion";
 
 	/**
+	 * 在请求的属性中设置查询的参数的名称.
+	 *
+	 * @see SearchParam
+	 */
+	String ATTR_SEARCH_PARAM = "ETERNA_ATTR_SEARCH_PARAM";
+
+	/**
 	 * 用于标志是否要读取所有的记录. <p>
 	 * 由于查询模块中设置了分页功能, 如果需要读取所有记录的话, 则可
 	 * 在调用前按如下方法设置:

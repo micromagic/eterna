@@ -51,7 +51,7 @@ public interface ConditionBuilder extends EternaObject
 	 * @param cp       与此条件生成器的相对应的ConditionProperty
 	 * @return         所生成的条件, 及相关参数
 	 */
-	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
+	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException;
 
 }

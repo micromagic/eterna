@@ -58,7 +58,7 @@ public class AttrBinder
 
 	/**
 	 * 解析配置信息, 生成AttrBind.
-	 * 格式: begin:{name1,name2:id2,$body:attr}
+	 * 格式: attr:{name1,name2:id2,$body:attr}
 	 */
 	public static AttrBinder parseConfig(String config, IntegerRef position)
 	{
@@ -68,7 +68,7 @@ public class AttrBinder
 		while (config.charAt(position.value - 1) != ParseRule.BLOCK_END)
 		{
 			StringRef name = new StringRef();
-			AttrGetter ag = parseGetter(config, position, name);
+			AttrGetter ag = parseGetter(config, position, name, "AttrBinder");
 			attrs.add(ag);
 			toNames.add(name.getString());
 		}
@@ -85,7 +85,8 @@ public class AttrBinder
 	 * 解析配置信息, 生成AttrBind单元.
 	 * 格式: name1 或 name2:id2 或 $body:attr
 	 */
-	static AttrGetter parseGetter(String config, IntegerRef position, StringRef name)
+	static AttrGetter parseGetter(String config, IntegerRef position, StringRef name,
+			String caption)
 	{
 		int beginPos = position.value;
 		int endPos = ParseRule.findItemEnd(config, position);
@@ -93,7 +94,7 @@ public class AttrBinder
 		if (tmpName.length() == 0)
 		{
 			// 没有任何数据, 无法构造AttrBind
-			throw new ParseException("Error config [" + config + "] for AttrBinder.");
+			throw new ParseException("Error config [" + config + "] for " + caption + ".");
 		}
 		int sFlag = name == null ? -1 : config.indexOf(':', beginPos);  // 属性与绑定名称的分隔符
 		int pFlag = config.indexOf('(', beginPos);  // 参数的起始符
@@ -114,7 +115,7 @@ public class AttrBinder
 			if (name != null && (sFlag == -1 || sFlag > endPos))
 			{
 				// $body必须设置绑定的属性名
-				throw new ParseException("Error config [" + config + "] for AttrBinder.");
+				throw new ParseException("Error config [" + config + "] for " + caption + ".");
 			}
 			else if (name != null)
 			{
@@ -129,7 +130,7 @@ public class AttrBinder
 			if (name != null && (sFlag == -1 || sFlag > endPos))
 			{
 				// $element必须设置绑定的属性名
-				throw new ParseException("Error config [" + config + "] for AttrBinder.");
+				throw new ParseException("Error config [" + config + "] for " + caption + ".");
 			}
 			else if (name != null)
 			{
@@ -160,6 +161,10 @@ public class AttrBinder
 				if ((bStr = (String) params.get("d")) != null)
 				{
 					sag.setDefaultValue(bStr);
+				}
+				if ((bStr = (String) params.get("c")) != null)
+				{
+					sag.setCheckEmpty(ParseRule.booleanConverter.convertToBoolean(bStr));
 				}
 				endPos = ParseRule.findItemEnd(config, position);
 			}
@@ -220,6 +225,12 @@ class StandardAttrGetter
 	}
 	private final String flag;
 
+	public void setCheckEmpty(boolean b)
+	{
+		this.checkEmpty = b;
+	}
+	private boolean checkEmpty;
+
 	public void setMustExists(boolean b)
 	{
 		this.mustExists = b;
@@ -264,7 +275,8 @@ class StandardAttrGetter
 		{
 			r = Utility.resolveDynamicPropnames(r);
 		}
-		return this.intern ? StringTool.intern(r) : r;
+		r = this.intern ? StringTool.intern(r) : r;
+		return this.checkEmpty ? StringTool.isEmpty(r) ? null : r : r;
 	}
 
 }

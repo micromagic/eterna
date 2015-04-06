@@ -33,16 +33,16 @@
 		<objs>
 
 			<entity name="e1" order="i2,i1">
-				<item name="i1" colName="c1" type="Blob"/>
-				<item name="i2" type="Stream">
+				<item name="i1" colName="c1" type="Blob" x1="a"/>
+				<item name="i2" type="Stream" x2="b">
 					<attribute name="a" value="2"/>
 					<attribute name="v" value="0"/>
 					<attribute name="t" value="2015-1-1 01:01:01"/>
 					<attribute name="myObj" value="abc"/>
 				</item>
-				<item name="p3" colName="c3" type="int"/>
-				<item name="i5" type="int"/>
-				<item name="i6" type="int">
+				<item name="p3" colName="c3" type="int" x3="3"/>
+				<item name="i5" type="int" x1="a1" x3="-2"/>
+				<item name="i6" type="int" x1="">
 					<attribute name="myObj" value="abc/123"/>
 				</item>
 			</entity>

@@ -23,8 +23,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.EntityRef;
+import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.reader.InvalidReader;
@@ -526,6 +528,59 @@ public class ReaderManagerImpl
 		ReaderManagerImpl other = new ReaderManagerImpl(this);
 		other.name = this.name;
 		return other;
+	}
+
+	/**
+	 * 将一个Query对象转换成实体.
+	 *
+	 * @param dao  需要转换的Query对象
+	 */
+	public static Entity query2Entity(Query query)
+	{
+		EntityImpl entity = new EntityImpl();
+		entity.setName("tmpEntity.".concat(query.getName()));
+		entity.setFactory(query.getFactory());
+		Iterator itr = query.getReaderManager().getReaderList().iterator();
+		while (itr.hasNext())
+		{
+			entity.addItem(reader2Item((ResultReader) itr.next()));
+		}
+		String[] attrNames = query.getAttributeNames();
+		for (int i = 0; i < attrNames.length; i++)
+		{
+			String n = attrNames[i];
+			entity.setAttribute(n, query.getAttribute(n));
+		}
+		return entity;
+	}
+
+	/**
+	 * 将一个ResultReader对象转换成实体元素.
+	 *
+	 * @param reader  需要转换的ResultReader对象
+	 */
+	public static EntityItem reader2Item(ResultReader reader)
+	{
+		EntityItemGenerator itemG = new EntityItemGenerator();
+		itemG.setName(reader.getName());
+		itemG.setColumnName(reader.getColumnName());
+		itemG.setType(TypeManager.getTypeName(reader.getType()));
+		String alias = reader.getAlias();
+		if (!StringTool.isEmpty(alias) && !alias.equals(reader.getName()))
+		{
+			itemG.setAttribute(ALIAS_FLAG, alias);
+		}
+		if (reader.getFormatName() != null)
+		{
+			itemG.setAttribute(FORMAT_FLAG, reader.getFormatName());
+		}
+		String[] attrNames = reader.getAttributeNames();
+		for (int i = 0; i < attrNames.length; i++)
+		{
+			String n = attrNames[i];
+			itemG.setAttribute(n, reader.getAttribute(n));
+		}
+		return (EntityItem) itemG.create();
 	}
 
 	/**

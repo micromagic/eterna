@@ -64,6 +64,11 @@ public interface Factory
 	Object createObject(Object key) throws EternaException;
 
 	/**
+	 * 获取某种类型的对象的所有名称.
+	 */
+	String[] getObjectNames(Class type);
+
+	/**
 	 * 判断某个对象是否为单例.
 	 */
 	boolean isSingleton(Object key) throws EternaException;

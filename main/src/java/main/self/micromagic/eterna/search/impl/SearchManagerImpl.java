@@ -41,6 +41,7 @@ import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
+import self.micromagic.eterna.search.SearchParam;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.DataPrinter;
@@ -133,6 +134,21 @@ public class SearchManagerImpl extends AbstractGenerator
 				}
 			}
 			raMap.put(checkName, "1");
+		}
+		SearchParam sParam = (SearchParam) data.getRequestAttributeMap().get(
+				Search.ATTR_SEARCH_PARAM);
+		if (sParam != null)
+		{
+			this.pageNum = sParam.pageNum;
+			if (sParam.pageSize > 0)
+			{
+				this.pageSize = sParam.pageSize > MAX_PAGE_SIZE ?
+						MAX_PAGE_SIZE : sParam.pageSize;
+			}
+			boolean saveCondition = raMap.get(SAVE_CONDITION) != null || search.isSpecialCondition();
+			this.setConditionValues(sParam, search, saveCondition);
+			// 设置了条件对象, 处理完后直接返回
+			return;
 		}
 		try
 		{
@@ -291,6 +307,112 @@ public class SearchManagerImpl extends AbstractGenerator
 			buf.append(" )");
 		}
 		this.preparedCondition = buf.toString();
+		if (log.isDebugEnabled())
+		{
+			log.debug("Condition:" + buf.toString());
+		}
+		int pSize = preparerList.size();
+		if (pSize > 0)
+		{
+			PreparerManager tmpPM = new PreparerManager(pSize);
+			Iterator itr = preparerList.iterator();
+			for (int i = 0; i < pSize; i++)
+			{
+				ValuePreparer preparer = (ValuePreparer) itr.next();
+				preparer.setRelativeIndex(i + 1);
+				tmpPM.setValuePreparer(preparer);
+			}
+			this.generatedPM = tmpPM;
+		}
+		else
+		{
+			this.generatedPM = null;
+		}
+	}
+
+	/**
+	 * 根据参数对象, 设置查询条件.
+	 */
+	private void setConditionValues(SearchParam param, Search search, boolean saveCondition)
+			throws EternaException
+	{
+		if (param.clearCondition)
+		{
+			// 需要清除查询条件
+			this.preparedCondition = null;
+			this.generatedPM = null;
+			this.clearCondition();
+			this.conditionVersion++;
+			return;
+		}
+		if (param.condition == null || param.condition.isEmpty())
+		{
+			// 没有条件则直接返回
+			return;
+		}
+		this.clearCondition();
+		this.conditionVersion++;
+		this.resetConditionSearch = search;
+		StringAppender buf = StringTool.createStringAppender(512);
+
+		List preparerList = new LinkedList();
+		int index = 0;
+		int count = search.getConditionPropertyCount();
+		for (int i = 0; i < count; i++)
+		{
+			// 这里不捕获异常, 因为在方法外已经捕获了
+			ConditionProperty cp = search.getConditionProperty(i);
+			Object value = param.condition.get(cp.getName());
+			if (!cp.isIgnore() && value != null)
+			{
+				ConditionBuilder cb = cp.getDefaultConditionBuilder();
+				Condition cbCon = null;
+				try
+				{
+					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
+					if (saveCondition)
+					{
+						this.addCondition(new ConditionInfo(cp.getName(), null, String.valueOf(value), cb));
+					}
+				}
+				catch (Exception ex)
+				{
+					log.error("Error wen builde condition: ConditionProperty[" + cp.getName()
+							+ "], search[" + search.getName() + "]", ex);
+				}
+				if (log.isDebugEnabled())
+				{
+					log.debug("OneCondition:" + cbCon != null  ? cbCon.toString() : null);
+				}
+				if (cbCon != null)
+				{
+					if (index != 0)
+					{
+						buf.append(" AND ");
+					}
+					else
+					{
+						buf.append('(');
+					}
+					buf.append(cbCon.sqlPart);
+					for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
+					{
+						cbCon.preparers[pIndex].setName(cp.getName());
+					}
+					preparerList.addAll(Arrays.asList(cbCon.preparers));
+					index++;
+				}
+			}
+		}
+		if (buf.length() > 1)
+		{
+			buf.append(')');
+			this.preparedCondition = buf.toString();
+		}
+		else
+		{
+			this.preparedCondition = "";
+		}
 		if (log.isDebugEnabled())
 		{
 			log.debug("Condition:" + buf.toString());

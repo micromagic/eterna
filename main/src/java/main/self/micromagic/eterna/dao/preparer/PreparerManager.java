@@ -245,7 +245,7 @@ public class PreparerManager
 			}
 			else if (pm != null)
 			{
-				// 如果找未到了pml, 且pm不为空
+				// 如果找未到了pml, 且pm不为空, 则需要插入
 				if (prepml == nowpml)
 				{
 					// prepml == nowpml 则说明是头一个
@@ -372,53 +372,56 @@ public class PreparerManager
 		return settedCount;
 	}
 
-	private static class PreparerManagerList
+}
+
+class IgnorePreparer
+		implements ValuePreparer
+{
+	public PreparerCreater getCreater()
+			throws EternaException
 	{
-		public int subPartIndex;
-		public PreparerManager preparerManager;
-		public PreparerManagerList next;
-
-		public PreparerManagerList(int subPartIndex, PreparerManager preparerManager)
-		{
-			this.subPartIndex = subPartIndex;
-			this.preparerManager = preparerManager;
-			this.next = null;
-		}
-
+		return null;
 	}
 
-	private static class IgnorePreparer
-			implements ValuePreparer
+	public void setValueToStatement(int index, PreparedStatementWrap stmtWrap)
+			throws SQLException
 	{
-		public PreparerCreater getCreater()
-				throws EternaException
-		{
-			return null;
-		}
+	}
 
-		public void setValueToStatement(int index, PreparedStatementWrap stmtWrap)
-				throws SQLException
-		{
-		}
+	public void setName(String name)
+	{
+	}
 
-		public void setName(String name)
-		{
-		}
+	public String getName()
+	{
+		return null;
+	}
 
-		public String getName()
-		{
-			return null;
-		}
+	public void setRelativeIndex(int index)
+	{
+	}
 
-		public void setRelativeIndex(int index)
-		{
-		}
+	public int getRelativeIndex()
+	{
+		return 0;
+	}
 
-		public int getRelativeIndex()
-		{
-			return 0;
-		}
+}
 
+/**
+ * PreparerManager的列表.
+ */
+class PreparerManagerList
+{
+	public int subPartIndex;
+	public PreparerManager preparerManager;
+	public PreparerManagerList next;
+
+	public PreparerManagerList(int subPartIndex, PreparerManager preparerManager)
+	{
+		this.subPartIndex = subPartIndex;
+		this.preparerManager = preparerManager;
+		this.next = null;
 	}
 
 }

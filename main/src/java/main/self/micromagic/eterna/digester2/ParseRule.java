@@ -277,6 +277,7 @@ public class ParseRule
 		registerElementProcessor(ObjectCreater.__FLAG, ObjectCreater.getInstance());
 		registerElementProcessor(AttrBinder.__FLAG, AttrBinder.getInstance());
 		registerElementProcessor(MethodBinder.__FLAG, MethodBinder.getInstance());
+		registerElementProcessor(MapBinder.__FLAG, MapBinder.getInstance());
 		registerElementProcessor(StackBinder.__FLAG, StackBinder.getInstance());
 		registerElementProcessor(SubRuleCaller.__FLAG, SubRuleCaller.getInstance());
 		registerElementProcessor(SameCheck.__FLAG, SameCheck.getInstance());

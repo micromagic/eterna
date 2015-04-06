@@ -73,7 +73,7 @@ class ConditionBuilderImpl
 		return this.caption;
 	}
 
-	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
+	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
 		if (this.optType == -1)
@@ -92,7 +92,8 @@ class ConditionBuilderImpl
 			}
 		}
 
-		if (value == null || value.length() == 0)
+		String strValue = value == null ? null : value.toString();
+		if (value == null || strValue.length() == 0)
 		{
 			return this.getNullCheckCondition(colName);
 		}
@@ -112,34 +113,34 @@ class ConditionBuilderImpl
 				}
 				else
 				{
-					String newStr = BuilderGenerator.dealEscapeString(value);
-					if (newStr != value)
+					String newStr = BuilderGenerator.dealEscapeString(strValue);
+					if (newStr != strValue)
 					{
-						value = newStr;
+						strValue = newStr;
 						sqlPart.append(" escape '\\'");
 					}
 				}
 			}
-			String strValue = "";
+			String tmpValue = "";
 			if (this.optType == 0)
 			{
-				strValue = value;
+				tmpValue = strValue;
 			}
 			else
 			{
-				StringAppender temp = StringTool.createStringAppender(value.length() + 2);
+				StringAppender temp = StringTool.createStringAppender(strValue.length() + 2);
 				if ((this.optType & 0x2) != 0)
 				{
 					temp.append('%');
 				}
-				temp.append(value);
+				temp.append(strValue);
 				if ((this.optType & 0x1) != 0)
 				{
 					temp.append('%');
 				}
-				strValue = temp.toString();
+				tmpValue = temp.toString();
 			}
-			preparers[0] = cp.createValuePreparer(strValue);
+			preparers[0] = cp.createValuePreparer(tmpValue);
 		}
 		else
 		{

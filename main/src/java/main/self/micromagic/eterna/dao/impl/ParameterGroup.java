@@ -22,8 +22,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.EntityRef;
+import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.ParameterGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -168,6 +171,58 @@ public class ParameterGroup
 			}
 		}
 		return pg;
+	}
+
+	/**
+	 * 将一个Dao对象转换成实体.
+	 *
+	 * @param dao  需要转换的Dao对象
+	 */
+	public static Entity dao2Entity(Dao dao)
+	{
+		EntityImpl entity = new EntityImpl();
+		entity.setName("tmpEntity.".concat(dao.getName()));
+		entity.setFactory(dao.getFactory());
+		Iterator itr = dao.getParameterIterator();
+		while (itr.hasNext())
+		{
+			entity.addItem(parameter2Item((Parameter) itr.next()));
+		}
+		String[] attrNames = dao.getAttributeNames();
+		for (int i = 0; i < attrNames.length; i++)
+		{
+			String n = attrNames[i];
+			entity.setAttribute(n, dao.getAttribute(n));
+		}
+		return entity;
+	}
+
+	/**
+	 * 将一个Parameter对象转换成实体元素.
+	 *
+	 * @param param  需要转换的Parameter对象
+	 */
+	public static EntityItem parameter2Item(Parameter param)
+	{
+		EntityItemGenerator itemG = new EntityItemGenerator();
+		itemG.setName(param.getName());
+		itemG.setColumnName(param.getColumnName());
+		itemG.setType(TypeManager.getTypeName(param.getType()));
+		if (param instanceof ParameterImpl)
+		{
+			String tmp = ((ParameterImpl) param).getPepareName();
+			if (tmp != null)
+			{
+				itemG.setAttribute(PREPARE_FLAG, tmp);
+			}
+		}
+		String[] attrNames = param.getAttributeNames();
+		for (int i = 0; i < attrNames.length; i++)
+		{
+			String n = attrNames[i];
+			itemG.setAttribute(n, param.getAttribute(n));
+		}
+		return (EntityItem) itemG.create();
 	}
 
 }

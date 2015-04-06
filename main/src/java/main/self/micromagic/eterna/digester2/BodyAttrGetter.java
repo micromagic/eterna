@@ -78,6 +78,10 @@ public class BodyAttrGetter
 			{
 				result.setMustExists(ParseRule.booleanConverter.convertToBoolean(bStr));
 			}
+			if ((bStr = (String) params.get("c")) != null)
+			{
+				result.setCheckEmpty(ParseRule.booleanConverter.convertToBoolean(bStr));
+			}
 		}
 		else
 		{
@@ -103,6 +107,12 @@ public class BodyAttrGetter
 		this.intern = b;
 	}
 	private boolean intern = false;
+
+	public void setCheckEmpty(boolean b)
+	{
+		this.checkEmpty = b;
+	}
+	private boolean checkEmpty;
 
 	public void setMustExists(boolean b)
 	{
@@ -199,7 +209,7 @@ public class BodyAttrGetter
 		{
 			bText = StringTool.intern(bText, true);
 		}
-		return bText;
+		return this.checkEmpty ? StringTool.isEmpty(bText) ? null : bText : bText;
 	}
 
 	public void setTrimLines(String attr, boolean defalutValue)

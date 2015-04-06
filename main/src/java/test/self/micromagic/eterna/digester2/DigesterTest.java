@@ -34,6 +34,7 @@ import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.Resource;
 import self.micromagic.eterna.view.View;
 import self.micromagic.util.FormatTool;
+import self.micromagic.util.Utility;
 import self.micromagic.util.ref.StringRef;
 
 public class DigesterTest extends TestCase
@@ -101,6 +102,16 @@ public class DigesterTest extends TestCase
 		Entity entity = f.getEntity("e1");
 		assertEquals("2015-1-1 01:01:01", entity.getItem("i2").getAttribute("t"));
 		assertEquals(Boolean.FALSE, entity.getItem("i2").getAttribute("v"));
+		assertNull(entity.getItem("i1").getAttribute("x2"));
+		assertNull(entity.getItem("i2").getAttribute("x1"));
+		assertNull(entity.getItem("i2").getAttribute("x2"));
+		assertEquals("a", entity.getItem("i1").getAttribute("x1"));
+		assertEquals("b", entity.getItem("i2").getAttribute("web.h"));
+		assertNull(entity.getItem("p3").getAttribute("x3"));
+		assertEquals(Utility.createInteger(3), entity.getItem("p3").getAttribute("i"));
+		assertEquals(Utility.createInteger(-2), entity.getItem("i5").getAttribute("i"));
+		assertEquals("a1", entity.getItem("i5").getAttribute("x1"));
+		assertNull(entity.getItem("i6").getAttribute("x1"));
 
 		MyType myType = (MyType) entity.getItem("i2").getAttribute("myObj");
 		assertEquals("abc", myType.table);

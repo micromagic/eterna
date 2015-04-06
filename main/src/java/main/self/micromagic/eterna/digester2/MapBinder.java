@@ -24,22 +24,24 @@ import org.dom4j.Element;
 import self.micromagic.cg.BeanMap;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.ref.IntegerRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
- * 通过方法调用的设置来绑定配置与对象的属性.
+ * 通过名称及其值来设置一个类似map的对象.
  */
-public class MethodBinder
+public class MapBinder
 		implements ElementProcessor
 {
-	public static final String __FLAG = "method:";
-	public static MethodBinder getInstance()
+	static final String __FLAG = "map:";
+	public static MapBinder getInstance()
 	{
 		return instance;
 	}
-	private static MethodBinder instance = new MethodBinder();
+	private static MapBinder instance = new MapBinder();
 
 	private String methodName;
 	private AttrGetter[] attrs;
+	private String[] toNames;
 
 	public ElementProcessor parse(Digester digester, ParseRule rule,
 			String config, IntegerRef position)
@@ -48,10 +50,10 @@ public class MethodBinder
 	}
 
 	/**
-	 * 解析配置信息, 生成MethodBinder.
-	 * 格式: method:{mName,name2,$body}
+	 * 解析配置信息, 生成MapBinder.
+	 * 格式: map:{name1,name2:id2,$body:attr}
 	 */
-	public static MethodBinder parseConfig(String config, IntegerRef position)
+	public static MapBinder parseConfig(String config, IntegerRef position)
 	{
 		int mBegin = position.value += 1;
 		int mEnd = ParseRule.findItemEnd(config, position);
@@ -59,21 +61,26 @@ public class MethodBinder
 		if (mName.length() == 0)
 		{
 			// 没有方法名不能解析为MethodBinder
-			throw new ParseException("Error config [" + config + "] for MethodBinder.");
+			throw new ParseException("Error config [" + config + "] for MapBinder.");
 		}
 		List attrs = new ArrayList();
+		List toNames = new ArrayList();
 		position.value = mEnd + 1;
 		while (config.charAt(position.value - 1) != ParseRule.BLOCK_END)
 		{
-			AttrGetter ag = AttrBinder.parseGetter(config, position, null, "MethodBinder");
+			StringRef name = new StringRef();
+			AttrGetter ag = AttrBinder.parseGetter(config, position, name, "MapBinder");
 			attrs.add(ag);
+			toNames.add(name.getString());
 		}
-		MethodBinder methodBind = new MethodBinder();
-		methodBind.methodName = mName;
+		MapBinder mapBind = new MapBinder();
+		mapBind.methodName = mName;
 		int size = attrs.size();
-		methodBind.attrs = new AttrGetter[size];
-		attrs.toArray(methodBind.attrs);
-		return methodBind;
+		mapBind.attrs = new AttrGetter[size];
+		mapBind.toNames = new String[size];
+		attrs.toArray(mapBind.attrs);
+		toNames.toArray(mapBind.toNames);
+		return mapBind;
 	}
 
 	public boolean begin(Digester digester, Element element)
@@ -93,14 +100,20 @@ public class MethodBinder
 
 	public void bind(Object obj, Element element)
 	{
-		Object[] args = new Object[this.attrs.length];
-		for (int i = 0; i < args.length; i++)
-		{
-			args[i] = this.attrs[i].get(element);
-		}
 		try
 		{
-			Tool.invokeExactMethod(obj, this.methodName, args);
+			int count = this.attrs.length;
+			for (int i = 0; i < count; i++)
+			{
+				Object value = this.attrs[i].get(element);
+				if (value != null)
+				{
+					Object[] args = new Object[2];
+					args[0] = this.toNames[i]; // name;
+					args[1] = value; // value;
+					Tool.invokeExactMethod(obj, this.methodName, args);
+				}
+			}
 		}
 		catch (RuntimeException ex)
 		{
@@ -113,3 +126,4 @@ public class MethodBinder
 	}
 
 }
+
