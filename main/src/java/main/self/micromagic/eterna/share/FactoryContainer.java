@@ -50,6 +50,11 @@ public interface FactoryContainer
 	String URIS_FLAG = "eterna.uris";
 
 	/**
+	 * 在attribute中存放扩展对象获取工具的前缀.
+	 */
+	String EXT_PREFIX = "ext.";
+
+	/**
 	 * 获得工厂容器实例的id.
 	 */
 	String getId();

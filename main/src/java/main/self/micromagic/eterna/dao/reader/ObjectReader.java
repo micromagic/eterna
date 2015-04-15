@@ -125,6 +125,7 @@ public class ObjectReader
 				this.attributes.setAttribute(PRINT_CAPTION, pCaption);
 			}
 		}
+		this.attributes.convertType(factory, "reader");
 	}
 
 	public boolean isIgnore()

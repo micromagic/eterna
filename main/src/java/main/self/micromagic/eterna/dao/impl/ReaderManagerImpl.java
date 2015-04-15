@@ -537,9 +537,16 @@ public class ReaderManagerImpl
 	 */
 	public static Entity query2Entity(Query query)
 	{
-		EntityImpl entity = new EntityImpl();
-		entity.setName("tmpEntity.".concat(query.getName()));
-		entity.setFactory(query.getFactory());
+		String eName = "___tmpEntity.".concat(query.getName());
+		EternaFactory f = query.getFactory();
+		EntityImpl entity = (EntityImpl) f.getAttribute(eName);
+		if (entity != null)
+		{
+			return entity;
+		}
+		entity = new EntityImpl();
+		entity.setName(eName);
+		entity.setFactory(f);
 		Iterator itr = query.getReaderManager().getReaderList().iterator();
 		while (itr.hasNext())
 		{
@@ -551,6 +558,8 @@ public class ReaderManagerImpl
 			String n = attrNames[i];
 			entity.setAttribute(n, query.getAttribute(n));
 		}
+		entity.initialize(f);
+		f.setAttribute(eName, entity);
 		return entity;
 	}
 

@@ -90,6 +90,7 @@ class ParameterImpl
 			throws EternaException
 	{
 		this.prepare = CreaterManager.createPrepareCreater(this.type, this.prepareName, factory);
+		this.attrs.convertType(factory, "parameter");
 	}
 
 	/**

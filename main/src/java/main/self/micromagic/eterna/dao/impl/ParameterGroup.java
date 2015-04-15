@@ -180,9 +180,16 @@ public class ParameterGroup
 	 */
 	public static Entity dao2Entity(Dao dao)
 	{
-		EntityImpl entity = new EntityImpl();
-		entity.setName("tmpEntity.".concat(dao.getName()));
-		entity.setFactory(dao.getFactory());
+		String eName = "___tmpEntity.".concat(dao.getName());
+		EternaFactory f = dao.getFactory();
+		EntityImpl entity = (EntityImpl) f.getAttribute(eName);
+		if (entity != null)
+		{
+			return entity;
+		}
+		entity = new EntityImpl();
+		entity.setName(eName);
+		entity.setFactory(f);
 		Iterator itr = dao.getParameterIterator();
 		while (itr.hasNext())
 		{
@@ -194,6 +201,8 @@ public class ParameterGroup
 			String n = attrNames[i];
 			entity.setAttribute(n, dao.getAttribute(n));
 		}
+		entity.initialize(f);
+		f.setAttribute(eName, entity);
 		return entity;
 	}
 

@@ -272,7 +272,7 @@ public class Digester
 	 */
 	private void addRule(String name, ParseRule rule)
 	{
-		if (this.roleMap.put(name, rule) != null)
+		if (this.ruleMap.put(name, rule) != null)
 		{
 			throw new ParseException("Same rule name [" + name + "].");
 		}
@@ -283,7 +283,7 @@ public class Digester
 	 */
 	public ParseRule getRule(String name)
 	{
-		ParseRule r = (ParseRule) this.roleMap.get(name);
+		ParseRule r = (ParseRule) this.ruleMap.get(name);
 		if (this.inInit)
 		{
 			// 如果在初始化过程中获取规则, 需要判断是否已初始化
@@ -297,7 +297,7 @@ public class Digester
 		}
 		return r;
 	}
-	private final Map roleMap = new HashMap();
+	private final Map ruleMap = new HashMap();
 
 	/**
 	 * 获取解析配置中的属性.

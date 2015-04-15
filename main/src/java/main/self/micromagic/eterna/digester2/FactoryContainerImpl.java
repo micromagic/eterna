@@ -41,7 +41,7 @@ import self.micromagic.util.converter.LongConverter;
 import self.micromagic.util.ref.StringRef;
 
 /**
- *
+ * 工厂容器的实现类.
  */
 public class FactoryContainerImpl
 		implements FactoryContainer
@@ -340,9 +340,10 @@ public class FactoryContainerImpl
 		if (tmpTime == null)
 		{
 			this.reloadTime = -1L;
+			return;
 		}
 		long time = (new LongConverter()).convertToLong(tmpTime);
-		if (time >= 0L)
+		if (time > 0L)
 		{
 			this.reloadTime = time < 200L ? 200L : time;
 		}

@@ -115,6 +115,9 @@
 				</parameters>
 			</query>
 
+			<update name="update1xx">
+				<prepared-sql/>
+			</update>
 			<update name="update1">
 				<prepared-sql>
 					update T set #check #auto[update,dynamic;1,i-k1]

@@ -34,9 +34,9 @@ import self.micromagic.eterna.dao.preparer.PreparedStatementWrapImpl;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.util.container.PreFetchIterator;
 
 /**
@@ -67,7 +67,9 @@ public abstract class AbstractDao extends AbstractGenerator
 		{
 			if (this.preparedSQL == null)
 			{
-				throw new EternaException( "Can't initialize without preparedSQL.");
+				this.preparedSQL = "";
+				log.error(this.getType() + " [" + this.getName()
+						+ "]'s prepared-sql hasn't setted.");
 			}
 			this.initialized = true;
 			this.attributes.convertType(factory, this.getType());

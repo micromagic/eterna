@@ -788,6 +788,24 @@ public class EternaFactoryImpl extends AbstractFactory
 	public Object createObject(Object key)
 			throws EternaException
 	{
+		if (key instanceof String)
+		{
+			String n = (String) key;
+			int index = n.indexOf(':');
+			if (index != -1)
+			{
+				String fName = FactoryContainer.EXT_PREFIX.concat(n.substring(0, index));
+				ExtObjectFinder finder = getExtFinder(this, fName);
+				if (finder != null)
+				{
+					Object obj = finder.findObject(n.substring(index + 1));
+					if (obj != null)
+					{
+						return obj;
+					}
+				}
+			}
+		}
 		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
 		if (container == null)
 		{
@@ -798,6 +816,25 @@ public class EternaFactoryImpl extends AbstractFactory
 			throw new ParseException("Not found object [" + key + "].");
 		}
 		return container.create(this.inInit, this);
+	}
+
+	/**
+	 * 从给出的工厂中获取扩展对象查找者.
+	 * 此方法会递归共享工厂来获取.
+	 */
+	private static ExtObjectFinder getExtFinder(EternaFactory factory, String fName)
+	{
+		if (factory != null)
+		{
+			ExtObjectFinder finder = (ExtObjectFinder) factory
+					.getFactoryContainer().getAttribute(fName);
+			if (finder != null)
+			{
+				return finder;
+			}
+			return getExtFinder(factory.getShareFactory(), fName);
+		}
+		return null;
 	}
 
 	/**
