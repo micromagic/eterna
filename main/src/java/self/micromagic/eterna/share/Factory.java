@@ -16,29 +16,29 @@
 
 package self.micromagic.eterna.share;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 
 public interface Factory
 {
 	static final int MAX_ADAPTER_COUNT = 1024 * 16;
 
-	void initialize(FactoryManager.Instance factoryManager, Factory shareFactory)
-			throws ConfigurationException;
+	void initialize(FactoryManager.Instance instance, Factory shareFactory)
+			throws EternaException;
 
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	FactoryManager.Instance getFactoryManager() throws ConfigurationException;
+	FactoryManager.Instance getFactoryContainer() throws EternaException;
 
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
-	Object setAttribute(String name, Object value) throws ConfigurationException;
+	Object setAttribute(String name, Object value) throws EternaException;
 
-	Object removeAttribute(String name) throws ConfigurationException;
+	Object removeAttribute(String name) throws EternaException;
 
 	void destroy();
 

@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.sql.PreparedStatementWrap;
@@ -63,13 +63,13 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!this.initialized)
 		{
 			if (this.preparedSQL == null)
 			{
-				throw new ConfigurationException( "Can't initialize without preparedSQL.");
+				throw new EternaException( "Can't initialize without preparedSQL.");
 			}
 			this.initialized = true;
 
@@ -107,14 +107,14 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 			}
 			if (this.sqlManager.getParameterCount() > paramArray.length)
 			{
-				throw new ConfigurationException(
+				throw new EternaException(
 						"Not all parameter has been bound in [" + this.getName() + "].");
 			}
 		}
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createSQLAdapter();
 	}
@@ -140,51 +140,51 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public int getParameterCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.sqlManager.getParameterCount();
 	}
 
 	public boolean hasActiveParam()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.preparerManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.preparerManager.hasActiveParam();
 	}
 
 	public int getActiveParamCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.preparerManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.preparerManager.getParamCount();
 	}
 
 	public int getSubSQLCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.sqlManager.getSubPartCount();
 	}
 
 	public String getPreparedSQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.sqlManager.getPreparedSQL();
 	}
@@ -193,21 +193,21 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	 * 根据临时设置的子句获取预备SQL.
 	 */
 	String getTempPreparedSQL(int[] indexs, String[] subParts)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.sqlManager.getTempPreparedSQL(indexs, subParts);
 	}
 
 	public void setPreparedSQL(String sql)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.preparedSQL != null)
 		{
-			throw new ConfigurationException("You can't set prepared sql twice.");
+			throw new EternaException("You can't set prepared sql twice.");
 		}
 		if (sql == null)
 		{
@@ -217,7 +217,7 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	protected void clear()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.preparedSQL = null;
 		this.sqlManager = null;
@@ -226,17 +226,17 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public void setSubSQL(int index, String subPart)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setSubSQL(index, subPart, null);
 	}
 
 	public void setSubSQL(int index, String subPart, PreparerManager pm)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		int tempI = this.sqlManager.setSubPart(index - 1, subPart);
 		this.preparerManager.inserPreparerManager(pm, tempI, index);
@@ -248,44 +248,44 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public boolean isDynamicParameter(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		return this.sqlManager.isDynamicParameter(index - 1);
 	}
 
 	public boolean isDynamicParameter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.isDynamicParameter(this.getIndexByParameterName(name));
 	}
 
 	public void setIgnore(int parameterIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		this.preparerManager.setIgnore(parameterIndex);
 		this.sqlManager.setParamSetted(parameterIndex - 1, false);
 	}
 
 	public void setIgnore(String parameterName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setIgnore(this.getIndexByParameterName(parameterName));
 	}
 
 	public void setValuePreparer(ValuePreparer preparer)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		this.preparerManager.setValuePreparer(preparer);
 		preparer.setName(this.parameterArray[preparer.getRelativeIndex() - 1].getName());
@@ -293,45 +293,45 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public void prepareValues(PreparedStatement stmt)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		this.preparerManager.prepareValues(new PreparedStatementWrapImpl(stmt));
 	}
 
 	public void prepareValues(PreparedStatementWrap stmtWrap)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (this.sqlManager == null)
 		{
-			throw new ConfigurationException("SQL not initialized.");
+			throw new EternaException("SQL not initialized.");
 		}
 		this.preparerManager.prepareValues(stmtWrap);
 	}
 
 	public Iterator getParameterIterator()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return new PreFetchIterator(Arrays.asList(this.parameterArray).iterator(), false);
 	}
 
 	private void addParameterNameMap(SQLParameter param)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = param.getIndex();
 		if (index < 1 || index > this.getParameterCount())
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Invalid parameter index:" + index + " at SQLAdapter "
 					+ this.getName() + ".");
 		}
 		Object obj = this.parameterNameMap.put(param.getName(), param);
 		if (obj != null)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Duplicate parameter name:" + param.getName() + " at SQLAdapter "
 					+ this.getName() + ".");
 		}
@@ -340,7 +340,7 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public void clearParameters()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sqlManager != null)
 		{
@@ -356,11 +356,11 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public void addParameter(SQLParameterGenerator paramGenerator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Can't add parameter in initialized " + this.getType() + " [" + this.getName() + "].");
 		}
 		else if (this.paramGroup == null)
@@ -371,11 +371,11 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	public void addParameterRef(String groupName, String ignoreList)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Can't add parameter ref in initialized " + this.getType() + " [" + this.getName() + "].");
 		}
 		else if (this.paramGroup == null)
@@ -386,18 +386,18 @@ public abstract class AbstractSQLAdapter extends AbstractGenerator
 	}
 
 	protected int getIndexByParameterName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.getParameter(name).getIndex();
 	}
 
 	public SQLParameter getParameter(String paramName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLParameter p = (SQLParameter) this.parameterNameMap.get(paramName);
 		if (p == null)
 		{
-			throw new ConfigurationException("Invalid parameter name:[" + paramName + "].");
+			throw new EternaException("Invalid parameter name:[" + paramName + "].");
 		}
 		return p;
 	}

@@ -16,10 +16,10 @@
 
 package self.micromagic.eterna.model;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface TransOperator
 {
-	Object change(Object value) throws ConfigurationException;
+	Object change(Object value) throws EternaException;
 
 }

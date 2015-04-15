@@ -21,7 +21,7 @@ import java.util.Map;
 import javax.naming.Context;
 import javax.sql.DataSource;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface DataSourceManager
 {
@@ -37,19 +37,19 @@ public interface DataSourceManager
 	/**
 	 * 初始化这个DataSourceManager.
 	 */
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
-	DataSource getDefaultDataSource() throws ConfigurationException;
+	DataSource getDefaultDataSource() throws EternaException;
 
-	DataSource getDataSource(String name) throws ConfigurationException;
+	DataSource getDataSource(String name) throws EternaException;
 
-	Map getDataSourceMap() throws ConfigurationException;
+	Map getDataSourceMap() throws EternaException;
 
-	String getDefaultDataSourceName() throws ConfigurationException;
+	String getDefaultDataSourceName() throws EternaException;
 
-	void setDefaultDataSourceName(String name) throws ConfigurationException;
+	void setDefaultDataSourceName(String name) throws EternaException;
 
 	void addDataSource(Context context, String dataSourceConfig)
-			throws ConfigurationException;
+			throws EternaException;
 
 }

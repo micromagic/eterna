@@ -33,7 +33,7 @@ import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.ResultMetaData;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import org.apache.commons.collections.iterators.IteratorEnumeration;
 
 /**
@@ -235,7 +235,7 @@ public class ValueContainerMap extends AbstractMap
 			{
 				return null;
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				return null;
 			}
@@ -251,7 +251,7 @@ public class ValueContainerMap extends AbstractMap
 			{
 				return false;
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				return false;
 			}
@@ -284,7 +284,7 @@ public class ValueContainerMap extends AbstractMap
 			{
 				return null;
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				return null;
 			}

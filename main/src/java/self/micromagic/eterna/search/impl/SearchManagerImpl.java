@@ -30,7 +30,7 @@ import java.io.IOException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
@@ -105,13 +105,13 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 	public void setPageNumAndCondition(AppData data, SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setPageNumAndCondition(data, search, true);
 	}
 
 	private void setPageNumAndCondition(AppData data, SearchAdapter search, boolean checkDealed)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Map raMap = data.getRequestAttributeMap();
 		if (checkDealed)
@@ -198,7 +198,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	 * 根据参数的名称从<code>doc</code>中的条件配置，设置查询条件。
 	 */
 	private void setConditionValues(Document doc, SearchAdapter search, boolean saveCondition)
-			throws ConfigurationException
+			throws EternaException
 	{
 		StringAppender buf = StringTool.createStringAppender(512);
 
@@ -309,7 +309,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	 * 根据参数的名称从<code>request</code>中的读取参数，设置查询条件。
 	 */
 	private void setConditionValues(AppData data, SearchAdapter search, boolean saveCondition, boolean dealDefault)
-			throws ConfigurationException
+			throws EternaException
 	{
 		StringAppender buf = StringTool.createStringAppender(512);
 
@@ -423,7 +423,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 	public PreparerManager getSpecialPreparerManager(SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (search == this.resetConditionSearch)
 		{
@@ -456,7 +456,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 	public String getSpecialConditionPart(SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (search == this.resetConditionSearch)
 		{
@@ -474,7 +474,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 	public String getSpecialConditionPart(SearchAdapter search, boolean needWrap)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (search == this.resetConditionSearch)
 		{
@@ -486,7 +486,7 @@ public class SearchManagerImpl extends AbstractGenerator
 
 
 	private Map prepareCondition(SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		List cons = this.getConditions();
 		if (cons.size() == 0)
@@ -518,7 +518,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	 * 生成条件子集，返回值为2个，第一个为ConditionPart，第二个为PreparerManager.
 	 */
 	private Object[] createSpecialCondition(SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Map consMap = this.prepareCondition(search);
 		if (consMap == null || consMap.size() == 0)
@@ -695,19 +695,19 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createSearchManager();
 	}
 
 	public SearchManager createSearchManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return new SearchManagerImpl();
 	}
 
 	public void print(DataPrinter p, Writer out, Object bean)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		Iterator itr = this.getConditions().iterator();
 		boolean firstValue = true;

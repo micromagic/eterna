@@ -18,7 +18,7 @@ package self.micromagic.eterna.view.impl;
 
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.BaseManager;
 import self.micromagic.eterna.view.Component;
@@ -48,14 +48,14 @@ public class TR extends ComponentImpl
 	}
 
 	public TR(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this();
 		this.setName(name);
 	}
 
 	public void initialize(EternaFactory factory, Component parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -112,7 +112,7 @@ public class TR extends ComponentImpl
 	}
 
 	public void setName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		super.setName(name);
 		if (name == null)
@@ -130,13 +130,13 @@ public class TR extends ComponentImpl
 		}
 		else
 		{
-			throw new ConfigurationException("The name must start with [tableList_TR or tableForm_TR] for tr component.");
+			throw new EternaException("The name must start with [tableList_TR or tableForm_TR] for tr component.");
 		}
 		if (name.length() > preNameLength)
 		{
 			if (name.charAt(preNameLength) != '.')
 			{
-				throw new ConfigurationException("If you want set plus base name, must start with \".\" for tr component.");
+				throw new EternaException("If you want set plus base name, must start with \".\" for tr component.");
 			}
 			super.setName(name.substring(0, preNameLength));
 			this.baseComponentName = name.substring(preNameLength + 1);
@@ -144,16 +144,16 @@ public class TR extends ComponentImpl
 	}
 
 	public void setType(String type)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!"tr".equalsIgnoreCase(type))
 		{
-			throw new ConfigurationException("The type must be [tr] for tr component.");
+			throw new EternaException("The type must be [tr] for tr component.");
 		}
 	}
 
 	public Iterator getSubComponents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.baseComponent != null && this.componentList.size() == 0)
 		{
@@ -163,7 +163,7 @@ public class TR extends ComponentImpl
 	}
 
 	public Iterator getEvents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.baseComponent == null)
 		{
@@ -173,7 +173,7 @@ public class TR extends ComponentImpl
 	}
 
 	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{

@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.DataSourceManager;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.ObjectRef;
 
 public interface ModelCaller
@@ -42,26 +42,26 @@ public interface ModelCaller
 	 */
 	public static final String DEFAULT_DATA_SOURCE_NAME = DataSourceManager.DEFAULT_DATA_SOURCE_NAME;
 
-	void initModelCaller(EternaFactory factory) throws ConfigurationException;
+	void initModelCaller(EternaFactory factory) throws EternaException;
 
-	Connection getConnection(ModelAdapter model) throws SQLException, ConfigurationException;
+	Connection getConnection(ModelAdapter model) throws SQLException, EternaException;
 
 	void closeConnection(Connection conn);
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
 	ModelExport callModel(AppData data)
-			throws ConfigurationException, SQLException, IOException;
+			throws EternaException, SQLException, IOException;
 
 	ModelExport callModel(AppData data, ObjectRef preConn)
-			throws ConfigurationException, SQLException, IOException;
+			throws EternaException, SQLException, IOException;
 
 	ModelExport callModel(AppData data, ModelAdapter model, ModelExport export, int tType, ObjectRef preConn)
-			throws ConfigurationException, SQLException, IOException;
+			throws EternaException, SQLException, IOException;
 
 	/**
 	 * 根据数据集<code>data</code>生成重定向的参数
 	 */
-	String prepareParam(AppData data, String charset) throws ConfigurationException, IOException;
+	String prepareParam(AppData data, String charset) throws EternaException, IOException;
 
 }

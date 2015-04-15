@@ -21,7 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.sql.preparer.PreparerManager;
 import self.micromagic.eterna.sql.preparer.ValuePreparer;
@@ -64,60 +64,60 @@ public interface SQLAdapter
 	/**
 	 * 获取本SQL适配器的名称.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 获取本SQL适配器的类型.
 	 * 如: query, update.
 	 */
-	String getType() throws ConfigurationException;
+	String getType() throws EternaException;
 
 	/**
 	 * 获取本SQL适配器某个设置的属性.
 	 */
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
 	/**
 	 * 获取本SQL适配器设置的所有属性的名称.
 	 */
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
 	/**
 	 * 获取本SQL适配器sql日志的记录方式
 	 */
-	int getLogType() throws ConfigurationException;
+	int getLogType() throws EternaException;
 
 	/**
 	 * 获取生成本适配器的工厂.
 	 */
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
 	/**
 	 * 获得参数的个数.
 	 *
 	 * @return    <code>SQLAdapter</code>中参数的个数.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	int getParameterCount() throws ConfigurationException;
+	int getParameterCount() throws EternaException;
 
 	/**
 	 * 获得实际有效的参数个数.
 	 *
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	public int getActiveParamCount() throws ConfigurationException;
+	public int getActiveParamCount() throws EternaException;
 
 	/**
 	 * 判断是否有有效的参数.
 	 *
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	public boolean hasActiveParam() throws ConfigurationException;
+	public boolean hasActiveParam() throws EternaException;
 
 	/**
 	 * 根据Parameter的名称获取一个SQLParameter.
 	 */
-	SQLParameter getParameter(String paramName) throws ConfigurationException;
+	SQLParameter getParameter(String paramName) throws EternaException;
 
 	/**
 	 * 获取包含所有SQLParameter的迭代器.
@@ -125,38 +125,38 @@ public interface SQLAdapter
 	 *
 	 * @see SQLParameter#getIndex
 	 */
-	Iterator getParameterIterator() throws ConfigurationException;
+	Iterator getParameterIterator() throws EternaException;
 
 	/**
 	 * 执行本SQL适配器.
 	 */
-	void execute(Connection conn) throws ConfigurationException, SQLException;
+	void execute(Connection conn) throws EternaException, SQLException;
 
 	/**
 	 * 获得子语句的个数.
 	 *
 	 * @return    <code>SQLAdapter</code>中子语句的个数.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	int getSubSQLCount() throws ConfigurationException;
+	int getSubSQLCount() throws EternaException;
 
 	/**
 	 * 获得预备SQL语句. <p>
 	 * 该预备SQL语句是经过第一步处理，将子语句设置完后的预备SQL语句。
 	 *
 	 * @return    经过第一步处理预备SQL语句.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	String getPreparedSQL() throws ConfigurationException;
+	String getPreparedSQL() throws EternaException;
 
 	/**
 	 * 设置子语句.
 	 *
 	 * @param index    子语句的索引值.
 	 * @param subPart  要设置的子语句.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setSubSQL(int index, String subPart) throws ConfigurationException;
+	void setSubSQL(int index, String subPart) throws EternaException;
 
 	/**
 	 * 设置子语句, 并为其配上相应的参数.
@@ -164,61 +164,61 @@ public interface SQLAdapter
 	 * @param index    子语句的索引值.
 	 * @param subPart  要设置的子语句.
 	 * @param pm       要配上的参数.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setSubSQL(int index, String subPart, PreparerManager pm) throws ConfigurationException;
+	void setSubSQL(int index, String subPart, PreparerManager pm) throws EternaException;
 
 	/**
 	 * 获得本sql适配器的配置参数.
 	 */
-	PreparerManager getPreparerManager() throws ConfigurationException;
+	PreparerManager getPreparerManager() throws EternaException;
 
 	/**
 	 * 根据索引值判断对应的参数是否是动态参数.
 	 *
 	 * @param index    第一个参数是1, 第二个是2, ...
 	 */
-	boolean isDynamicParameter(int index) throws ConfigurationException;
+	boolean isDynamicParameter(int index) throws EternaException;
 
 	/**
 	 * 根据参数的名称判断对应的参数是否是动态参数.
 	 *
 	 * @param name    参数的名称
 	 */
-	boolean isDynamicParameter(String name) throws ConfigurationException;
+	boolean isDynamicParameter(String name) throws EternaException;
 
 	/**
 	 * 通过ValuePreparer来设置参数.
 	 */
-	void setValuePreparer(ValuePreparer preparer) throws ConfigurationException;
+	void setValuePreparer(ValuePreparer preparer) throws EternaException;
 
 	/**
 	 * 将参数设置到PreparedStatement中.
 	 */
-	void prepareValues(PreparedStatement stmt) throws ConfigurationException, SQLException;
+	void prepareValues(PreparedStatement stmt) throws EternaException, SQLException;
 
 	/**
 	 * 将参数设置到PreparedStatementWrap中.
 	 */
-	void prepareValues(PreparedStatementWrap stmtWrap) throws ConfigurationException, SQLException;
+	void prepareValues(PreparedStatementWrap stmtWrap) throws EternaException, SQLException;
 
 	/**
 	 * 将定义好的参数设为忽略.
 	 * 只有动态参数才可设置为忽略.
 	 *
 	 * @param parameterIndex 第一个参数是1, 第二个是2, ...
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setIgnore(int parameterIndex) throws ConfigurationException;
+	void setIgnore(int parameterIndex) throws EternaException;
 
 	/**
 	 * 将定义好的参数设为忽略.
 	 * 只有动态参数才可设置为忽略.
 	 *
 	 * @param parameterName  这个参数的名称
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setIgnore(String parameterName) throws ConfigurationException;
+	void setIgnore(String parameterName) throws EternaException;
 
 	/* *
 	 * 用一个<code>Timestamp</code>来设置目标参数.
@@ -226,10 +226,10 @@ public interface SQLAdapter
 	 * @param parameterIndex   参数的索引值.
 	 * @param x                参数的值.
 	 * @param cal              用来构造Timestamp的<code>Calendar</code>.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setTimestamp(int parameterIndex, java.sql.Timestamp x, Calendar cal)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/* *
@@ -238,10 +238,10 @@ public interface SQLAdapter
 	 * @param parameterName    参数的名称.
 	 * @param x                参数的值.
 	 * @param cal              用来构造Timestamp的<code>Calendar</code>.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setTimestamp(String parameterName, java.sql.Timestamp x, Calendar cal)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/* *
@@ -249,10 +249,10 @@ public interface SQLAdapter
 	 *
 	 * @param parameterIndex   参数的索引值.
 	 * @param x                参数的值.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setObject(int parameterIndex, Object x)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/*
@@ -260,10 +260,10 @@ public interface SQLAdapter
 	 *
 	 * @param parameterName    参数的名称.
 	 * @param x                参数的值.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setObject(String parameterName, Object x)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/* *
@@ -272,10 +272,10 @@ public interface SQLAdapter
 	 * @param parameterIndex   参数的索引值.
 	 * @param x                参数的值.
 	 * @param targetSqlType    SQL中的类型(在java.sql.Types中定义).
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setObject(int parameterIndex, Object x, int targetSqlType)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/* *
@@ -284,10 +284,10 @@ public interface SQLAdapter
 	 * @param parameterName    参数的名称.
 	 * @param x                参数的值.
 	 * @param targetSqlType    SQL中的类型(在java.sql.Types中定义).
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setObject(String parameterName, Object x, int targetSqlType)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/* *
@@ -297,10 +297,10 @@ public interface SQLAdapter
 	 * @param x                参数的值.
 	 * @param targetSqlType    SQL中的类型(在java.sql.Types中定义).
 	 * @param scale            设置DECIMAL和NUMERIC的小数位数.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setObject(int parameterIndex, Object x, int targetSqlType, int scale)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/* *
@@ -310,10 +310,10 @@ public interface SQLAdapter
 	 * @param x                参数的值.
 	 * @param targetSqlType    SQL中的类型(在java.sql.Types中定义).
 	 * @param scale            设置DECIMAL和NUMERIC的小数位数.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 *
 	public void setObject(String parameterName, Object x, int targetSqlType, int scale)
-			throws ConfigurationException;
+			throws EternaException;
 	*/
 
 	/**
@@ -327,9 +327,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param sqlType the SQL type code defined in <code>java.sql.Types</code>
 	 *                <p>在<code>java.sql.Types</code>中定义的SQL型
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setNull(int parameterIndex, int sqlType) throws ConfigurationException;
+	void setNull(int parameterIndex, int sqlType) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to SQL <code>NULL</code>.
@@ -342,9 +342,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param sqlType the SQL type code defined in <code>java.sql.Types</code>
 	 *                <p>在<code>java.sql.Types</code>中定义的SQL型
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setNull(String parameterName, int sqlType) throws ConfigurationException;
+	void setNull(String parameterName, int sqlType) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>boolean</code> value.
@@ -357,9 +357,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setBoolean(int parameterIndex, boolean x) throws ConfigurationException;
+	void setBoolean(int parameterIndex, boolean x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>boolean</code> value.
@@ -371,9 +371,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setBoolean(String parameterName, boolean x) throws ConfigurationException;
+	void setBoolean(String parameterName, boolean x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>byte</code> value.
@@ -386,9 +386,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setByte(int parameterIndex, byte x) throws ConfigurationException;
+	void setByte(int parameterIndex, byte x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>byte</code> value.
@@ -401,9 +401,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setByte(String parameterName, byte x) throws ConfigurationException;
+	void setByte(String parameterName, byte x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>short</code> value.
@@ -416,9 +416,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setShort(int parameterIndex, short x) throws ConfigurationException;
+	void setShort(int parameterIndex, short x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>short</code> value.
@@ -431,9 +431,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setShort(String parameterName, short x) throws ConfigurationException;
+	void setShort(String parameterName, short x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>int</code> value.
@@ -446,9 +446,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setInt(int parameterIndex, int x) throws ConfigurationException;
+	void setInt(int parameterIndex, int x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>int</code> value.
@@ -461,9 +461,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setInt(String parameterName, int x) throws ConfigurationException;
+	void setInt(String parameterName, int x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>long</code> value.
@@ -476,9 +476,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setLong(int parameterIndex, long x) throws ConfigurationException;
+	void setLong(int parameterIndex, long x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>long</code> value.
@@ -491,9 +491,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setLong(String parameterName, long x) throws ConfigurationException;
+	void setLong(String parameterName, long x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>float</code> value.
@@ -506,9 +506,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setFloat(int parameterIndex, float x) throws ConfigurationException;
+	void setFloat(int parameterIndex, float x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>float</code> value.
@@ -521,9 +521,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setFloat(String parameterName, float x) throws ConfigurationException;
+	void setFloat(String parameterName, float x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>double</code> value.
@@ -536,9 +536,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setDouble(int parameterIndex, double x) throws ConfigurationException;
+	void setDouble(int parameterIndex, double x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>double</code> value.
@@ -551,9 +551,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setDouble(String parameterName, double x) throws ConfigurationException;
+	void setDouble(String parameterName, double x) throws EternaException;
 
 	/* *
 	 * Sets the designated parameter to the given <code>java.math.BigDecimal</code> value.
@@ -566,10 +566,10 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 * 未支持
 	 *
-	void setBigDecimal(int parameterIndex, BigDecimal x) throws ConfigurationException;
+	void setBigDecimal(int parameterIndex, BigDecimal x) throws EternaException;
 	*/
 
 	/* *
@@ -583,10 +583,10 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 * 未支持
 	 *
-	void setBigDecimal(String parameterName, BigDecimal x) throws ConfigurationException;
+	void setBigDecimal(String parameterName, BigDecimal x) throws EternaException;
 	*/
 
 	/**
@@ -604,9 +604,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setString(int parameterIndex, String x) throws ConfigurationException;
+	void setString(int parameterIndex, String x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java <code>String</code> value.
@@ -623,9 +623,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setString(String parameterName, String x) throws ConfigurationException;
+	void setString(String parameterName, String x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java array of bytes.
@@ -641,9 +641,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setBytes(int parameterIndex, byte[] x) throws ConfigurationException;
+	void setBytes(int parameterIndex, byte[] x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given Java array of bytes.
@@ -659,9 +659,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setBytes(String parameterName, byte[] x) throws ConfigurationException;
+	void setBytes(String parameterName, byte[] x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>java.sql.Date</code> value.
@@ -674,9 +674,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setDate(int parameterIndex, java.sql.Date x) throws ConfigurationException;
+	void setDate(int parameterIndex, java.sql.Date x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>java.sql.Date</code> value.
@@ -689,9 +689,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setDate(String parameterName, java.sql.Date x) throws ConfigurationException;
+	void setDate(String parameterName, java.sql.Date x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>java.sql.Time</code> value.
@@ -704,9 +704,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setTime(int parameterIndex, java.sql.Time x) throws ConfigurationException;
+	void setTime(int parameterIndex, java.sql.Time x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>java.sql.Time</code> value.
@@ -719,9 +719,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setTime(String parameterName, java.sql.Time x) throws ConfigurationException;
+	void setTime(String parameterName, java.sql.Time x) throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>java.sql.Timestamp</code> value.
@@ -734,10 +734,10 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ...
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
 	void setTimestamp(int parameterIndex, java.sql.Timestamp x)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>java.sql.Timestamp</code> value.
@@ -750,10 +750,10 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
 	void setTimestamp(String parameterName, java.sql.Timestamp x)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/*  *
 	 * Sets the designated parameter to the given input stream, which will have
@@ -820,10 +820,10 @@ public interface SQLAdapter
 	 * @param parameterIndex the first parameter is 1, the second is 2, ...
 	 * @param x the java input stream which contains the binary parameter value
 	 * @param length the number of bytes in the stream
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
 	void setBinaryStream(int parameterIndex, java.io.InputStream x, int length)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given input stream, which will have
@@ -840,10 +840,10 @@ public interface SQLAdapter
 	 * @param parameterName  这个参数的名称
 	 * @param x the java input stream which contains the binary parameter value
 	 * @param length the number of bytes in the stream
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
 	void setBinaryStream(String parameterName, java.io.InputStream x, int length)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/* *
 	 * Clears the current parameter values immediately.
@@ -941,9 +941,9 @@ public interface SQLAdapter
 	 *                       <p>第一个参数是1, 第二个是2, ....
 	 * @param x the object containing the input parameter value
 	 *          <p> 含有这个参数值的对象
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setObject(int parameterIndex, Object x) throws ConfigurationException;
+	void setObject(int parameterIndex, Object x) throws EternaException;
 
 	/**
 	 * <p>Sets the value of the designated parameter using the given object.
@@ -974,9 +974,9 @@ public interface SQLAdapter
 	 *                       <p>这个参数的名称
 	 * @param x the parameter value
 	 *          <p> 这个参数的值
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void setObject(String parameterName, Object x) throws ConfigurationException;
+	void setObject(String parameterName, Object x) throws EternaException;
 
 	//--------------------------JDBC 2.0-----------------------------
 
@@ -1009,11 +1009,11 @@ public interface SQLAdapter
 	 * @param reader the <code>java.io.Reader</code> object that contains the
 	 *        Unicode data
 	 * @param length the number of characters in the stream
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 * @since 1.2
 	 */
 	void setCharacterStream(int parameterIndex, java.io.Reader reader, int length)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * Sets the designated parameter to the given <code>Reader</code>
@@ -1032,11 +1032,11 @@ public interface SQLAdapter
 	 * @param reader the <code>java.io.Reader</code> object that contains the
 	 *        Unicode data
 	 * @param length the number of characters in the stream
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 * @since 1.2
 	 */
 	void setCharacterStream(String parameterName, java.io.Reader reader, int length)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/* *
 	 * Sets the designated parameter to the given

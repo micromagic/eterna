@@ -23,7 +23,7 @@ import javax.servlet.jsp.JspWriter;
 
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchAdapter;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public class PageManager
 {
@@ -78,13 +78,13 @@ public class PageManager
 	}
 
 	public void printPageTool(boolean moreOpt)
-			throws IOException, SQLException, ConfigurationException
+			throws IOException, SQLException, EternaException
 	{
 		this.printPageTool(moreOpt, false);
 	}
 
 	public void printPageTool(boolean moreOpt, boolean canHidden)
-			throws IOException, SQLException, ConfigurationException
+			throws IOException, SQLException, EternaException
 	{
 		if (canHidden)
 		{

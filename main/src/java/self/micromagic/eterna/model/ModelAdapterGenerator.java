@@ -16,31 +16,31 @@
 
 package self.micromagic.eterna.model;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AdapterGenerator;
 
 public interface ModelAdapterGenerator extends AdapterGenerator
 {
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	void setKeepCaches(boolean keep) throws ConfigurationException;
+	void setKeepCaches(boolean keep) throws EternaException;
 
-	void setNeedFrontModel(boolean needFrontModel) throws ConfigurationException;
+	void setNeedFrontModel(boolean needFrontModel) throws EternaException;
 
-	void setFrontModelName(String frontModelName) throws ConfigurationException;
+	void setFrontModelName(String frontModelName) throws EternaException;
 
-	void setModelExportName(String name) throws ConfigurationException;
+	void setModelExportName(String name) throws EternaException;
 
-	void setErrorExportName(String name) throws ConfigurationException;
+	void setErrorExportName(String name) throws EternaException;
 
-	void addExecute(Execute execute) throws ConfigurationException;
+	void addExecute(Execute execute) throws EternaException;
 
-	void setTransactionType(String tType) throws ConfigurationException;
+	void setTransactionType(String tType) throws EternaException;
 
-	void setDataSourceName(String dsName) throws ConfigurationException;
+	void setDataSourceName(String dsName) throws EternaException;
 
-	void setAllowPosition(String positions) throws ConfigurationException;
+	void setAllowPosition(String positions) throws EternaException;
 
-	ModelAdapter createModelAdapter() throws ConfigurationException;
+	ModelAdapter createModelAdapter() throws EternaException;
 
 }

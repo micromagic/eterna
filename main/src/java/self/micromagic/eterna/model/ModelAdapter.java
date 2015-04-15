@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 /**
@@ -91,34 +91,34 @@ public interface ModelAdapter
 	public static final String DEFAULT_ERROR_EXPORT_NAME = "defaultErrorExport";
 
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
-	boolean isKeepCaches() throws ConfigurationException;
+	boolean isKeepCaches() throws EternaException;
 
-	boolean isNeedFrontModel() throws ConfigurationException;
+	boolean isNeedFrontModel() throws EternaException;
 
-	String getFrontModelName() throws ConfigurationException;
+	String getFrontModelName() throws EternaException;
 
-	int getTransactionType() throws ConfigurationException;
+	int getTransactionType() throws EternaException;
 
-	String getDataSourceName() throws ConfigurationException;
+	String getDataSourceName() throws EternaException;
 
-	boolean checkPosition(AppData data) throws ConfigurationException;
+	boolean checkPosition(AppData data) throws EternaException;
 
-	ModelExport getModelExport() throws ConfigurationException;
+	ModelExport getModelExport() throws EternaException;
 
-	ModelExport getErrorExport() throws ConfigurationException;
+	ModelExport getErrorExport() throws EternaException;
 
 	ModelExport doModel(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException;
+			throws EternaException, SQLException, IOException;
 
 	/**
 	 * 获得一个执行者.
 	 *
 	 * @param index   执行者所在的索引值, 从1开始, 如: 第一个 1 第二个 2
 	 */
-	Execute getExecute(int index) throws ConfigurationException;
+	Execute getExecute(int index) throws EternaException;
 
 }

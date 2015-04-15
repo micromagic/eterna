@@ -23,13 +23,13 @@ import java.sql.SQLException;
 import javax.portlet.PortletMode;
 import javax.portlet.WindowState;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 
 public class RenderExecute extends AbstractExecute
 		implements Execute, Generator
@@ -39,7 +39,7 @@ public class RenderExecute extends AbstractExecute
 	protected ModelExport help = null;
 
 	public void initialize(ModelAdapter model)
-				throws ConfigurationException
+				throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -75,13 +75,14 @@ public class RenderExecute extends AbstractExecute
 		}
 	}
 
-	public String getExecuteType() throws ConfigurationException
+	public String getExecuteType()
+			throws EternaException
 	{
 		return "doRender";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		WindowState state = data.renderRequest.getWindowState();
 		if (!state.equals(WindowState.MINIMIZED))

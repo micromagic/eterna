@@ -32,10 +32,10 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 import self.micromagic.app.WebApp;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.sql.ResultIterator;
+import self.micromagic.eterna.share.EternaException;
 
 public class CodeItemManager
 {
@@ -165,11 +165,11 @@ public class CodeItemManager
 	}
 
 	public static List getCodeItems(Connection conn, CodeItemProperty cp)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		if (cp == null)
 		{
-			throw new ConfigurationException("代码名称不正确!");
+			throw new EternaException("代码名称不正确!");
 		}
 		List list = (List) itemMap.get(cp.getEName());
 		if (list == null || !cp.isCacheValid())
@@ -227,14 +227,14 @@ public class CodeItemManager
 	}
 
 	public static List getCodeItems(Connection conn, String codeType)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		CodeItemProperty cp = getPropertyByEName(codeType);
 		try
 		{
 			return getCodeItems(conn, cp);
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			WebApp.log.error("Error codeType:" + codeType + ".");
 			throw ex;
@@ -249,11 +249,11 @@ public class CodeItemManager
 	 * 注：nodeId的名称必须是唯一的。
 	 */
 	public static List getTreeItems(Connection conn, String treeName)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		if (!treeNameMap.containsKey(treeName))
 		{
-			throw new ConfigurationException("树菜单名称\"" + treeName + "\"不正确!");
+			throw new EternaException("树菜单名称\"" + treeName + "\"不正确!");
 		}
 
 		List list = (List) itemMap.get("[tree]:" + treeName);
@@ -265,9 +265,9 @@ public class CodeItemManager
 				query = FactoryManager.getEternaFactory().createQueryAdapter(
 						"util.get.trees." + treeName);
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
-				throw new ConfigurationException("未定义\"" + treeName + "\"的query，请参照说明定义!");
+				throw new EternaException("未定义\"" + treeName + "\"的query，请参照说明定义!");
 			}
 
 			ResultIterator ritr = query.executeQuery(conn);

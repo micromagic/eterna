@@ -20,7 +20,7 @@ import java.util.List;
 import java.io.Writer;
 import java.io.IOException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.sql.preparer.PreparerManager;
 import self.micromagic.eterna.view.DataPrinter;
@@ -87,18 +87,18 @@ public interface SearchManager
 	/**
 	 * 是否存在查询标志.
 	 */
-	boolean hasQueryType(AppData data) throws ConfigurationException;
+	boolean hasQueryType(AppData data) throws EternaException;
 
 	/**
 	 * 获得当前的条件版本, 每更新一次条件版本自动增1, 起始版本号为1.
 	 */
-	int getConditionVersion() throws ConfigurationException;
+	int getConditionVersion() throws EternaException;
 
 	/**
 	 * 根据request中的信息, 设置条件和页号.
 	 */
 	void setPageNumAndCondition(AppData data, SearchAdapter search)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * 获取整理出来的PreparerManager.
@@ -109,7 +109,7 @@ public interface SearchManager
 	 * 获取整理出来的PreparerManager子集.
 	 */
 	PreparerManager getSpecialPreparerManager(SearchAdapter search)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * 获取整理出来做为条件的sql子句.
@@ -126,14 +126,14 @@ public interface SearchManager
 	/**
 	 * 获取整理出来做为条件的sql子句的子集.
 	 */
-	String getSpecialConditionPart(SearchAdapter search) throws ConfigurationException;
+	String getSpecialConditionPart(SearchAdapter search) throws EternaException;
 
 	/**
 	 * 获取整理出来做为条件的sql子句的子集.
 	 *
 	 * @param needWrap   是否需要在条件外面带上括号"(", ")".
 	 */
-	String getSpecialConditionPart(SearchAdapter search, boolean needWrap) throws ConfigurationException;
+	String getSpecialConditionPart(SearchAdapter search, boolean needWrap) throws EternaException;
 
 	/**
 	 * 获取本SearchManager的配置属性.
@@ -244,7 +244,7 @@ public interface SearchManager
 		}
 
 		public void print(DataPrinter p, Writer out, Object bean)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			p.printObjectBegin(out);
 			p.printPairWithoutCheck(out, "pageNumTag", this.pageNumTag, true);

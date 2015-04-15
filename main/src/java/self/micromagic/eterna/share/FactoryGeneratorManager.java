@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.digester.ObjectLogRule;
 
@@ -36,6 +36,7 @@ public class FactoryGeneratorManager
 
 	private FactoryGeneratorManager shareFGM;
 	private boolean initialized;
+	private boolean inInit;
 
 	public FactoryGeneratorManager(String managerName, EternaFactory factory)
 	{
@@ -53,13 +54,14 @@ public class FactoryGeneratorManager
 	}
 
 	public void initialize(FactoryGeneratorManager shareFGM)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
 			return;
 		}
 		this.initialized = true;
+		this.inInit = true;
 		this.shareFGM = shareFGM;
 
 		List temp = new ArrayList(this.generatorList.size() + (this.shareFGM == null ? 32 : 2));
@@ -74,6 +76,7 @@ public class FactoryGeneratorManager
 			ObjectLogRule.setObjName(this.managerName, container.generator.getName());
 			container.generator.initialize(this.factory);
 		}
+		this.inInit = false;
 	}
 
 	public void destroy()
@@ -87,7 +90,7 @@ public class FactoryGeneratorManager
 	}
 
 	public Object create(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		GeneratorContainer container = (GeneratorContainer) this.generatorMap.get(name);
 		if (container == null)
@@ -96,14 +99,18 @@ public class FactoryGeneratorManager
 			{
 				return this.shareFGM.create(name);
 			}
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [" + this.managerName + "] name:" + name + ".");
+		}
+		if (this.inInit || !this.initialized)
+		{
+			container.generator.initialize(this.factory);
 		}
 		return container.generator.create();
 	}
 
 	public Object create(int id)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (id < 0 || id >= this.generatorList.size())
 		{
@@ -111,21 +118,25 @@ public class FactoryGeneratorManager
 			{
 				return this.shareFGM.create(id - Factory.MAX_ADAPTER_COUNT);
 			}
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [" + this.managerName + "] id:" + id + ".");
 		}
 
 		GeneratorContainer container = (GeneratorContainer) this.generatorList.get(id);
 		if (container == null)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [" + this.managerName + "] id:" + id + ".");
+		}
+		if (this.inInit || !this.initialized)
+		{
+			container.generator.initialize(this.factory);
 		}
 		return container.generator.create();
 	}
 
 	public int getIdByName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		GeneratorContainer container = (GeneratorContainer) this.generatorMap.get(name);
 		if (container == null)
@@ -134,14 +145,14 @@ public class FactoryGeneratorManager
 			{
 				return this.shareFGM.getIdByName(name) + Factory.MAX_ADAPTER_COUNT;
 			}
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [" + this.managerName + "] name:" + name + ".");
 		}
 		return container.id;
 	}
 
 	public void register(AdapterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (generator == null)
 		{
@@ -152,7 +163,7 @@ public class FactoryGeneratorManager
 		{
 			if (!FactoryManager.isSuperInit())
 			{
-				throw new ConfigurationException(
+				throw new EternaException(
 						"Duplicate [" + this.managerName + "] name:" + name + ".");
 			}
 			else
@@ -168,7 +179,7 @@ public class FactoryGeneratorManager
 		int id = this.generatorList.size();
 		if (id >= Factory.MAX_ADAPTER_COUNT)
 		{
-			throw new ConfigurationException("Max adapter count:" + id + "," + Factory.MAX_ADAPTER_COUNT + ".");
+			throw new EternaException("Max adapter count:" + id + "," + Factory.MAX_ADAPTER_COUNT + ".");
 		}
 		container = new GeneratorContainer(id, generator);
 		this.generatorList.add(container);
@@ -177,12 +188,12 @@ public class FactoryGeneratorManager
 	}
 
 	public void deregister(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		GeneratorContainer container = (GeneratorContainer) this.generatorMap.get(name);
 		if (container == null)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [" + this.managerName + "] name:" + name + ".");
 		}
 		this.generatorList.set(container.id, null);
@@ -228,19 +239,19 @@ public class FactoryGeneratorManager
 		}
 
 		public Object create(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createQueryAdapter(name);
 		}
 
 		public Object create(int id)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createQueryAdapter(id);
 		}
 
 		public int getIdByName(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.getQueryAdapterId(name);
 		}
@@ -259,19 +270,19 @@ public class FactoryGeneratorManager
 		}
 
 		public Object create(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createUpdateAdapter(name);
 		}
 
 		public Object create(int id)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createUpdateAdapter(id);
 		}
 
 		public int getIdByName(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.getUpdateAdapterId(name);
 		}
@@ -290,19 +301,19 @@ public class FactoryGeneratorManager
 		}
 
 		public Object create(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createSearchAdapter(name);
 		}
 
 		public Object create(int id)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createSearchAdapter(id);
 		}
 
 		public int getIdByName(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.getSearchAdapterId(name);
 		}
@@ -321,19 +332,19 @@ public class FactoryGeneratorManager
 		}
 
 		public Object create(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createModelAdapter(name);
 		}
 
 		public Object create(int id)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createModelAdapter(id);
 		}
 
 		public int getIdByName(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.getModelAdapterId(name);
 		}
@@ -352,19 +363,19 @@ public class FactoryGeneratorManager
 		}
 
 		public Object create(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createViewAdapter(name);
 		}
 
 		public Object create(int id)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.createViewAdapter(id);
 		}
 
 		public int getIdByName(String name)
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.factory.getViewAdapterId(name);
 		}

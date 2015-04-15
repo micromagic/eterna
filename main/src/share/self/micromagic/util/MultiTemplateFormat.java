@@ -19,11 +19,11 @@ package self.micromagic.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.sql.ResultFormat;
 import self.micromagic.eterna.sql.ResultFormatGenerator;
 import self.micromagic.eterna.sql.ResultRow;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * example
@@ -42,7 +42,7 @@ public class MultiTemplateFormat extends TemplateFormat
 	protected int maxIndex;
 
 	public String format(Object obj, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.needPermission != null && permission != null)
 		{
@@ -82,7 +82,7 @@ public class MultiTemplateFormat extends TemplateFormat
 	}
 
 	public String format(Object obj, ResultRow row, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.format(obj, permission);
 	}
@@ -148,7 +148,7 @@ public class MultiTemplateFormat extends TemplateFormat
 	}
 
 	public static void main(String[] args)
-			throws ConfigurationException
+			throws EternaException
 	{
 		MultiTemplateFormat t = new MultiTemplateFormat();
 		t.setPattern("s[v1]dfdfds[v0]df[v4]gg");

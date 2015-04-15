@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
@@ -118,7 +118,7 @@ public class ViewTool
 	}
 
 	public static String createTypicalComponentName(AppData data, Component com)
-			throws ConfigurationException
+			throws EternaException
 	{
 		boolean hasOld = false;
 		// 先从typical列表和used列表中查找对应名称的控件
@@ -237,7 +237,7 @@ public class ViewTool
 	 * 解析资源文本.
 	 */
 	public static List parseResourceText(String text)
-			throws ConfigurationException
+			throws EternaException
 	{
 		GrammerElement ge = grammerManager.getGrammerElement("resource_parser");
 		ParserData pd = new ParserData(text);
@@ -245,7 +245,7 @@ public class ViewTool
 		{
 			if (!ge.verify(pd))
 			{
-				throw new ConfigurationException("Parse resource error:" + text
+				throw new EternaException("Parse resource error:" + text
 						+ "\n[maxBuf:" + pd.getMaxErrorBuffer() + "].");
 			}
 			return pd.getGrammerCellLst();
@@ -253,7 +253,7 @@ public class ViewTool
 		catch (Exception ex)
 		{
 			log.error("Error in parse resource.", ex);
-			throw new ConfigurationException("Parse resource error:" + text + "\n[msg:"
+			throw new EternaException("Parse resource error:" + text + "\n[msg:"
 					+ ex.getMessage() + "].");
 		}
 	}
@@ -263,7 +263,7 @@ public class ViewTool
 	 */
 	public static String dealScriptPart(ViewAdapterGenerator.ModifiableViewRes viewRes, String script,
 			int grammerType, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (script == null)
 		{
@@ -274,7 +274,7 @@ public class ViewTool
 
 	private static String checkGrammmer(ViewAdapterGenerator.ModifiableViewRes viewRes, String script,
 			int grammerType, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		GrammerElement ge;
 		if (!FactoryManager.isCheckGrammer() || grammerType == GRAMMER_TYPE_NONE)
@@ -291,7 +291,7 @@ public class ViewTool
 		{
 			if (!ge.verify(pd))
 			{
-				throw new ConfigurationException("Grammer error:" + script
+				throw new EternaException("Grammer error:" + script
 						+ "\n[maxBuf:" + pd.getMaxErrorBuffer() + "].");
 			}
 			StringAppender buf = StringTool.createStringAppender(script.length());
@@ -308,13 +308,13 @@ public class ViewTool
 		catch (Exception ex)
 		{
 			log.error("Error in check grammer.", ex);
-			throw new ConfigurationException("Grammer error:" + script + "\n[msg:" + ex.getMessage() + "].");
+			throw new EternaException("Grammer error:" + script + "\n[msg:" + ex.getMessage() + "].");
 		}
 	}
 
 	private static void parseGrammerCell(ViewAdapterGenerator.ModifiableViewRes viewRes, List gclist,
 			StringAppender buf, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (gclist == null)
 		{

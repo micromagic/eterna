@@ -16,49 +16,49 @@
 
 package self.micromagic.eterna.view;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Generator;
 
 public interface ComponentGenerator extends Generator
 {
-	void addComponent(Component com) throws ConfigurationException;
+	void addComponent(Component com) throws EternaException;
 
-	void deleteComponent(Component com) throws ConfigurationException;
+	void deleteComponent(Component com) throws EternaException;
 
-	void clearComponents() throws ConfigurationException;
+	void clearComponents() throws EternaException;
 
-	void addEvent(Component.Event event) throws ConfigurationException;
+	void addEvent(Component.Event event) throws EternaException;
 
-	void deleteEvent(Component.Event event) throws ConfigurationException;
+	void deleteEvent(Component.Event event) throws EternaException;
 
-	void clearEvent() throws ConfigurationException;
+	void clearEvent() throws EternaException;
 
-	void setType(String type) throws ConfigurationException;
+	void setType(String type) throws EternaException;
 
-	void setIgnoreGlobalParam(boolean ignore) throws ConfigurationException;
+	void setIgnoreGlobalParam(boolean ignore) throws EternaException;
 
-	void setComponentParam(String param) throws ConfigurationException;
+	void setComponentParam(String param) throws EternaException;
 
-	void setBeforeInit(String condition) throws ConfigurationException;
+	void setBeforeInit(String condition) throws EternaException;
 
-	void setInitScript(String body) throws ConfigurationException;
+	void setInitScript(String body) throws EternaException;
 
-	void setAttributes(String attributes) throws ConfigurationException;
+	void setAttributes(String attributes) throws EternaException;
 
-	void initAttributes(EternaFactory factory, String attributes) throws ConfigurationException;
+	void initAttributes(EternaFactory factory, String attributes) throws EternaException;
 
-	Component createComponent() throws ConfigurationException;
+	Component createComponent() throws EternaException;
 
 	interface EventGenerator extends Generator
 	{
-		void setName(String name) throws ConfigurationException;
+		void setName(String name) throws EternaException;
 
-		void setScriptParam(String param) throws ConfigurationException;
+		void setScriptParam(String param) throws EternaException;
 
-		void setScriptBody(String body) throws ConfigurationException;
+		void setScriptBody(String body) throws EternaException;
 
-		Component.Event createEvent() throws ConfigurationException;
+		Component.Event createEvent() throws EternaException;
 
 	}
 

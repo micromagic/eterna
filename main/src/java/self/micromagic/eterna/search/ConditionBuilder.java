@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.search;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.StringAppender;
@@ -38,11 +38,11 @@ public interface ConditionBuilder
 
 	public static ValuePreparer[] EMPTY_PREPARERS = new ValuePreparer[0];
 
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
-	public String getName() throws ConfigurationException;
+	public String getName() throws EternaException;
 
-	public String getCaption() throws ConfigurationException;
+	public String getCaption() throws EternaException;
 
 	/**
 	 * 生成一个SQL条件.
@@ -53,7 +53,7 @@ public interface ConditionBuilder
 	 * @return         所生成的条件, 及相关参数.
 	 */
 	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
-			throws ConfigurationException;
+			throws EternaException;
 
 	public static class Condition
 	{

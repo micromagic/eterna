@@ -17,8 +17,9 @@
 package self.micromagic.eterna.model.impl;
 
 import java.util.Map;
+import java.util.HashMap;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 
 /**
@@ -33,14 +34,14 @@ public class DataHandler
 
 
 	/**
-	 * 从哪个map中读取/设置数据.
+	 * AppData中的map的获取工具.
 	 */
-	private int mapIndex = -1;
+	private MapGetter mapGetter;
 
 	/**
 	 * 读取/设置map中数据的名称.
 	 */
-	private String mapDataName = null;
+	private String mapDataName;
 
 	/**
 	 * 从哪个cache中读取/设置数据.
@@ -85,7 +86,7 @@ public class DataHandler
 	private void clearConfig()
 	{
 		this.config = null;
-		this.mapIndex = -1;
+		this.mapGetter = null;
 		this.mapDataName = null;
 		this.cacheIndex = -1;
 		this.fromStack = false;
@@ -104,7 +105,7 @@ public class DataHandler
 	 * 设置处理配置.
 	 */
 	public void setConfig(String config)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.clearConfig();
 		this.config = config;
@@ -117,26 +118,12 @@ public class DataHandler
 			mainName = config.substring(0, index);
 		}
 
-		for (int i = 0; i < AppData.MAP_NAMES.length; i++)
+		Object tObj = mapNameIndex.get(mainName);
+		if (tObj != null)
 		{
-			if (AppData.MAP_NAMES[i].equals(mainName))
-			{
-				this.mapIndex = i;
-				break;
-			}
+			this.mapGetter = (MapGetter) tObj;
 		}
-		if (this.mapIndex == -1)
-		{
-			for (int i = 0; i < AppData.MAP_SHORT_NAMES.length; i++)
-			{
-				if (AppData.MAP_SHORT_NAMES[i].equals(mainName))
-				{
-					this.mapIndex = i;
-					break;
-				}
-			}
-		}
-		if (this.mapIndex != -1)
+		if (this.mapGetter != null)
 		{
 			if (subName != null)
 			{
@@ -206,7 +193,7 @@ public class DataHandler
 			}
 		}
 
-		throw new ConfigurationException("Error " + this.caption + " [" + config + "].");
+		throw new EternaException("Error " + this.caption + " [" + config + "].");
 	}
 
 	/**
@@ -216,16 +203,16 @@ public class DataHandler
 	 * @param remove     获取数据后, 是否将源头的数据移除
 	 */
 	public Object getData(AppData data, boolean remove)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Object value = null;
 		if (this.constValue != null)
 		{
 			value = this.constValue;
 		}
-		else if (this.mapIndex != -1)
+		else if (this.mapGetter != null)
 		{
-			Map tmpMap = data.maps[this.mapIndex];
+			Map tmpMap = this.mapGetter.getMap(data);
 			if (this.mapDataName != null)
 			{
 				value = tmpMap.get(this.mapDataName);
@@ -265,15 +252,15 @@ public class DataHandler
 	 * 根据处理配置设置数据
 	 */
 	public void setData(AppData data, Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.readOnly)
 		{
-			throw new ConfigurationException("The [" + this.caption + "] is read only, can't be setted.");
+			throw new EternaException("The [" + this.caption + "] is read only, can't be setted.");
 		}
-		if (this.mapIndex != -1)
+		if (this.mapGetter != null)
 		{
-			Map tmpMap = data.maps[this.mapIndex];
+			Map tmpMap = this.mapGetter.getMap(data);
 			if (value == null)
 			{
 				tmpMap.remove(this.mapDataName);
@@ -287,6 +274,26 @@ public class DataHandler
 		{
 			data.caches[this.cacheIndex] = value;
 		}
+	}
+
+	/**
+	 * 存放名称与AppData中map索引值的对应表.
+	 */
+	private static final Map mapNameIndex = new HashMap();
+	static
+	{
+      mapNameIndex.put(AppData.REQUEST_PARAMETER_MAP_NAME, new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
+      mapNameIndex.put(AppData.REQUEST_ATTRIBUTE_MAP_NAME, new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP));
+      mapNameIndex.put(AppData.SESSION_ATTRIBUTE_MAP_NAME, new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
+      mapNameIndex.put(AppData.DATA_MAP_NAME, new BaseMapGetter(AppData.DATA_MAP));
+      mapNameIndex.put("param", new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
+      mapNameIndex.put("attr", new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP));
+      mapNameIndex.put("session", new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
+      mapNameIndex.put("RP", new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
+      mapNameIndex.put("RA", new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP));
+      mapNameIndex.put("SA", new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
+      mapNameIndex.put("header", new HeaderGetter());
+      mapNameIndex.put("cookie", new CookieGetter());
 	}
 
 }

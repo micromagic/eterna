@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.sql.impl;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
@@ -48,13 +48,13 @@ public class SQLParameterGeneratorImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
-		throw new ConfigurationException("You must use createParameter(int).");
+		throw new EternaException("You must use createParameter(int).");
 	}
 
 	public SQLParameter createParameter(int paramIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.type == null)
 		{
@@ -83,7 +83,7 @@ public class SQLParameterGeneratorImpl extends AbstractGenerator
 		}
 
 		public void initialize(EternaFactory factory)
-				throws ConfigurationException
+				throws EternaException
 		{
 			this.vpCreater = factory.createValuePreparerCreater(this.vpcName, this.getPureType());
 			if (this.vpCreater == null)
@@ -124,7 +124,7 @@ public class SQLParameterGeneratorImpl extends AbstractGenerator
 		}
 
 		public ValuePreparer createValuePreparer(String value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			ValuePreparer vp = this.vpCreater.createPreparer(value);
 			vp.setRelativeIndex(this.index);
@@ -132,7 +132,7 @@ public class SQLParameterGeneratorImpl extends AbstractGenerator
 		}
 
 		public ValuePreparer createValuePreparer(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			ValuePreparer vp = this.vpCreater.createPreparer(value);
 			vp.setRelativeIndex(this.index);

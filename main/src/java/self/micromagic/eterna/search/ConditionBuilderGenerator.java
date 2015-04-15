@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.search;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 
 /**
@@ -24,14 +24,14 @@ import self.micromagic.eterna.share.Generator;
  */
 public interface ConditionBuilderGenerator extends Generator
 {
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	void setCaption(String caption) throws ConfigurationException;
+	void setCaption(String caption) throws EternaException;
 
-	void setOperator(String operator) throws ConfigurationException;
+	void setOperator(String operator) throws EternaException;
 
-	ConditionBuilder createConditionBuilder() throws ConfigurationException;
+	ConditionBuilder createConditionBuilder() throws EternaException;
 
 }

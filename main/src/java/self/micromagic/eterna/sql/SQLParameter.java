@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.sql;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.sql.preparer.ValuePreparer;
 
@@ -25,46 +25,46 @@ public interface SQLParameter
 	/**
 	 * 初始化本SQLParameter.
 	 */
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获取这个SQLParameter的名称.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 获取对应的列名.
 	 */
-	String getColumnName() throws ConfigurationException;
+	String getColumnName() throws EternaException;
 
 	/**
 	 * 获取这个SQLParameter的数据类型.
 	 */
-	int getType() throws ConfigurationException;
+	int getType() throws EternaException;
 
 	/**
 	 * 获取这个SQLParameter的纯数据类型.
 	 */
-	int getPureType() throws ConfigurationException;
+	int getPureType() throws EternaException;
 
 	/**
 	 * 获取这个SQLParameter的参数索引值.
 	 */
-	int getIndex() throws ConfigurationException;
+	int getIndex() throws EternaException;
 
 	/**
 	 * 获取这个SQLParameter的数据类型名称.
 	 */
-	String getTypeName() throws ConfigurationException;
+	String getTypeName() throws EternaException;
 
 	/**
 	 * 通过String类型的数据构成一个ValuePreparer.
 	 */
-	ValuePreparer createValuePreparer(String value) throws ConfigurationException;
+	ValuePreparer createValuePreparer(String value) throws EternaException;
 
 	/**
 	 * 通过Object类型的数据构成一个ValuePreparer.
 	 */
-	ValuePreparer createValuePreparer(Object value) throws ConfigurationException;
+	ValuePreparer createValuePreparer(Object value) throws EternaException;
 
 }

@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.sql.SQLException;
 import java.text.DateFormat;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultRow;
@@ -37,12 +37,12 @@ public interface DataPrinter
 	/**
 	 * 初始化此数据集输出器.
 	 */
-	public void initialize(EternaFactory factory) throws ConfigurationException;
+	public void initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获取此数据集输出器的名称.
 	 */
-	public String getName() throws ConfigurationException;
+	public String getName() throws EternaException;
 
 	/**
 	 * 输出数据集.
@@ -51,7 +51,7 @@ public interface DataPrinter
 	 * @param data         数据集
 	 * @param hasPreData   输出的数据集前是否有其他数据
 	 */
-	void printData(Writer out, Map data, boolean hasPreData) throws IOException, ConfigurationException;
+	void printData(Writer out, Map data, boolean hasPreData) throws IOException, EternaException;
 
 	/**
 	 * 输出布尔类型值.
@@ -59,7 +59,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param b           布尔值
 	 */
-	void print(Writer out, boolean b) throws IOException, ConfigurationException;
+	void print(Writer out, boolean b) throws IOException, EternaException;
 
 	/**
 	 * 输出字符类型值.
@@ -67,7 +67,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param c           字符值
 	 */
-	void print(Writer out, char c) throws IOException, ConfigurationException;
+	void print(Writer out, char c) throws IOException, EternaException;
 
 	/**
 	 * 输出整型值.
@@ -75,7 +75,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param i           整型值
 	 */
-	void print(Writer out, int i) throws IOException, ConfigurationException;
+	void print(Writer out, int i) throws IOException, EternaException;
 
 	/**
 	 * 输出长整型值.
@@ -83,7 +83,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param l           长整型值
 	 */
-	void print(Writer out, long l) throws IOException, ConfigurationException;
+	void print(Writer out, long l) throws IOException, EternaException;
 
 	/**
 	 * 输出浮点型值.
@@ -91,7 +91,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param f           浮点型值
 	 */
-	void print(Writer out, float f) throws IOException, ConfigurationException;
+	void print(Writer out, float f) throws IOException, EternaException;
 
 	/**
 	 * 输出双精度浮点型值.
@@ -99,7 +99,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param d           双精度浮点型值
 	 */
-	void print(Writer out, double d) throws IOException, ConfigurationException;
+	void print(Writer out, double d) throws IOException, EternaException;
 
 	/**
 	 * 输出字符串类型值.
@@ -107,7 +107,7 @@ public interface DataPrinter
 	 * @param out         输出流
 	 * @param s           字符串类型值
 	 */
-	void print(Writer out, String s) throws IOException, ConfigurationException;
+	void print(Writer out, String s) throws IOException, EternaException;
 
 	/**
 	 * 输出一个Object对象.
@@ -115,7 +115,7 @@ public interface DataPrinter
 	 * @param out          输出流
 	 * @param value        要输出的Object对象
 	 */
-	void print(Writer out, Object value) throws IOException, ConfigurationException;
+	void print(Writer out, Object value) throws IOException, EternaException;
 
 	/**
 	 * 输出一个Object对象数组.
@@ -123,7 +123,7 @@ public interface DataPrinter
 	 * @param out          输出流
 	 * @param values       要输出的Object对象数组
 	 */
-	void print(Writer out, Object[] values) throws IOException, ConfigurationException;
+	void print(Writer out, Object[] values) throws IOException, EternaException;
 
 	/**
 	 * 输出一个Map对象.
@@ -131,7 +131,7 @@ public interface DataPrinter
 	 * @param out          输出流
 	 * @param map          要输出的Map对象
 	 */
-	void printMap(Writer out, Map map) throws IOException, ConfigurationException;
+	void printMap(Writer out, Map map) throws IOException, EternaException;
 
 	/**
 	 * 输出结果集迭代器的内容.
@@ -140,7 +140,7 @@ public interface DataPrinter
 	 * @param ritr         结果集迭代器
 	 */
 	void printResultIterator(Writer out, ResultIterator ritr)
-			throws IOException, ConfigurationException, SQLException;
+			throws IOException, EternaException, SQLException;
 
 	/**
 	 * 输出行结果集的内容.
@@ -149,7 +149,7 @@ public interface DataPrinter
 	 * @param row          行结果集
 	 */
 	void printResultRow(Writer out, ResultRow row)
-			throws IOException, ConfigurationException, SQLException;
+			throws IOException, EternaException, SQLException;
 
 	/**
 	 * 输出迭代器的内容.
@@ -157,21 +157,21 @@ public interface DataPrinter
 	 * @param out          输出流
 	 * @param itr          迭代器
 	 */
-	void printIterator(Writer out, Iterator itr) throws IOException, ConfigurationException;
+	void printIterator(Writer out, Iterator itr) throws IOException, EternaException;
 
 	/**
 	 * 输出对象的起始符.
 	 *
 	 * @param out          输出流
 	 */
-	void printObjectBegin(Writer out) throws IOException, ConfigurationException;
+	void printObjectBegin(Writer out) throws IOException, EternaException;
 
 	/**
 	 * 输出对象的结束符.
 	 *
 	 * @param out          输出流
 	 */
-	void printObjectEnd(Writer out) throws IOException, ConfigurationException;
+	void printObjectEnd(Writer out) throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -182,7 +182,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, boolean value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -193,7 +193,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, char value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -204,7 +204,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, int value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对, 不检查参数key是否为null, 是否包含特殊字符.
@@ -215,7 +215,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPairWithoutCheck(Writer out, String key, int value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -226,7 +226,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, long value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对, 不检查参数key是否为null, 是否包含特殊字符.
@@ -237,7 +237,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPairWithoutCheck(Writer out, String key, long value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -248,7 +248,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, float value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -259,7 +259,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, double value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对, 不检查参数key是否为null, 是否包含特殊字符.
@@ -270,7 +270,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPairWithoutCheck(Writer out, String key, double value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -281,7 +281,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, String value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对, 不检查参数key是否为null, 是否包含特殊字符.
@@ -292,7 +292,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPairWithoutCheck(Writer out, String key, String value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对.
@@ -303,7 +303,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPair(Writer out, String key, Object value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出一组key-value对, 不检查参数key是否为null, 是否包含特殊字符.
@@ -314,7 +314,7 @@ public interface DataPrinter
 	 * @param first        是否为对象中的第一组值
 	 */
 	void printPairWithoutCheck(Writer out, String key, Object value, boolean first)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 设置日期类型的数据使用的格式化方式.
@@ -327,7 +327,7 @@ public interface DataPrinter
 	 * @param beanClass     bean的Class
 	 * @return      bean实例的输出器
 	 */
-	BeanPrinter getBeanPrinter(Class beanClass) throws ConfigurationException;
+	BeanPrinter getBeanPrinter(Class beanClass) throws EternaException;
 
 	/**
 	 * bean实例的输出器.
@@ -341,7 +341,7 @@ public interface DataPrinter
 		 * @param out       输出流
 		 * @param bean      bean的实例
 		 */
-		void print(DataPrinter p, Writer out, Object bean) throws IOException, ConfigurationException;
+		void print(DataPrinter p, Writer out, Object bean) throws IOException, EternaException;
 
 	}
 

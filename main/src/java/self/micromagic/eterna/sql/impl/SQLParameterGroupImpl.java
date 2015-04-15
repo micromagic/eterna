@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.sql.ResultReader;
@@ -47,7 +47,7 @@ public class SQLParameterGroupImpl
 	private List paramGeneratorList = new LinkedList();
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!this.initialized)
 		{
@@ -81,7 +81,7 @@ public class SQLParameterGroupImpl
 					}
 					if (group == null)
 					{
-						throw new ConfigurationException("The SQLParameterGroup [" + arr[0] + "] not found.");
+						throw new EternaException("The SQLParameterGroup [" + arr[0] + "] not found.");
 					}
 					Set ignoreSet;
 					if (arr[1] == null)
@@ -103,7 +103,7 @@ public class SQLParameterGroupImpl
 							{
 								if (!ignoreSet.contains(IGNORE_SAME_NAME))
 								{
-									throw new ConfigurationException(
+									throw new EternaException(
 											"Duplicate [SQLParameter] name:" + spg.getName() + ".");
 								}
 							}
@@ -138,15 +138,15 @@ public class SQLParameterGroupImpl
 	}
 
 	public void addParameter(SQLParameterGenerator paramGenerator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException("You can't invoke addParameter after initialized.");
+			throw new EternaException("You can't invoke addParameter after initialized.");
 		}
 		if (this.tmpParamSet.contains(paramGenerator.getName()))
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Duplicate [SQLParameter] name:" + paramGenerator.getName() + ".");
 		}
 		this.tmpParamList.add(paramGenerator);
@@ -154,11 +154,11 @@ public class SQLParameterGroupImpl
 	}
 
 	public void addParameterRef(String groupName, String ignoreList)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException("You can't invoke addParameterRef after initialized.");
+			throw new EternaException("You can't invoke addParameterRef after initialized.");
 		}
 		this.tmpParamList.add(new String[]{groupName, ignoreList});
 	}
@@ -182,13 +182,13 @@ public class SQLParameterGroupImpl
 		public void setName(String name) {}
 
 		public String getName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.readerManager.getName();
 		}
 
 		public Iterator getParameterGeneratorIterator()
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.groupList == null)
 			{

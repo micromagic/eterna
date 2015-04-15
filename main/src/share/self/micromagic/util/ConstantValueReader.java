@@ -23,10 +23,10 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.Tool;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultReaderGenerator;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.ResultFormat;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.security.PermissionSet;
 
 public class ConstantValueReader extends AbstractGenerator
@@ -42,7 +42,7 @@ public class ConstantValueReader extends AbstractGenerator
 	protected String theValue = "";
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createReader();
 	}
@@ -53,7 +53,7 @@ public class ConstantValueReader extends AbstractGenerator
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.theValue = (String) this.getAttribute("value");
 		if (this.permissionSet != null)

@@ -16,28 +16,28 @@
 
 package self.micromagic.eterna.model;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 
 public interface QueryExecuteGenerator extends Generator
 {
-	void setCache(int cacheIndex) throws ConfigurationException;
+	void setCache(int cacheIndex) throws EternaException;
 
-	void setDoExecute(boolean execute) throws ConfigurationException;
+	void setDoExecute(boolean execute) throws EternaException;
 
-	void setPushResult(boolean push) throws ConfigurationException;
+	void setPushResult(boolean push) throws EternaException;
 
-	void setStart(int start) throws ConfigurationException;
+	void setStart(int start) throws EternaException;
 
-	void setCount(int count) throws ConfigurationException;
+	void setCount(int count) throws EternaException;
 
 	/**
 	 * 设置计算总记录数的方式. <p>
 	 * 分别为auto, count, none. 默认值为: none.
 	 */
-	void setCountType(String countType) throws ConfigurationException;
+	void setCountType(String countType) throws EternaException;
 
-	void addParamBind(ParamBind bind) throws ConfigurationException;
+	void addParamBind(ParamBind bind) throws EternaException;
 
-	Execute createExecute() throws ConfigurationException;
+	Execute createExecute() throws EternaException;
 }

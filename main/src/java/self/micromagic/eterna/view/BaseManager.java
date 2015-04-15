@@ -22,7 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.search.SearchAdapter;
 import self.micromagic.eterna.share.EternaFactory;
@@ -82,7 +82,7 @@ public class BaseManager
 	List items = new LinkedList();
 
 	public BaseManager(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.stringCoder = factory.getStringCoder();
 	}
@@ -98,7 +98,7 @@ public class BaseManager
 	}
 
 	public void setItems(ResultReaderManager readerManager)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Iterator itr = readerManager.getReaderList().iterator();
 		while (itr.hasNext())
@@ -112,7 +112,7 @@ public class BaseManager
 	}
 
 	public void setItems(SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int count = search.getConditionPropertyCount();
 		for (int i = 0; i < count; i++)
@@ -148,35 +148,35 @@ public class BaseManager
 
 	public interface Item
 	{
-		public String getName() throws ConfigurationException;
+		public String getName() throws EternaException;
 
-		public String getDataSrc() throws ConfigurationException;
+		public String getDataSrc() throws EternaException;
 
-		String getCaption() throws ConfigurationException;
+		String getCaption() throws EternaException;
 
-		int getWidth() throws ConfigurationException;
+		int getWidth() throws EternaException;
 
-		int[] getCellSize() throws ConfigurationException;
+		int[] getCellSize() throws EternaException;
 
-		int getType() throws ConfigurationException;
+		int getType() throws EternaException;
 
-		boolean isNewRow() throws ConfigurationException;
+		boolean isNewRow() throws EternaException;
 
-		boolean isRequired() throws ConfigurationException;
+		boolean isRequired() throws EternaException;
 
-		String getInputType() throws ConfigurationException;
+		String getInputType() throws EternaException;
 
-		String getInitParam() throws ConfigurationException;
+		String getInitParam() throws EternaException;
 
-		String getContainerParam() throws ConfigurationException;
+		String getContainerParam() throws EternaException;
 
-		String getTitleParam() throws ConfigurationException;
+		String getTitleParam() throws EternaException;
 
-		String getBeforeInit() throws ConfigurationException;
+		String getBeforeInit() throws EternaException;
 
-		String getInitScript() throws ConfigurationException;
+		String getInitScript() throws EternaException;
 
-		boolean isVisible() throws ConfigurationException;
+		boolean isVisible() throws EternaException;
 
 	}
 
@@ -200,7 +200,7 @@ public class BaseManager
 		}
 
 		protected void initItem()
-				throws ConfigurationException
+				throws EternaException
 		{
 			this.dataSrc = this.getAttribute(DATA_SRC);
 			this.beforeInit = this.getAttribute(BEFORE_INIT);
@@ -212,28 +212,28 @@ public class BaseManager
 			this.required = "true".equals(this.getAttribute(REQUIRED));
 		}
 
-		protected abstract String getAttribute(String name) throws ConfigurationException;
+		protected abstract String getAttribute(String name) throws EternaException;
 
 		public String getDataSrc()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.dataSrc;
 		}
 
 		public boolean isNewRow()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.newRow;
 		}
 
 		public boolean isRequired()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.required;
 		}
 
 		public int[] getCellSize()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cellSize;
 		}
@@ -272,7 +272,7 @@ public class BaseManager
 		private String inputType;
 
 		public ReaderItem(StringCoder stringCoder, ResultReader reader)
-				throws ConfigurationException
+				throws EternaException
 		{
 			super(stringCoder);
 			this.reader = reader;
@@ -319,43 +319,43 @@ public class BaseManager
 		}
 
 		protected String getAttribute(String name)
-				throws ConfigurationException
+				throws EternaException
 		{
 			return (String) this.reader.getAttribute(name);
 		}
 
 		public String getName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.reader.getName();
 		}
 
 		public String getCaption()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.reader.getCaption();
 		}
 
 		public int getWidth()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.reader.getWidth();
 		}
 
 		public int getType()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.reader.getType();
 		}
 
 		public String getInputType()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.inputType;
 		}
 
 		public boolean isVisible()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.reader.isVisible();
 		}
@@ -368,7 +368,7 @@ public class BaseManager
 		private ConditionProperty property;
 
 		public PropertyItem(StringCoder stringCoder, ConditionProperty property)
-				throws ConfigurationException
+				throws EternaException
 		{
 			super(stringCoder);
 			this.property = property;
@@ -408,19 +408,19 @@ public class BaseManager
 		}
 
 		protected String getAttribute(String name)
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.property.getAttribute(name);
 		}
 
 		public String getName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.property.getName();
 		}
 
 		public String getCaption()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.property.getColumnCaption();
 		}
@@ -431,19 +431,19 @@ public class BaseManager
 		}
 
 		public int getType()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.property.getColumnType();
 		}
 
 		public String getInputType()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.property.getConditionInputType();
 		}
 
 		public boolean isVisible()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.property.isVisible();
 		}

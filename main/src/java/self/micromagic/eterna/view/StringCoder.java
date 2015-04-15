@@ -19,7 +19,7 @@ package self.micromagic.eterna.view;
 import java.io.IOException;
 import java.io.Writer;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 /**
@@ -30,7 +30,7 @@ public interface StringCoder
 	/**
 	 * 初始化.
 	 */
-	void initStringCoder(EternaFactory factory) throws ConfigurationException;
+	void initStringCoder(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 解析json使用属性的名称. <p>

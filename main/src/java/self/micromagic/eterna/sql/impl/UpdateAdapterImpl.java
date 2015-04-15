@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.sql.UpdateAdapter;
@@ -39,13 +39,13 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 	}
 
 	public SQLAdapter createSQLAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createUpdateAdapter();
 	}
 
 	public UpdateAdapter createUpdateAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		UpdateAdapterImpl other = new UpdateAdapterImpl();
 		this.copy(other);
@@ -53,7 +53,7 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 	}
 
 	public void execute(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		long startTime = TimeLogger.getTime();
 		Statement stmt = null;
@@ -73,7 +73,7 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 				stmt.execute(this.getPreparedSQL());
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			exception = ex;
 			throw ex;
@@ -104,7 +104,7 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 	}
 
 	public int executeUpdate(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		long startTime = TimeLogger.getTime();
 		Statement stmt = null;
@@ -126,7 +126,7 @@ public class UpdateAdapterImpl extends SQLAdapterImpl
 			}
 			return result;
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			exception = ex;
 			throw ex;

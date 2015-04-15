@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
@@ -55,7 +55,7 @@ public class TableListImpl extends AbstractTable
 	private Column typicalColumn = null;
 
 	protected void initSubs(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Iterator columnItr = this.getColumns();
 		while (columnItr.hasNext())
@@ -76,7 +76,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	protected void initBaseManager(String baseManagerName, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultReaderManager readerManager = null;
 		if (baseManagerName.startsWith("reader:"))
@@ -134,7 +134,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	protected void fillSubs(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ListIterator itr = this.columns.listIterator();
 		while (itr.hasNext())
@@ -185,7 +185,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	private ColumnImpl createColumnByItem(BaseManager.Item item, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ColumnImpl column = new ColumnImpl();
 		this.fillSubByItem(column, item);
@@ -207,7 +207,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	private void fillEmptyAttr(ColumnImpl nowColumn, Column typical, Component typicalComponent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (nowColumn.getWidth() == -1 && typical.getWidth() != -1)
 		{
@@ -219,7 +219,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		super.printSpecialBody(out, data, view);
 
@@ -260,7 +260,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	public void addColumn(Column column)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (ViewTool.TYPICAL_NAME.equals(column.getName()))
 		{
@@ -271,7 +271,7 @@ public class TableListImpl extends AbstractTable
 			Object tmp = this.columnMap.put(column.getName(), column);
 			if (tmp != null)
 			{
-				throw new ConfigurationException("The Column [" + column.getName()
+				throw new EternaException("The Column [" + column.getName()
 						+ "] allready in this TableList [" + this.getName() + "].");
 			}
 			this.columns.add(column);
@@ -279,7 +279,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	public void deleteColumn(Column column)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.columnMap.remove(column.getName());
 		this.columns.remove(column);
@@ -292,7 +292,7 @@ public class TableListImpl extends AbstractTable
 	}
 
 	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{
@@ -330,7 +330,7 @@ public class TableListImpl extends AbstractTable
 		private boolean cloneInitParam;
 
 		public void initialize(EternaFactory factory, Component parent)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.initialized)
 			{
@@ -363,7 +363,7 @@ public class TableListImpl extends AbstractTable
 		}
 
 		protected void printSpecialElse(Writer out, AppData data)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			if (this.getWidth() != -1)
 			{
@@ -388,7 +388,7 @@ public class TableListImpl extends AbstractTable
 		public void setType(String type) {}
 
 		public String getDataName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.isOtherData() ? this.otherDataName : this.getTableList().getDataName();
 		}
@@ -436,13 +436,13 @@ public class TableListImpl extends AbstractTable
 		}
 
 		public boolean isIgnore()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.isIgnore();
 		}
 
 		public OrderManager.OrderItem create(Object obj)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (obj == null)
 			{
@@ -453,7 +453,7 @@ public class TableListImpl extends AbstractTable
 		}
 
 		public Iterator getOrderItemIterator(Object container)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (container instanceof List)
 			{

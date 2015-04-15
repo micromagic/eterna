@@ -26,7 +26,7 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.coder.SpellCoder;
 import self.micromagic.util.Utils;
 
@@ -41,7 +41,7 @@ public class SpellCoderExecute extends AbstractExecute
 	protected int srcIndex = 0;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -83,7 +83,7 @@ public class SpellCoderExecute extends AbstractExecute
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		Object obj = data.caches[this.srcIndex];
 		if (obj != null && obj instanceof String)

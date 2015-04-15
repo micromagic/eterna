@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.view.impl;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Function;
@@ -61,7 +61,7 @@ public class FunctionImpl extends AbstractGenerator
 	}
 
 	public ViewAdapter.ViewRes getViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{

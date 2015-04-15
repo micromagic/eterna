@@ -19,7 +19,7 @@ package self.micromagic.eterna.share;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public abstract class AbstractGenerator
 		implements Generator
@@ -52,23 +52,23 @@ public abstract class AbstractGenerator
 	}
 
 	public void setFactory(Factory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.factory = factory;
 	}
 
 	public String getName()
-			 throws ConfigurationException
+			 throws EternaException
 	{
 		return this.name;
 	}
 
 	public void setName(String name)
-			 throws ConfigurationException
+			 throws EternaException
 	{
 		if (!this.checkName(name))
 		{
-			throw new ConfigurationException("The name [" + name
+			throw new EternaException("The name [" + name
 					+ "] can't use (\",\", \";\", \"#\", \"$\", \"?\", \":\", \"/\","
 					+ " \"{\", \"}\", \"[\", \"]\", \"(\", \")\", \"[space]\").");
 		}

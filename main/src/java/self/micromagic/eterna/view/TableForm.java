@@ -18,67 +18,67 @@ package self.micromagic.eterna.view;
 
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface TableForm extends Component
 {
 	public static final String TR_NAME_PERFIX = "tableForm_TR";
 
-	boolean isAutoArrange() throws ConfigurationException;
+	boolean isAutoArrange() throws EternaException;
 
-	boolean isPercentWidth() throws ConfigurationException;
+	boolean isPercentWidth() throws EternaException;
 
-	boolean isCaculateWidth() throws ConfigurationException;
+	boolean isCaculateWidth() throws EternaException;
 
-	int getCaculateWidthFix() throws ConfigurationException;
+	int getCaculateWidthFix() throws EternaException;
 
-	String getColumns() throws ConfigurationException;
+	String getColumns() throws EternaException;
 
-	Component getTR() throws ConfigurationException;
+	Component getTR() throws EternaException;
 
-	String getBaseName() throws ConfigurationException;
+	String getBaseName() throws EternaException;
 
-	String getDataName() throws ConfigurationException;
+	String getDataName() throws EternaException;
 
-	Iterator getCells() throws ConfigurationException;
+	Iterator getCells() throws EternaException;
 
 	interface Cell extends Component
 	{
-		int getTitleSize() throws ConfigurationException;
+		int getTitleSize() throws EternaException;
 
-		String getTitleParam() throws ConfigurationException;
+		String getTitleParam() throws EternaException;
 
-		int getContainerSize() throws ConfigurationException;
+		int getContainerSize() throws EternaException;
 
-		String getContainerParam() throws ConfigurationException;
+		String getContainerParam() throws EternaException;
 
-		int getRowSpan() throws ConfigurationException;
+		int getRowSpan() throws EternaException;
 
-		boolean isIgnoreGlobalTitleParam() throws ConfigurationException;
+		boolean isIgnoreGlobalTitleParam() throws EternaException;
 
-		boolean isIgnoreGlobalContainerParam() throws ConfigurationException;
+		boolean isIgnoreGlobalContainerParam() throws EternaException;
 
-		String getCaption() throws ConfigurationException;
+		String getCaption() throws EternaException;
 
-		String getDefaultValue() throws ConfigurationException;
+		String getDefaultValue() throws EternaException;
 
-		boolean isIgnore() throws ConfigurationException;
+		boolean isIgnore() throws EternaException;
 
-		boolean isNewRow() throws ConfigurationException;
+		boolean isNewRow() throws EternaException;
 
-		String getSrcName() throws ConfigurationException;
+		String getSrcName() throws EternaException;
 
-		String getDataName() throws ConfigurationException;
+		String getDataName() throws EternaException;
 
-		boolean isOtherData() throws ConfigurationException;
+		boolean isOtherData() throws EternaException;
 
-		boolean isRequired() throws ConfigurationException;
+		boolean isRequired() throws EternaException;
 
-		boolean isNeedIndex() throws ConfigurationException;
+		boolean isNeedIndex() throws EternaException;
 
-		Component getTypicalComponent() throws ConfigurationException;
+		Component getTypicalComponent() throws EternaException;
 
-		String getInitParam() throws ConfigurationException;
+		String getInitParam() throws EternaException;
 
 	}
 

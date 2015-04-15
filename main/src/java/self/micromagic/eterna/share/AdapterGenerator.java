@@ -16,13 +16,13 @@
 
 package self.micromagic.eterna.share;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface AdapterGenerator extends Generator
 {
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
 	void destroy();
 

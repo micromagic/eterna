@@ -17,43 +17,43 @@
 package self.micromagic.eterna.search;
 
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * @author micromagic@sina.com
  */
 public interface ConditionPropertyGenerator extends Generator
 {
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	void setColumnName(String name) throws ConfigurationException;
+	void setColumnName(String name) throws EternaException;
 
-	void setColumnCaption(String caption) throws ConfigurationException;
+	void setColumnCaption(String caption) throws EternaException;
 
-	void setColumnType(String type) throws ConfigurationException;
+	void setColumnType(String type) throws EternaException;
 
 	/**
 	 * 设置对应列的数据准备生成器.
 	 */
-	void setColumnVPC(String vpcName) throws ConfigurationException;
+	void setColumnVPC(String vpcName) throws EternaException;
 
 	/**
 	 * 设置是否可见.
 	 */
-	void setVisible(boolean visible) throws ConfigurationException;
+	void setVisible(boolean visible) throws EternaException;
 
-	void setConditionInputType(String type) throws ConfigurationException;
+	void setConditionInputType(String type) throws EternaException;
 
-	void setDefaultValue(String value) throws ConfigurationException;
+	void setDefaultValue(String value) throws EternaException;
 
-	void setPermissions(String permissions) throws ConfigurationException;
+	void setPermissions(String permissions) throws EternaException;
 
-	void setUseDefaultConditionBuilder(boolean use) throws ConfigurationException;
+	void setUseDefaultConditionBuilder(boolean use) throws EternaException;
 
-	void setDefaultConditionBuilderName(String name) throws ConfigurationException;
+	void setDefaultConditionBuilderName(String name) throws EternaException;
 
-	void setConditionBuilderListName(String name) throws ConfigurationException;
+	void setConditionBuilderListName(String name) throws EternaException;
 
-	ConditionProperty createConditionProperty() throws ConfigurationException;
+	ConditionProperty createConditionProperty() throws EternaException;
 
 }

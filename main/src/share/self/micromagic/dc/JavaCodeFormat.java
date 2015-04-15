@@ -16,10 +16,10 @@
 
 package self.micromagic.dc;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultFormat;
 import self.micromagic.eterna.sql.ResultFormatGenerator;
 import self.micromagic.eterna.sql.ResultRow;
@@ -52,7 +52,7 @@ public class JavaCodeFormat extends AbstractGenerator
 	private FormatCode formatCode;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.formatCode != null)
 		{
@@ -69,11 +69,11 @@ public class JavaCodeFormat extends AbstractGenerator
 		{
 			if ("true".equalsIgnoreCase((String) this.getAttribute("throwCompileError")))
 			{
-				if (ex instanceof ConfigurationException)
+				if (ex instanceof EternaException)
 				{
-					throw (ConfigurationException) ex;
+					throw (EternaException) ex;
 				}
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 			else
 			{
@@ -84,7 +84,7 @@ public class JavaCodeFormat extends AbstractGenerator
 	}
 
 	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -95,11 +95,11 @@ public class JavaCodeFormat extends AbstractGenerator
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 		return "";
 	}
@@ -150,13 +150,13 @@ public class JavaCodeFormat extends AbstractGenerator
 	}
 
 	public ResultFormat createFormat()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createFormat();
 	}
@@ -164,7 +164,7 @@ public class JavaCodeFormat extends AbstractGenerator
 	public interface FormatCode
 	{
 		public void setGenerator(JavaCodeFormat generator, EternaFactory factory)
-				throws ConfigurationException;
+				throws EternaException;
 
 		public Object invoke(Object obj, ResultRow row, ResultReader reader, Permission permission)
 				throws Exception;

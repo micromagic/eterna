@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.sql.ResultIterator;
@@ -41,7 +41,7 @@ public class ParamSetManager
 	private Map paramsCacheValues;
 
 	public ParamSetManager(SQLAdapter sql)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.sql = sql;
 		Iterator itr = sql.getParameterIterator();
@@ -87,7 +87,7 @@ public class ParamSetManager
 	}
 
 	public static void preparerValue(SQLAdapter sql, SQLParameter param, String value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -95,16 +95,16 @@ public class ParamSetManager
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
 			doPreparerError(sql, param, value, ex);
 		}
 	}
 
 	public static void preparerValue(SQLAdapter sql, SQLParameter param, Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -112,9 +112,9 @@ public class ParamSetManager
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
 			doPreparerError(sql, param, value, ex);
 		}
@@ -122,7 +122,7 @@ public class ParamSetManager
 
 	private static void doPreparerError(SQLAdapter sql, SQLParameter param, Object value,
 			Exception ex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!"".equals(value))
 		{
@@ -146,19 +146,19 @@ public class ParamSetManager
 
 
 	public void setSubSQL(int index, String subSQL, PreparerManager pm)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.sql.setSubSQL(index, subSQL, pm);
 	}
 
 	public void setSubSQL(int index, String subSQL)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.sql.setSubSQL(index, subSQL);
 	}
 
 	public void setParam(int index, Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		// 因为parameter的index从1开始，所以要减1
 		SQLParameter param = this.params[index - 1];
@@ -168,7 +168,7 @@ public class ParamSetManager
 	}
 
 	public void setIgnore(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		// 因为parameter的index从1开始，所以要减1
 		SQLParameter param = this.params[index - 1];
@@ -178,19 +178,19 @@ public class ParamSetManager
 	}
 
 	public Object getParamValue(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.paramsValues[index - 1];
 	}
 
 	public boolean isParamSetted(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.paramsSetted[index - 1];
 	}
 
 	public void setParam(String name, Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLParameter param = this.sql.getParameter(name);
 		preparerValue(this.sql, param, value);
@@ -201,7 +201,7 @@ public class ParamSetManager
 	}
 
 	public void setIgnore(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLParameter param = this.sql.getParameter(name);
 		if (this.sql.isDynamicParameter(param.getIndex()))
@@ -220,14 +220,14 @@ public class ParamSetManager
 	}
 
 	public Object getParamValue(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLParameter param = this.sql.getParameter(name);
 		return this.paramsValues[param.getIndex() - 1];
 	}
 
 	public boolean isParamSetted(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLParameter param = this.sql.getParameter(name);
 		return this.paramsSetted[param.getIndex() - 1];
@@ -239,7 +239,7 @@ public class ParamSetManager
 	 * @param settedFlag   设置完后是否要置上已设置标志
 	 */
 	public void setIgnores(boolean settedFlag)
-			throws ConfigurationException
+			throws EternaException
 	{
 		for (int i = 0; i < this.params.length; i++)
 		{
@@ -265,7 +265,7 @@ public class ParamSetManager
 	}
 
 	public void setParams(Map values)
-			throws ConfigurationException
+			throws EternaException
 	{
 		for (int i = 0; i < this.params.length; i++)
 		{
@@ -296,7 +296,7 @@ public class ParamSetManager
 	}
 
 	public int setParams(Map values, Name[] names, int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Object[][] arrays;
 		if (index == 0)
@@ -331,7 +331,7 @@ public class ParamSetManager
 						}
 						if (loopCount != array.length)
 						{
-							throw new ConfigurationException("The param count not same, "
+							throw new EternaException("The param count not same, "
 									+ loopCount + " and " + array.length + ".");
 						}
 					}
@@ -358,7 +358,7 @@ public class ParamSetManager
 	}
 
 	public void setParams(Map values, Name[] names)
-			throws ConfigurationException
+			throws EternaException
 	{
 		for (int i = 0; i < names.length; i++)
 		{
@@ -392,7 +392,7 @@ public class ParamSetManager
 	}
 
 	public void setParams(ResultRow values)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		for (int i = 0; i < this.params.length; i++)
 		{
@@ -405,7 +405,7 @@ public class ParamSetManager
 					colIndex = values.findColumn(param.getName(), true);
 				}
 				catch (SQLException ex) {}
-				catch (ConfigurationException ex) {}
+				catch (EternaException ex) {}
 				if (colIndex != -1)
 				{
 					Object value = values.getObject(colIndex);
@@ -418,7 +418,7 @@ public class ParamSetManager
 	}
 
 	public int setParams(ResultIterator values, Name[] names, int index)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		ResultIterator ritr;
 		if (index == 0)
@@ -445,7 +445,7 @@ public class ParamSetManager
 					colIndex = row.findColumn(names[i].srcName, true);
 				}
 				catch (SQLException ex) {}
-				catch (ConfigurationException ex) {}
+				catch (EternaException ex) {}
 				if (colIndex != -1)
 				{
 					Object value = row.getObject(colIndex);
@@ -468,7 +468,7 @@ public class ParamSetManager
 	}
 
 	public void setParams(ResultRow values, Name[] names)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		for (int i = 0; i < names.length; i++)
 		{
@@ -480,7 +480,7 @@ public class ParamSetManager
 				colIndex = values.findColumn(names[i].srcName, true);
 			}
 			catch (SQLException ex) {}
-			catch (ConfigurationException ex) {}
+			catch (EternaException ex) {}
 			if (colIndex != -1)
 			{
 				Object value = values.getObject(colIndex);
@@ -497,7 +497,7 @@ public class ParamSetManager
 	}
 
 	public void setParams(SearchManager searchManager)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		for (int i = 0; i < this.params.length; i++)
 		{
@@ -516,7 +516,7 @@ public class ParamSetManager
 	}
 
 	public void setParams(SearchManager searchManager, Name[] names)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		for (int i = 0; i < names.length; i++)
 		{
@@ -537,7 +537,7 @@ public class ParamSetManager
 	}
 
 	private void dealNull(SQLParameter param)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.sql.isDynamicParameter(param.getIndex()))
 		{
@@ -554,11 +554,11 @@ public class ParamSetManager
 	}
 
 	public int setParams(Name[] names, int index)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (index < 1)
 		{
-			throw new ConfigurationException("In this method:setParams(String[], int), the second parameter mustn't below than 1.");
+			throw new EternaException("In this method:setParams(String[], int), the second parameter mustn't below than 1.");
 		}
 		Object obj = this.getValues(names);
 		if (obj != null)
@@ -572,7 +572,7 @@ public class ParamSetManager
 				return this.setParams((ResultIterator) null, names, index);
 			}
 		}
-		throw new ConfigurationException("Not found cached values.");
+		throw new EternaException("Not found cached values.");
 	}
 
 	public static class Name

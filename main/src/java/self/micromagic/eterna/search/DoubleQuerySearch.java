@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.impl.SearchAdapterImpl;
 import self.micromagic.eterna.share.EternaFactory;
@@ -82,7 +82,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 	private boolean initialized = false;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -95,9 +95,9 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 		tmp = (String) this.getAttribute("nextQueryName");
 		if (tmp == null)
 		{
-			throw new ConfigurationException("Not found attribute [nextQueryName].");
+			throw new EternaException("Not found attribute [nextQueryName].");
 		}
-		this.sessionNextQueryTag = "q:" + tmp + ":" + factory.getFactoryManager().getId();
+		this.sessionNextQueryTag = "q:" + tmp + ":" + factory.getFactoryContainer().getId();
 		this.nextQueryIndex = factory.getQueryAdapterId(tmp);
 		tmp = (String) this.getAttribute("keyConditionIndex");
 		if (tmp != null)
@@ -108,7 +108,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 		tmp = (String) this.getAttribute("keyNameList");
 		if (tmp == null)
 		{
-			throw new ConfigurationException("Not found attribute [keyNameList].");
+			throw new EternaException("Not found attribute [keyNameList].");
 		}
 		String[] keyList = StringTool.separateString(tmp, ",", true);
 		QueryAdapter keyQuery = factory.createQueryAdapter(this.getQueryName());
@@ -162,7 +162,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 	}
 
 	public Result doSearch(AppData data, Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (this.needSynchronize)
 		{
@@ -175,7 +175,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 	}
 
 	protected Result doSearch0(AppData data, Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		Result result = super.doSearch0(data, conn, true);
 		ResultIterator ritr = result.queryResult;
@@ -245,7 +245,7 @@ public class DoubleQuerySearch extends SearchAdapterImpl
 	 * 获取执行第二次查询的query对象.
 	 */
 	private void setNextQueryCondition(ResultIterator keyIterator, QueryAdapter nextQuery)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		boolean multiKey = this.keyIndexs.length > 1;
 		if (keyIterator.getRecordCount() == 0)

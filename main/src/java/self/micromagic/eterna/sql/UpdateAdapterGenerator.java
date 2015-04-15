@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.sql;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 
 public interface UpdateAdapterGenerator extends SQLAdapterGenerator
@@ -25,8 +25,8 @@ public interface UpdateAdapterGenerator extends SQLAdapterGenerator
 	 * 获得一个<code>QueryAdapter</code>的实例. <p>
 	 *
 	 * @return <code>QueryAdapter</code>的实例.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	UpdateAdapter createUpdateAdapter() throws ConfigurationException;
+	UpdateAdapter createUpdateAdapter() throws EternaException;
 
 }

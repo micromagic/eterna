@@ -26,10 +26,10 @@ import java.util.zip.DeflaterOutputStream;
 
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.cg.ClassKeyCache;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.share.Factory;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
@@ -163,13 +163,13 @@ public class CodeClassTool
 	 * @return 代码字符串
 	 */
 	public static String getCode(Generator g, Factory factory, String codeFlag, String attrCondeFlag)
-			throws ConfigurationException
+			throws EternaException
 	{
 		String code = (String) g.getAttribute(codeFlag);
 		String attrCode = (String) g.getAttribute(attrCondeFlag);
 		if (code == null && attrCode == null)
 		{
-			throw new ConfigurationException("Not found the [" + codeFlag + "] or ["
+			throw new EternaException("Not found the [" + codeFlag + "] or ["
 					+ attrCondeFlag + "] attribute.");
 		}
 		if (code == null)
@@ -177,7 +177,7 @@ public class CodeClassTool
 			code = (String) factory.getAttribute(attrCode);
 			if (code == null)
 			{
-				throw new ConfigurationException("Not found the [" + attrCode + "] in factory attribute.");
+				throw new EternaException("Not found the [" + attrCode + "] in factory attribute.");
 			}
 		}
 		Map paramMap = new HashMap();

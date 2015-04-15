@@ -18,7 +18,7 @@ package self.micromagic.eterna.view;
 
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 public interface Replacement extends Component
@@ -43,7 +43,7 @@ public interface Replacement extends Component
 	 * @see #initBase
 	 */
 	void initReplace(EternaFactory factory, Component base, Replacement parent)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * 通过<code>baseComponent</code>进行初始化.
@@ -51,7 +51,7 @@ public interface Replacement extends Component
 	 * @param factory   本控件所在的factory
 	 * @param base      用于对本控件进行初始化的<code>baseComponent</code>
 	 */
-	void initBase(EternaFactory factory, Component base) throws ConfigurationException;
+	void initBase(EternaFactory factory, Component base) throws EternaException;
 
 	/**
 	 * 将控件替换到<code>baseComponent</code>的子节点中.
@@ -60,17 +60,17 @@ public interface Replacement extends Component
 	 * @param newReplace    需要替换的控件, 其会替换<code>baseComponent</code>子节点中的
 	 *                      同名控件
 	 */
-	void replaceComponent(EternaFactory factory, Component newReplace) throws ConfigurationException;
+	void replaceComponent(EternaFactory factory, Component newReplace) throws EternaException;
 
 	/**
 	 * 获得直接匹配控件的映射表.
 	 * 控件映射表是用户替换<code>baseComponent</code>中任意层次下的同名节点.
 	 */
-	Map getDirectMatchMap() throws ConfigurationException;
+	Map getDirectMatchMap() throws EternaException;
 
 	/**
 	 * 获取当前控件的<code>baseComponent</code>.
 	 */
-	Component getBaseComponent() throws ConfigurationException;
+	Component getBaseComponent() throws EternaException;
 
 }

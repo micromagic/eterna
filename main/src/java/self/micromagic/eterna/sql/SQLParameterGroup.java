@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql;
 import java.util.Iterator;
 
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * 参数组, 多个参数的组合
@@ -48,38 +48,38 @@ public interface SQLParameterGroup
 	 *
 	 * @param factory  EternaFactory的实例, 可以从中获得父对象
 	 */
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 设置本SQLParameterGroup的名称.
 	 */
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
 	/**
 	 * 获取本SQLParameterGroup的名称.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 获取SQLParameterGenerator列表的迭代器.
 	 */
-	Iterator getParameterGeneratorIterator() throws ConfigurationException;
+	Iterator getParameterGeneratorIterator() throws EternaException;
 
 	/**
 	 * 添加一个参数. <p>
 	 *
 	 * @param paramGenerator     参数构造器.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void addParameter(SQLParameterGenerator paramGenerator) throws ConfigurationException;
+	void addParameter(SQLParameterGenerator paramGenerator) throws EternaException;
 
 	/**
 	 * 添加一个参数组. <p>
 	 *
 	 * @param groupName     参数组名称.
 	 * @param ignoreList    忽略的参数列表.
-	 * @throws ConfigurationException     当相关配置出错时.
+	 * @throws EternaException     当相关配置出错时.
 	 */
-	void addParameterRef(String groupName, String ignoreList) throws ConfigurationException;
+	void addParameterRef(String groupName, String ignoreList) throws EternaException;
 
 }

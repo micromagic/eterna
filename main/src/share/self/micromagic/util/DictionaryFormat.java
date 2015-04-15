@@ -22,12 +22,12 @@ import java.util.HashMap;
 
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultFormat;
 import self.micromagic.eterna.sql.ResultFormatGenerator;
 import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.security.Permission;
-import self.micromagic.eterna.digester.ConfigurationException;
 import org.apache.commons.collections.ReferenceMap;
 
 public class DictionaryFormat extends AbstractGenerator
@@ -54,12 +54,12 @@ public class DictionaryFormat extends AbstractGenerator
 	protected String needPermission = null;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 	}
 
 	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.needPermission != null && permission != null)
 		{
@@ -99,7 +99,7 @@ public class DictionaryFormat extends AbstractGenerator
 	}
 
 	protected void parseWords()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.pattern == null)
 		{
@@ -115,7 +115,7 @@ public class DictionaryFormat extends AbstractGenerator
 		}
 		else
 		{
-			throw new ConfigurationException("The type must be [String] or [Number] or [int], but it's ["
+			throw new EternaException("The type must be [String] or [Number] or [int], but it's ["
 					+ this.type + "].");
 		}
 		this.needPermission = (String) this.getAttribute("format_permission");
@@ -159,7 +159,7 @@ public class DictionaryFormat extends AbstractGenerator
 			{
 				if (this.words.length % 2 != 0)
 				{
-					throw new ConfigurationException("The words count must be an even number, but the count is:"
+					throw new EternaException("The words count must be an even number, but the count is:"
 							+ this.words.length + ".");
 				}
 				this.transMap = new HashMap();
@@ -169,7 +169,7 @@ public class DictionaryFormat extends AbstractGenerator
 					String value = this.words[i + 1];
 					if (this.transMap.put(key, value) != null)
 					{
-						throw new ConfigurationException("The key words:[" + key + "] appeared more than once.");
+						throw new EternaException("The key words:[" + key + "] appeared more than once.");
 					}
 				}
 				dictionaryCache.put(this.words, this.transMap);
@@ -178,7 +178,7 @@ public class DictionaryFormat extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createFormat();
 	}
@@ -194,7 +194,7 @@ public class DictionaryFormat extends AbstractGenerator
 	}
 
 	public ResultFormat createFormat()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.parseWords();
 		return this;

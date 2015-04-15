@@ -29,12 +29,12 @@ import javax.portlet.PortletSession;
 import javax.portlet.RenderRequest;
 import javax.portlet.RenderResponse;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.container.RequestParameterMap;
 
 /**
@@ -85,7 +85,7 @@ public class EternaPortlet extends GenericPortlet
 	}
 
 	protected FactoryManager.Instance getFactoryManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.factoryManager;
 	}
@@ -134,7 +134,7 @@ public class EternaPortlet extends GenericPortlet
 				data.modelName = nextModel;
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			log.warn("Error in processAction.", ex);
 		}
@@ -182,7 +182,7 @@ public class EternaPortlet extends GenericPortlet
 						data.export = export;
 					}
 				}
-				catch (ConfigurationException ex)
+				catch (EternaException ex)
 				{
 					log.warn("Error in render.", ex);
 				}
@@ -244,7 +244,7 @@ public class EternaPortlet extends GenericPortlet
 				request.setAttribute(VIEW_TAG, view);
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			log.warn("Error in doExport.", ex);
 		}
@@ -263,7 +263,7 @@ public class EternaPortlet extends GenericPortlet
 			{
 				this.getFactoryManager().destroy();
 			}
-		} catch (ConfigurationException ex) {}
+		} catch (EternaException ex) {}
 	}
 
 }

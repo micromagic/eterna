@@ -27,7 +27,7 @@ import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.CodeItemManager;
 
 public class CodeItemExecute extends AbstractExecute
@@ -38,7 +38,7 @@ public class CodeItemExecute extends AbstractExecute
 	private String valueName;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -58,13 +58,13 @@ public class CodeItemExecute extends AbstractExecute
 		this.valueName = (String) this.getAttribute("valueName");
 	}
 
-	public String getExecuteType() throws ConfigurationException
+	public String getExecuteType() throws EternaException
 	{
 		return "codeItem";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		List item;
 		if (this.useCName)

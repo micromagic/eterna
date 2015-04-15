@@ -16,17 +16,17 @@
 
 package self.micromagic.eterna.view;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 
 public interface FunctionGenerator extends Generator
 {
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	void setParam(String param) throws ConfigurationException;
+	void setParam(String param) throws EternaException;
 
-	void setBody(String body) throws ConfigurationException;
+	void setBody(String body) throws EternaException;
 
-	Function createFunction() throws ConfigurationException;
+	Function createFunction() throws EternaException;
 
 }

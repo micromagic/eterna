@@ -23,10 +23,10 @@ import java.math.BigDecimal;
 import self.micromagic.util.Utility;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionBuilderGenerator;
 import self.micromagic.eterna.search.ConditionProperty;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.sql.preparer.ValuePreparer;
 
 /**
@@ -47,7 +47,6 @@ public class TemplateConditionBuilder extends AbstractGenerator
 	protected int maxIndex;
 	private String[] patterns;
 	private int paramCount = 1;
-	private EternaFactory factory;
 
 	public void initialize(EternaFactory factory)
 	{
@@ -64,13 +63,13 @@ public class TemplateConditionBuilder extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createConditionBuilder();
 	}
 
 	public ConditionBuilder createConditionBuilder()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.parseTemplate();
 		return this;
@@ -145,7 +144,7 @@ public class TemplateConditionBuilder extends AbstractGenerator
 	}
 
 	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.template.length() == 0)
 		{

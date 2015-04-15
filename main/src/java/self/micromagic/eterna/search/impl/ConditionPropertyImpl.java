@@ -19,7 +19,7 @@ package self.micromagic.eterna.search.impl;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.security.PermissionSet;
@@ -59,7 +59,7 @@ class ConditionPropertyImpl
 	AttributeManager attributes;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.listName != null)
 		{
@@ -137,13 +137,13 @@ class ConditionPropertyImpl
 	}
 
 	public ValuePreparer createValuePreparer(String value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.vpCreater.createPreparer(value);
 	}
 
 	public ValuePreparer createValuePreparer(Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.vpCreater.createPreparer(value);
 	}

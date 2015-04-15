@@ -17,7 +17,7 @@
 package self.micromagic.eterna.tag;
 
 import self.micromagic.eterna.digester.FactoryManager;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.Utility;
 import org.apache.commons.logging.Log;
 
@@ -46,7 +46,7 @@ public class DefaultFinder
 		{
 			return FactoryManager.getFactoryManager(name);
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			return null;
 		}

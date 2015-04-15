@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultMetaData;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.QueryAdapter;
@@ -39,7 +39,7 @@ public class ResultMetaDataImpl
 	private boolean colNameSensitive = true;
 
 	public ResultMetaDataImpl(List readerList, ResultReaderManager readerManager, QueryAdapter query)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.query = query;
 		int count = readerList.size();
@@ -103,19 +103,19 @@ public class ResultMetaDataImpl
 	}
 
 	public int getColumnWidth(int column)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.readers[column - 1].getWidth();
 	}
 
 	public String getColumnCaption(int column)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.readers[column - 1].getCaption();
 	}
 
 	public String getColumnName(int column)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.readers[column - 1].getName();
 	}
@@ -126,13 +126,13 @@ public class ResultMetaDataImpl
 	}
 
 	public int findColumn(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.findColumn(columnName, false);
 	}
 
 	public int findColumn(String columnName, boolean notThrow)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.nameToIndexMap == null)
 		{
@@ -150,7 +150,7 @@ public class ResultMetaDataImpl
 				}
 				else
 				{
-					throw new ConfigurationException(
+					throw new EternaException(
 							"Invalid column name:[" + columnName + "] at " + this.getName() + ".");
 				}
 			}

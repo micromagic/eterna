@@ -20,13 +20,13 @@ import java.sql.SQLException;
 
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.ParamBindGenerator;
 import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ParamSetManager;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.dc.CodeClassTool;
 import self.micromagic.util.StringTool;
 
@@ -52,7 +52,7 @@ public class JavaCodeParamBind extends AbstractGenerator
 	private ParamBindCode paramBindCode;
 
 	public void initialize(ModelAdapter model, Execute execute)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.paramBindCode != null)
 		{
@@ -73,7 +73,7 @@ public class JavaCodeParamBind extends AbstractGenerator
 		String code = (String) factory.getAttribute(attrCode);
 		if (code == null)
 		{
-			throw new ConfigurationException("Not found the [" + attrCode + "] in factory attribute.");
+			throw new EternaException("Not found the [" + attrCode + "] in factory attribute.");
 		}
 		try
 		{
@@ -85,11 +85,11 @@ public class JavaCodeParamBind extends AbstractGenerator
 		{
 			if (throwCompileError)
 			{
-				if (ex instanceof ConfigurationException)
+				if (ex instanceof EternaException)
 				{
-					throw (ConfigurationException) ex;
+					throw (EternaException) ex;
 				}
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 			else
 			{
@@ -101,7 +101,7 @@ public class JavaCodeParamBind extends AbstractGenerator
 	}
 
 	public int setParam(AppData data, ParamSetManager psm, int loopIndex)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		try
 		{
@@ -112,11 +112,11 @@ public class JavaCodeParamBind extends AbstractGenerator
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 		return 1;
 	}
@@ -162,7 +162,7 @@ public class JavaCodeParamBind extends AbstractGenerator
 	}
 
 	public ParamBind createParamBind()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
@@ -188,7 +188,7 @@ public class JavaCodeParamBind extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createParamBind();
 	}
@@ -196,7 +196,7 @@ public class JavaCodeParamBind extends AbstractGenerator
 	public interface ParamBindCode
 	{
 		public void setGenerator(JavaCodeParamBind generator, EternaFactory factory)
-				throws ConfigurationException;
+				throws EternaException;
 
 		public int invoke(AppData data, ParamSetManager psm, int loopIndex)
 				throws Exception;

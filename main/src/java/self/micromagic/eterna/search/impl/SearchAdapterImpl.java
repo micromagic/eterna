@@ -33,7 +33,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.ColumnSetting;
 import self.micromagic.eterna.search.ConditionBuilder;
@@ -111,14 +111,14 @@ public class SearchAdapterImpl extends AbstractGenerator
 	private boolean initialized = false;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
 			return;
 		}
 		this.initialized = true;
-		this.sessionQueryTag = "s:" + this.getName() + ":" + factory.getFactoryManager().getId();
+		this.sessionQueryTag = "s:" + this.getName() + ":" + factory.getFactoryContainer().getId();
 		if (this.parentName != null)
 		{
 			if (this.parentName.indexOf(',') == -1)
@@ -216,7 +216,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 		{
 			if (this.getConditionPropertyCount() > 0)
 			{
-				throw new ConfigurationException("Can't set conditionIndex 0 in a search witch has conditionProperty.");
+				throw new EternaException("Can't set conditionIndex 0 in a search witch has conditionProperty.");
 			}
 		}
 		*/
@@ -229,13 +229,13 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createSearchAdapter();
 	}
 
 	public SearchAdapter createSearchAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
@@ -266,7 +266,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	public void setCountType(String countType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if ("auto".equals(countType))
 		{
@@ -285,14 +285,14 @@ public class SearchAdapterImpl extends AbstractGenerator
 			int index = countType.indexOf(',');
 			if (index == -1)
 			{
-				throw new ConfigurationException("Error count type:[" + countType + "].");
+				throw new EternaException("Error count type:[" + countType + "].");
 			}
 			this.countSearchName = countType.substring(7, index).trim();
 			this.countReaderName = countType.substring(index + 1).trim();
 		}
 		else
 		{
-			throw new ConfigurationException("Error count type:[" + countType + "].");
+			throw new EternaException("Error count type:[" + countType + "].");
 		}
 	}
 
@@ -378,7 +378,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private PermissionSet[] getPermissionSet(ConditionProperty[] cps)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Set psSet = null;
 		for (int i = 0; i < cps.length; i++)
@@ -417,7 +417,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private MemoryChars getConditionDocument0(Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int cdId = 0;
 		int addInt = 1;
@@ -449,7 +449,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private MemoryChars createConditionDocument(Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Document document = DocumentHelper.createDocument();
 		Element root = document.addElement("eterna");
@@ -477,7 +477,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	public Reader getConditionDocument(Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.permissionSets == null)
 		{
@@ -494,7 +494,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 
 	private void list2Document(ConditionProperty[] cps, Element el_conditionPropertys,
 			Element el_conditionBuilserLists, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Set addedBuilders = new HashSet();
 
@@ -540,7 +540,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private boolean checkPermission(ConditionProperty cp, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (permission == null)
 		{
@@ -574,18 +574,18 @@ public class SearchAdapterImpl extends AbstractGenerator
 		this.conditionPropertyOrder = order;
 	}
 
-	public void clearConditionPropertys() throws ConfigurationException
+	public void clearConditionPropertys() throws EternaException
 	{
 		this.allConditionProperties = null;
 		this.conditionProperties.clear();
 	}
 
-	public void addConditionProperty(ConditionProperty cp) throws ConfigurationException
+	public void addConditionProperty(ConditionProperty cp) throws EternaException
 	{
 		this.allConditionProperties = null;
 		if (this.conditionPropertyMap.containsKey(cp.getName()))
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Duplicate [ConditionProperty] name:" + cp.getName() + ".");
 		}
 		this.conditionProperties.add(cp);
@@ -593,27 +593,27 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	public int getConditionPropertyCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.getConditionPropertys0().length;
 	}
 
 	public ConditionProperty getConditionProperty(int colId)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ConditionProperty[] temp = this.getConditionPropertys0();
 		return temp[colId];
 	}
 
 	public ConditionProperty getConditionProperty(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getConditionPropertys0();
 		return (ConditionProperty) this.conditionPropertyMap.get(name);
 	}
 
 	public int getPageSize()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.maxPageSize == -1)
 		{
@@ -651,7 +651,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	public SearchManager getSearchManager(AppData data)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SearchManager manager = this.getSearchManager0(data.getSessionAttributeMap());
 		manager.setPageNumAndCondition(data, this);
@@ -659,7 +659,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	public Result doSearch(AppData data, Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (this.needSynchronize)
 		{
@@ -679,7 +679,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	 * @param onlySearch  是否为仅执行搜索, 不进行列设置或全记录获取
 	 */
 	protected Result doSearch0(AppData data, Connection conn, boolean onlySearch)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (log.isDebugEnabled())
 		{
@@ -828,7 +828,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	 */
 	protected static void dealOthers(AppData data, Connection conn, SearchAdapter[] others,
 			QueryAdapter query, boolean first)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (others == null)
 		{
@@ -877,7 +877,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	protected static QueryAdapter getQueryAdapter(AppData data, Connection conn, SearchAdapter search,
 			BooleanRef first, String sessionQueryTag, SearchManager searchManager, int queryIndex,
 			ColumnSetting columnSetting, String columnType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (queryIndex == -1)
 		{
@@ -970,7 +970,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private SearchManager getSearchManager0(Map saMap)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Map managerMap = (Map) SessionCache.getInstance().getProperty(saMap, SESSION_SEARCH_MANAGER);
 		if (managerMap == null)
@@ -988,7 +988,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private ConditionProperty[] getConditionPropertys0()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.allConditionProperties != null)
 		{
@@ -1002,7 +1002,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 	}
 
 	private ConditionProperty[] getConditionPropertysWithOther()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.allConditionPropertiesWithOther != null)
 		{
@@ -1032,13 +1032,13 @@ public class SearchAdapterImpl extends AbstractGenerator
 		}
 
 		public boolean isIgnore()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cp.isIgnore();
 		}
 
 		public OrderManager.OrderItem create(Object obj)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (obj == null)
 			{
@@ -1049,7 +1049,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 		}
 
 		public Iterator getOrderItemIterator(Object container)
-				throws ConfigurationException
+				throws EternaException
 		{
 			SearchAdapter search = (SearchAdapter) container;
 			return new MyIterator(search);
@@ -1065,7 +1065,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 		SearchAdapter search;
 
 		public MyIterator(SearchAdapter search)
-				throws ConfigurationException
+				throws EternaException
 		{
 			this.search = search;
 			this.count = search.getConditionPropertyCount();
@@ -1082,7 +1082,7 @@ public class SearchAdapterImpl extends AbstractGenerator
 			{
 				return this.search.getConditionProperty(this.index++);
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				log.error("Search my iterator next.", ex);
 				throw new UnsupportedOperationException(ex.getMessage());

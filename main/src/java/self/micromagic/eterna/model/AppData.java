@@ -74,13 +74,10 @@ public class AppData
 	public static final int POSITION_OTHER3 = 0x4000;
 
 	public static final String REQUEST_PARAMETER_MAP_NAME = "request-parameter";
-	public static final String REQUEST_PARAMETER_MAP_SHORT_NAME = "RP";
 	public static final int REQUEST_PARAMETER_MAP = 0;
 	public static final String REQUEST_ATTRIBUTE_MAP_NAME = "request-attribute";
-	public static final String REQUEST_ATTRIBUTE_MAP_SHORT_NAME = "RA";
 	public static final int REQUEST_ATTRIBUTE_MAP = 1;
 	public static final String SESSION_ATTRIBUTE_MAP_NAME = "session-attribute";
-	public static final String SESSION_ATTRIBUTE_MAP_SHORT_NAME = "SA";
 	public static final int SESSION_ATTRIBUTE_MAP = 2;
 	public static final String DATA_MAP_NAME = "data";
 	public static final int DATA_MAP = 3;
@@ -88,10 +85,6 @@ public class AppData
 	public static final String[] MAP_NAMES = {
 		REQUEST_PARAMETER_MAP_NAME, REQUEST_ATTRIBUTE_MAP_NAME,
 		SESSION_ATTRIBUTE_MAP_NAME, DATA_MAP_NAME
-	};
-	public static final String[] MAP_SHORT_NAMES = {
-		REQUEST_PARAMETER_MAP_SHORT_NAME, REQUEST_ATTRIBUTE_MAP_SHORT_NAME,
-		SESSION_ATTRIBUTE_MAP_SHORT_NAME
 	};
 
 	private static int APP_LOG_TYPE = 0;

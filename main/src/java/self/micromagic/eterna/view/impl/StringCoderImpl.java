@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.util.StringAppender;
@@ -108,7 +108,7 @@ public class StringCoderImpl
 	}
 
 	public void initStringCoder(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 	}
 

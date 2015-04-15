@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql.impl;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.sql.SQLParameter;
 import self.micromagic.util.StringTool;
@@ -65,7 +65,7 @@ public class ParameterManager
 	 * 预查动态参数
 	 */
 	public void preCheck()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.type == NORMAL_PARAMETER)
 		{
@@ -83,14 +83,14 @@ public class ParameterManager
 		}
 		if (paramList.size() != 1)
 		{
-			throw new ConfigurationException("Error dynamic parameter template, postion ["
+			throw new EternaException("Error dynamic parameter template, postion ["
 					+ (this.index + 1) + "], group name [" + this.groupName
 					+ "], param count [" + paramList.size() + "].");
 		}
 	}
 
 	public void check(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.checked)
 		{
@@ -101,7 +101,7 @@ public class ParameterManager
 		// 对于没有设置的不进行判断, 未设置的可以通过数字设置
 		/*if (this.param == null)
 		{
-			throw new ConfigurationException("The parameter not bind at position:"
+			throw new EternaException("The parameter not begin at position:"
 					+ (this.index + 1) + ".");
 		}*/
 
@@ -138,7 +138,7 @@ public class ParameterManager
 		}
 		if (paramList.size() != 1)
 		{
-			throw new ConfigurationException("Error parameter template, param name ["
+			throw new EternaException("Error parameter template, param name ["
 					+ this.param.getName() + "].");
 		}
 	}
@@ -149,11 +149,11 @@ public class ParameterManager
 	}
 
 	public void setParam(SQLParameter param)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.param != null)
 		{
-			throw new ConfigurationException("You can't bind two name in same position:"
+			throw new EternaException("You can't begin two name in same position:"
 					+ (this.index + 1) + ".");
 		}
 		this.param = param;
@@ -170,11 +170,11 @@ public class ParameterManager
 	}
 
 	public void addParameterTemplate(String template)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.type == NORMAL_PARAMETER)
 		{
-			throw new ConfigurationException("You can't set template in normal parameter, name "
+			throw new EternaException("You can't set template in normal parameter, name "
 					+ this.param.getName() + ".");
 		}
 		if (template == null)
@@ -190,22 +190,22 @@ public class ParameterManager
 	}
 
 	public int getParameterTemplateCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (type == NORMAL_PARAMETER)
 		{
-			throw new ConfigurationException("You can't get template in normal parameter, name "
+			throw new EternaException("You can't get template in normal parameter, name "
 					+ this.param.getName() + ".");
 		}
 		return this.templates.length;
 	}
 
 	public String getParameterTemplate(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (type == NORMAL_PARAMETER)
 		{
-			throw new ConfigurationException("You can't get template in normal parameter, name "
+			throw new EternaException("You can't get template in normal parameter, name "
 					+ this.param.getName() + ".");
 		}
 		return this.templates[index];

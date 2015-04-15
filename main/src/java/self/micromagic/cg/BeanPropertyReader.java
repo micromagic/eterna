@@ -41,6 +41,6 @@ public interface BeanPropertyReader
 	 * @return              对应的属性的值
 	 */
 	Object getBeanValue(CellDescriptor cd, int[] indexs, Object bean, String prefix,
-			BeanMap beanMap) throws Exception;
+			BeanMap beanMap) throws Throwable;
 
 }

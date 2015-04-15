@@ -28,7 +28,7 @@ import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.CheckOperator;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.ObjectCreateRule;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.StringTool;
@@ -73,7 +73,7 @@ public class CheckExecute extends AbstractExecute
 	private CheckOperator checkOpt = null;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -83,7 +83,7 @@ public class CheckExecute extends AbstractExecute
 
 		if (this.checkOpt == null)
 		{
-			throw new ConfigurationException("The attribute checkPattern must be setted.");
+			throw new EternaException("The attribute checkPattern must be setted.");
 		}
 
 		StringAppender nameBuf = StringTool.createStringAppender(64);
@@ -130,13 +130,13 @@ public class CheckExecute extends AbstractExecute
 	}
 
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "check";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		boolean checkResult;
 		ModelExport export;
@@ -215,12 +215,12 @@ public class CheckExecute extends AbstractExecute
 	}
 
 	public void setCheckPattern(String pattern)
-			throws ConfigurationException
+			throws EternaException
 	{
 		String[] params = StringTool.separateString(pattern, ";", true);
 		if (params.length > 3)
 		{
-			throw new ConfigurationException("Too many type params:[" + pattern + "].");
+			throw new EternaException("Too many type params:[" + pattern + "].");
 		}
 		if (params.length > 0)
 		{
@@ -230,7 +230,7 @@ public class CheckExecute extends AbstractExecute
 			}
 			catch (NumberFormatException ex)
 			{
-				throw new ConfigurationException("Error check obj1:" + params[0] + ".");
+				throw new EternaException("Error check obj1:" + params[0] + ".");
 			}
 		}
 		if (params.length == 3)
@@ -241,7 +241,7 @@ public class CheckExecute extends AbstractExecute
 			}
 			catch (NumberFormatException ex)
 			{
-				throw new ConfigurationException("Error check obj2:" + params[2] + ".");
+				throw new EternaException("Error check obj2:" + params[2] + ".");
 			}
 		}
 		if (params.length > 1)
@@ -283,7 +283,7 @@ public class CheckExecute extends AbstractExecute
 				}
 				catch (Exception ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 			}
 			else
@@ -294,7 +294,7 @@ public class CheckExecute extends AbstractExecute
 				}
 				catch (Exception ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 			}
 		}
@@ -316,26 +316,26 @@ public class CheckExecute extends AbstractExecute
 	}
 
 	public void setTrueTransactionType(String tType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.trueTransactionType = ModelAdapterImpl.parseTransactionType(tType);
 	}
 
 	public void setFalseTransactionType(String tType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.falseTransactionType = ModelAdapterImpl.parseTransactionType(tType);
 	}
 
 	public void setTrueModelName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.trueModelName = name;
 		this.setName(name);
 	}
 
 	public void setFalseModelName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.falseModelName = name;
 	}
@@ -346,7 +346,7 @@ public class CheckExecute extends AbstractExecute
 		static HasNextCheck instance = new HasNextCheck();
 
 		public boolean check(Object value1, Object value2)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value1 != null && value1 instanceof Iterator)
 			{
@@ -368,7 +368,7 @@ public class CheckExecute extends AbstractExecute
 		static NullCheck instance = new NullCheck();
 
 		public boolean check(Object value1, Object value2)
-				throws ConfigurationException
+				throws EternaException
 		{
 			return value1 == null;
 		}
@@ -386,7 +386,7 @@ public class CheckExecute extends AbstractExecute
 		static EmptyCheck instance = new EmptyCheck();
 
 		public boolean check(Object value1, Object value2)
-				throws ConfigurationException
+				throws EternaException
 		{
 			return value1 == null || "".equals(value1);
 		}
@@ -404,7 +404,7 @@ public class CheckExecute extends AbstractExecute
 		static ArrayCheck instance = new ArrayCheck();
 
 		public boolean check(Object value1, Object value2)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value1 == null)
 			{
@@ -431,7 +431,7 @@ public class CheckExecute extends AbstractExecute
 		}
 
 		public boolean check(Object value1, Object value2)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value1 == null)
 			{
@@ -462,7 +462,7 @@ public class CheckExecute extends AbstractExecute
 		}
 
 		public boolean check(Object value1, Object value2)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value1 == null)
 			{
@@ -482,7 +482,7 @@ public class CheckExecute extends AbstractExecute
 			}
 			else
 			{
-				throw new ConfigurationException("The two value can not compare, 1:"
+				throw new EternaException("The two value can not compare, 1:"
 						+ value1.getClass() + ", 2:" + value2.getClass() + ".");
 			}
 		}

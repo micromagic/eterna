@@ -18,7 +18,7 @@ package self.micromagic.eterna.view.impl;
 
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.ViewAdapter;
@@ -38,7 +38,7 @@ public class ViewWrapComponent extends ComponentImpl
 	}
 
 	public void initialize(EternaFactory factory, Component parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -100,7 +100,7 @@ public class ViewWrapComponent extends ComponentImpl
 	}
 
 	public String getName()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.view.getName();
 	}
@@ -111,7 +111,7 @@ public class ViewWrapComponent extends ComponentImpl
 	}
 
 	public Iterator getSubComponents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.view.getComponents();
 	}
@@ -122,13 +122,13 @@ public class ViewWrapComponent extends ComponentImpl
 	}
 
 	public String getBeforeInit()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.needScript ? this.view.getBeforeInit() : null;
 	}
 
 	public String getInitScript()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.needScript ? this.view.getInitScript() : null;
 	}

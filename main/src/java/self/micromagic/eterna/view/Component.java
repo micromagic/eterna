@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -75,59 +75,59 @@ public interface Component
 	 */
 	public static final String INHERIT_GLOBAL_SEARCH = "inheritGlobalSearch";
 
-	void initialize(EternaFactory factory, Component parent) throws ConfigurationException;
+	void initialize(EternaFactory factory, Component parent) throws EternaException;
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	String getType() throws ConfigurationException;
+	String getType() throws EternaException;
 
-	Component getParent() throws ConfigurationException;
+	Component getParent() throws EternaException;
 
-	Iterator getSubComponents() throws ConfigurationException;
+	Iterator getSubComponents() throws EternaException;
 
-	Iterator getEvents() throws ConfigurationException;
+	Iterator getEvents() throws EternaException;
 
-	boolean isIgnoreGlobalParam() throws ConfigurationException;
+	boolean isIgnoreGlobalParam() throws EternaException;
 
-	String getComponentParam() throws ConfigurationException;
+	String getComponentParam() throws EternaException;
 
-	String getBeforeInit() throws ConfigurationException;
+	String getBeforeInit() throws EternaException;
 
-	String getInitScript() throws ConfigurationException;
+	String getInitScript() throws EternaException;
 
 	/**
 	 * 获取本Component某个设置的属性.
 	 */
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
 	/**
 	 * 获取本Component设置的所有属性的名称.
 	 */
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
-	ViewAdapter.ViewRes getViewRes() throws ConfigurationException;
+	ViewAdapter.ViewRes getViewRes() throws EternaException;
 
-	void print(Writer out, AppData data, ViewAdapter view) throws IOException, ConfigurationException;
+	void print(Writer out, AppData data, ViewAdapter view) throws IOException, EternaException;
 
-	void printBody(Writer out, AppData data, ViewAdapter view) throws IOException, ConfigurationException;
+	void printBody(Writer out, AppData data, ViewAdapter view) throws IOException, EternaException;
 
-	void printSpecialBody(Writer out, AppData data, ViewAdapter view) throws IOException, ConfigurationException;
+	void printSpecialBody(Writer out, AppData data, ViewAdapter view) throws IOException, EternaException;
 
 	interface Event
 	{
-		void initialize(Component component) throws ConfigurationException;
+		void initialize(Component component) throws EternaException;
 
-		String getName() throws ConfigurationException;
+		String getName() throws EternaException;
 
-		String getScriptParam() throws ConfigurationException;
+		String getScriptParam() throws EternaException;
 
-		String getScriptBody() throws ConfigurationException;
+		String getScriptBody() throws EternaException;
 
-		Component getComponent() throws ConfigurationException;
+		Component getComponent() throws EternaException;
 
-		ViewAdapter.ViewRes getViewRes() throws ConfigurationException;
+		ViewAdapter.ViewRes getViewRes() throws EternaException;
 
 	}
 

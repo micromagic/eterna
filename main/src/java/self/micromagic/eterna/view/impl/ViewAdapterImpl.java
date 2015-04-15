@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
@@ -67,7 +67,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 	private MemoryChars mc = null;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!this.initialized)
 		{
@@ -78,7 +78,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 			this.dataPrinter = factory.getDataPrinter(this.dataPrinterName);
 			if (this.dataPrinter == null)
 			{
-				throw new ConfigurationException("Not found DataPrinter [" + this.dataPrinterName
+				throw new EternaException("Not found DataPrinter [" + this.dataPrinterName
 						+ "] in view [" + this.getName() + "].");
 			}
 
@@ -198,25 +198,25 @@ public class ViewAdapterImpl extends AbstractGenerator
 	}
 
 	public String getBeforeInit()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.beforeInit;
 	}
 
 	public void setBeforeInit(String condition)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.beforeInit = condition;
 	}
 
 	public String getInitScript()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.initScript;
 	}
 
 	public void setInitScript(String body)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.initScript = body;
 	}
@@ -261,7 +261,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 			+ "},_fn:function(event,webObj,objConfig){";
 
 	public void printEvent(Writer out, AppData data, Component.Event event)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write("{type:\"");
 		this.stringCoder.toJsonString(out, event.getName());
@@ -292,7 +292,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 	}
 
 	public void printFunction(Writer out, AppData data, String key, Function fn)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		String param = fn.getParam();
 		if (StringTool.isEmpty(param))
@@ -352,7 +352,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 	}
 
 	protected void printResource(Writer out, String name, Resource resource)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('"');
 		this.stringCoder.toJsonString(out, name);
@@ -362,13 +362,13 @@ public class ViewAdapterImpl extends AbstractGenerator
 	}
 
 	public void printView(Writer out, AppData data)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		this.printView(out, data, null);
 	}
 
 	public void printView(Writer out, AppData data, Map cache)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		String dataType = this.getDataType(data);
 		boolean webData = true;
@@ -587,7 +587,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 	 * @param allMap       所有生成的typical控件
 	 */
 	private void printTypical(Writer out, AppData data, Map typicalMap, Map allMap)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		Map typical = typicalMap;
 		if (allMap == null)
@@ -650,7 +650,7 @@ public class ViewAdapterImpl extends AbstractGenerator
 		return this;
 	}
 
-	public Object create() throws ConfigurationException
+	public Object create() throws EternaException
 	{
 		return this.createViewAdapter();
 	}

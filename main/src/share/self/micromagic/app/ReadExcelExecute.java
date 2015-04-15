@@ -37,7 +37,6 @@ import jxl.WorkbookSettings;
 import jxl.biff.StringHelper;
 import jxl.read.biff.BiffException;
 import org.apache.commons.fileupload.FileItem;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -45,6 +44,7 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.ResultReaderManager;
 import self.micromagic.eterna.sql.impl.ResultReaders;
@@ -66,7 +66,7 @@ public class ReadExcelExecute extends AbstractExecute
 	private String excelCharset = null;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -119,7 +119,7 @@ public class ReadExcelExecute extends AbstractExecute
 			this.readerManager = model.getFactory().getReaderManager(temp);
 			if (this.readerManager == null)
 			{
-				throw new ConfigurationException("Not found the reader manager [" + temp + "].");
+				throw new EternaException("Not found the reader manager [" + temp + "].");
 			}
 			if (this.needRowIndex)
 			{
@@ -137,7 +137,7 @@ public class ReadExcelExecute extends AbstractExecute
 				ResultReader reader = (ResultReader) itr.next();
 				if (!reader.isUseColumnIndex() && !this.needRowIndex && i == 0)
 				{
-					throw new ConfigurationException(
+					throw new EternaException(
 							"In the reader manager [" + temp + "], all reader must set colIndex.");
 				}
 				this.readers[i] = reader;
@@ -153,22 +153,23 @@ public class ReadExcelExecute extends AbstractExecute
 		}
 		else
 		{
-			throw new ConfigurationException("At ReadExcelExecute you must set readerManagerName attribute.");
+			throw new EternaException("At ReadExcelExecute you must set readerManagerName attribute.");
 		}
 	}
 
-	public String getExecuteType() throws ConfigurationException
+	public String getExecuteType()
+			throws EternaException
 	{
 		return "readExcel";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		Object obj = data.caches[this.cacheIndex];
 		if (obj == null)
 		{
-			throw new ConfigurationException("Not found the stream in cache:" + this.cacheIndex + ".");
+			throw new EternaException("Not found the stream in cache:" + this.cacheIndex + ".");
 		}
 		InputStream in = null;
 		if (obj instanceof InputStream)
@@ -181,7 +182,7 @@ public class ReadExcelExecute extends AbstractExecute
 		}
 		else
 		{
-			throw new ConfigurationException("Error stream type " + obj.getClass() + ".");
+			throw new EternaException("Error stream type " + obj.getClass() + ".");
 		}
 
 		try
@@ -310,7 +311,7 @@ public class ReadExcelExecute extends AbstractExecute
 		}
 		catch (BiffException ex)
 		{
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 		if (in != null)
 		{

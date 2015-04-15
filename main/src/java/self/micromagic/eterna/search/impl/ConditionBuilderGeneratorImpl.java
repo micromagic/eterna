@@ -19,7 +19,7 @@ package self.micromagic.eterna.search.impl;
 import java.util.HashMap;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionBuilderGenerator;
 import self.micromagic.eterna.share.AbstractGenerator;
@@ -79,13 +79,13 @@ public class ConditionBuilderGeneratorImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createConditionBuilder();
 	}
 
 	public ConditionBuilder createConditionBuilder()
-			throws ConfigurationException
+			throws EternaException
 	{
 		ConditionBuilderImpl cb = (ConditionBuilderImpl) builderMap.get(this.operator);
 		if (cb == null)

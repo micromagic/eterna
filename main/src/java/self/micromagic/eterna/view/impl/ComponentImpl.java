@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
@@ -60,7 +60,7 @@ public class ComponentImpl extends AbstractGenerator
 	protected boolean initialized = false;
 
 	public void initialize(EternaFactory factory, Component parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -89,7 +89,7 @@ public class ComponentImpl extends AbstractGenerator
 	}
 
 	public void initAttributes(EternaFactory factory, String attributes)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (attributes == null || "".equals(attributes))
 		{
@@ -107,7 +107,7 @@ public class ComponentImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('{');
 		this.printBody(out, data, view);
@@ -116,7 +116,7 @@ public class ComponentImpl extends AbstractGenerator
 	}
 
 	public void printBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write("name:\"");
 		this.stringCoder.toJsonString(out, this.getName());
@@ -192,126 +192,126 @@ public class ComponentImpl extends AbstractGenerator
 	}
 
 	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 	}
 
 	public String getType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.type;
 	}
 
 	public void setType(String type)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.type = type;
 	}
 
 	public Component getParent()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return parent;
 	}
 
 	public Iterator getSubComponents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return new PreFetchIterator(this.componentList.iterator(), false);
 	}
 
 	public void addComponent(Component com)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.componentList.add(com);
 	}
 
 	public void deleteComponent(Component com)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.componentList.remove(com);
 	}
 
 	public void clearComponents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.componentList.clear();
 	}
 
 	public Iterator getEvents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return new PreFetchIterator(this.eventList.iterator(), false);
 	}
 
 	public void addEvent(Event event)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.eventList.add(event);
 	}
 
 	public void deleteEvent(Event event)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.eventList.remove(event);
 	}
 
 	public void clearEvent()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.eventList.clear();
 	}
 
 	public boolean isIgnoreGlobalParam()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.ignoreGlobalParam;
 	}
 
 	public void setIgnoreGlobalParam(boolean ignore)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.ignoreGlobalParam = ignore;
 	}
 
 	public String getComponentParam()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.componentParam;
 	}
 
 	public void setComponentParam(String param)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.componentParam = param;
 	}
 
 	public String getBeforeInit()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.beforeInit;
 	}
 
 	public void setBeforeInit(String condition)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.beforeInit = condition;
 	}
 
 	public String getInitScript()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.initScript;
 	}
 
 	public void setInitScript(String body)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.initScript = body;
 	}
 
 	public void setAttributes(String attributes)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.attributes = attributes;
 	}
@@ -322,7 +322,7 @@ public class ComponentImpl extends AbstractGenerator
 	}
 
 	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{
@@ -354,7 +354,7 @@ public class ComponentImpl extends AbstractGenerator
 	 * 处理参数部分的脚本, 如: component-param, init-param.
 	 */
 	protected String dealParamPart(String param, ViewAdapterGenerator.ModifiableViewRes viewRes)
-			throws ConfigurationException
+			throws EternaException
 	{
 		// 为空或者没有代码都返回null
 		if (param == null || param.trim().length() == 0)
@@ -365,19 +365,19 @@ public class ComponentImpl extends AbstractGenerator
 	}
 
 	public ViewAdapter.ViewRes getViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.getModifiableViewRes();
 	}
 
 	public Component createComponent()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createComponent();
 	}
@@ -397,25 +397,25 @@ public class ComponentImpl extends AbstractGenerator
 		}
 
 		public String getScriptParam()
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.param;
 		}
 
 		public void setScriptParam(String param)
-			throws ConfigurationException
+			throws EternaException
 		{
 			this.param = param;
 		}
 
 		public String getScriptBody()
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.scriptBody;
 		}
 
 		public void setScriptBody(String body)
-			throws ConfigurationException
+			throws EternaException
 		{
 			this.scriptBody = body;
 		}
@@ -426,7 +426,7 @@ public class ComponentImpl extends AbstractGenerator
 		}
 
 		public ViewAdapter.ViewRes getViewRes()
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.viewRes == null)
 			{
@@ -440,13 +440,13 @@ public class ComponentImpl extends AbstractGenerator
 		}
 
 		public Event createEvent()
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this;
 		}
 
 		public Object create()
-			throws ConfigurationException
+			throws EternaException
 		{
 			return this.createEvent();
 		}

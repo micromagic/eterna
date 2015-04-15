@@ -17,28 +17,28 @@
 package self.micromagic.eterna.model;
 
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface CheckExecuteGenerator extends Generator
 {
 	public static final String MAX_LOOP_COUNT_PROPERTY = "self.micromagic.eterna.model.maxLoopCount";
 
-	void setCheckPattern(String pattern) throws ConfigurationException;
+	void setCheckPattern(String pattern) throws EternaException;
 
-	void setLoopType(int type) throws ConfigurationException;
+	void setLoopType(int type) throws EternaException;
 
-	void setTrueExportName(String name) throws ConfigurationException;
+	void setTrueExportName(String name) throws EternaException;
 
-	void setFalseExportName(String name) throws ConfigurationException;
+	void setFalseExportName(String name) throws EternaException;
 
-	void setTrueTransactionType(String tType) throws ConfigurationException;
+	void setTrueTransactionType(String tType) throws EternaException;
 
-	void setFalseTransactionType(String tType) throws ConfigurationException;
+	void setFalseTransactionType(String tType) throws EternaException;
 
-	void setTrueModelName(String name) throws ConfigurationException;
+	void setTrueModelName(String name) throws EternaException;
 
-	void setFalseModelName(String name) throws ConfigurationException;
+	void setFalseModelName(String name) throws EternaException;
 
-	Execute createExecute() throws ConfigurationException;
+	Execute createExecute() throws EternaException;
 
 }

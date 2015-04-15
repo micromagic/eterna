@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaFactory;
@@ -124,7 +124,7 @@ public class ResultReaderManagerImpl
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!this.initialized)
 		{
@@ -168,11 +168,11 @@ public class ResultReaderManagerImpl
 	}
 
 	public void setName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException("You can't set name at initialized ResultReaderManager.");
+			throw new EternaException("You can't set name at initialized ResultReaderManager.");
 		}
 		this.name = name;
 	}
@@ -183,11 +183,11 @@ public class ResultReaderManagerImpl
 	}
 
 	public void setParentName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException("You can't set parent name at initialized ResultReaderManager.");
+			throw new EternaException("You can't set parent name at initialized ResultReaderManager.");
 		}
 		this.parentName = name;
 	}
@@ -222,29 +222,29 @@ public class ResultReaderManagerImpl
 	}
 
 	public int getReaderCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getReaderList0();
 		return this.readerMap.size();
 	}
 
 	public ResultReader getReader(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getReaderList0();
 		return (ResultReader) this.readerMap.get(this.colNameSensitive ? name : name.toUpperCase());
 	}
 
 	public ResultReader addReader(ResultReader reader)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.readMapLocked)
 		{
-			throw new ConfigurationException("You can't add reader at initialized ResultReaderManager.");
+			throw new EternaException("You can't add reader at initialized ResultReaderManager.");
 		}
 		if (this.locked)
 		{
-			throw new ConfigurationException("You can't invoke addReader when ResultReaderManager locked.");
+			throw new EternaException("You can't invoke addReader when ResultReaderManager locked.");
 		}
 
 		this.allReaderList = null;
@@ -257,7 +257,7 @@ public class ResultReaderManagerImpl
 
 		if (temp != null)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Duplicate [ResultReader] name:" + reader.getName() + ".");
 		}
 		this.readerList.add(reader);
@@ -266,7 +266,7 @@ public class ResultReaderManagerImpl
 	}
 
 	public void setColNameSensitive(boolean colNameSensitive)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.getReaderCount() == 0)
 		{
@@ -274,7 +274,7 @@ public class ResultReaderManagerImpl
 		}
 		else
 		{
-			throw new ConfigurationException("You can't set column name sensitive when ResultReaderManager has readers.");
+			throw new EternaException("You can't set column name sensitive when ResultReaderManager has readers.");
 		}
 	}
 
@@ -284,12 +284,12 @@ public class ResultReaderManagerImpl
 	}
 
 	public void setReaderList(String[] names)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getReaderList0();
 		if (this.locked)
 		{
-			throw new ConfigurationException("You can't invoke setReaderList when ResultReaderManager locked.");
+			throw new EternaException("You can't invoke setReaderList when ResultReaderManager locked.");
 		}
 
 		this.readerList = new ArrayList(names.length);
@@ -304,7 +304,7 @@ public class ResultReaderManagerImpl
 			ResultReader reader = this.getReader(name);
 			if (reader == null)
 			{
-				throw new ConfigurationException(
+				throw new EternaException(
 						"Invalid ResultReader name:" + name + " at ResultReaderManager "
 						+ this.getName() + ".");
 			}
@@ -327,7 +327,7 @@ public class ResultReaderManagerImpl
 	}
 
 	public int getIndexByName(String name, boolean notThrow)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getReaderList0();
 		Integer i = (Integer) this.nameToIndexMap.get(
@@ -340,7 +340,7 @@ public class ResultReaderManagerImpl
 			}
 			else
 			{
-				throw new ConfigurationException(
+				throw new EternaException(
 						"Invalid ResultReader name:[" + name + "] at ResultReaderManager ["
 						+ this.getName() + "].");
 			}
@@ -349,7 +349,7 @@ public class ResultReaderManagerImpl
 	}
 
 	public int getIndexByName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.getIndexByName(name, false);
 	}
@@ -379,11 +379,11 @@ public class ResultReaderManagerImpl
 	 * 无论setReaderList设置了怎样的值, 都是返回所有的.
 	 *
 	 * @return  用于读取数据的所有<code>ResultReader</code>的列表.
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 * @see #setReaderList
 	 */
 	public List getReaderList()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.getReaderList0();
 	}
@@ -396,11 +396,11 @@ public class ResultReaderManagerImpl
 	 * 的实例.
 	 *
 	 * @return  正式用于读取数据的<code>ResultReader</code>的列表.
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 * @see #setReaderList
 	 */
 	public List getReaderList(Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getReaderList0();
 		if (this.nonePermission)
@@ -445,7 +445,7 @@ public class ResultReaderManagerImpl
 	}
 
 	private boolean checkPermission(ResultReader reader, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		PermissionSet ps = reader.getPermissionSet();
 		if (ps == null)
@@ -456,7 +456,7 @@ public class ResultReaderManagerImpl
 	}
 
 	public ResultReader getReaderInList(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.getReaderList0();
 		try
@@ -465,7 +465,7 @@ public class ResultReaderManagerImpl
 		}
 		catch (Exception ex)
 		{
-			throw new ConfigurationException(ex.getMessage());
+			throw new EternaException(ex.getMessage());
 		}
 	}
 
@@ -480,7 +480,7 @@ public class ResultReaderManagerImpl
 	}
 
 	public ResultReaderManager copy(String copyName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultReaderManagerImpl other;
 		if (this.initialized)
@@ -499,7 +499,7 @@ public class ResultReaderManagerImpl
 	}
 
 	private List getReaderList0()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.allReaderList != null)
 		{
@@ -548,13 +548,13 @@ public class ResultReaderManagerImpl
 		}
 
 		public boolean isIgnore()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.reader.isIgnore();
 		}
 
 		public OrderManager.OrderItem create(Object obj)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (obj == null)
 			{
@@ -565,7 +565,7 @@ public class ResultReaderManagerImpl
 		}
 
 		public Iterator getOrderItemIterator(Object container)
-				throws ConfigurationException
+				throws EternaException
 		{
 			ResultReaderManager rm = (ResultReaderManager) container;
 			return rm.getReaderList().iterator();

@@ -35,12 +35,32 @@ import java.util.Map;
 import java.util.Set;
 
 import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.util.converter.*;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.SynHashMap;
+import self.micromagic.util.converter.BigIntegerConverter;
+import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.converter.ByteConverter;
+import self.micromagic.util.converter.BytesConverter;
+import self.micromagic.util.converter.CalendarConverter;
+import self.micromagic.util.converter.CharacterConverter;
+import self.micromagic.util.converter.DateConverter;
+import self.micromagic.util.converter.DecimalConverter;
+import self.micromagic.util.converter.DoubleConverter;
+import self.micromagic.util.converter.FloatConverter;
+import self.micromagic.util.converter.IntegerConverter;
+import self.micromagic.util.converter.LongConverter;
+import self.micromagic.util.converter.MapConverter;
+import self.micromagic.util.converter.ReaderConverter;
+import self.micromagic.util.converter.ShortConverter;
+import self.micromagic.util.converter.StreamConverter;
+import self.micromagic.util.converter.StringConverter;
+import self.micromagic.util.converter.TimeConverter;
+import self.micromagic.util.converter.TimestampConverter;
+import self.micromagic.util.converter.UtilDateConverter;
+import self.micromagic.util.converter.ValueConverter;
 
 /**
  * 对bean进行操作的工具.
@@ -263,7 +283,7 @@ public class BeanTool
 				String fnName = "public int setBeanValue(CellDescriptor cd, int[] indexs, Object bean, "
 						+ "Object value, String prefix, BeanMap beanMap, Object originObj, Object oldValue)";
 				String mh = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Exception").toString();
+						.append("		throws Throwable").toString();
 				String beginCode = StringTool.createStringAppender()
 						.append("	int ").append(SETTED_COUNT_NAME).append(" = 0;").appendln()
 						.toString();
@@ -310,7 +330,7 @@ public class BeanTool
 				fnName = "public Object getBeanValue(CellDescriptor cd, int[] indexs, Object bean, "
 						+ "String prefix, BeanMap beanMap)";
 				mh = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Exception").toString();
+						.append("		throws Throwable").toString();
 				beginCode = endCode = "";
 				BeanPropertyReadProcesser rp = new BeanPropertyReadProcesser(beanClass);
 				tmp = createPropertyProcessers(beanClass, BeanPropertyReader.class,
@@ -355,7 +375,7 @@ public class BeanTool
 
 				// 这里的fnName和前面的相同, 就不用重新赋值了
 				beginCode = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Exception").appendln().append('{').toString();
+						.append("		throws Throwable").appendln().append('{').toString();
 				endCode = "}";
 				String bodyCode = "return new " + ClassGenerator.getClassName(beanClass) + "();";
 				CellDescriptor tmpBMC = null;
@@ -393,15 +413,7 @@ public class BeanTool
 				throw new CGException(ex);
 			}
 		}
-		if (bd != null)
-		{
-			beanDescriptorCache.setProperty(beanClass, bd);
-		}
-		else
-		{
-			throw new IllegalArgumentException("Can't create bean properties info for ["
-					+ beanClass + "].");
-		}
+		beanDescriptorCache.setProperty(beanClass, bd);
 		return bd;
 	}
 
@@ -430,7 +442,7 @@ public class BeanTool
 			{
 				String mh = StringTool.createStringAppender()
 						.append("public int setBeanValues(Object bean, Map values, String prefix)").appendln()
-						.append("		throws Exception").toString();
+						.append("		throws Throwable").toString();
 				String beginCode = StringTool.createStringAppender()
 						.append("	Object ").append(TMP_OBJ_NAME).append(';').appendln()
 						.append("	int ").append(SETTED_COUNT_NAME).append(" = 0;").appendln()

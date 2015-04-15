@@ -16,23 +16,23 @@
 
 package self.micromagic.eterna.model;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 
 public interface TransExecuteGenerator extends Generator
 {
-	void setPushResult(boolean push) throws ConfigurationException;
+	void setPushResult(boolean push) throws EternaException;
 
-	void setFrom(String from) throws ConfigurationException;
+	void setFrom(String from) throws EternaException;
 
-	void setRemoveFrom(boolean remove) throws ConfigurationException;
+	void setRemoveFrom(boolean remove) throws EternaException;
 
-	void setMustExist(boolean mustExist) throws ConfigurationException;
+	void setMustExist(boolean mustExist) throws EternaException;
 
-	void setOpt(String opt) throws ConfigurationException;
+	void setOpt(String opt) throws EternaException;
 
-	void setTo(String toStr) throws ConfigurationException;
+	void setTo(String toStr) throws EternaException;
 
-	Execute createExecute() throws ConfigurationException;
+	Execute createExecute() throws EternaException;
 
 }

@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.sql.impl.ResultReaders;
 import self.micromagic.util.BooleanRef;
@@ -86,12 +86,12 @@ public interface QueryAdapter extends SQLAdapter
 	 *
 	 * @see #getPreparedSQL
 	 */
-	String getPrimitiveQuerySQL() throws ConfigurationException;
+	String getPrimitiveQuerySQL() throws EternaException;
 
 	/**
 	 * 获得ResultReader的排序方式字符串.
 	 */
-	String getReaderOrder() throws ConfigurationException;
+	String getReaderOrder() throws EternaException;
 
 	/**
 	 * 获得当前查询对象的ResultReaderManager. <p>
@@ -99,26 +99,26 @@ public interface QueryAdapter extends SQLAdapter
 	 * 然后通过{@link #setReaderManager(ResultReaderManager)}方法将
 	 * 改动作用到查询对象上.
 	 */
-	ResultReaderManager getReaderManager() throws ConfigurationException;
+	ResultReaderManager getReaderManager() throws EternaException;
 
 	/**
 	 * 设置该查询的ResultReaderManager, 所设置的ResultReaderManager的名称必须
 	 * 与原来的名称相同, 或者在<code>otherReaderManagerSet</code>列表中.
 	 */
-	void setReaderManager(ResultReaderManager readerManager) throws ConfigurationException;
+	void setReaderManager(ResultReaderManager readerManager) throws EternaException;
 
 	/**
 	 * 是否可设置排序. <p>
 	 * 如果在定义时设置了orderIndex这该query是可设置排序的.
 	 */
-	boolean canOrder() throws ConfigurationException;
+	boolean canOrder() throws EternaException;
 
 	/**
 	 * 设置单列排序的列. <p>
 	 * 排序的升降序为自动设置, 如前一次设置了该列, 初始为升序, 则再次
 	 * 设置时就会变为降序. 如果前一次设置的不是该列, 则默认为升序.
 	 */
-	void setSingleOrder(String readerName) throws ConfigurationException;
+	void setSingleOrder(String readerName) throws EternaException;
 
 	/**
 	 * 设置单列排序的列.
@@ -127,7 +127,7 @@ public interface QueryAdapter extends SQLAdapter
 	 *                    负数 表示使用降序
 	 *                    正数 表示使用升序
 	 */
-	void setSingleOrder(String readerName, int orderType) throws ConfigurationException;
+	void setSingleOrder(String readerName, int orderType) throws EternaException;
 
 	/**
 	 * 获取单列排序的列名, 该名称为某个reader的名称. <p>
@@ -135,7 +135,7 @@ public interface QueryAdapter extends SQLAdapter
 	 *
 	 * @param desc  表示是否为降序, true表示是降序
 	 */
-	String getSingleOrder(BooleanRef desc) throws ConfigurationException;
+	String getSingleOrder(BooleanRef desc) throws EternaException;
 
 	/**
 	 * 设置多列排序. <p>
@@ -144,12 +144,12 @@ public interface QueryAdapter extends SQLAdapter
 	 *
 	 * @param orderNames   多列排序排序名称数组
 	 */
-	void setMultipleOrder(String[] orderNames) throws ConfigurationException;
+	void setMultipleOrder(String[] orderNames) throws EternaException;
 
 	/**
 	 * 获取这个查询对象是否只能用forwardOnly模式来执行.
 	 */
-	boolean isForwardOnly() throws ConfigurationException;
+	boolean isForwardOnly() throws EternaException;
 
 	/**
 	 * 获取该查询对象是从第几条记录开始读取, 默认值为"1".
@@ -179,7 +179,7 @@ public interface QueryAdapter extends SQLAdapter
 	/**
 	 * 获取该查询对象设置的总记录数.
 	 */
-	int getTotalCount() throws ConfigurationException;
+	int getTotalCount() throws EternaException;
 
 	/**
 	 * 设置该查询对象的记录数. <p>
@@ -193,7 +193,7 @@ public interface QueryAdapter extends SQLAdapter
 	 * @see #TOTAL_COUNT_NONE
 	 * @see #TOTAL_COUNT_COUNT
 	 */
-	void setTotalCount(int totalCount) throws ConfigurationException;
+	void setTotalCount(int totalCount) throws EternaException;
 
 	/**
 	 * 设置该查询对象的记录数. <p>
@@ -206,13 +206,13 @@ public interface QueryAdapter extends SQLAdapter
 	 * @see #TOTAL_COUNT_NONE
 	 * @see #TOTAL_COUNT_COUNT
 	 */
-	void setTotalCount(int totalCount, TotalCountExt ext) throws ConfigurationException;
+	void setTotalCount(int totalCount, TotalCountExt ext) throws EternaException;
 
 	/**
 	 * 获取该查询对象设置的总记录数扩展信息. <p>
 	 * 只有在totalCount的值设为0-N时, 该值才有效.
 	 */
-	TotalCountExt getTotalCountExt() throws ConfigurationException;
+	TotalCountExt getTotalCountExt() throws EternaException;
 
 	/**
 	 * 获得查询的结果, 用于少量(100条左右)数据的查询.
@@ -221,11 +221,11 @@ public interface QueryAdapter extends SQLAdapter
 	 *
 	 * @param conn      数据库的连接
 	 * @return          查询出来的结果集
-	 * @throws ConfigurationException   当相关配置出错时
+	 * @throws EternaException   当相关配置出错时
 	 * @throws SQLException    假如访问数据库时出错
 	 */
 	ResultIterator executeQuery(Connection conn)
-			throws ConfigurationException, SQLException;
+			throws EternaException, SQLException;
 
 	/**
 	 * 获得查询的结果, 用于大量(500条以上)数据的查询.
@@ -236,11 +236,11 @@ public interface QueryAdapter extends SQLAdapter
 	 *
 	 * @param conn      数据库的连接
 	 * @return          查询出来的结果集
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 * @throws SQLException    假如访问数据库时出错
 	 */
 	ResultIterator executeQueryHoldConnection(Connection conn)
-			throws ConfigurationException, SQLException;
+			throws EternaException, SQLException;
 
 	/**
 	 * 设置总记录数的扩展信息.

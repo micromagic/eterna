@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.search.impl;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.search.ConditionPropertyGenerator;
 import self.micromagic.eterna.share.AbstractGenerator;
@@ -90,13 +90,13 @@ public class ConditionPropertyGeneratorImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createConditionProperty();
 	}
 
 	public ConditionProperty createConditionProperty()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.conditionProperty.name = this.name;
 		this.conditionProperty.columnName = this.columnName == null ? this.name : this.columnName;

@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import self.micromagic.eterna.view.impl.DataPrinterImpl;
 import self.micromagic.eterna.view.impl.StringCoderImpl;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.Utility;
 
 /**
@@ -59,14 +59,7 @@ public class JsonPrinter
 	public JsonPrinter print(boolean b)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, b);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, b);
 		return this;
 	}
 
@@ -78,14 +71,7 @@ public class JsonPrinter
 	public JsonPrinter print(char c)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, c);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, c);
 		return this;
 	}
 
@@ -97,14 +83,7 @@ public class JsonPrinter
 	public JsonPrinter print(int i)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, i);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, i);
 		return this;
 	}
 
@@ -116,14 +95,7 @@ public class JsonPrinter
 	public JsonPrinter print(long l)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, l);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, l);
 		return this;
 	}
 
@@ -135,14 +107,7 @@ public class JsonPrinter
 	public JsonPrinter print(float f)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, f);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, f);
 		return this;
 	}
 
@@ -154,14 +119,7 @@ public class JsonPrinter
 	public JsonPrinter print(double d)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, d);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, d);
 		return this;
 	}
 
@@ -174,14 +132,7 @@ public class JsonPrinter
 	public JsonPrinter print(String s)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, s);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, s);
 		return this;
 	}
 
@@ -193,14 +144,7 @@ public class JsonPrinter
 	public JsonPrinter print(Object value)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, value);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, value);
 		return this;
 	}
 
@@ -212,14 +156,7 @@ public class JsonPrinter
 	public JsonPrinter print(Object[] values)
 			throws IOException
 	{
-		try
-		{
-			printer.print(this.out, values);
-		}
-		catch (ConfigurationException ex)
-		{
-			throw new RuntimeException(ex);
-		}
+		this.printer.print(this.out, values);
 		return this;
 	}
 

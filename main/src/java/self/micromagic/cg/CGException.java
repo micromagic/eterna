@@ -36,4 +36,6 @@ public class CGException extends RuntimeException
 		super(cause);
 	}
 
+	private static final long serialVersionUID = 1L;
+
 }

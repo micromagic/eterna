@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Set;
 
 import self.micromagic.eterna.sql.ResultRow;
-import self.micromagic.util.converter.ValueConverter;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.converter.ValueConverter;
 
 /**
  * bean和map的转换工具. <p>
@@ -42,13 +42,15 @@ public class BeanMap extends AbstractMap
 		implements Map
 {
 	private Object beanObj;
-	private Class beanType;
-	private String namePrefix;
-	private BeanDescriptor beanDescriptor;
+	private final Class beanType;
+	private final String namePrefix;
+	private final BeanDescriptor beanDescriptor;
 	private ConverterManager converterManager;
-	private boolean converterManagerCopied = false;
+	private boolean converterManagerCopied;
 	private List entryList = null;
 	private boolean bean2Map;
+	private boolean throwException;
+	private boolean readBeforeModify = true;
 
 	BeanMap(Object beanObj, String namePrefix, BeanDescriptor beanDescriptor)
 	{
@@ -113,7 +115,7 @@ public class BeanMap extends AbstractMap
 			this.beanObj = this.beanDescriptor.getInitCell().readProcesser.getBeanValue(
 					null, null, null, this.getPrefix(), this);
 		}
-		catch (Exception ex) {}
+		catch (Throwable ex) {}
 		return this.beanObj;
 	}
 
@@ -131,6 +133,38 @@ public class BeanMap extends AbstractMap
 	public Object getBean()
 	{
 		return this.beanObj;
+	}
+
+	/**
+	 * 在修改数据出错时是否要抛出异常.
+	 */
+	public boolean isThrowException()
+	{
+		return this.throwException;
+	}
+
+	/**
+	 * 设置在修改数据出错时是否要抛出异常.
+	 */
+	public void setThrowException(boolean t)
+	{
+		this.throwException = t;
+	}
+
+	/**
+	 * 在修改数据时是否要先读取原始值.
+	 */
+	public boolean isReadBeforeModify()
+	{
+		return this.readBeforeModify;
+	}
+
+	/**
+	 * 设置在修改数据时是否要先读取原始值.
+	 */
+	public void setReadBeforeModify(boolean rbm)
+	{
+		this.readBeforeModify = rbm;
 	}
 
 	/**
@@ -155,6 +189,37 @@ public class BeanMap extends AbstractMap
 	public String getPrefix()
 	{
 		return this.namePrefix;
+	}
+
+	/**
+	 * 处理修改数据时抛出的异常.
+	 */
+	void dealWriteException(Throwable t)
+	{
+      if (this.throwException)
+		{
+         if (t instanceof RuntimeException)
+			{
+				throw (RuntimeException) t;
+			}
+			else if (t instanceof Error)
+			{
+				throw (Error) t;
+			}
+			else
+			{
+				throw new RuntimeException(t);
+			}
+		}
+		if (t instanceof ClassCastException)
+		{
+			// 类型转换异常不记录日志
+			return;
+		}
+		if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
+		{
+			CG.log.info("Write bean value error.", t);
+		}
 	}
 
 	/**
@@ -190,17 +255,15 @@ public class BeanMap extends AbstractMap
 						Object oldValue = null;
 						if (cd.readProcesser != null && cd.isReadOldValue())
 						{
+							// 在设置数组或bean对象时需要读取原始值
 							oldValue = cd.readProcesser.getBeanValue(cd, null, beanObj, prefix, this);
 						}
 						settedCount += cd.writeProcesser.setBeanValue(
 								cd, null, bean, value, prefix, this, map, oldValue);
 					}
-					catch (Exception ex)
+					catch (Throwable ex)
 					{
-						if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-						{
-							CG.log.info("Write bean value error.", ex);
-						}
+						this.dealWriteException(ex);
 					}
 				}
 			}
@@ -242,6 +305,7 @@ public class BeanMap extends AbstractMap
 						Object oldValue = null;
 						if (cd.readProcesser != null && cd.isReadOldValue())
 						{
+							// 在设置数组或bean对象时需要读取原始值
 							oldValue = cd.readProcesser.getBeanValue(cd, null, beanObj, prefix, this);
 						}
 						settedCount += cd.writeProcesser.setBeanValue(
@@ -249,12 +313,9 @@ public class BeanMap extends AbstractMap
 					}
 				}
 			}
-			catch (Exception ex)
+			catch (Throwable ex)
 			{
-				if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-				{
-					CG.log.info("Write bean value error.", ex);
-				}
+				this.dealWriteException(ex);
 			}
 		}
 		return settedCount;
@@ -283,7 +344,7 @@ public class BeanMap extends AbstractMap
 		{
 			String tmpName;
 			StringRef refName = new StringRef();
-			int[] indexs = this.parseArrayName(key.substring(0, index), refName);
+			int[] indexs = parseArrayName(key.substring(0, index), refName);
 			tmpName = refName.getString();
 			CellDescriptor cd =  this.beanDescriptor.getCell(tmpName);
 			if (cd != null && cd.isValid())
@@ -312,7 +373,7 @@ public class BeanMap extends AbstractMap
 								sub = BeanTool.getBeanMap(tmpObj, prefix + tmpName + ".");
 							}
 						}
-						catch (Exception ex) {}
+						catch (Throwable ex) {}
 					}
 					if (sub == null)
 					{
@@ -324,12 +385,9 @@ public class BeanMap extends AbstractMap
 								cd.writeProcesser.setBeanValue(cd, null, thisObj, sub.createBean(),
 										prefix, this, null, null);
 							}
-							catch (Exception ex)
+							catch (Throwable ex)
 							{
-								if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
-								{
-									CG.log.info("Write bean value error.", ex);
-								}
+								this.dealWriteException(ex);
 							}
 						}
 					}
@@ -365,12 +423,12 @@ public class BeanMap extends AbstractMap
 							BeanMap sub = BeanTool.getBeanMap(tmpObj, prefix + tmpName + ".");
 							return sub.getCellAccessInfo(key.substring(index + 1), needCreate);
 						}
-						catch (Exception ex) {}
+						catch (Throwable ex) {}
 					}
 				}
 				else if (Collection.class.isAssignableFrom(cd.getCellType()))
 				{
-					if (indexs == null && indexs.length != 1)
+					if (indexs == null || indexs.length != 1)
 					{
 						// 集合容器类型且元素索引个数不为1, 无法访问子属性
 						return null;
@@ -395,14 +453,14 @@ public class BeanMap extends AbstractMap
 							BeanMap sub = BeanTool.getBeanMap(tmpObj, prefix + tmpName + ".");
 							return sub.getCellAccessInfo(key.substring(index + 1), needCreate);
 						}
-						catch (Exception ex) {}
+						catch (Throwable ex) {}
 					}
 				}
 			}
 			return null;
 		}
 		StringRef refName = new StringRef();
-		int[] indexs = this.parseArrayName(key, refName);
+		int[] indexs = parseArrayName(key, refName);
 		CellDescriptor cd = this.beanDescriptor.getCell(refName.toString());
 		if (cd == null || !cd.isValid())
 		{
@@ -519,7 +577,7 @@ public class BeanMap extends AbstractMap
 							sub = BeanTool.getBeanMap(tmpObj, prefix + pName + ".");
 						}
 					}
-					catch (Exception ex) {}
+					catch (Throwable ex) {}
 				}
 				if (sub == null)
 				{
@@ -635,8 +693,8 @@ public class BeanMap extends AbstractMap
 	private static class BeanMapEntrySet extends AbstractSet
 			implements Set
 	{
-		private int beanMapSetType;
-		private List entryList;
+		private final int beanMapSetType;
+		private final List entryList;
 
 		public BeanMapEntrySet(BeanMap beanMap, int beanMapSetType)
 		{
@@ -684,8 +742,8 @@ public class BeanMap extends AbstractMap
 	private static class BeanMapIterator
 			implements Iterator
 	{
-		private int beanMapSetType;
-		private Iterator entrySetIterator;
+		private final int beanMapSetType;
+		private final Iterator entrySetIterator;
 		BeanMapEntry nowEntry = null;
 
 		public BeanMapIterator(int beanMapSetType, Iterator entrySetIterator)
@@ -726,9 +784,9 @@ public class BeanMap extends AbstractMap
 	private static class BeanMapEntry
 			implements Map.Entry
 	{
-		private BeanMap beanMap;
-		private Object key;
-		private CellAccessInfo cellAccessInfo;
+		private final BeanMap beanMap;
+		private final Object key;
+		private final CellAccessInfo cellAccessInfo;
 
 		public BeanMapEntry(BeanMap beanMap, Object key, CellDescriptor cellDescriptor)
 		{

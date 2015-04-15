@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql.preparer;
 import org.apache.commons.logging.Log;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public abstract class AbstractValuePreparer
 		implements ValuePreparer
@@ -71,13 +71,13 @@ public abstract class AbstractValuePreparer
 		}
 
 		public EternaFactory getFactory()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.vpcg.getFactory();
 		}
 
 		public Object getAttribute(String name)
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.vpcg.getAttribute(name);
 		}

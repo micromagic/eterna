@@ -26,7 +26,7 @@ import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.ResultMetaData;
 import self.micromagic.eterna.sql.ResultReaderManager;
 import self.micromagic.eterna.sql.QueryAdapter;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 
 /**
@@ -56,7 +56,7 @@ public abstract class AbstractResultIterator
 	}
 
 	public AbstractResultIterator(ResultReaderManager readerManager, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.readerManager = readerManager;
 		this.readerList = readerManager.getReaderList(permission);
@@ -68,7 +68,7 @@ public abstract class AbstractResultIterator
 	}
 
 	public ResultMetaData getMetaData()
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		if (this.metaData == null)
 		{
@@ -168,7 +168,7 @@ public abstract class AbstractResultIterator
 	}
 
 	protected void copy(ResultIterator copyObj)
-			throws ConfigurationException
+			throws EternaException
 	{
 		AbstractResultIterator other = (AbstractResultIterator) copyObj;
 		other.result = this.result;

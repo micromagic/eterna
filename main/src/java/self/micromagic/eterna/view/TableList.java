@@ -18,57 +18,57 @@ package self.micromagic.eterna.view;
 
 import java.util.Iterator;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface TableList extends Component
 {
 	public static final String TR_NAME_PERFIX = "tableList_TR";
 
-	boolean isAutoArrange() throws ConfigurationException;
+	boolean isAutoArrange() throws EternaException;
 
-	boolean isPercentWidth() throws ConfigurationException;
+	boolean isPercentWidth() throws EternaException;
 
-	boolean isCaculateWidth() throws ConfigurationException;
+	boolean isCaculateWidth() throws EternaException;
 
-	int getCaculateWidthFix() throws ConfigurationException;
+	int getCaculateWidthFix() throws EternaException;
 
-	Component getTR() throws ConfigurationException;
+	Component getTR() throws EternaException;
 
-	String getBaseName() throws ConfigurationException;
+	String getBaseName() throws EternaException;
 
-	String getDataName() throws ConfigurationException;
+	String getDataName() throws EternaException;
 
-	Iterator getColumns() throws ConfigurationException;
+	Iterator getColumns() throws EternaException;
 
 	interface Column extends Component
 	{
-		int getWidth() throws ConfigurationException;
+		int getWidth() throws EternaException;
 
-		String getTitleParam() throws ConfigurationException;
+		String getTitleParam() throws EternaException;
 
-		String getContainerParam() throws ConfigurationException;
+		String getContainerParam() throws EternaException;
 
-		boolean isIgnoreGlobalTitleParam() throws ConfigurationException;
+		boolean isIgnoreGlobalTitleParam() throws EternaException;
 
-		boolean isIgnoreGlobalContainerParam() throws ConfigurationException;
+		boolean isIgnoreGlobalContainerParam() throws EternaException;
 
-		String getCaption() throws ConfigurationException;
+		String getCaption() throws EternaException;
 
-		String getDefaultValue() throws ConfigurationException;
+		String getDefaultValue() throws EternaException;
 
-		boolean isIgnore() throws ConfigurationException;
+		boolean isIgnore() throws EternaException;
 
-		String getSrcName() throws ConfigurationException;
+		String getSrcName() throws EternaException;
 
-		String getDataName() throws ConfigurationException;
+		String getDataName() throws EternaException;
 
-		boolean isOtherData() throws ConfigurationException;
+		boolean isOtherData() throws EternaException;
 
-		Component getTypicalComponent() throws ConfigurationException;
+		Component getTypicalComponent() throws EternaException;
 
-		String getInitParam() throws ConfigurationException;
+		String getInitParam() throws EternaException;
 
-		boolean getCloneInitParam() throws ConfigurationException;
+		boolean getCloneInitParam() throws EternaException;
 
 	}
 }

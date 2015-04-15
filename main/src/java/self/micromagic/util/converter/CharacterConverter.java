@@ -18,7 +18,7 @@ package self.micromagic.util.converter;
 
 import self.micromagic.util.StringRef;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public class CharacterConverter extends ObjectConverter
 {
@@ -35,7 +35,7 @@ public class CharacterConverter extends ObjectConverter
 	}
 
 	public int getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{

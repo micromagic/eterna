@@ -21,7 +21,7 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
@@ -30,6 +30,7 @@ import self.micromagic.eterna.sql.ResultFormatGenerator;
 import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.FormatTool;
 
 public class ResultFormatGeneratorImpl extends AbstractGenerator
 		implements ResultFormatGenerator
@@ -48,19 +49,19 @@ public class ResultFormatGeneratorImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createFormat();
 	}
 
 	public ResultFormat createFormat()
-			throws ConfigurationException
+			throws EternaException
 	{
 		Format format;
 		if (this.formatType == null)
 		{
 			// 当没有指定类型时, 无法生成需要的格式化对象
-			throw new ConfigurationException(
+			throw new EternaException(
 					"The format's attribute [type] not give.");
 		}
 		if ("Number".equals(this.formatType))
@@ -86,7 +87,7 @@ public class ResultFormatGeneratorImpl extends AbstractGenerator
 				if (index == -1)
 				{
 					// 如果有地区设置，地区与日期模式之间必须用“,”分隔
-					throw new ConfigurationException(
+					throw new EternaException(
 							"Error format pattern:[" + this.formatPattern + "].");
 				}
 				String pattern = this.formatPattern.substring(index + 1);
@@ -108,7 +109,7 @@ public class ResultFormatGeneratorImpl extends AbstractGenerator
 		else
 		{
 			// 类型不明, 无法生成需要的格式化对象
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Error format type [" + this.formatType + "].");
 		}
 		return new MyResultFormat(format, this.name);
@@ -135,7 +136,7 @@ public class ResultFormatGeneratorImpl extends AbstractGenerator
 
 		public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
 		{
-			return obj == null ? "" : this.format.format(obj);
+			return obj == null ? "" : FormatTool.getThreadFormat(this.format).format(obj);
 		}
 
 		public boolean useEmptyString()

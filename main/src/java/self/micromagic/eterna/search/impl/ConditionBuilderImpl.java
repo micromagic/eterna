@@ -20,7 +20,7 @@ import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.preparer.ValuePreparer;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -55,24 +55,24 @@ class ConditionBuilderImpl
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 	}
 
 	public String getName()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.name;
 	}
 
 	public String getCaption()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.caption;
 	}
 
 	public Condition buildeCondition(String colName, String value, ConditionProperty cp)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.optType == -1)
 		{

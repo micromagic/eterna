@@ -25,13 +25,13 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultMetaData;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.ResultRow;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryStream;
 import self.micromagic.util.Utility;
 
@@ -41,13 +41,13 @@ import self.micromagic.util.Utility;
 public class ExportCSV extends AbstractExportExecute
 {
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "exportCSV";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		ResultIterator ritr = null;
 		Writer out = null;

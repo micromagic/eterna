@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaFactory;
@@ -106,70 +106,70 @@ public interface SearchAdapter
 	 */
 	String HOLD_CONNECTION = "ETERNA_HODE_CONNECTION";
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
-	String getOtherSearchManagerName() throws ConfigurationException;
+	String getOtherSearchManagerName() throws EternaException;
 
 	/**
 	 * 获取其它辅助设置条件及参数的search, 用于分布式条件查询的时候使用.
 	 */
-	SearchAdapter[] getOtherSearchs() throws ConfigurationException;
+	SearchAdapter[] getOtherSearchs() throws EternaException;
 
-	String getConditionPropertyOrderWithOther() throws ConfigurationException;
+	String getConditionPropertyOrderWithOther() throws EternaException;
 
 	/**
 	 * 获得关于这个查询的相关条件说明的XML文档.
 	 */
-	Reader getConditionDocument(Permission permission) throws ConfigurationException;
+	Reader getConditionDocument(Permission permission) throws EternaException;
 
 	/**
 	 * 是否是特殊的条件, 需要重新构造条件子语句..
 	 */
-	boolean isSpecialCondition() throws ConfigurationException;
+	boolean isSpecialCondition() throws EternaException;
 
 	/**
 	 * 判断是否需要在条件外面带上括号"(", ")".
 	 */
-	boolean isNeedWrap() throws ConfigurationException;
+	boolean isNeedWrap() throws EternaException;
 
 	/**
 	 * 获得ColumnSetting的类型, 用于区分读取哪个ColumnSetting.
 	 */
-	String getColumnSettingType() throws ConfigurationException;
+	String getColumnSettingType() throws EternaException;
 
 	/**
 	 * 获得设置的ColumnSetting, SearchAdapter将用它来设置查询的列.
 	 */
-	ColumnSetting getColumnSetting() throws ConfigurationException;
+	ColumnSetting getColumnSetting() throws EternaException;
 
 	/**
 	 * 获得绑定的参数设置器<code>ParameterSetting</code>.
 	 *
 	 * @return  如果未绑定则返回null, 如果已绑定则返回参数设置器
 	 */
-	ParameterSetting getParameterSetting() throws ConfigurationException;
+	ParameterSetting getParameterSetting() throws EternaException;
 
-	String getParentConditionPropretyName() throws ConfigurationException;
+	String getParentConditionPropretyName() throws EternaException;
 
-	String getConditionPropertyOrder() throws ConfigurationException;
+	String getConditionPropertyOrder() throws EternaException;
 
-	int getConditionPropertyCount() throws ConfigurationException;
+	int getConditionPropertyCount() throws EternaException;
 
-	ConditionProperty getConditionProperty(int colId) throws ConfigurationException;
+	ConditionProperty getConditionProperty(int colId) throws EternaException;
 
-	ConditionProperty getConditionProperty(String name) throws ConfigurationException;
+	ConditionProperty getConditionProperty(String name) throws EternaException;
 
-	int getConditionIndex() throws ConfigurationException;
+	int getConditionIndex() throws EternaException;
 
-	int getPageSize() throws ConfigurationException;
+	int getPageSize() throws EternaException;
 
-	String getSearchManagerName() throws ConfigurationException;
+	String getSearchManagerName() throws EternaException;
 
 	/**
 	 * 获得一个SearchManager.
@@ -177,7 +177,7 @@ public interface SearchAdapter
 	 * @param data   数据, 里面包含了request的parameter, request的attribute,
 	 *               session的attritute
 	 */
-	SearchManager getSearchManager(AppData data) throws ConfigurationException;
+	SearchManager getSearchManager(AppData data) throws EternaException;
 
 	/**
 	 * 执行查询, 并获得结果.
@@ -186,7 +186,7 @@ public interface SearchAdapter
 	 *               session的attritute
 	 * @param conn   数据库连接
 	 */
-	Result doSearch(AppData data, Connection conn) throws ConfigurationException, SQLException;
+	Result doSearch(AppData data, Connection conn) throws EternaException, SQLException;
 
 	/**
 	 * 搜索的结果.
@@ -261,7 +261,7 @@ public interface SearchAdapter
 		}
 
 		public void print(DataPrinter p, Writer out, Object bean)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			try
 			{
@@ -284,7 +284,7 @@ public interface SearchAdapter
 			}
 			catch (SQLException ex)
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 

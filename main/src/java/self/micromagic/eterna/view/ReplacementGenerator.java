@@ -16,10 +16,10 @@
 
 package self.micromagic.eterna.view;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface ReplacementGenerator extends ComponentGenerator
 {
-	void setBaseComponentName(String name) throws ConfigurationException;
+	void setBaseComponentName(String name) throws EternaException;
 
 }

@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.CallableStatement;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
@@ -87,12 +87,12 @@ public class NullResultReader
 		return -1;
 	}
 
-	public boolean needHtmlFilter() throws ConfigurationException
+	public boolean needHtmlFilter() throws EternaException
 	{
 		return false;
 	}
 
-	public boolean isValid() throws ConfigurationException
+	public boolean isValid() throws EternaException
 	{
 		return false;
 	}
@@ -107,32 +107,32 @@ public class NullResultReader
 		return null;
 	}
 
-	public String getCaption() throws ConfigurationException
+	public String getCaption() throws EternaException
 	{
 		return null;
 	}
 
-	public String getFilledCaption() throws ConfigurationException
+	public String getFilledCaption() throws EternaException
 	{
 		return null;
 	}
 
-	public int getWidth() throws ConfigurationException
+	public int getWidth() throws EternaException
 	{
 		return 0;
 	}
 
-	public boolean isVisible() throws ConfigurationException
+	public boolean isVisible() throws EternaException
 	{
 		return false;
 	}
 
-	public Object getAttribute(String name) throws ConfigurationException
+	public Object getAttribute(String name) throws EternaException
 	{
 		return null;
 	}
 
-	public String[] getAttributeNames() throws ConfigurationException
+	public String[] getAttributeNames() throws EternaException
 	{
 		return null;
 	}
@@ -148,7 +148,7 @@ public class NullResultReader
 		return null;
 	}
 
-	public Object readObject(Object obj) throws ConfigurationException
+	public Object readObject(Object obj) throws EternaException
 	{
 		return null;
 	}

@@ -25,7 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
@@ -195,7 +195,7 @@ public class EternaDefine extends InitBaseTag
 				}
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			DefaultFinder.log.warn("Error in def.", ex);
 		}
@@ -215,7 +215,7 @@ public class EternaDefine extends InitBaseTag
 	}
 
 	private EternaFactory getEternaFactory()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.instanceName != null)
 		{

@@ -37,7 +37,7 @@ import self.micromagic.eterna.search.SearchAdapter;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.ResultIterator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public class Utils
 {
@@ -89,7 +89,7 @@ public class Utils
 
 	public static void setListPageAttributes(String listURL, SearchManager.Attributes attributes,
 			SearchAdapter.Result result, HttpServletRequest request)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		String root = request.getContextPath();
 		int totalRecord = result.queryResult.getRealRecordCount();
@@ -385,7 +385,7 @@ public class Utils
 	 * 生成select控件的一组option<p>
 	 */
 	public static void printOptions(JspWriter out, List rows, String indentSpace)
-			throws IOException, SQLException, ConfigurationException
+			throws IOException, SQLException, EternaException
 	{
 		printOptions(out, rows, indentSpace, "codeId", "codeValue");
 	}
@@ -395,7 +395,7 @@ public class Utils
 	 */
 	public static void printOptions(JspWriter out, List rows, String indentSpace,
 			String colNameCodeId, String colNameCodeValue)
-			throws IOException, SQLException, ConfigurationException
+			throws IOException, SQLException, EternaException
 	{
 		Iterator itr = rows.iterator();
 		while (itr.hasNext())
@@ -413,7 +413,7 @@ public class Utils
 	 * </pre></blockquote>
 	 */
 	public static void printOption(JspWriter out, ResultRow row, String indentSpace)
-			throws IOException, SQLException, ConfigurationException
+			throws IOException, SQLException, EternaException
 	{
 		printOption(out, row, indentSpace, "codeId", "codeValue");
 	}
@@ -427,7 +427,7 @@ public class Utils
 	 */
 	public static void printOption(JspWriter out, ResultRow row, String indentSpace,
 			String colNameCodeId, String colNameCodeValue)
-			throws IOException, SQLException, ConfigurationException
+			throws IOException, SQLException, EternaException
 	{
 		out.print(indentSpace);
 		out.print("<option value=\"");
@@ -1091,7 +1091,7 @@ public class Utils
 	 * @param toHTML   是否要处理HTML的字符
 	 */
 	public static String getResult(ResultRow row, String name, boolean toHTML)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		if (row == null)
 		{
@@ -1104,25 +1104,25 @@ public class Utils
 	public static abstract class Print
 	{
 		public void print(String name)
-				throws SQLException, IOException, ConfigurationException
+				throws SQLException, IOException, EternaException
 		{
 			this.print(name, true);
 		}
 
 		public void print(String name, String defaultVale)
-				throws SQLException, IOException, ConfigurationException
+				throws SQLException, IOException, EternaException
 		{
 			this.print(name, true, defaultVale);
 		}
 
 		public void print(String name, boolean toHTML)
-				throws SQLException, IOException, ConfigurationException
+				throws SQLException, IOException, EternaException
 		{
 			this.print(name, toHTML, null);
 		}
 
 		public abstract void print(String name, boolean toHTML, String defaultVale)
-				throws SQLException, IOException, ConfigurationException;
+				throws SQLException, IOException, EternaException;
 	}
 
 	public static class ResultPrint extends Print
@@ -1131,7 +1131,7 @@ public class Utils
 		private ResultRow row;
 
 		public ResultPrint(Writer out, Object obj)
-				throws SQLException, ConfigurationException
+				throws SQLException, EternaException
 		{
 			this.out = out;
 			this.row = null;
@@ -1159,7 +1159,7 @@ public class Utils
 		}
 
 		public void print(String name, boolean toHTML, String defaultVale)
-				throws SQLException, IOException, ConfigurationException
+				throws SQLException, IOException, EternaException
 		{
 			if (this.row == null)
 			{

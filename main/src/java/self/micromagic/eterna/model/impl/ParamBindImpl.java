@@ -19,7 +19,7 @@ package self.micromagic.eterna.model.impl;
 import java.sql.SQLException;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -55,7 +55,7 @@ public class ParamBindImpl extends AbstractGenerator
 	protected boolean subSQL = false;
 
 	public void initialize(ModelAdapter model, Execute execute)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.loop && this.names == null)
 		{
@@ -82,7 +82,7 @@ public class ParamBindImpl extends AbstractGenerator
 					}
 					catch (Exception ex)
 					{
-						throw new ConfigurationException("When set sub SQL, names must be number. but the "
+						throw new EternaException("When set sub SQL, names must be number. but the "
 								+ (i + 1) + " name is [" + this.names[i].sqlName +  "].");
 					}
 				}
@@ -101,7 +101,7 @@ public class ParamBindImpl extends AbstractGenerator
 						this.names[i] = new ParamSetManager.Name(this.names[i], param.getIndex());
 					}
 				}
-				catch (ConfigurationException ex)
+				catch (EternaException ex)
 				{
 					log.error("Error in parse name index.", ex);
 				}
@@ -130,7 +130,7 @@ public class ParamBindImpl extends AbstractGenerator
 	}
 
 	public void setSrc(String theSrc)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.srcHandler.setConfig(theSrc);
 	}
@@ -169,7 +169,7 @@ public class ParamBindImpl extends AbstractGenerator
 	}
 
 	public int setParam(AppData data, ParamSetManager psm, int loopIndex)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int loopCount = -1;
 		Object tempValue = null;
@@ -230,7 +230,7 @@ public class ParamBindImpl extends AbstractGenerator
 			}
 			else
 			{
-				throw new ConfigurationException("Error src type:" + tempValue.getClass() + ".");
+				throw new EternaException("Error src type:" + tempValue.getClass() + ".");
 			}
 		}
 		else
@@ -263,7 +263,7 @@ public class ParamBindImpl extends AbstractGenerator
 					}
 					else
 					{
-						throw new ConfigurationException("Error src type:" + tempValue.getClass() + ".");
+						throw new EternaException("Error src type:" + tempValue.getClass() + ".");
 					}
 				}
 				else
@@ -322,7 +322,7 @@ public class ParamBindImpl extends AbstractGenerator
 						}
 						else
 						{
-							throw new ConfigurationException("Error src length:" + objs.length + ", require:" + this.names.length + ".");
+							throw new EternaException("Error src length:" + objs.length + ", require:" + this.names.length + ".");
 						}
 					}
 					else
@@ -338,7 +338,7 @@ public class ParamBindImpl extends AbstractGenerator
 			{
 				if (tempValue == null)
 				{
-					throw new ConfigurationException("Error src type:[null].");
+					throw new EternaException("Error src type:[null].");
 				}
 				else if (tempValue instanceof Map)
 				{
@@ -370,7 +370,7 @@ public class ParamBindImpl extends AbstractGenerator
 				}
 				else
 				{
-					throw new ConfigurationException("Error src type:" + tempValue.getClass() + ".");
+					throw new EternaException("Error src type:" + tempValue.getClass() + ".");
 				}
 			}
 		}

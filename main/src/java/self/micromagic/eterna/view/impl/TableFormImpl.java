@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.SearchAdapter;
 import self.micromagic.eterna.share.EternaFactory;
@@ -58,7 +58,7 @@ public class TableFormImpl extends AbstractTable
 	private Cell typicalCell = null;
 
 	protected void initSubs(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Iterator celltr = this.getCells();
 		while (celltr.hasNext())
@@ -73,7 +73,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	protected void initBaseManager(String baseManagerName, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultReaderManager readerManager = null;
 		SearchAdapter search = null;
@@ -141,7 +141,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	protected void fillSubs(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ListIterator itr = this.cells.listIterator();
 		while (itr.hasNext())
@@ -195,7 +195,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	private CellImpl createCellByItem(BaseManager.Item item, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		CellImpl cell = new CellImpl();
 		this.fillSubByItem(cell, item);
@@ -229,7 +229,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	private void fillEmptyAttr(CellImpl nowCell, Cell typical, Component typicalComponent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!nowCell.sizeSetted && (typical.getTitleSize() != 1 || typical.getContainerSize() != 1))
 		{
@@ -252,7 +252,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		super.printSpecialBody(out, data, view);
 
@@ -308,7 +308,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	public void addCell(Cell cell)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (ViewTool.TYPICAL_NAME.equals(cell.getName()))
 		{
@@ -319,7 +319,7 @@ public class TableFormImpl extends AbstractTable
 			Object tmp = this.cellMap.put(cell.getName(), cell);
 			if (tmp != null)
 			{
-				throw new ConfigurationException("The Cell [" + cell.getName()
+				throw new EternaException("The Cell [" + cell.getName()
 						+ "] allready in this TableForm.");
 			}
 			this.cells.add(cell);
@@ -327,7 +327,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	public void deleteCell(Cell cell)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.cellMap.remove(cell.getName());
 		this.cells.remove(cell);
@@ -340,7 +340,7 @@ public class TableFormImpl extends AbstractTable
 	}
 
 	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{
@@ -384,7 +384,7 @@ public class TableFormImpl extends AbstractTable
 		private boolean newRowSetted = false;
 
 		protected void printSpecialTitle(Writer out, AppData data)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			if (this.getTitleSize() != 1)
 			{
@@ -394,7 +394,7 @@ public class TableFormImpl extends AbstractTable
 		}
 
 		protected void printSpecialContainer(Writer out, AppData data)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			if (this.getContainerSize() != 1)
 			{
@@ -412,7 +412,7 @@ public class TableFormImpl extends AbstractTable
 		}
 
 		protected void printSpecialElse(Writer out, AppData data)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			if (this.getRowSpan() != 1)
 			{
@@ -433,7 +433,7 @@ public class TableFormImpl extends AbstractTable
 		public void setType(String type) {}
 
 		public String getDataName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.isOtherData() ? this.otherDataName : this.getTableForm().getDataName();
 		}
@@ -536,13 +536,13 @@ public class TableFormImpl extends AbstractTable
 		}
 
 		public boolean isIgnore()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.isIgnore();
 		}
 
 		public OrderManager.OrderItem create(Object obj)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (obj == null)
 			{
@@ -553,7 +553,7 @@ public class TableFormImpl extends AbstractTable
 		}
 
 		public Iterator getOrderItemIterator(Object container)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (container instanceof List)
 			{

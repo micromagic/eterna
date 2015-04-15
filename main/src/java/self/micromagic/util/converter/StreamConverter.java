@@ -21,8 +21,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryStream;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.ObjectRef;
@@ -41,7 +41,7 @@ public class StreamConverter extends ObjectConverter
 	}
 
 	public InputStream getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{

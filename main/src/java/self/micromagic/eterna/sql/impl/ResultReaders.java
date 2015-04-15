@@ -28,7 +28,7 @@ import java.sql.Blob;
 import java.util.HashMap;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaFactory;
@@ -113,7 +113,7 @@ public abstract class ResultReaders
 		}
 
 		public void initialize(EternaFactory factory)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.orderName == null)
 			{
@@ -289,7 +289,7 @@ public abstract class ResultReaders
 		}
 
 		public PermissionSet getPermissionSet()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.permissionSet;
 		}
@@ -373,7 +373,7 @@ public abstract class ResultReaders
 		}
 
 		public Object readObject(Object obj)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (obj == null)
 			{
@@ -387,7 +387,7 @@ public abstract class ResultReaders
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 			}
 			return this.converter == null ? obj : this.converter.convert(obj);
@@ -968,18 +968,18 @@ public abstract class ResultReaders
 	}
 
 	public static ResultReader createReader(String type, String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Class c = (Class) ResultReaders.typeClassMap.get(type);
 		if (c == null)
 		{
-			throw new ConfigurationException("Can't create [ResultReader] type:" + type + ".");
+			throw new EternaException("Can't create [ResultReader] type:" + type + ".");
 		}
 		return ResultReaders.createReader(c, name);
 	}
 
 	public static ResultReader createReader(Class type, String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (type == null)
 		{
@@ -987,7 +987,7 @@ public abstract class ResultReaders
 		}
 		if (!ResultReader.class.isAssignableFrom(type))
 		{
-			throw new ConfigurationException(ClassGenerator.getClassName(type)
+			throw new EternaException(ClassGenerator.getClassName(type)
 					+ " is not instance of " + ClassGenerator.getClassName(ObjectReader.class));
 		}
 		try
@@ -998,7 +998,7 @@ public abstract class ResultReaders
 		catch (Exception ex)
 		{
 			SQLManager.log.warn("createReader:" + name, ex);
-			throw new ConfigurationException("Can't create [ResultReader] class:"
+			throw new EternaException("Can't create [ResultReader] class:"
 					+ ClassGenerator.getClassName(type) + ".");
 		}
 	}

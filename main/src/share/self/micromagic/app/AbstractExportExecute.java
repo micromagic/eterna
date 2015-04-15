@@ -28,8 +28,8 @@ import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.impl.AbstractExecute;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.sql.ResultReaderManager;
@@ -105,7 +105,7 @@ public abstract class AbstractExportExecute extends AbstractExecute
 	protected boolean needClose;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -220,12 +220,12 @@ public abstract class AbstractExportExecute extends AbstractExecute
 	}
 
 	protected ResultIterator getResultIterator(AppData data, Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		Object obj = data.caches[this.queryCacheIndex];
 		if (obj == null)
 		{
-			throw new ConfigurationException("There is no value in cache:" + this.queryCacheIndex + ".");
+			throw new EternaException("There is no value in cache:" + this.queryCacheIndex + ".");
 		}
 		if (obj instanceof QueryAdapter)
 		{
@@ -244,7 +244,7 @@ public abstract class AbstractExportExecute extends AbstractExecute
 		{
 			return ((SearchAdapter.Result) obj).queryResult;
 		}
-		throw new ConfigurationException("Error value type [" + obj.getClass() + "] in cache:"
+		throw new EternaException("Error value type [" + obj.getClass() + "] in cache:"
 				+ this.queryCacheIndex + ".");
 	}
 

@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.sql;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.util.IntegerRef;
 
@@ -25,26 +25,26 @@ public interface SQLParameterGenerator extends Generator
 	/**
 	 * 设置要构造的SQLParameter的名称.
 	 */
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
 	/**
 	 * 设置对应的列名.
 	 */
-	void setColumnName(String name) throws ConfigurationException;
+	void setColumnName(String name) throws EternaException;
 
 	/**
 	 * 设置要构造的SQLParameter的类型.
 	 */
-	void setParamType(String type) throws ConfigurationException;
+	void setParamType(String type) throws EternaException;
 
 	/**
 	 * 设置对应的数据准备生成器.
 	 */
-	void setParamVPC(String vpcName) throws ConfigurationException;
+	void setParamVPC(String vpcName) throws EternaException;
 
 	/**
 	 * 构造一个SQLParameter.
 	 */
-	SQLParameter createParameter(int paramIndex) throws ConfigurationException;
+	SQLParameter createParameter(int paramIndex) throws EternaException;
 
 }

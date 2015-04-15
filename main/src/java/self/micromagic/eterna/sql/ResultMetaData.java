@@ -16,58 +16,58 @@
 
 package self.micromagic.eterna.sql;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface ResultMetaData
 {
 	/**
 	 * 获取<code>ResultIterator</code>对应的<code>QueryAdapter</code>.
 	 */
-	QueryAdapter getQuery() throws ConfigurationException;
+	QueryAdapter getQuery() throws EternaException;
 
 	/**
 	 * 获取<code>ResultIterator</code>对应的<code>ResultReaderManager</code>.
 	 */
-	ResultReaderManager getReaderManager() throws ConfigurationException;
+	ResultReaderManager getReaderManager() throws EternaException;
 
 	/**
 	 * 获取<code>ResultIterator</code>对应的名称.
 	 * 此名称可以是对应query的名字, 也可以是对应reader-manager的名字.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 获取<code>ResultIterator</code>中列的个数.
 	 */
-	int getColumnCount() throws ConfigurationException;
+	int getColumnCount() throws EternaException;
 
 	/**
 	 * 获取某列的显示宽度.
 	 *
 	 * @param column 第一列为1, 第二列为2, ...
 	 */
-	int getColumnWidth(int column) throws ConfigurationException;
+	int getColumnWidth(int column) throws EternaException;
 
 	/**
 	 * 获取某列的显示标题.
 	 *
 	 * @param column 第一列为1, 第二列为2, ...
 	 */
-	String getColumnCaption(int column) throws ConfigurationException;
+	String getColumnCaption(int column) throws EternaException;
 
 	/**
 	 * 获取某列的名称.
 	 *
 	 * @param column 第一列为1, 第二列为2, ...
 	 */
-	String getColumnName(int column) throws ConfigurationException;
+	String getColumnName(int column) throws EternaException;
 
 	/**
 	 * 获取用于读取该列的ResultReader对象.
 	 *
 	 * @param column 第一列为1, 第二列为2, ...
 	 */
-	ResultReader getColumnReader(int column) throws ConfigurationException;
+	ResultReader getColumnReader(int column) throws EternaException;
 
 	/**
 	 * 根据列名查找此列所在的索引值.
@@ -76,7 +76,7 @@ public interface ResultMetaData
 	 * @return  该列所在的索引值
 	 *          第一列为1, 第二列为2, ...
 	 */
-	int findColumn(String columnName) throws ConfigurationException;
+	int findColumn(String columnName) throws EternaException;
 
 	/**
 	 * 根据列名查找此列所在的索引值.
@@ -87,6 +87,6 @@ public interface ResultMetaData
 	 * @return  该列所在所在的索引值, 或-1(当该列名不存在时)
 	 *          第一列为1, 第二列为2, ...
 	 */
-	int findColumn(String columnName, boolean notThrow) throws ConfigurationException;
+	int findColumn(String columnName, boolean notThrow) throws EternaException;
 
 }

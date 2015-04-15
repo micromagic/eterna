@@ -26,7 +26,7 @@ import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.search.SearchAdapter;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.EternaFactory;
@@ -48,7 +48,7 @@ public class SearchExecute extends AbstractExecute
 			DEFAULT_SEARCH_MANAGER.setConfig("data:searchManager");
 			DEFAULT_SEARCH_COUNT.setConfig("data:searchCount");
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			log.error("Error in init SearchExecute DataHandler.", ex);
 		}
@@ -71,7 +71,7 @@ public class SearchExecute extends AbstractExecute
 	protected boolean doExecute = true;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -86,7 +86,7 @@ public class SearchExecute extends AbstractExecute
 	}
 
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "search";
 	}
@@ -107,7 +107,7 @@ public class SearchExecute extends AbstractExecute
 	}
 
 	public void setQueryResultName(String config)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (config == null || config.length() == 0)
 		{
@@ -124,7 +124,7 @@ public class SearchExecute extends AbstractExecute
 	}
 
 	public void setSearchManagerName(String config)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (config == null || config.length() == 0)
 		{
@@ -141,7 +141,7 @@ public class SearchExecute extends AbstractExecute
 	}
 
 	public void setSearchCountName(String config)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (config == null || config.length() == 0)
 		{
@@ -188,7 +188,7 @@ public class SearchExecute extends AbstractExecute
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		String searchName = this.searchName != null ?
 				this.searchName : data.getRequestParameter(this.searchNameTag);

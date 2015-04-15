@@ -16,8 +16,8 @@
 
 package self.micromagic.util.converter;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
@@ -41,7 +41,7 @@ public class BooleanConverter extends ObjectConverter
 	}
 
 	public boolean getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{

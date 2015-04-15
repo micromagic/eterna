@@ -24,7 +24,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -39,7 +39,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 		implements QueryAdapter
 {
 	public QueryAdapter createQueryAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		QueryAdapterImpl other = new QueryAdapterImpl();
 		this.copy(other);
@@ -47,7 +47,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 	}
 
 	public ResultIterator executeQueryHoldConnection(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		long startTime = TimeLogger.getTime();
 		Statement stmt = null;
@@ -91,7 +91,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 			AppData.getCurrentData().addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, "1");
 			return result;
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			exception = ex;
 			throw ex;
@@ -134,7 +134,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 
 	protected ResultRow readResults(ResultReaderManager readerManager, Object[] row,
 			ResultIterator resultIterator, int rowNum)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		ResultRowImpl rowSet = new ResultRowImpl(row, resultIterator, rowNum, this.getPermission0());
 		return rowSet;
@@ -155,7 +155,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 		}
 
 		public ResultMetaData getMetaData()
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.metaData == null)
 			{
@@ -174,7 +174,7 @@ public class QueryAdapterImpl extends AbstractQueryAdapter
 				values = getResults(QueryAdapterImpl.this, this.readerList, rs);
 				return new ResultRowImpl(values, this, rowNum, QueryAdapterImpl.this.getPermission0());
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				log.error("Error in get results.", ex);
 				throw new SQLException(ex.getMessage());

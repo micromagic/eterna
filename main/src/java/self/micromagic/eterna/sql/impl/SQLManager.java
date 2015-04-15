@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.sql.SQLParameter;
@@ -67,7 +67,7 @@ public class SQLManager
 	private String cacheSQL;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int subIndex = 1;
 		for (int i = 0; i < this.partSQLs.length; i++)
@@ -85,7 +85,7 @@ public class SQLManager
 	}
 
 	public String getPreparedSQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.changed)
 		{
@@ -110,7 +110,7 @@ public class SQLManager
 	}
 
 	public String getTempPreparedSQL(int[] indexs, String[] subParts)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.backupSubParts();
 		try
@@ -159,7 +159,7 @@ public class SQLManager
 	}
 
 	public String frontParse(String sql, SQLParameter[] paramArray)
-			throws ConfigurationException
+			throws EternaException
 	{
 		StringAppender buf = StringTool.createStringAppender(sql.length() + 16);
 		String dealedSql = sql;
@@ -174,18 +174,18 @@ public class SQLManager
 				if (dealedSql.length() <= 1 + AUTO_NAME.length()
 						|| dealedSql.charAt(1 + AUTO_NAME.length()) != TEMPLATE_BEGIN)
 				{
-					throw new ConfigurationException("After #auto must with a \"[\".");
+					throw new EternaException("After #auto must with a \"[\".");
 				}
 				int endI = dealedSql.indexOf(TEMPLATE_END);
 				if (endI == -1)
 				{
-					throw new ConfigurationException("After #auto not found \"]\".");
+					throw new EternaException("After #auto not found \"]\".");
 				}
 				String tStr = dealedSql.substring(1 + AUTO_NAME.length() + 1, endI);
 				String[] arr = StringTool.separateString(tStr, ",;", true);
 				if (arr.length != 3)
 				{
-					throw new ConfigurationException("The #auto must with 3 parameters.");
+					throw new EternaException("The #auto must with 3 parameters.");
 				}
 				try
 				{
@@ -220,16 +220,16 @@ public class SQLManager
 					}
 					else
 					{
-						throw new ConfigurationException("Error #auto type [" + tStr + "].");
+						throw new EternaException("Error #auto type [" + tStr + "].");
 					}
 				}
 				catch (Exception ex)
 				{
-					if (ex instanceof ConfigurationException)
+					if (ex instanceof EternaException)
 					{
-						throw (ConfigurationException) ex;
+						throw (EternaException) ex;
 					}
-					throw new ConfigurationException("Error #auto parameters [" + tStr
+					throw new EternaException("Error #auto parameters [" + tStr
 							+ "], parameter count:" + paramArray.length + ".", ex);
 				}
 				dealedSql = dealedSql.substring(endI + 1);
@@ -249,7 +249,7 @@ public class SQLManager
 	 * 获取自动代码生成的索引值.
 	 */
 	private int getAutoParamIndex(String indexExp, SQLParameter[] paramArray)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (indexExp.charAt(0) == 'i')
 		{
@@ -294,11 +294,11 @@ public class SQLManager
 
 	private void dealAuto(String plus, String separator, String template, StringAppender buf,
 			SQLParameter[] paramArray, int begin, int end, boolean needName, boolean dynamicAuto)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (begin > end || begin < 0)
 		{
-			throw new ConfigurationException("Error #auto range [" + template + "].");
+			throw new EternaException("Error #auto range [" + template + "].");
 		}
 		boolean first = true;
 		for (int i = begin; i < end; i++)
@@ -325,7 +325,7 @@ public class SQLManager
 	}
 
 	public void parse(String sql)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.changed = true;
 		ArrayList partList = new ArrayList();
@@ -354,7 +354,7 @@ public class SQLManager
 	 */
 	public static void parse(String sql, boolean onlyC, List partList, List paramList,
 			List subSQLList, List subList)
-			throws ConfigurationException
+			throws EternaException
 	{
 		HashMap paramMap = new HashMap();
 		String dealedSql = sql;
@@ -390,7 +390,7 @@ public class SQLManager
 				{
 					if (onlyC)
 					{
-						throw new ConfigurationException("In template can't use sub_sql, sql:" + sql + ".");
+						throw new EternaException("In template can't use sub_sql, sql:" + sql + ".");
 					}
 					// 是一个sub sql
 					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
@@ -413,14 +413,14 @@ public class SQLManager
 				{
 					if (onlyC)
 					{
-						throw new ConfigurationException("In template can't use parameter, sql:" + sql + ".");
+						throw new EternaException("In template can't use parameter, sql:" + sql + ".");
 					}
 					// 是一个动态参数
 					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
 					dealedSql = dealedSql.substring(PARAMETER_NAME.length());
 					if (dealedSql.length() == 0 || dealedSql.charAt(0) != EXTEND_NAME_BEGIN)
 					{
-						throw new ConfigurationException("Not found dynamic parameter group, sql:" + sql + ".");
+						throw new EternaException("Not found dynamic parameter group, sql:" + sql + ".");
 					}
 					dealedSql = addParamPart(partList, paramList, paramMap, dealedSql);
 				}
@@ -431,12 +431,12 @@ public class SQLManager
 					dealedSql = dealedSql.substring(CONSTANT_NAME.length());
 					if (dealedSql.length() == 0 || dealedSql.charAt(0) != EXTEND_NAME_BEGIN)
 					{
-						throw new ConfigurationException("Not found constant name, sql:" + sql + ".");
+						throw new EternaException("Not found constant name, sql:" + sql + ".");
 					}
 					index = dealedSql.indexOf(EXTEND_NAME_END);
 					if (index == -1)
 					{
-						throw new ConfigurationException("Not end constant name, sql:" + sql + ".");
+						throw new EternaException("Not end constant name, sql:" + sql + ".");
 					}
 					partSQL = new ConstantSQL(dealedSql.substring(1, index));
 					partList.add(partSQL);
@@ -461,15 +461,15 @@ public class SQLManager
 	 * @return 此subSql前面的参数个数
 	 */
 	public int setSubPart(int index, String subPart)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (index < 0 || index >= this.subPartIndexs.length)
 		{
-			throw new ConfigurationException("The position [" + (index + 1) + "] hasn't sub sql.");
+			throw new EternaException("The position [" + (index + 1) + "] hasn't sub sql.");
 		}
 		if (subPart == null)
 		{
-			throw new ConfigurationException("The position [" + (index + 1) + "] sub sql can't set [null].");
+			throw new EternaException("The position [" + (index + 1) + "] sub sql can't set [null].");
 		}
 		int temp = this.subPartIndexs[index];
 		SubPart sp = (SubPart) this.partSQLs[temp];
@@ -482,11 +482,11 @@ public class SQLManager
 	}
 
 	private void setSubParts(int[] indexs, String[] subParts)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (indexs.length != subParts.length)
 		{
-			throw new ConfigurationException("The index count [" + indexs.length
+			throw new EternaException("The index count [" + indexs.length
 					+ "] must same as sub part count [" + subParts.length + "].");
 		}
 		for (int i = 0; i < indexs.length; i++)
@@ -494,11 +494,11 @@ public class SQLManager
 			int index = indexs[i];
 			if (index < 0 || index >= this.subPartIndexs.length)
 			{
-				throw new ConfigurationException("The position [" + (index + 1) + "] hasn't sub sql.");
+				throw new EternaException("The position [" + (index + 1) + "] hasn't sub sql.");
 			}
 			if (subParts[i] == null)
 			{
-				throw new ConfigurationException("The position [" + (index + 1) + "] sub sql can't set [null].");
+				throw new EternaException("The position [" + (index + 1) + "] sub sql can't set [null].");
 			}
 			int temp = this.subPartIndexs[index];
 			SubPart sp = (SubPart) this.partSQLs[temp];
@@ -525,13 +525,13 @@ public class SQLManager
 	}
 
 	public void setParamSetted(int index, boolean setted)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ParameterManager pm = this.parameterManagers[index];
 		boolean isDynamicType = pm.getType() == ParameterManager.DYNAMIC_PARAMETER;
 		if (!setted && !isDynamicType)
 		{
-			throw new ConfigurationException("Only dynamic parameter can ignore.");
+			throw new EternaException("Only dynamic parameter can ignore.");
 		}
 		boolean old = pm.isParameterSetted();
 		if (old != setted)
@@ -542,7 +542,7 @@ public class SQLManager
 	}
 
 	public boolean isDynamicParameter(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ParameterManager pm = this.parameterManagers[index];
 		boolean isDynamicType = pm.getType() == ParameterManager.DYNAMIC_PARAMETER;
@@ -626,7 +626,7 @@ public class SQLManager
 	}
 
 	private static int getEndTemplateIndex(String dealedSql)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = 0;
 		do
@@ -634,7 +634,7 @@ public class SQLManager
 			index = dealedSql.indexOf(TEMPLATE_END, index + 1);
 			if (index == -1)
 			{
-				throw new ConfigurationException("Not found the template end, dealedSql:" + dealedSql + ".");
+				throw new EternaException("Not found the template end, dealedSql:" + dealedSql + ".");
 			}
 		// 如果模板结束标记前是个扩展标记, 则继续寻找下一个结束标记
 		} while (isExtendBefore(dealedSql, index));
@@ -663,12 +663,12 @@ public class SQLManager
 	}
 
 	private static String addParamPart(List partList, List paramList, Map paramMap, String dealedSql)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = dealedSql.indexOf(EXTEND_NAME_END);
 		if (index == -1)
 		{
-			throw new ConfigurationException("Not end dynamic parameter group name, dealedSql:" + dealedSql + ".");
+			throw new EternaException("Not end dynamic parameter group name, dealedSql:" + dealedSql + ".");
 		}
 
 		// 根据组名 归类动态参数
@@ -685,7 +685,7 @@ public class SQLManager
 		dealedSql = dealedSql.substring(index + 1);
 		if (dealedSql.charAt(0) != TEMPLATE_BEGIN)
 		{
-			throw new ConfigurationException("Not found dynamic parameter template, dealedSql:" + dealedSql + ".");
+			throw new EternaException("Not found dynamic parameter template, dealedSql:" + dealedSql + ".");
 		}
 		index = getEndTemplateIndex(dealedSql);
 
@@ -735,15 +735,15 @@ public class SQLManager
 	protected static abstract class PartSQL
 	{
 		public void initialize(EternaFactory factory)
-				throws ConfigurationException
+				throws EternaException
 		{
 		}
 
 		public abstract PartSQL copy(boolean clear, SQLManager manager);
 
-		public abstract int getLength() throws ConfigurationException;
+		public abstract int getLength() throws EternaException;
 
-		public abstract String getSQL() throws ConfigurationException;
+		public abstract String getSQL() throws EternaException;
 
 	}
 
@@ -776,7 +776,7 @@ public class SQLManager
 		}
 
 		public int getLength()
-				throws ConfigurationException
+				throws EternaException
 		{
 			try
 			{
@@ -785,12 +785,12 @@ public class SQLManager
 			}
 			catch (Exception ex)
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 
 		public String getSQL()
-				throws ConfigurationException
+				throws EternaException
 		{
 			String temp = this.paramManager.getParameterTemplate(this.templateIndex);
 			return this.paramManager.isParameterSetted() ? temp : "";
@@ -864,7 +864,7 @@ public class SQLManager
 		}
 
 		public void initialize(EternaFactory factory)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.parts == null)
 			{
@@ -877,13 +877,13 @@ public class SQLManager
 
 				if (paramList.size() > 0)
 				{
-					throw new ConfigurationException(
+					throw new EternaException(
 							"The parameter flag '?' can't int the sub SQL tamplet:"
 							+ this.template + ".");
 				}
 				if (subList.size() != 1)
 				{
-					throw new ConfigurationException(
+					throw new EternaException(
 							"Error sub SQL flag in template:" + this.template + ".");
 				}
 				this.parts = new PartSQL[partList.size()];
@@ -924,11 +924,11 @@ public class SQLManager
 		}
 
 		public int getLength()
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.insertString == null)
 			{
-				throw new ConfigurationException("Sub SQL unsetted, subsql:[" + this.template + "].");
+				throw new EternaException("Sub SQL unsetted, subsql:[" + this.template + "].");
 			}
 
 			if (this.insertString.length() == 0)
@@ -946,11 +946,11 @@ public class SQLManager
 			}
 		}
 
-		public String getSQL() throws ConfigurationException
+		public String getSQL() throws EternaException
 		{
 			if (this.insertString == null)
 			{
-				throw new ConfigurationException("Sub SQL unsetted, index:[" + this.subIndex
+				throw new EternaException("Sub SQL unsetted, index:[" + this.subIndex
 						+ "], subsql:[" + this.template + "].");
 			}
 
@@ -1009,7 +1009,7 @@ public class SQLManager
 		}
 
 		public void initialize(EternaFactory factory)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.value == null)
 			{
@@ -1017,7 +1017,7 @@ public class SQLManager
 				String temp = factory.getConstantValue(this.name);
 				if (temp == null)
 				{
-					throw new ConfigurationException("The constant '" + this.name + "' not found.");
+					throw new EternaException("The constant '" + this.name + "' not found.");
 				}
 				this.value = temp;
 
@@ -1029,7 +1029,7 @@ public class SQLManager
 
 				if (paramList.size() > 0)
 				{
-					throw new ConfigurationException(
+					throw new EternaException(
 							"The parameter flag '?' can't int the sub SQL tamplet:"
 							+ this.value + ".");
 				}

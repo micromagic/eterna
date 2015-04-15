@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql;
 import java.sql.SQLException;
 import java.sql.Connection;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.logging.TimeLogger;
 import org.dom4j.Element;
@@ -32,7 +32,7 @@ public interface SpecialLog
 	/**
 	 * 初始化这个日志记录器.
 	 */
-	void initSpecialLog(EternaFactory factory) throws ConfigurationException;
+	void initSpecialLog(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 记录日志.
@@ -46,6 +46,6 @@ public interface SpecialLog
 	 * @see TimeLogger#formatPassTime(long)
 	 */
 	void logSQL(SQLAdapter sql, Element xmlLog, long usedTime, Throwable exception, Connection conn)
-			throws ConfigurationException, SQLException;
+			throws EternaException, SQLException;
 
 }

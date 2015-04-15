@@ -20,7 +20,7 @@ import java.util.Arrays;
 
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public class PermissionSet
 {
@@ -59,7 +59,7 @@ public class PermissionSet
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.permissionIds == null && this.permissionNames != null)
 		{

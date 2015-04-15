@@ -44,6 +44,7 @@ class BeanPropertyWriteProcesser
 		this.paramCache.put("settedCountName", BeanTool.SETTED_COUNT_NAME);
 		this.paramCache.put("prefixName", BeanTool.PREFIX_NAME);
 		this.paramCache.put("oldValueName", oldValueName);
+		this.paramCache.put("throw", "throw ex;");
 		this.beanMapName = beanMapName;
 	}
 

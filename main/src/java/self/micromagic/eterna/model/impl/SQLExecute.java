@@ -20,8 +20,9 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ArrayList;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -40,7 +41,7 @@ public abstract class SQLExecute extends AbstractExecute
 	protected EternaFactory factory;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -53,9 +54,13 @@ public abstract class SQLExecute extends AbstractExecute
 		{
 			((ParamBind) itr.next()).initialize(model, this);
 		}
+		// 换成ArrayList减少内存使用
+		ArrayList tmpList = new ArrayList(this.binds.size());
+		tmpList.addAll(this.binds);
+		this.binds = tmpList;
 	}
 
-	protected abstract SQLAdapter getSQL() throws ConfigurationException;
+	protected abstract SQLAdapter getSQL() throws EternaException;
 
 	public boolean isPushResult()
 	{
@@ -83,7 +88,7 @@ public abstract class SQLExecute extends AbstractExecute
 	}
 
 	public int setParams(AppData data, ParamSetManager psm, int loopIndex)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int loopCount = -1;
 		boolean hasLoop = false;
@@ -107,7 +112,7 @@ public abstract class SQLExecute extends AbstractExecute
 					}
 					if (loopCount != temp)
 					{
-						throw new ConfigurationException("The param count not same, "
+						throw new EternaException("The param count not same, "
 								+ loopCount + " and " + temp + ".");
 					}
 				}

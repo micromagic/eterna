@@ -22,7 +22,7 @@ import java.util.HashMap;
 import javax.servlet.jsp.tagext.TagSupport;
 
 import self.micromagic.eterna.view.ViewAdapter;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * @author micromagic@sina.com
@@ -51,7 +51,7 @@ public class InitBaseTag extends TagSupport
 	private String scatterFlag;
 
 	protected Map getCacheMap(ViewAdapter view)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Map cache = new HashMap();
 		if (this.suffixId != null)

@@ -1553,7 +1553,7 @@ class:className
 
      initParam             作用同init-param子节点.
 
-	  cloneInitParam        标识每一行的单元格中是否需要复制出独立的initParam
+     cloneInitParam        标识每一行的单元格中是否需要复制出独立的initParam
 
      ignore                是否将替代的控件忽略掉, 即不生成.
 

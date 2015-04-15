@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.digester.ObjectLogRule;
 import self.micromagic.eterna.digester.ShareSet;
@@ -82,7 +82,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public UserManager getUserManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.userManager == null && this.shareEternaFactory != null)
 		{
@@ -92,7 +92,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void setUserManager(UserManager um)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.userManager != null)
 		{
@@ -112,7 +112,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public DataSourceManager getDataSourceManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.dataSourceManager == null && this.shareEternaFactory != null)
 		{
@@ -122,7 +122,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void setDataSourceManager(DataSourceManager dsm)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.dataSourceManager != null)
 		{
@@ -142,7 +142,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public String[] getAttributeNames()
-			throws ConfigurationException
+			throws EternaException
 	{
 		String[] tmpP = this.shareEternaFactory != null ?
 				this.shareEternaFactory.getAttributeNames() : null;
@@ -158,7 +158,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public Object getAttribute(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Object tmp = super.getAttribute(name);
 		if (tmp == null && this.shareEternaFactory != null)
@@ -169,7 +169,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public Object setAttribute(String name, Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!this.initialized)
 		{
@@ -186,13 +186,13 @@ public class EternaFactoryImpl extends AbstractFactory
 		return super.setAttribute(name, value);
 	}
 
-	public void initialize(FactoryManager.Instance factoryManager, Factory shareFactory)
-			throws ConfigurationException
+	public void initialize(FactoryManager.Instance instance, Factory shareFactory)
+			throws EternaException
 	{
 		if (!this.initialized)
 		{
 			this.initialized = true;
-			super.initialize(factoryManager, shareFactory);
+			super.initialize(instance, shareFactory);
 			this.shareEternaFactory = (EternaFactory) shareFactory;
 			if (shareFactory != null && shareFactory instanceof EternaFactoryImpl)
 			{
@@ -217,7 +217,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			}
 			else
 			{
-				this.dataSourceManager = ShareSet.getDataSourceFromCache(this.getFactoryManager());
+				this.dataSourceManager = ShareSet.getDataSourceFromCache(this.getFactoryContainer());
 				if (this.dataSourceManager != null)
 				{
 					ObjectLogRule.setObjName("dataSourceManager");
@@ -437,7 +437,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			= new FactoryGeneratorManager("UpdateAdapter", this);
 
 	public String getConstantValue(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		String result = (String) this.constantMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -463,7 +463,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public SpecialLog getSpecialLog()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.specialLog == null && this.shareEternaFactory != null)
 		{
@@ -473,7 +473,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void setSpecialLog(SpecialLog sl)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.specialLog != null)
 		{
@@ -493,7 +493,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ResultFormat getFormat(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultFormat result = (ResultFormat) this.formatMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -504,7 +504,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addFormat(String name, ResultFormat format)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.formatMap.containsKey(name))
 		{
@@ -524,7 +524,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ResultReaderManager getReaderManager(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultReaderManager result = (ResultReaderManager) this.readerManagerMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -535,7 +535,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addReaderManager(String name, ResultReaderManager manager)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.readerManagerMap.containsKey(name))
 		{
@@ -555,7 +555,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public SQLParameterGroup getParameterGroup(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLParameterGroup group = (SQLParameterGroup) this.paramGroupMap.get(name);
 		if (group == null && this.shareEternaFactory != null)
@@ -566,7 +566,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addParameterGroup(String name, SQLParameterGroup group)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.paramGroupMap.containsKey(name))
 		{
@@ -586,67 +586,67 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public QueryAdapter createQueryAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (QueryAdapter) this.queryManager.create(name);
 	}
 
 	public QueryAdapter createQueryAdapter(int id)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (QueryAdapter) this.queryManager.create(id);
 	}
 
 	public int getQueryAdapterId(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.queryManager.getIdByName(name);
 	}
 
 	public void registerQueryAdapter(QueryAdapterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.queryManager.register(generator);
 	}
 
 	public void deregisterQueryAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.queryManager.deregister(name);
 	}
 
 	public UpdateAdapter createUpdateAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (UpdateAdapter) this.updateManager.create(name);
 	}
 
 	public UpdateAdapter createUpdateAdapter(int id)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (UpdateAdapter) this.updateManager.create(id);
 	}
 
 	public int getUpdateAdapterId(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.updateManager.getIdByName(name);
 	}
 
 	public void registerUpdateAdapter(UpdateAdapterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.updateManager.register(generator);
 	}
 
 	public void deregisterUpdateAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.updateManager.deregister(name);
 	}
 
 	public void registerValuePreparerGenerator(ValuePreparerCreaterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (generator == null)
 		{
@@ -675,7 +675,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ValuePreparerCreaterGenerator getValuePreparerCreaterGenerator(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (name == null)
 		{
@@ -688,21 +688,21 @@ public class EternaFactoryImpl extends AbstractFactory
 			{
 				return this.shareEternaFactory.getValuePreparerCreaterGenerator(name);
 			}
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [ValuePreparerCreaterGenerator] name:" + name + ".");
 		}
 		return vpcg;
 	}
 
 	public ValuePreparerCreater createValuePreparerCreater(int type)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int pureType = TypeManager.getPureType(type);
 		return this.defaultVPCG.createValuePreparerCreater(pureType);
 	}
 
 	public ValuePreparerCreater createValuePreparerCreater(String name, int type)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int pureType = TypeManager.getPureType(type);
 		ValuePreparerCreaterGenerator vpcg = (ValuePreparerCreaterGenerator) this.valuePreparerMap.get(name);
@@ -712,7 +712,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			{
 				return this.shareEternaFactory.createValuePreparerCreater(name, pureType);
 			}
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Not found [ValuePreparerCreaterGenerator] name:" + name + ".");
 		}
 		return vpcg.createValuePreparerCreater(pureType);
@@ -732,7 +732,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	private SearchManager.Attributes searchManagerAttributes;
 
 	private void initConditionBuilderList(String name, List builderNames)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Iterator itrName = builderNames.iterator();
 		List builders = new ArrayList(builderNames.size());
@@ -742,7 +742,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			ConditionBuilder cb = this.getConditionBuilder(cbName);
 			if (cb == null)
 			{
-				throw new ConfigurationException(
+				throw new EternaException(
 						"The ConditionBuilder [" + cbName + "] not found at list [" + name + "].");
 			}
 			builders.add(cb);
@@ -758,7 +758,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ConditionBuilder getConditionBuilder(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ConditionBuilder result = (ConditionBuilder) this.conditionBuilderMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -769,7 +769,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addConditionBuilder(String name, ConditionBuilder builder)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.conditionBuilderMap.containsKey(name))
 		{
@@ -789,7 +789,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public List getConditionBuilderList(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		List result = (List) this.conditionBuilderListMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -800,7 +800,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addConditionBuilderList(String name, List builderNames)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (builderNames == null)
 		{
@@ -827,37 +827,37 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public SearchAdapter createSearchAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (SearchAdapter) this.searchAdapterManager.create(name);
 	}
 
 	public SearchAdapter createSearchAdapter(int id)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (SearchAdapter) this.searchAdapterManager.create(id);
 	}
 
 	public int getSearchAdapterId(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.searchAdapterManager.getIdByName(name);
 	}
 
 	public void registerSearchAdapter(SearchAdapterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.searchAdapterManager.register(generator);
 	}
 
 	public void deregisterSearchAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.searchAdapterManager.deregister(name);
 	}
 
 	public void registerSearchManager(SearchManagerGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (generator == null)
 		{
@@ -880,7 +880,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 	}
 
-	public SearchManager createSearchManager() throws ConfigurationException
+	public SearchManager createSearchManager() throws EternaException
 	{
 		if (this.searchManagerGenerator == null)
 		{
@@ -893,7 +893,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public SearchManager.Attributes getSearchManagerAttributes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.searchManagerAttributes == null)
 		{
@@ -927,7 +927,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			= new FactoryGeneratorManager("ModelAdapter", this);
 
 	public String getModelNameTag()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.modelNameTag == null)
 		{
@@ -946,7 +946,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void setModelCaller(ModelCaller mc)
-		throws ConfigurationException
+		throws EternaException
 	{
 		if (this.modelCaller != this.defaultModelCaller)
 		{
@@ -981,7 +981,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ModelExport getModelExport(String exportName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ModelExport result = (ModelExport) this.exportMap.get(exportName);
 		if (result == null && this.shareEternaFactory != null)
@@ -992,31 +992,31 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ModelAdapter createModelAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (ModelAdapter) this.modelManager.create(name);
 	}
 
 	public ModelAdapter createModelAdapter(int id)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (ModelAdapter) this.modelManager.create(id);
 	}
 
 	public int getModelAdapterId(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.modelManager.getIdByName(name);
 	}
 
 	public void registerModelAdapter(ModelAdapterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.modelManager.register(generator);
 	}
 
 	public void deregisterModelAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.modelManager.deregister(name);
 	}
@@ -1035,7 +1035,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	private FactoryGeneratorManager viewManager
 			= new FactoryGeneratorManager("ViewAdapter", this);
 
-	public String getViewGlobalSetting() throws ConfigurationException
+	public String getViewGlobalSetting() throws EternaException
 	{
 		if (this.viewGlobalSetting == null)
 		{
@@ -1049,7 +1049,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public DataPrinter getDataPrinter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		DataPrinter result = (DataPrinter) this.dataPrinterMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -1060,7 +1060,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addDataPrinter(String name, DataPrinter dataPrinter)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.dataPrinterMap.containsKey(name))
 		{
@@ -1080,7 +1080,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public Function getFunction(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Function result = (Function) this.functionMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -1089,7 +1089,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		if (result == null)
 		{
-			throw new ConfigurationException("Not found the function [" + name + "].");
+			throw new EternaException("Not found the function [" + name + "].");
 		}
 		return result;
 	}
@@ -1110,7 +1110,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public Component getTypicalComponent(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Component result = (Component) this.typicalComponentMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -1121,7 +1121,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addTypicalComponent(String name, Component com)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.typicalComponentMap.containsKey(name))
 		{
@@ -1146,7 +1146,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void setStringCoder(StringCoder sc)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.stringCoder != this.defaultStringCoder)
 		{
@@ -1166,37 +1166,37 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public ViewAdapter createViewAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (ViewAdapter) this.viewManager.create(name);
 	}
 
 	public ViewAdapter createViewAdapter(int id)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return (ViewAdapter) this.viewManager.create(id);
 	}
 
 	public int getViewAdapterId(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.viewManager.getIdByName(name);
 	}
 
 	public void registerViewAdapter(ViewAdapterGenerator generator)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.viewManager.register(generator);
 	}
 
 	public void deregisterViewAdapter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.viewManager.deregister(name);
 	}
 
 	public Resource getResource(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Resource result = (Resource) this.resourceMap.get(name);
 		if (result == null && this.shareEternaFactory != null)
@@ -1207,7 +1207,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	}
 
 	public void addResource(String name, Resource resource)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.resourceMap.containsKey(name))
 		{

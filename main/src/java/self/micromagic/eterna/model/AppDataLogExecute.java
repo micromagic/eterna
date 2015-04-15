@@ -36,7 +36,7 @@ import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.cg.ClassKeyCache;
 import self.micromagic.cg.ArrayTool;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.search.SearchAdapter;
 import self.micromagic.eterna.search.SearchManager;
@@ -59,13 +59,13 @@ public class AppDataLogExecute extends AbstractExecute
 		implements Execute, Generator
 {
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "appDataLog";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		printAppData(data);
 		return null;
@@ -634,13 +634,13 @@ public class AppDataLogExecute extends AbstractExecute
 			else if (value instanceof Date)
 			{
 				parent.addAttribute("type", "Date");
-				parent.addAttribute("value", FormatTool.dateFullFormat.format((Date) value));
+				parent.addAttribute("value", FormatTool.formatFullDate(value));
 			}
 			else if (value instanceof Calendar)
 			{
 				parent.addAttribute("type", "Calendar");
 				Date d = ((Calendar) value).getTime();
-				parent.addAttribute("value", FormatTool.dateFullFormat.format(d));
+				parent.addAttribute("value", FormatTool.formatFullDate(d));
 			}
 			else if (value instanceof BeanPrinter)
 			{

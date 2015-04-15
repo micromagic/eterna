@@ -23,7 +23,7 @@ import java.text.DecimalFormat;
 
 import self.micromagic.eterna.sql.PreparedStatementWrap;
 import self.micromagic.util.converter.IntegerConverter;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 class ShortPreparer extends AbstractValuePreparer
 {
@@ -57,7 +57,7 @@ class ShortPreparer extends AbstractValuePreparer
 		}
 
 		public ValuePreparer createPreparer(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -67,7 +67,7 @@ class ShortPreparer extends AbstractValuePreparer
 		}
 
 		public ValuePreparer createPreparer(String value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{

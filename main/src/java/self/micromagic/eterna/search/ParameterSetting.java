@@ -18,7 +18,7 @@ package self.micromagic.eterna.search;
 
 import java.sql.Connection;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.model.AppData;
 
@@ -30,7 +30,7 @@ public interface ParameterSetting
 	/**
 	 * 初始化, 该方法会在所属的search初始化时被调用.
 	 */
-	void initParameterSetting(SearchAdapter search) throws ConfigurationException;
+	void initParameterSetting(SearchAdapter search) throws EternaException;
 
 	/**
 	 * 设置用于查询的QueryAdapter的参数.
@@ -42,6 +42,6 @@ public interface ParameterSetting
 	 */
 	void setParameter(QueryAdapter query, SearchAdapter search, boolean first,
 			AppData data, Connection conn)
-			throws ConfigurationException;
+			throws EternaException;
 
 }

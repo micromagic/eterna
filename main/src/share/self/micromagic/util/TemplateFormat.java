@@ -18,10 +18,10 @@ package self.micromagic.util;
 
 import java.util.ArrayList;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultFormat;
 import self.micromagic.eterna.sql.ResultFormatGenerator;
 import self.micromagic.eterna.sql.ResultRow;
@@ -50,12 +50,12 @@ public class TemplateFormat extends AbstractGenerator
 	protected String needPermission = null;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 	}
 
 	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.needPermission != null && permission != null)
 		{
@@ -116,7 +116,7 @@ public class TemplateFormat extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createFormat();
 	}
@@ -137,7 +137,7 @@ public class TemplateFormat extends AbstractGenerator
 	}
 
 	public static void main(String[] args)
-			throws ConfigurationException
+			throws EternaException
 	{
 		TemplateFormat t = new TemplateFormat();
 		t.setPattern("s[v]dfdfds[v]df[v]");

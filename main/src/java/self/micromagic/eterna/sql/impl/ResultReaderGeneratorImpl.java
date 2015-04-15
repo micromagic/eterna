@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.sql.impl;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.ResultReaderGenerator;
@@ -44,11 +44,11 @@ public class ResultReaderGeneratorImpl extends AbstractGenerator
 	}
 
 	public void setColumnName(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.columnIndex != -1)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Can't set the attribute 'colName' when given the attribute 'colIndex'.");
 		}
 		this.columnName = columnName;
@@ -56,11 +56,11 @@ public class ResultReaderGeneratorImpl extends AbstractGenerator
 	}
 
 	public void setColumnIndex(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.columnName != null)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Can't set the attribute 'colIndex' when given the attribute 'colName'.");
 		}
 		this.columnIndex = columnIndex;
@@ -103,13 +103,13 @@ public class ResultReaderGeneratorImpl extends AbstractGenerator
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createReader();
 	}
 
 	public ResultReader createReader()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.type = this.type == null ? "Object" : this.type;
 		ResultReader tmpReader = ResultReaders.createReader(this.type, this.name);

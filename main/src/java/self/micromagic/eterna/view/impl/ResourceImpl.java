@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Resource;
@@ -47,7 +47,7 @@ public class ResourceImpl extends AbstractGenerator
 	protected int estimateResSize = 128;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.text == null)
 		{
@@ -159,13 +159,13 @@ public class ResourceImpl extends AbstractGenerator
 	}
 
 	public Resource createResource()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createResource();
 	}

@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.view;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 public interface Function
@@ -24,14 +24,14 @@ public interface Function
 	public static final String ETERNA_FUNCTION_BEGIN = "{$eternaFunction:";
 	public static final String ETERNA_FUNCTION_END = "}";
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	String getParam() throws ConfigurationException;
+	String getParam() throws EternaException;
 
-	String getBody() throws ConfigurationException;
+	String getBody() throws EternaException;
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
-	ViewAdapter.ViewRes getViewRes() throws ConfigurationException;
+	ViewAdapter.ViewRes getViewRes() throws EternaException;
 
 }

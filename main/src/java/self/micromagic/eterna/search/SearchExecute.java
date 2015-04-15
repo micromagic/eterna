@@ -25,7 +25,7 @@ import java.sql.SQLException;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -68,7 +68,7 @@ public class SearchExecute extends AbstractExecute
 	}
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -93,13 +93,13 @@ public class SearchExecute extends AbstractExecute
 		this.sql_add_setting_id = this.factory.getUpdateAdapterId("eterna.search.insert.search_setting");
 	}
 
-	public String getExecuteType() throws ConfigurationException
+	public String getExecuteType() throws EternaException
 	{
 		return "search setting";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		String search = data.getRequestParameter("search");
 		String action = data.getRequestParameter("action");

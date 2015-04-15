@@ -20,11 +20,11 @@ import java.sql.Connection;
 
 import self.micromagic.eterna.search.ParameterSetting;
 import self.micromagic.eterna.search.SearchAdapter;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Factory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringTool;
 
 /**
@@ -51,7 +51,7 @@ public class JavaCodeParameterSetting
 	private ParameterSettingCode parameterSettingCode;
 
 	public void initParameterSetting(SearchAdapter search)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.search = search;
 		if (this.parameterSettingCode != null)
@@ -68,11 +68,11 @@ public class JavaCodeParameterSetting
 		{
 			if ("true".equalsIgnoreCase((String) this.getAttribute("throwCompileError")))
 			{
-				if (ex instanceof ConfigurationException)
+				if (ex instanceof EternaException)
 				{
-					throw (ConfigurationException) ex;
+					throw (EternaException) ex;
 				}
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 			else
 			{
@@ -84,7 +84,7 @@ public class JavaCodeParameterSetting
 
 	public void setParameter(QueryAdapter query, SearchAdapter search, boolean first,
 			AppData data, Connection conn)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -95,28 +95,28 @@ public class JavaCodeParameterSetting
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 	}
 
 	public Object getAttribute(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.search.getAttribute(name);
 	}
 
 	public String[] getAttributeNames()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.search.getAttributeNames();
 	}
 
 	public String getName()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.search.getName();
 	}

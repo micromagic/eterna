@@ -18,11 +18,11 @@ package self.micromagic.util.converter;
 
 import java.text.NumberFormat;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.ObjectRef;
-import self.micromagic.util.Utility;
 import self.micromagic.util.StringRef;
+import self.micromagic.util.Utility;
 import self.micromagic.util.container.RequestParameterMap;
 
 public class IntegerConverter extends ObjectConverter
@@ -46,7 +46,7 @@ public class IntegerConverter extends ObjectConverter
 	}
 
 	public int getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -130,7 +130,10 @@ public class IntegerConverter extends ObjectConverter
 			}
 			else
 			{
-				return format.parse(value).intValue();
+				synchronized (format)
+				{
+					return format.parse(value).intValue();
+				}
 			}
 		}
 		catch (Exception ex) {}

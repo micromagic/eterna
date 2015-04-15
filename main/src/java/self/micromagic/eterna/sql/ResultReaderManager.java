@@ -18,7 +18,7 @@ package self.micromagic.eterna.sql;
 
 import java.util.List;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -31,60 +31,60 @@ public interface ResultReaderManager
 	 *
 	 * @param factory  EternaFactory的实例, 可以从中获得父对象
 	 */
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 设置本ResultReaderManager的名称.
 	 */
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
 	/**
 	 * 获取本ResultReaderManager的名称.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 设置父ResultReaderManager的名称.
 	 */
-	void setParentName(String name) throws ConfigurationException;
+	void setParentName(String name) throws EternaException;
 
 	/**
 	 * 获取父ResultReaderManager的名称.
 	 */
-	String getParentName() throws ConfigurationException;
+	String getParentName() throws EternaException;
 
 	/**
 	 * 设置本ResultReaderManager的名称.
 	 */
-	ResultReaderManager getParent() throws ConfigurationException;
+	ResultReaderManager getParent() throws EternaException;
 
 	/**
 	 * 获取生成本ResultReaderManager的工厂.
 	 */
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
 	/**
 	 * 设置列名是否是大小写敏感的, 默认的是敏感的. <p>
 	 * 注: 只有在没有添加reader的时候才能设置这个属性.
 	 */
-	void setColNameSensitive(boolean colNameSensitive) throws ConfigurationException;
+	void setColNameSensitive(boolean colNameSensitive) throws EternaException;
 
 	/**
 	 * 获取列名是否大小写敏感的. <p>
 	 *
 	 * @return  true为大小写敏感的, false为不区分大小写
 	 */
-	boolean isColNameSensitive() throws ConfigurationException;
+	boolean isColNameSensitive() throws EternaException;
 
 	/**
 	 * 获得ResultReader的排序方式字符串.
 	 */
-	String getReaderOrder() throws ConfigurationException;
+	String getReaderOrder() throws EternaException;
 
 	/**
 	 * 设置ResultReader的排序方式字符串.
 	 */
-	void setReaderOrder(String readerOrder) throws ConfigurationException;
+	void setReaderOrder(String readerOrder) throws EternaException;
 
 	/**
 	 * 获得ResultReaderManager中的ResultReader总个数, 这个数字一般等于或大于
@@ -93,12 +93,12 @@ public interface ResultReaderManager
 	 * @see #getReaderList(Permission)
 	 * @see #getReaderInList(int)
 	 */
-	int getReaderCount() throws ConfigurationException;
+	int getReaderCount() throws EternaException;
 
 	/**
 	 * 通过reader的名称获取一个ResultReader.
 	 */
-	ResultReader getReader(String name) throws ConfigurationException;
+	ResultReader getReader(String name) throws EternaException;
 
 	/**
 	 * 添加一个<code>ResultReader</code>.
@@ -107,9 +107,9 @@ public interface ResultReaderManager
 	 * @param reader  要添加的<code>ResultReader</code>
 	 * @return     当该<code>ResultReader</code>的名称已经存在时则返回被覆盖掉
 	 *             的<code>ResultReader</code>, 否则返回<code>null</code>.
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 */
-	ResultReader addReader(ResultReader reader) throws ConfigurationException;
+	ResultReader addReader(ResultReader reader) throws EternaException;
 
 	/**
 	 * 设置<code>ResultReader</code>的排列顺序以及查询的排序规则.
@@ -120,9 +120,9 @@ public interface ResultReaderManager
 	 *                  列名及排序的格式为[名称][排序(1个字符)].
 	 *                  排序分别为: "-"无, "A"升序, "D"降序.
 	 *
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 */
-	void setReaderList(String[] names) throws ConfigurationException;
+	void setReaderList(String[] names) throws EternaException;
 
 	/**
 	 * 通过reader的名称获取该reader对象所在的索引值.
@@ -133,17 +133,17 @@ public interface ResultReaderManager
 	 * @return  reader所在的索引值, 或-1(当对应名称的reader不存在时)
 	 *          第一个值为1, 第二个值为2, ...
 	 */
-	int getIndexByName(String name, boolean notThrow) throws ConfigurationException;
+	int getIndexByName(String name, boolean notThrow) throws EternaException;
 
 	/**
 	 * 通过reader的名称获取该reader对象所在的索引值.
 	 */
-	int getIndexByName(String name) throws ConfigurationException;
+	int getIndexByName(String name) throws EternaException;
 
 	/**
 	 * 获取用于排序的sql子语句.
 	 */
-	String getOrderByString() throws ConfigurationException;
+	String getOrderByString() throws EternaException;
 
 	/**
 	 * 获得一个<code>ResultReader</code>的列表.
@@ -151,10 +151,10 @@ public interface ResultReaderManager
 	 * 无论setReaderList设置了怎样的值, 都是返回所有的.
 	 *
 	 * @return  用于读取数据的所有<code>ResultReader</code>的列表.
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 * @see #setReaderList
 	 */
-	List getReaderList() throws ConfigurationException;
+	List getReaderList() throws EternaException;
 
 	/**
 	 * 根据权限, 获得一个<code>ResultReader</code>的列表.
@@ -164,17 +164,17 @@ public interface ResultReaderManager
 	 * 的实例.
 	 *
 	 * @return  正式用于读取数据的<code>ResultReader</code>的列表.
-	 * @throws ConfigurationException  当相关配置出错时
+	 * @throws EternaException  当相关配置出错时
 	 * @see #setReaderList
 	 */
-	List getReaderList(Permission permission) throws ConfigurationException;
+	List getReaderList(Permission permission) throws EternaException;
 
 	/**
 	 * 根据索引值, 从reader列表中获取一个ResultReader.
 	 * reader列表会随着列设置而改变.
 	 * 第一个值为0, 第二个值为1, ...
 	 */
-	ResultReader getReaderInList(int index) throws ConfigurationException;
+	ResultReader getReaderInList(int index) throws EternaException;
 
 	/**
 	 * 锁住自己的所有属性, 这样使用者只能读取, 而不能修改. <p>
@@ -183,7 +183,7 @@ public interface ResultReaderManager
 	 *
 	 * @see #copy(String)
 	 */
-	void lock() throws ConfigurationException;
+	void lock() throws EternaException;
 
 	/**
 	 * 判断是否已锁住所有属性, 这样使用者只能读取, 而不能修改. <p>
@@ -191,13 +191,13 @@ public interface ResultReaderManager
 	 * @return  true表示已锁, false表示未锁
 	 * @see #lock
 	 */
-	boolean isLocked() throws ConfigurationException;
+	boolean isLocked() throws EternaException;
 
 	/**
 	 * 复制自身的所有属性, 并返回.
 	 * 当copyName不为null时, 名称将改为:"[原name]+[copyName]".
 	 * 反之名称将不会改变.
 	 */
-	ResultReaderManager copy(String copyName) throws ConfigurationException;
+	ResultReaderManager copy(String copyName) throws EternaException;
 
 }

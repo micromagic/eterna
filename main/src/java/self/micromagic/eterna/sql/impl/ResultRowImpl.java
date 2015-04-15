@@ -23,7 +23,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultMetaData;
@@ -61,7 +61,7 @@ public class ResultRowImpl implements ResultRow
 	private boolean wasNull;
 
 	public ResultRowImpl(Object[] values, ResultIterator resultIterator, int rowNum, Permission permission)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.values = values;
 		this.formateds = new Object[values.length];
@@ -98,7 +98,7 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public Object getSmartValue(int columnIndex)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		ResultReader reader = this.metaData.getColumnReader(columnIndex);
 		if (reader.getFormat() == null)
@@ -109,7 +109,7 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public Object getSmartValue(String columnName, boolean notThrow)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int index = this.metaData.findColumn(columnName, notThrow);
 		if (index == -1)
@@ -120,7 +120,7 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public Object getFormated(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int cIndex = columnIndex - 1;
 		if (this.values[cIndex] == null)
@@ -191,14 +191,14 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public Object getFormated(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getFormated(index);
 	}
 
 	private String getFormatErrMsg(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		StringAppender buf = StringTool.createStringAppender(128);
 		buf.append("When format the column [").append(columnIndex).append(':')
@@ -214,168 +214,168 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public String getString(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return strConvert.convertToString(this.values[columnIndex - 1]);
 	}
 
 	public boolean getBoolean(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return boolConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public byte getByte(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return byteConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public short getShort(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return shortConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public int getInt(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return intConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public long getLong(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return longConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public float getFloat(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return floatConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public double getDouble(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return doubleConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public byte[] getBytes(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return bytesConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public Date getDate(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return dateConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public Time getTime(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return timeConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public Timestamp getTimestamp(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return timestampConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public String getString(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getString(index);
 	}
 
 	public boolean getBoolean(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getBoolean(index);
 	}
 
 	public byte getByte(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getByte(index);
 	}
 
 	public short getShort(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getShort(index);
 	}
 
 	public int getInt(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getInt(index);
 	}
 
 	public long getLong(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getLong(index);
 	}
 
 	public float getFloat(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getFloat(index);
 	}
 
 	public double getDouble(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getDouble(index);
 	}
 
 	public byte[] getBytes(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getBytes(index);
 	}
 
 	public Date getDate(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getDate(index);
 	}
 
 	public Time getTime(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getTime(index);
 	}
 
 	public Timestamp getTimestamp(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getTimestamp(index);
@@ -388,14 +388,14 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public Object getObject(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getObject(index);
 	}
 
 	public Object getObject(String columnName, boolean notThrow)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		int index = this.metaData.findColumn(columnName, notThrow);
 		if (index == -1)
@@ -406,41 +406,41 @@ public class ResultRowImpl implements ResultRow
 	}
 
 	public InputStream getBinaryStream(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return streamConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public InputStream getBinaryStream(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getBinaryStream(index);
 	}
 
 	public Reader getCharacterStream(int columnIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.wasNull = this.values[columnIndex - 1] == null;
 		return readerConvert.getResult(this.values[columnIndex - 1]);
 	}
 
 	public Reader getCharacterStream(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		return this.getCharacterStream(index);
 	}
 
 	public int findColumn(String columnName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.metaData.findColumn(columnName, false);
 	}
 
 	public int findColumn(String columnName, boolean notThrow)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.metaData.findColumn(columnName, notThrow);
 	}

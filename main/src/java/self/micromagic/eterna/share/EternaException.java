@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.share;
 
-public class EternaException extends Exception
+public class EternaException extends RuntimeException
 {
 	/**
 	 * 构造一个<code>EternaException</code>.

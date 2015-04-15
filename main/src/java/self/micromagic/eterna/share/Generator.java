@@ -16,24 +16,24 @@
 
 package self.micromagic.eterna.share;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface Generator
 {
-	void setFactory(Factory factory) throws ConfigurationException;
+	void setFactory(Factory factory) throws EternaException;
 
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
-	Object setAttribute(String name, Object value) throws ConfigurationException;
+	Object setAttribute(String name, Object value) throws EternaException;
 
-	Object removeAttribute(String name) throws ConfigurationException;
+	Object removeAttribute(String name) throws EternaException;
 
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	Object create() throws ConfigurationException;
+	Object create() throws EternaException;
 
 }

@@ -20,20 +20,20 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface Execute
 {
-	void initialize(ModelAdapter model) throws ConfigurationException;
+	void initialize(ModelAdapter model) throws EternaException;
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	ModelAdapter getModelAdapter() throws ConfigurationException;
+	ModelAdapter getModelAdapter() throws EternaException;
 
-	String getExecuteType() throws ConfigurationException;
+	String getExecuteType() throws EternaException;
 
 	ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException;
+			throws EternaException, SQLException, IOException;
 
 	void destroy();
 

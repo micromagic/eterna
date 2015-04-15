@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql.preparer;
 import java.sql.SQLException;
 import java.util.Arrays;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.PreparedStatementWrap;
 import self.micromagic.eterna.sql.SQLParameter;
 import self.micromagic.eterna.sql.SQLAdapter;
@@ -131,7 +131,7 @@ public class PreparerManager
 	 * 设置一个preparer
 	 */
 	public void setValuePreparer(ValuePreparer preparer)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -139,7 +139,7 @@ public class PreparerManager
 		}
 		catch (Exception ex)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Invalid parameter index:" + (preparer.getRelativeIndex()) + ".");
 		}
 	}
@@ -148,7 +148,7 @@ public class PreparerManager
 	 * 将某个preparer设置为忽略的参数
 	 */
 	public void setIgnore(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -156,7 +156,7 @@ public class PreparerManager
 		}
 		catch (Exception ex)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Invalid parameter index:" + (index) + ".");
 		}
 	}
@@ -267,7 +267,7 @@ public class PreparerManager
 	 * 将所有的preparer参数设置到PreparedStatement中
 	 */
 	public void prepareValues(PreparedStatementWrap stmtWrap)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.prepareValues(stmtWrap, 1, null);
 	}
@@ -277,7 +277,7 @@ public class PreparerManager
 	 * 并且会将对配置的参数设置的索引值放到paramIndexs中
 	 */
 	public void prepareValues(PreparedStatementWrap stmtWrap, int[] paramIndexs)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		if (paramIndexs != null)
 		{
@@ -299,7 +299,7 @@ public class PreparerManager
 	 * @return 实际设置的参数个数
 	 */
 	private int prepareValues(PreparedStatementWrap stmtWrap, int startIndex, int[] paramIndexs)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int realIndex = startIndex;
 		int settedCount = 0;
@@ -339,7 +339,7 @@ public class PreparerManager
 				}
 				buf.append(" not setted. real:").append(realIndex);
 				buf.append(" relative:").append(i + 1).append('.');
-				throw new ConfigurationException(buf.toString());
+				throw new EternaException(buf.toString());
 			}
 			else
 			{
@@ -391,7 +391,7 @@ public class PreparerManager
 			implements ValuePreparer
 	{
 		public ValuePreparerCreater getCreater()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return null;
 		}

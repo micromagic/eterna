@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.Execute;
@@ -31,6 +30,7 @@ import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringTool;
 
 /**
@@ -55,7 +55,7 @@ public class DataPrepareExecute extends AbstractExecute
 	protected boolean pushPrepare = false;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -91,7 +91,7 @@ public class DataPrepareExecute extends AbstractExecute
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		if (data.getLogType() > 0)
 		{

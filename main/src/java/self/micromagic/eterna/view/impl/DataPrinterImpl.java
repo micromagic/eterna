@@ -33,7 +33,7 @@ import self.micromagic.cg.BeanMethodInfo;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.cg.ClassKeyCache;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
@@ -52,7 +52,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		implements DataPrinter, DataPrinterGenerator
 {
 	protected StringCoder stringCoder;
-	protected DateFormat dateFormat = FormatTool.dateFullFormat;
+	protected DateFormat dateFormat = FormatTool.fullDateFormat;
 
 	public DataPrinterImpl()
 	{
@@ -64,13 +64,13 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.stringCoder = factory.getStringCoder();
 	}
 
 	public void printData(Writer out, Map data, boolean hasPreData)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		boolean first = true;
 		Set entrySet = data.entrySet();
@@ -106,7 +106,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, Object value)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (value == null)
 		{
@@ -138,7 +138,7 @@ public class DataPrinterImpl extends AbstractGenerator
 			}
 			catch (SQLException ex)
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 		else if (value instanceof ResultIterator)
@@ -150,7 +150,7 @@ public class DataPrinterImpl extends AbstractGenerator
 			}
 			catch (SQLException ex)
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 			out.write('}');
 		}
@@ -225,7 +225,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		}
 		else if (value instanceof Date)
 		{
-			this.print(out, this.dateFormat.format((Date) value));
+			this.print(out, FormatTool.getThreadFormat(this.dateFormat).format((Date) value));
 		}
 		else if (Tool.isBean(value.getClass()))
 		{
@@ -237,7 +237,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		else if (value instanceof Calendar)
 		{
 			Date d = ((Calendar) value).getTime();
-			this.print(out, this.dateFormat.format(d));
+			this.print(out, FormatTool.getThreadFormat(this.dateFormat).format(d));
 		}
 		else if (value instanceof Map.Entry)
 		{
@@ -259,7 +259,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, Object[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -275,7 +275,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printMap(Writer out, Map map)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('{');
 		this.printData(out, map, false);
@@ -283,7 +283,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	protected void printCollection(Writer out, Collection collection)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (collection.size() > 0)
 		{
@@ -296,7 +296,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printResultRow(Writer out, ResultRow row)
-			throws IOException, ConfigurationException, SQLException
+			throws IOException, EternaException, SQLException
 	{
 		out.write('{');
 		ResultMetaData rmd = row.getResultIterator().getMetaData();
@@ -324,7 +324,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printResultIterator(Writer out, ResultIterator ritr)
-			throws IOException, ConfigurationException, SQLException
+			throws IOException, EternaException, SQLException
 	{
 		ResultMetaData rmd = ritr.getMetaData();
 		int count = rmd.getColumnCount();
@@ -378,7 +378,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printEnumeration(Writer out, Enumeration e)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (e.hasMoreElements())
@@ -394,7 +394,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printIterator(Writer out, Iterator itr)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (itr.hasNext())
@@ -410,13 +410,13 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, boolean b)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write(b ? "true" : "false");
 	}
 
 	public void print(Writer out, boolean[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -431,7 +431,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, char c)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('"');
 		this.stringCoder.toJsonString(out, c);
@@ -439,7 +439,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, char[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -458,13 +458,13 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, int i)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write(Integer.toString(i, 10));
 	}
 
 	public void print(Writer out, int[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -480,7 +480,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, byte[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -496,7 +496,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, short[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -512,13 +512,13 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, long l)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write(Long.toString(l, 10));
 	}
 
 	public void print(Writer out, long[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -534,13 +534,13 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, float f)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write(Float.toString(f));
 	}
 
 	public void print(Writer out, float[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -556,13 +556,13 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, double d)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write(Double.toString(d));
 	}
 
 	public void print(Writer out, double[] values)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.write('[');
 		if (values.length > 0)
@@ -578,7 +578,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void print(Writer out, String s)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (s == null)
 		{
@@ -605,7 +605,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, boolean value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -617,7 +617,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, char value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -629,7 +629,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, int value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -641,7 +641,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPairWithoutCheck(Writer out, String key, int value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (first)
 		{
@@ -657,7 +657,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, long value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -669,7 +669,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPairWithoutCheck(Writer out, String key, long value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (first)
 		{
@@ -685,7 +685,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, float value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -697,7 +697,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, double value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -709,7 +709,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPairWithoutCheck(Writer out, String key, double value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (first)
 		{
@@ -725,7 +725,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, String value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -737,7 +737,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPairWithoutCheck(Writer out, String key, String value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (first)
 		{
@@ -753,7 +753,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPair(Writer out, String key, Object value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!first)
 		{
@@ -765,7 +765,7 @@ public class DataPrinterImpl extends AbstractGenerator
 	}
 
 	public void printPairWithoutCheck(Writer out, String key, Object value, boolean first)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (first)
 		{
@@ -837,14 +837,14 @@ public class DataPrinterImpl extends AbstractGenerator
 			{
 				/*
 				String mh = "public void print(DataPrinter p, Writer out, Object bean)"
-						+ " throws IOException, ConfigurationException";
+						+ " throws IOException, EternaException";
 				String ut = "p.printPair(out, \"${name}\", ${value}, ${first});";
 				String pt = "p.printPair(out, \"${name}\", ${o_value}, ${first});";
 				String lt = "";
 				使用上面这段代码，对bean的处理效率明显下降
 				*/
 				String mh = "public void print(DataPrinter p, Writer out, Object bean)"
-						+ " throws IOException, ConfigurationException";
+						+ " throws IOException, EternaException";
 				String ut = "out.write(\"\\\"${name}\\\":\");"
 						+ "p.print(out, ${value});";
 				String pt = "out.write(\"\\\"${name}\\\":\");"
@@ -853,7 +853,7 @@ public class DataPrinterImpl extends AbstractGenerator
 				String[] imports = new String[]{
 					ClassGenerator.getPackageString(DataPrinter.class),
 					ClassGenerator.getPackageString(Writer.class),
-					ClassGenerator.getPackageString(ConfigurationException.class),
+					ClassGenerator.getPackageString(EternaException.class),
 					ClassGenerator.getPackageString(beanClass)
 				};
 				bp = (BeanPrinter) Tool.createBeanPrinter(beanClass, BeanPrinter.class, mh,
@@ -885,7 +885,7 @@ public class DataPrinterImpl extends AbstractGenerator
 		}
 
 		public void print(DataPrinter p, Writer out, Object bean)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			try
 			{
@@ -932,11 +932,11 @@ public class DataPrinterImpl extends AbstractGenerator
 				{
 					throw (IOException) ex;
 				}
-				if (ex instanceof ConfigurationException)
+				if (ex instanceof EternaException)
 				{
-					throw (ConfigurationException) ex;
+					throw (EternaException) ex;
 				}
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 

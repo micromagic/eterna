@@ -20,12 +20,12 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 
-import self.micromagic.util.StringRef;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringRef;
 import self.micromagic.util.container.RequestParameterMap;
-import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.digester.ConfigurationException;
 
 public class CalendarConverter extends ObjectConverter
 {
@@ -51,7 +51,7 @@ public class CalendarConverter extends ObjectConverter
 	}
 
 	public Calendar getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -159,8 +159,11 @@ public class CalendarConverter extends ObjectConverter
 				{
 					try
 					{
-						c.setTimeInMillis(formats[i].parse(value).getTime());
-						return c;
+						synchronized (formats[i])
+						{
+							c.setTimeInMillis(formats[i].parse(value).getTime());
+							return c;
+						}
 					}
 					catch (Throwable ex) {}
 				}

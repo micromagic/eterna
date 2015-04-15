@@ -32,13 +32,13 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultMetaData;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.ResultRow;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryStream;
 
 /**
@@ -50,13 +50,13 @@ public class ExportExcelExecute extends AbstractExportExecute
 	public static final int PRINT_TYPE_DATE = 2;
 
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "exportExcel";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		ResultIterator ritr = null;
 		OutputStream out = null;

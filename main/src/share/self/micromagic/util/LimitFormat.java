@@ -16,10 +16,10 @@
 
 package self.micromagic.util;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultFormat;
 import self.micromagic.eterna.sql.ResultFormatGenerator;
 import self.micromagic.eterna.sql.ResultRow;
@@ -31,12 +31,12 @@ public class LimitFormat extends AbstractGenerator
 	private int limit = 5;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 	}
 
 	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		String temp = obj == null ? "" : obj.toString();
 		return Utils.formatLength(temp, this.limit);
@@ -47,7 +47,8 @@ public class LimitFormat extends AbstractGenerator
 		return true;
 	}
 
-	public Object create() throws ConfigurationException
+	public Object create()
+			throws EternaException
 	{
 		return this.createFormat();
 	}

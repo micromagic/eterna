@@ -18,8 +18,8 @@ package self.micromagic.util.converter;
 
 import java.beans.PropertyEditor;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.ObjectRef;
 
@@ -169,9 +169,9 @@ public class ObjectConverter
 		return "Can't cast [" + obj + "](" + obj.getClass() + ") to " + needType + ".";
 	}
 
-	public static ConfigurationException getErrorTypeException(Object obj, String needType)
+	public static EternaException getErrorTypeException(Object obj, String needType)
 	{
-		return new ConfigurationException(getCastErrorMessage(obj, needType));
+		return new EternaException(getCastErrorMessage(obj, needType));
 	}
 
 	public ValueConverter copy()

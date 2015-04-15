@@ -19,7 +19,7 @@ package self.micromagic.eterna.sql;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface UpdateAdapter extends SQLAdapter
 {
@@ -28,6 +28,6 @@ public interface UpdateAdapter extends SQLAdapter
 	 *
 	 * @return    更新的记录数.
 	 */
-	int executeUpdate(Connection conn) throws ConfigurationException, SQLException;
+	int executeUpdate(Connection conn) throws EternaException, SQLException;
 
 }

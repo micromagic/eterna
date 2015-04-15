@@ -17,7 +17,7 @@
 package self.micromagic.eterna.security;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.StringRef;
@@ -31,12 +31,12 @@ public interface UserManager
 	/**
 	 * 初始化这个UserManager.
 	 */
-	void initUserManager(EternaFactory factory) throws ConfigurationException;
+	void initUserManager(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获得构造此UserManager的工厂.
 	 */
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
 	/**
 	 * 是否存在权限的编号. <p>

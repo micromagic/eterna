@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -109,7 +109,7 @@ public class QueryHelper
 	 * 根据原始语句, 生成处理后的, 带记录数限制的查询语句.
 	 */
 	public String getQuerySQL(String preparedSQL)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return preparedSQL;
 	}
@@ -136,7 +136,7 @@ public class QueryHelper
 	 * 获取本次查询设置的总记录数.
 	 */
 	public int getTotalCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getTotalCount();
 	}
@@ -145,7 +145,7 @@ public class QueryHelper
 	 * 获取该查询对象设置的总记录数扩展信息.
 	 */
 	public QueryAdapter.TotalCountExt getTotalCountExt()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getTotalCountExt();
 	}
@@ -158,7 +158,7 @@ public class QueryHelper
 	 * @return     包含数据结果的List对象, 里面的每个值为Object数组
 	 */
 	public List readResults(ResultSet rs, List readerList)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int start = this.getStartRow() - 1;
 		int tmpRecordCount = 0;
@@ -376,7 +376,7 @@ public class QueryHelper
 		protected abstract String createSpecialSQL(String preparedSQL);
 
 		public String getQuerySQL(String preparedSQL)
-				throws ConfigurationException
+				throws EternaException
 		{
 			QueryAdapter query = this.getQueryAdapter();
 			if (this.cacheSQL != null)
@@ -392,7 +392,7 @@ public class QueryHelper
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 			}
 			if (this.cacheSQL == null)
@@ -407,7 +407,7 @@ public class QueryHelper
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 				// 如果是读取全部记录或使用自动计数, 则使用原始的语句
 				this.useOldSQL = (this.nowMaxRows == -1 && this.nowStartRow == 1)
@@ -425,7 +425,7 @@ public class QueryHelper
 		}
 
 		public List readResults(ResultSet rs, List readerList)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			if (this.useOldSQL)
 			{

@@ -33,7 +33,7 @@ import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.Utility;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItem;
@@ -50,7 +50,7 @@ public class UploadExecute extends AbstractExecute
 	private Set namesSet = new HashSet();
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -84,13 +84,14 @@ public class UploadExecute extends AbstractExecute
 		}
 	}
 
-	public String getExecuteType() throws ConfigurationException
+	public String getExecuteType()
+			throws EternaException
 	{
 		return "upload";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		try
 		{
@@ -155,7 +156,7 @@ public class UploadExecute extends AbstractExecute
 		catch (FileUploadException ex)
 		{
 			log.error("Upload error.", ex);
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 		return null;
 	}

@@ -29,7 +29,7 @@ import java.util.StringTokenizer;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import self.micromagic.coder.Base64;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.sql.PreparedStatementWrap;
@@ -64,7 +64,7 @@ public class SQLAdapterImpl extends AbstractSQLAdapter
 	}
 
 	public SQLAdapter createSQLAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		SQLAdapterImpl other = new SQLAdapterImpl();
 		this.copy(other);
@@ -141,7 +141,7 @@ public class SQLAdapterImpl extends AbstractSQLAdapter
 	}
 
 	private static void logSQL(SQLAdapter sql, long usedTime, Throwable exception, Element logNode)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		logNode.addAttribute("name", sql.getName());
 		logNode.addAttribute("time", FormatTool.formatDatetime(new java.util.Date(System.currentTimeMillis())));
@@ -171,7 +171,7 @@ public class SQLAdapterImpl extends AbstractSQLAdapter
 	 */
 	protected static boolean logSQL(SQLAdapter sql, long usedTime, Throwable exception,
 			Connection conn)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		int logType = sql.getLogType();
 		if (logType == 0 || logType == -1)
@@ -225,196 +225,196 @@ public class SQLAdapterImpl extends AbstractSQLAdapter
 	 * @see TimeLogger#getTime()
 	 */
 	protected boolean logSQL(long usedTime, Throwable exception, Connection conn)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		return logSQL(this, usedTime, exception, conn);
 	}
 
 	public void execute(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.logSQL(0L, null, conn);
 	}
 
-	public void setNull(int parameterIndex, int sqlType) throws ConfigurationException
+	public void setNull(int parameterIndex, int sqlType) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createNullPreparer(parameterIndex, sqlType));
 	}
 
-	public void setNull(String parameterName, int sqlType) throws ConfigurationException
+	public void setNull(String parameterName, int sqlType) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createNullPreparer(this.getIndexByParameterName(parameterName), sqlType));
 	}
 
-	public void setBoolean(int parameterIndex, boolean x) throws ConfigurationException
+	public void setBoolean(int parameterIndex, boolean x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createBooleanPreparer(parameterIndex, x));
 	}
 
-	public void setBoolean(String parameterName, boolean x) throws ConfigurationException
+	public void setBoolean(String parameterName, boolean x) throws EternaException
 	{
 		this.setValuePreparer(
 			  this.vpcg.createBooleanPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setByte(int parameterIndex, byte x) throws ConfigurationException
+	public void setByte(int parameterIndex, byte x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createBytePreparer(parameterIndex, x));
 	}
 
-	public void setByte(String parameterName, byte x) throws ConfigurationException
+	public void setByte(String parameterName, byte x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createBytePreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setShort(int parameterIndex, short x) throws ConfigurationException
+	public void setShort(int parameterIndex, short x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createShortPreparer(parameterIndex, x));
 	}
 
-	public void setShort(String parameterName, short x) throws ConfigurationException
+	public void setShort(String parameterName, short x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createShortPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setInt(int parameterIndex, int x) throws ConfigurationException
+	public void setInt(int parameterIndex, int x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createIntPreparer(parameterIndex, x));
 	}
 
-	public void setInt(String parameterName, int x) throws ConfigurationException
+	public void setInt(String parameterName, int x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createIntPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setLong(int parameterIndex, long x) throws ConfigurationException
+	public void setLong(int parameterIndex, long x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createLongPreparer(parameterIndex, x));
 	}
 
-	public void setLong(String parameterName, long x) throws ConfigurationException
+	public void setLong(String parameterName, long x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createLongPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setFloat(int parameterIndex, float x) throws ConfigurationException
+	public void setFloat(int parameterIndex, float x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createFloatPreparer(parameterIndex, x));
 	}
 
-	public void setFloat(String parameterName, float x) throws ConfigurationException
+	public void setFloat(String parameterName, float x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createFloatPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setDouble(int parameterIndex, double x) throws ConfigurationException
+	public void setDouble(int parameterIndex, double x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createDoublePreparer(parameterIndex, x));
 	}
 
-	public void setDouble(String parameterName, double x) throws ConfigurationException
+	public void setDouble(String parameterName, double x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createDoublePreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setString(int parameterIndex, String x) throws ConfigurationException
+	public void setString(int parameterIndex, String x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createStringPreparer(parameterIndex, x));
 	}
 
-	public void setString(String parameterName, String x) throws ConfigurationException
+	public void setString(String parameterName, String x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createStringPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setBytes(int parameterIndex, byte[] x) throws ConfigurationException
+	public void setBytes(int parameterIndex, byte[] x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createBytesPreparer(parameterIndex, x));
 	}
 
-	public void setBytes(String parameterName, byte[] x) throws ConfigurationException
+	public void setBytes(String parameterName, byte[] x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createBytesPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setDate(int parameterIndex, Date x) throws ConfigurationException
+	public void setDate(int parameterIndex, Date x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createDatePreparer(parameterIndex, x));
 	}
 
-	public void setDate(String parameterName, Date x) throws ConfigurationException
+	public void setDate(String parameterName, Date x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createDatePreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
-	public void setTime(int parameterIndex, Time x) throws ConfigurationException
+	public void setTime(int parameterIndex, Time x) throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createTimePreparer(parameterIndex, x));
 	}
 
-	public void setTime(String parameterName, Time x) throws ConfigurationException
+	public void setTime(String parameterName, Time x) throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createTimePreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
 	public void setTimestamp(int parameterIndex, Timestamp x)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createTimestampPreparer(parameterIndex, x));
 	}
 
 	public void setTimestamp(String parameterName, Timestamp x)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createTimestampPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
 	public void setObject(int parameterIndex, Object x)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createObjectPreparer(parameterIndex, x));
 	}
 
 	public void setObject(String parameterName, Object x)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createObjectPreparer(this.getIndexByParameterName(parameterName), x));
 	}
 
 	public void setBinaryStream(int parameterIndex, InputStream x, int length)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createStreamPreparer(parameterIndex, x, length));
 	}
 
 	public void setBinaryStream(String parameterName, InputStream x, int length)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createStreamPreparer(this.getIndexByParameterName(parameterName), x, length));
 	}
 
 	public void setCharacterStream(int parameterIndex, Reader reader, int length)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(this.vpcg.createReaderPreparer(parameterIndex, reader, length));
 	}
 
 	public void setCharacterStream(String parameterName, Reader reader, int length)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(
 				this.vpcg.createReaderPreparer(this.getIndexByParameterName(parameterName), reader, length));
@@ -422,13 +422,13 @@ public class SQLAdapterImpl extends AbstractSQLAdapter
 
 	/*
 	public void setObject(int parameterIndex, Object x, int targetSqlType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(new ObjectPreparer(parameterIndex, x, new Integer(targetSqlType)));
 	}
 
 	public void setObject(String parameterName, Object x, int targetSqlType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(
 				new ObjectPreparer(this.getIndexByParameterName(parameterName),
@@ -437,14 +437,14 @@ public class SQLAdapterImpl extends AbstractSQLAdapter
 	}
 
 	public void setObject(int parameterIndex, Object x, int targetSqlType, int scale)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(new ObjectPreparer(parameterIndex, x,
 				new Integer(targetSqlType), new Integer(scale)));
 	}
 
 	public void setObject(String parameterName, Object x, int targetSqlType, int scale)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setValuePreparer(
 				new ObjectPreparer(this.getIndexByParameterName(parameterName),

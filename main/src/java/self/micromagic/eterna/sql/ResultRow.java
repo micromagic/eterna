@@ -18,20 +18,20 @@ package self.micromagic.eterna.sql;
 
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface ResultRow
 {
 	/**
 	 * 获得当前的ResultRow所在的ResultIterator.
 	 */
-	ResultIterator getResultIterator() throws SQLException, ConfigurationException;
+	ResultIterator getResultIterator() throws SQLException, EternaException;
 
 	/**
 	 * 获取当前<code>ResultRow</code>在结果中的位置.
 	 * 如果在第一条记录则返回1, 第二条记录则返回2...
 	 */
-	int getRowNum() throws SQLException, ConfigurationException;
+	int getRowNum() throws SQLException, EternaException;
 
 	/**
 	 * 如果指定的列设置了format, 则以getFormated方式获取值.
@@ -44,7 +44,7 @@ public interface ResultRow
 	 * @see #getObject(int)
 	 * @exception SQLException 假如访问数据库时出错
 	 */
-	Object getSmartValue(int columnIndex) throws SQLException, ConfigurationException;
+	Object getSmartValue(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * 如果指定的列设置了format, 则以getFormated方式获取值.
@@ -59,7 +59,7 @@ public interface ResultRow
 	 * @see #getObject(String)
 	 * @exception SQLException 假如访问数据库时出错
 	 */
-	Object getSmartValue(String columnName, boolean notThrow) throws SQLException, ConfigurationException;
+	Object getSmartValue(String columnName, boolean notThrow) throws SQLException, EternaException;
 
 	/**
 	 * 在当前行<code>ResultRow</code>对象中取出格式化后指定的列.
@@ -69,7 +69,7 @@ public interface ResultRow
 	 *
 	 * @exception SQLException 假如访问数据库时出错
 	 */
-	Object getFormated(int columnIndex) throws SQLException, ConfigurationException;
+	Object getFormated(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * 在当前行<code>ResultRow</code>对象中取出格式化后指定的列.
@@ -79,7 +79,7 @@ public interface ResultRow
 	 *
 	 * @exception SQLException 假如访问数据库时出错
 	 */
-	Object getFormated(String columnName) throws SQLException, ConfigurationException;
+	Object getFormated(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Reports whether
@@ -98,7 +98,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	boolean wasNull() throws SQLException, ConfigurationException;
+	boolean wasNull() throws SQLException, EternaException;
 
 	//======================================================================
 	// Methods for accessing results by column index
@@ -120,7 +120,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	String getString(int columnIndex) throws SQLException, ConfigurationException;
+	String getString(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -138,7 +138,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	boolean getBoolean(int columnIndex) throws SQLException, ConfigurationException;
+	boolean getBoolean(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -156,7 +156,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	byte getByte(int columnIndex) throws SQLException, ConfigurationException;
+	byte getByte(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -174,7 +174,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	short getShort(int columnIndex) throws SQLException, ConfigurationException;
+	short getShort(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -192,7 +192,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	int getInt(int columnIndex) throws SQLException, ConfigurationException;
+	int getInt(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -210,7 +210,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	long getLong(int columnIndex) throws SQLException, ConfigurationException;
+	long getLong(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -228,7 +228,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	float getFloat(int columnIndex) throws SQLException, ConfigurationException;
+	float getFloat(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -246,7 +246,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	double getDouble(int columnIndex) throws SQLException, ConfigurationException;
+	double getDouble(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -265,7 +265,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	byte[] getBytes(int columnIndex) throws SQLException, ConfigurationException;
+	byte[] getBytes(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -283,7 +283,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	java.sql.Date getDate(int columnIndex) throws SQLException, ConfigurationException;
+	java.sql.Date getDate(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -301,7 +301,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	java.sql.Time getTime(int columnIndex) throws SQLException, ConfigurationException;
+	java.sql.Time getTime(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -319,7 +319,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	java.sql.Timestamp getTimestamp(int columnIndex) throws SQLException, ConfigurationException;
+	java.sql.Timestamp getTimestamp(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -343,7 +343,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *
 	 */
-	java.io.InputStream getBinaryStream(int columnIndex) throws SQLException, ConfigurationException;
+	java.io.InputStream getBinaryStream(int columnIndex) throws SQLException, EternaException;
 
 	//======================================================================
 	// Methods for accessing results by column name
@@ -365,7 +365,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	String getString(String columnName) throws SQLException, ConfigurationException;
+	String getString(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -383,7 +383,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	boolean getBoolean(String columnName) throws SQLException, ConfigurationException;
+	boolean getBoolean(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -401,7 +401,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	byte getByte(String columnName) throws SQLException, ConfigurationException;
+	byte getByte(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -419,7 +419,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	short getShort(String columnName) throws SQLException, ConfigurationException;
+	short getShort(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -437,7 +437,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	int getInt(String columnName) throws SQLException, ConfigurationException;
+	int getInt(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -455,7 +455,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	long getLong(String columnName) throws SQLException, ConfigurationException;
+	long getLong(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -473,7 +473,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	float getFloat(String columnName) throws SQLException, ConfigurationException;
+	float getFloat(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -491,7 +491,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	double getDouble(String columnName) throws SQLException, ConfigurationException;
+	double getDouble(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -510,7 +510,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	byte[] getBytes(String columnName) throws SQLException, ConfigurationException;
+	byte[] getBytes(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -528,7 +528,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	java.sql.Date getDate(String columnName) throws SQLException, ConfigurationException;
+	java.sql.Date getDate(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -546,7 +546,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	java.sql.Time getTime(String columnName) throws SQLException, ConfigurationException;
+	java.sql.Time getTime(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -564,7 +564,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 *                         <p>假如访问数据库时出错
 	 */
-	java.sql.Timestamp getTimestamp(String columnName) throws SQLException, ConfigurationException;
+	java.sql.Timestamp getTimestamp(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -587,7 +587,7 @@ public interface ResultRow
 	 * if the value is SQL <code>NULL</code>, the result is <code>null</code>
 	 * @exception SQLException if a database access error occurs
 	 */
-	java.io.InputStream getBinaryStream(String columnName) throws SQLException, ConfigurationException;
+	java.io.InputStream getBinaryStream(String columnName) throws SQLException, EternaException;
 
 
 	//=====================================================================
@@ -602,7 +602,7 @@ public interface ResultRow
 	 * @return  持有该列值的<code>java.lang.Object</code>
 	 * @exception SQLException  假如访问数据库时出错
 	 */
-	Object getObject(int columnIndex) throws SQLException, ConfigurationException;
+	Object getObject(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * 在当前行<code>ResultRow</code>对象中以<code>Object</code>的形式
@@ -612,7 +612,7 @@ public interface ResultRow
 	 * @return  持有该列值的<code>java.lang.Object</code>
 	 * @exception SQLException   假如访问数据库时出错
 	 */
-	Object getObject(String columnName) throws SQLException, ConfigurationException;
+	Object getObject(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * 在当前行<code>ResultRow</code>对象中以<code>Object</code>的形式
@@ -625,7 +625,7 @@ public interface ResultRow
 	 *          或null(当对应名称的reader不存在时)
 	 * @exception SQLException   假如访问数据库时出错
 	 */
-	Object getObject(String columnName, boolean notThrow) throws SQLException, ConfigurationException;
+	Object getObject(String columnName, boolean notThrow) throws SQLException, EternaException;
 
 	//----------------------------------------------------------------
 
@@ -637,7 +637,7 @@ public interface ResultRow
 	 * @exception SQLException  假如<code>ResultRow</code>对象中不存在该列名或
 	 *                          访问数据库时发生错误
 	 */
-	int findColumn(String columnName) throws SQLException, ConfigurationException;
+	int findColumn(String columnName) throws SQLException, EternaException;
 
 	/**
 	 * 在<code>ResultRow</code>中将列名映射为列的索引值.
@@ -649,7 +649,7 @@ public interface ResultRow
 	 * @exception SQLException  假如<code>ResultRow</code>对象中不存在该列名或
 	 *                          访问数据库时发生错误
 	 */
-	int findColumn(String columnName, boolean notThrow) throws SQLException, ConfigurationException;
+	int findColumn(String columnName, boolean notThrow) throws SQLException, EternaException;
 
 
 	//--------------------------JDBC 2.0-----------------------------------
@@ -669,7 +669,7 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 * @since 1.2
 	 */
-	java.io.Reader getCharacterStream(int columnIndex) throws SQLException, ConfigurationException;
+	java.io.Reader getCharacterStream(int columnIndex) throws SQLException, EternaException;
 
 	/**
 	 * Retrieves the value of the designated column in the current row
@@ -683,6 +683,6 @@ public interface ResultRow
 	 * @exception SQLException if a database access error occurs
 	 * @since 1.2
 	 */
-	java.io.Reader getCharacterStream(String columnName) throws SQLException, ConfigurationException;
+	java.io.Reader getCharacterStream(String columnName) throws SQLException, EternaException;
 
 }

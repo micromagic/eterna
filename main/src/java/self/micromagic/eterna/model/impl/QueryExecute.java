@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -44,7 +44,7 @@ public class QueryExecute extends SQLExecute
 	protected int queryAdapterIndex = -1;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -55,7 +55,7 @@ public class QueryExecute extends SQLExecute
 	}
 
 	protected SQLAdapter getSQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.queryAdapterIndex == -1 ? this.factory.createQueryAdapter(this.getName())
 				: this.factory.createQueryAdapter(this.queryAdapterIndex);
@@ -77,7 +77,7 @@ public class QueryExecute extends SQLExecute
 	}
 
 	public void setCountType(String countType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if ("auto".equals(countType))
 		{
@@ -93,12 +93,12 @@ public class QueryExecute extends SQLExecute
 		}
 		else
 		{
-			throw new ConfigurationException("Error count type:[" + countType + "].");
+			throw new EternaException("Error count type:[" + countType + "].");
 		}
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		boolean inCache = false;
 		QueryAdapter query = null;

@@ -257,8 +257,18 @@ public class CookieContainer extends AbstractContainerSetting
 			{
 				cookie = new Cookie(this.encodeStr(name), "");
 				cookie.setMaxAge(0);
-				cookie.setDomain(oldCookie.getDomain());
-				cookie.setPath(oldCookie.getPath());
+				if (oldCookie.getDomain() != null)
+				{
+					cookie.setDomain(oldCookie.getDomain());
+				}
+				if (oldCookie.getPath() != null)
+				{
+					cookie.setPath(oldCookie.getPath());
+				}
+				else
+				{
+					cookie.setPath(this.request.getContextPath().concat("/"));
+				}
 			}
 		}
 		else if (value instanceof Cookie)

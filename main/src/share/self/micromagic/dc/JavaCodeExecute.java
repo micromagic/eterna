@@ -21,10 +21,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import self.micromagic.app.BaseExecute;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringTool;
 import self.micromagic.cg.ClassGenerator;
 
@@ -50,7 +50,7 @@ public class JavaCodeExecute extends BaseExecute
 	private ExecuteCode executeCode;
 
 	protected void plusInit()
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.executeType = "javaCode";
 		String code = CodeClassTool.getCode(this, this.factory, "code", "attrCode");
@@ -65,11 +65,11 @@ public class JavaCodeExecute extends BaseExecute
 		{
 			if ("true".equalsIgnoreCase((String) this.getAttribute("throwCompileError")))
 			{
-				if (ex instanceof ConfigurationException)
+				if (ex instanceof EternaException)
 				{
-					throw (ConfigurationException) ex;
+					throw (EternaException) ex;
 				}
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 			else
 			{
@@ -100,7 +100,7 @@ public class JavaCodeExecute extends BaseExecute
 	}
 
 	protected ModelExport dealProcess(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException, InnerExport
+			throws EternaException, SQLException, IOException, InnerExport
 	{
 		if (this.executeCode == null)
 		{
@@ -117,9 +117,9 @@ public class JavaCodeExecute extends BaseExecute
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
 			if (ex instanceof SQLException)
 			{
@@ -133,7 +133,7 @@ public class JavaCodeExecute extends BaseExecute
 			{
 				throw (InnerExport) ex;
 			}
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 	}
 

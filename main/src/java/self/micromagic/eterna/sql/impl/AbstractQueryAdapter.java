@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.security.Permission;
@@ -89,7 +89,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	private boolean checkDatabaseName = true;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -141,7 +141,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	 * @param init  创建完后是否需要立刻执行初始化
 	 */
 	private ResultReaderManagerImpl createTempReaderManager0(boolean init)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultReaderManagerImpl temp = new ResultReaderManagerImpl();
 		temp.setName("<query>/" + this.getName());
@@ -153,7 +153,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	private ResultReaderManager createTempReaderManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		ResultReaderManagerImpl temp = this.createTempReaderManager0(false);
 		temp.setParentName(this.readerManagerName);
@@ -246,7 +246,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public ResultReaderManager getReaderManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.readerManagerSetted)
 		{
@@ -257,7 +257,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void setReaderManager(ResultReaderManager readerManager)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.readerManager != readerManager)
 		{
@@ -269,7 +269,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 				{
 					if (!this.otherReaderManagerSet.contains(name1))
 					{
-						throw new ConfigurationException(
+						throw new EternaException(
 								"The setted readerManager name [" + name1 + "],  not same [" + name2
 								+ "] in query[" + this.getName() + "], or in " + OTHER_READER_MANAGER_SET_FLAG
 								+ " " + this.otherReaderManagerSet + ".");
@@ -277,7 +277,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 				}
 				else
 				{
-					throw new ConfigurationException(
+					throw new EternaException(
 							"The setted readerManager name [" + name1 + "],  not same [" + name2
 							+ "] in query[" + this.getName() + "].");
 				}
@@ -305,11 +305,11 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void addResultReader(ResultReader reader)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Can't add reader in initialized " + this.getType() + " [" + this.getName() + "].");
 		}
 		else if (this.tempNameToIndexMap == null)
@@ -319,7 +319,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 		}
 		if (this.tempNameToIndexMap.containsKey(reader.getName()))
 		{
-			throw new ConfigurationException(
+			throw new EternaException(
 					"Duplicate [ResultReader] name:" + reader.getName()
 					+ ", in query[" + this.getName() + "].");
 		}
@@ -356,12 +356,12 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 			{
 				other.setSubSQL(other.orderIndex, "");
 			}
-			catch (ConfigurationException ex) {}
+			catch (EternaException ex) {}
 		}
 	}
 
 	public SQLAdapter createSQLAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createQueryAdapter();
 	}
@@ -413,14 +413,14 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public String getPreparedSQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		String preparedSQL = super.getPreparedSQL();
 		return this.queryHelper == null ? preparedSQL : this.queryHelper.getQuerySQL(preparedSQL);
 	}
 
 	public String getPrimitiveQuerySQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return super.getPreparedSQL();
 	}
@@ -431,7 +431,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void setSingleOrder(String readerName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.orderIndex != -1)
 		{
@@ -440,7 +440,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void setSingleOrder(String readerName, int orderType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.orderIndex != -1)
 		{
@@ -499,7 +499,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void setMultipleOrder(String[] orderNames)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (orderNames == null || orderNames.length == 0)
 		{
@@ -576,7 +576,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	 * 当需要检查reader时, 根据查询结果进行检查.
 	 */
 	private ResultReaderManager checkResultReaders(ResultSet rs)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		ResultSetMetaData meta = rs.getMetaData();
 		int count = meta.getColumnCount();
@@ -689,7 +689,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	 * 当没有设置reader时, 根据查询结果初始化.
 	 */
 	private ResultReaderManager initDefaultResultReaders(ResultSet rs)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		ResultReaderManagerImpl rm = this.createTempReaderManager0(false);
 		rm.setColNameSensitive(false);
@@ -759,17 +759,17 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void setTotalCount(int totalCount)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.setTotalCount(totalCount, null);
 	}
 
 	public void setTotalCount(int totalCount, TotalCountExt ext)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.totalCount < -3)
 		{
-			throw new ConfigurationException("Error total count:" + totalCount + ".");
+			throw new EternaException("Error total count:" + totalCount + ".");
 		}
 		this.totalCount = totalCount;
 		this.totalCountExt = ext;
@@ -781,13 +781,13 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	public void execute(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.executeQuery(conn);
 	}
 
 	public ResultIterator executeQuery(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		long startTime = TimeLogger.getTime();
 		QueryHelper qh = this.getQueryHelper(conn);
@@ -859,7 +859,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 			result = ritr;
 			return ritr;
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			exception = ex;
 			throw ex;
@@ -908,7 +908,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 	}
 
 	protected static Object[] getResults(QueryAdapter query, List readerList, ResultSet rs)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int count = readerList.size();
 		Iterator itr = readerList.iterator();
@@ -933,9 +933,9 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 			{
 				throw (SQLException) ex;
 			}
-			else if (ex instanceof ConfigurationException)
+			else if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
 			else if (ex instanceof RuntimeException)
 			{
@@ -943,7 +943,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 			}
 			else
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 		return values;
@@ -951,7 +951,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 
 	protected abstract ResultRow readResults(ResultReaderManager readerManager, Object[] row,
 			ResultIterator resultIterator, int rowNum)
-			throws ConfigurationException, SQLException;
+			throws EternaException, SQLException;
 
 	private static class ResultIteratorImpl extends AbstractResultIterator
 			implements ResultIterator
@@ -999,7 +999,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 		}
 
 		public ResultIterator copy()
-				throws ConfigurationException
+				throws EternaException
 		{
 			ResultIteratorImpl ritr = new ResultIteratorImpl();
 			this.copy(ritr);
@@ -1007,7 +1007,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 		}
 
 		protected void copy(ResultIterator copyObj)
-				throws ConfigurationException
+				throws EternaException
 		{
 			super.copy(copyObj);
 			ResultIteratorImpl ritr = (ResultIteratorImpl) copyObj;
@@ -1050,7 +1050,7 @@ public abstract class AbstractQueryAdapter extends SQLAdapterImpl
 
 /*
 	private ResultIteratorImpl executeQuery(ResultSet rs)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		int start = this.startRow - 1;
 		int recordCount = 0;

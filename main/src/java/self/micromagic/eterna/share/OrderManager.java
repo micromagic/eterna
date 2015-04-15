@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.ObjectRef;
 
 public class OrderManager
@@ -41,7 +41,7 @@ public class OrderManager
 
 	public List getOrder(OrderItem item, Object[] containers, String orderStr,
 			List srcList, Map srcMap)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ObjectRef[] tmpContainers = null;
 		if (containers != null)
@@ -78,7 +78,7 @@ public class OrderManager
 						}
 						if (tmpContainers[id] != null)
 						{
-							throw new ConfigurationException("Multi [" + containerName + ":"
+							throw new EternaException("Multi [" + containerName + ":"
 									+ (id + 1) + "], the order is:[" + orderStr + "].");
 						}
 						tmpContainers[id] = new ObjectRef();
@@ -232,7 +232,7 @@ public class OrderManager
 	}
 
 	private void checkIgnore(OrderItem item, List resultList, Map srcMap)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (item.isIgnore())
 		{
@@ -256,13 +256,13 @@ public class OrderManager
 		}
 
 		public abstract boolean isIgnore()
-				throws ConfigurationException;
+				throws EternaException;
 
 		public abstract OrderItem create(Object obj)
-				throws ConfigurationException;
+				throws EternaException;
 
 		public abstract Iterator getOrderItemIterator(Object container)
-				throws ConfigurationException;
+				throws EternaException;
 
 	}
 

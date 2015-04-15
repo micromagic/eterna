@@ -20,11 +20,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 
-import self.micromagic.util.StringRef;
-import self.micromagic.util.ObjectRef;
-import self.micromagic.util.container.RequestParameterMap;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.util.ObjectRef;
+import self.micromagic.util.StringRef;
+import self.micromagic.util.container.RequestParameterMap;
 
 public class BigIntegerConverter extends ObjectConverter
 {
@@ -45,7 +45,7 @@ public class BigIntegerConverter extends ObjectConverter
 	}
 
 	public BigInteger getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -137,7 +137,10 @@ public class BigIntegerConverter extends ObjectConverter
 			}
 			else
 			{
-				return this.convertToBigInteger(format.parse(value));
+				synchronized (format)
+				{
+					return this.convertToBigInteger(format.parse(value));
+				}
 			}
 		}
 		catch (Exception ex) {}

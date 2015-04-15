@@ -20,7 +20,7 @@ import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public abstract class AbstractExecute extends AbstractGenerator
 		implements Execute, Generator
@@ -29,26 +29,26 @@ public abstract class AbstractExecute extends AbstractGenerator
 	protected boolean initialized = false;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.initialized = true;
 		this.model = model;
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createExecute();
 	}
 
 	public Execute createExecute()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
 
 	public ModelAdapter getModelAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.model;
 	}

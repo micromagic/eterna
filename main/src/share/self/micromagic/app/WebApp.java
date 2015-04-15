@@ -26,13 +26,13 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaInitialize;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.container.ThreadCache;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.sql.ResultIterator;
@@ -189,7 +189,7 @@ public interface WebApp
 		 */
 		public ModelExport callModel(AppData data, Connection conn, EternaFactory factory,
 				String modelName)
-				throws ConfigurationException, SQLException, IOException
+				throws EternaException, SQLException, IOException
 		{
 			return this.callModel(data, conn, factory, modelName, false);
 		}
@@ -209,7 +209,7 @@ public interface WebApp
 		 */
 		public ModelExport callModel(AppData data, Connection conn, EternaFactory factory,
 				String modelName, boolean noJump)
-				throws ConfigurationException, SQLException, IOException
+				throws EternaException, SQLException, IOException
 		{
 			Object oldRef = null;
 			ObjectRef preConn = (ObjectRef) data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN);
@@ -323,32 +323,32 @@ public interface WebApp
 				}
 				else
 				{
-					instance = factory.getFactoryManager();
+					instance = factory.getFactoryContainer();
 				}
 				instance.addInitializedListener(this);
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				log.error("Error when create QueryTool.", ex);
 			}
 		}
 
 		private void afterEternaInitialize(FactoryManager.Instance instance)
-				throws ConfigurationException
+				throws EternaException
 		{
 			this.factory = instance.getEternaFactory();
 		}
 
 		public QueryAdapter getQueryAdapter(String name, String sql, String[] paramTypes,
 				String readerManager, String[] readerTypes)
-				throws ConfigurationException
+				throws EternaException
 		{
 			try
 			{
 				QueryAdapter query = factory.createQueryAdapter(name);
 				return query;
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				QueryAdapterImpl impl = new QueryAdapterImpl();
 				impl.setName(name);
@@ -384,7 +384,7 @@ public interface WebApp
 		}
 
 		public ResultIterator executeQuery(QueryAdapter query, String[] params, Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			if (params != null && params.length > 0)
 			{
@@ -400,7 +400,7 @@ public interface WebApp
 
 		public ResultIterator executeQuery(String name, String sql, String readerManager, String[] readerTypes,
 				Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			QueryAdapter query = this.getQueryAdapter(name, sql, null,
 					readerManager, readerTypes);
@@ -408,13 +408,13 @@ public interface WebApp
 		}
 
 		public ResultIterator executeQuery(String name, String sql, Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			return this.executeQuery(name, sql, null, null,conn);
 		}
 
 		public ResultRow getFirstRow(ResultIterator ritr)
-				throws SQLException, ConfigurationException
+				throws SQLException, EternaException
 		{
 			if (ritr == null)
 			{
@@ -428,20 +428,20 @@ public interface WebApp
 		}
 
 		public ResultRow getFirstRow(QueryAdapter query, Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			return this.getFirstRow(this.executeQuery(query, null, conn));
 		}
 
 		public ResultRow getFirstRow(QueryAdapter query, String[] params, Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			return this.getFirstRow(this.executeQuery(query, params, conn));
 		}
 
 		public ResultRow getFirstRow(String name, String sql, String[] paramTypes, String[] params,
 				String readerManager, String[] readerTypes, Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			QueryAdapter query = this.getQueryAdapter(name, sql, paramTypes,
 					readerManager, readerTypes);
@@ -451,7 +451,7 @@ public interface WebApp
 
 		public ResultRow getFirstRow(String name, String sql, String[] paramTypes, String[] params,
 				Connection conn)
-				throws ConfigurationException, SQLException
+				throws EternaException, SQLException
 		{
 			return this.getFirstRow(name, sql, paramTypes, params, null, null, conn);
 		}

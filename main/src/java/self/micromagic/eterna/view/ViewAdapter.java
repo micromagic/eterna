@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -124,39 +124,39 @@ public interface ViewAdapter
 	 */
 	public static final String JSON_SPLIT_FLAG = "<!-- eterna json data split -->";
 
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
-	DataPrinter getDataPrinter() throws ConfigurationException;
+	DataPrinter getDataPrinter() throws EternaException;
 
-	String getDefaultDataType() throws ConfigurationException;
+	String getDefaultDataType() throws EternaException;
 
-	String getDataType(AppData data) throws ConfigurationException;
+	String getDataType(AppData data) throws EternaException;
 
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
-	Iterator getComponents() throws ConfigurationException;
+	Iterator getComponents() throws EternaException;
 
-	int getDebug() throws ConfigurationException;
+	int getDebug() throws EternaException;
 
-	String getWidth() throws ConfigurationException;
+	String getWidth() throws EternaException;
 
-	String getHeight() throws ConfigurationException;
+	String getHeight() throws EternaException;
 
-	String getBeforeInit() throws ConfigurationException;
+	String getBeforeInit() throws EternaException;
 
-	String getInitScript() throws ConfigurationException;
+	String getInitScript() throws EternaException;
 
 	/**
 	 * 获取本view适配器某个设置的属性.
 	 */
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
 	/**
 	 * 获取本view适配器设置的所有属性的名称.
 	 */
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
-	ViewRes getViewRes() throws ConfigurationException;
+	ViewRes getViewRes() throws EternaException;
 
 	/**
 	 * 将界面及数据集信息写入到输出流中.
@@ -165,7 +165,7 @@ public interface ViewAdapter
 	 * @param out    信息写入的数据流
 	 * @param data   数据集所在的<code>AppData</code>
 	 */
-	void printView(Writer out, AppData data) throws IOException, ConfigurationException;
+	void printView(Writer out, AppData data) throws IOException, EternaException;
 
 	/**
 	 * 将界面及数据集信息写入到输出流中.
@@ -176,21 +176,21 @@ public interface ViewAdapter
 	 * @param cache     需要初始化到_eterna.cache中的值
 	 */
 	void printView(Writer out, AppData data, Map cache)
-			throws IOException, ConfigurationException;
+			throws IOException, EternaException;
 
 	/**
 	 * 输出控件的事件定义.
 	 * 由于要根据debug的等级，在事件脚本中加入调试代码，所以此功能在ViewAdapter中实现.
 	 */
-	void printEvent(Writer out, AppData data, Component.Event event) throws IOException, ConfigurationException;
+	void printEvent(Writer out, AppData data, Component.Event event) throws IOException, EternaException;
 
 	interface ViewRes
 	{
-		public Map getFunctionMap() throws ConfigurationException;
+		public Map getFunctionMap() throws EternaException;
 
-		public Set getTypicalComponentNames() throws ConfigurationException;
+		public Set getTypicalComponentNames() throws EternaException;
 
-		public Set getResourceNames() throws ConfigurationException;
+		public Set getResourceNames() throws EternaException;
 
 	}
 

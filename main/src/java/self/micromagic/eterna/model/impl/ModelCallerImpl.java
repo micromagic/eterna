@@ -28,7 +28,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -56,7 +56,7 @@ public class ModelCallerImpl
 	}
 
 	public void initModelCaller(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.factory = factory;
 		DataSourceManager dsm = factory.getDataSourceManager();
@@ -71,7 +71,7 @@ public class ModelCallerImpl
 	}
 
 	public Connection getConnection(ModelAdapter model)
-			throws SQLException, ConfigurationException
+			throws SQLException, EternaException
 	{
 		DataSource ds;
 		if (this.dataSourceMap != null)
@@ -87,7 +87,7 @@ public class ModelCallerImpl
 				ds = (DataSource) this.dataSourceMap.get(name);
 				if (ds == null)
 				{
-					throw new ConfigurationException("Can't find the data source:" + name + ".");
+					throw new EternaException("Can't find the data source:" + name + ".");
 				}
 			}
 		}
@@ -117,7 +117,7 @@ public class ModelCallerImpl
 	}
 
 	public ModelExport callModel(AppData data)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		ObjectRef preConn = (ObjectRef) data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN);
 		if (preConn == null)
@@ -203,7 +203,7 @@ public class ModelCallerImpl
 	}
 
 	public ModelExport callModel(AppData data, ObjectRef preConn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		if (data.modelName == null)
 		{
@@ -219,7 +219,7 @@ public class ModelCallerImpl
 		{
 			model = factory.createModelAdapter(data.modelName);
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			if (AppData.log.isInfoEnabled())
 			{
@@ -277,7 +277,7 @@ public class ModelCallerImpl
 	}
 
 	public ModelExport callModel(AppData data, ModelAdapter model, ModelExport export, int tType, ObjectRef preConn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		String dsName = model.getDataSourceName();
 		Connection oldConn = null;
@@ -435,7 +435,7 @@ public class ModelCallerImpl
 	}
 
 	public String prepareParam(AppData data, String charset)
-			throws ConfigurationException, IOException
+			throws EternaException, IOException
 	{
 		StringAppender buf = StringTool.createStringAppender(512);
 		String dataType = data.getRequestParameter(ViewAdapter.DATA_TYPE);

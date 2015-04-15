@@ -31,9 +31,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
+import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.sql.PreparedStatementWrap;
@@ -58,7 +59,7 @@ class CountQueryAdapter
 	private String oldSQL;
 
 	public CountQueryAdapter(QueryAdapter query)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.query = query;
 		this.name = "<count>/" + query.getName();
@@ -83,7 +84,7 @@ class CountQueryAdapter
 	}
 
 	public ResultIterator executeQuery(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		long startTime = TimeLogger.getTime();
 		Statement stmt = null;
@@ -115,7 +116,7 @@ class CountQueryAdapter
 			result = critr;
 			return critr;
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			exception = ex;
 			throw ex;
@@ -164,7 +165,7 @@ class CountQueryAdapter
 	}
 
 	public String getPreparedSQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		String tmpSQL = this.query.getPrimitiveQuerySQL();
 		if (this.oldSQL == tmpSQL)
@@ -182,141 +183,143 @@ class CountQueryAdapter
 	}
 
 	public String getPrimitiveQuerySQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getPrimitiveQuerySQL();
 	}
 
 	public ResultReaderManager getReaderManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.readerManager.copy(null);
 	}
 
 	public void prepareValues(PreparedStatement stmt)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.query.prepareValues(stmt);
 	}
 
 	public void prepareValues(PreparedStatementWrap stmtWrap)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.query.prepareValues(stmtWrap);
 	}
 
 	public PreparerManager getPreparerManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getPreparerManager();
 	}
 
 	public boolean isDynamicParameter(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.isDynamicParameter(index);
 	}
 
 	public boolean isDynamicParameter(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.isDynamicParameter(name);
 	}
 
 	public String getReaderOrder()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getReaderOrder();
 	}
 
 	public String getSingleOrder(BooleanRef desc)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getSingleOrder(desc);
 	}
 
 	public boolean canOrder()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.canOrder();
 	}
 
 	public boolean isForwardOnly()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return true;
 	}
 
 	public ResultIterator executeQueryHoldConnection(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		ResultIterator ritr = this.executeQuery(conn);
 		conn.close();
+		// 查询执行完成, 并关闭了链接, 可以设置链接接管标志
+		AppData.getCurrentData().addSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.CONN_HOLDED, "1");
 		return ritr;
 	}
 
 	public void execute(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.executeQuery(conn);
 	}
 
 	public Object getAttribute(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getAttribute(name);
 	}
 
 	public String[] getAttributeNames()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getAttributeNames();
 	}
 
 	public int getLogType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getLogType();
 	}
 
 	public EternaFactory getFactory()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getFactory();
 	}
 
 	public int getParameterCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getParameterCount();
 	}
 
 	public int getActiveParamCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getActiveParamCount();
 	}
 
 	public boolean hasActiveParam()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.hasActiveParam();
 	}
 
 	public SQLParameter getParameter(String paramName)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getParameter(paramName);
 	}
 
 	public Iterator getParameterIterator()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getParameterIterator();
 	}
 
 	public int getSubSQLCount()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.query.getSubSQLCount();
 	}
@@ -574,7 +577,7 @@ class CountQueryAdapter
 			implements ResultIterator
 	{
 		public CountResultIterator(ResultReaderManager readerManager, QueryAdapter query)
-				throws ConfigurationException
+				throws EternaException
 		{
 			super(readerManager, null);
 			this.query = query;
@@ -611,7 +614,7 @@ class CountQueryAdapter
 		}
 
 		public ResultIterator copy()
-				throws ConfigurationException
+				throws EternaException
 		{
 			CountResultIterator ritr = new CountResultIterator();
 			super.copy(ritr);

@@ -16,36 +16,36 @@
 
 package self.micromagic.eterna.view;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AdapterGenerator;
 
 public interface ViewAdapterGenerator extends AdapterGenerator
 {
-	void setName(String name) throws ConfigurationException;
+	void setName(String name) throws EternaException;
 
-	void setDataPrinterName(String dpName) throws ConfigurationException;
+	void setDataPrinterName(String dpName) throws EternaException;
 
-	void setDefaultDataType(String type) throws ConfigurationException;
+	void setDefaultDataType(String type) throws EternaException;
 
-	void setDynamicViewRes(String res) throws ConfigurationException;
+	void setDynamicViewRes(String res) throws EternaException;
 
-	void addComponent(Component com) throws ConfigurationException;
+	void addComponent(Component com) throws EternaException;
 
-	void deleteComponent(Component com) throws ConfigurationException;
+	void deleteComponent(Component com) throws EternaException;
 
-	void clearComponents() throws ConfigurationException;
+	void clearComponents() throws EternaException;
 
-	void setDebug(int debug) throws ConfigurationException;
+	void setDebug(int debug) throws EternaException;
 
-	void setWidth(String width) throws ConfigurationException;
+	void setWidth(String width) throws EternaException;
 
-	void setHeight(String height) throws ConfigurationException;
+	void setHeight(String height) throws EternaException;
 
-	void setBeforeInit(String condition) throws ConfigurationException;
+	void setBeforeInit(String condition) throws EternaException;
 
-	void setInitScript(String body) throws ConfigurationException;
+	void setInitScript(String body) throws EternaException;
 
-	ViewAdapter createViewAdapter() throws ConfigurationException;
+	ViewAdapter createViewAdapter() throws EternaException;
 
 	interface ModifiableViewRes extends ViewAdapter.ViewRes
 	{
@@ -54,13 +54,13 @@ public interface ViewAdapterGenerator extends AdapterGenerator
 		 *
 		 * @return  添加的方法名称, 方法名称可能会根据当前环境有所变化.
 		 */
-		public String addFunction(Function fn) throws ConfigurationException;
+		public String addFunction(Function fn) throws EternaException;
 
-		public void addTypicalComponentNames(String name) throws ConfigurationException;
+		public void addTypicalComponentNames(String name) throws EternaException;
 
-		public void addResourceNames(String name) throws ConfigurationException;
+		public void addResourceNames(String name) throws EternaException;
 
-		public void addAll(ViewAdapter.ViewRes res) throws ConfigurationException;
+		public void addAll(ViewAdapter.ViewRes res) throws EternaException;
 
 	}
 

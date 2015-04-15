@@ -22,7 +22,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
 import self.micromagic.app.WebApp;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.view.ViewAdapter;
 import self.micromagic.util.StringTool;
@@ -108,7 +108,7 @@ public class EternaInit extends InitBaseTag
 				view.printView(out, data, this.getCacheMap(view));
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			DefaultFinder.log.warn("Error in init.", ex);
 		}
@@ -170,7 +170,7 @@ public class EternaInit extends InitBaseTag
 	 * 输出初始化的脚本.
 	 */
 	private void printInitScript(ViewAdapter view, AppData data, JspWriter out)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		out.println("<script type=\"text/javascript\">");
 		out.println("(function() {");
@@ -184,7 +184,7 @@ public class EternaInit extends InitBaseTag
 	 * 打印Eterna的初始化脚本.
 	 */
 	private void printEternaScript(ViewAdapter view, AppData data, JspWriter out)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		// 定义初始化Eterna的变量
 		out.print("var $E = ");
@@ -240,7 +240,7 @@ public class EternaInit extends InitBaseTag
 	 * 输出初始化的页面.
 	 */
 	private void printInitPage(ViewAdapter view, AppData data, JspWriter out)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (this.printHTML == PRINT_HTML_ALL)
 		{

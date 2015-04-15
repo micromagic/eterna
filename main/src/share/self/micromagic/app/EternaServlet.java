@@ -31,12 +31,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.digester.FactoryManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.view.ViewAdapter;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.ValueContainerMap;
@@ -104,7 +104,7 @@ public class EternaServlet extends HttpServlet
 	}
 
 	protected FactoryManager.Instance getFactoryManager()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.factoryManager;
 	}
@@ -264,7 +264,7 @@ public class EternaServlet extends HttpServlet
 				data.export = export;
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			log.warn("Error in service.", ex);
 		}
@@ -297,7 +297,7 @@ public class EternaServlet extends HttpServlet
 	}
 
 	protected void doExport(AppData data, HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException, ConfigurationException
+			throws ServletException, IOException, EternaException
 	{
 		if (data.export == null)
 		{
@@ -351,7 +351,7 @@ public class EternaServlet extends HttpServlet
 				request.setAttribute(VIEW_TAG, view);
 			}
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			log.warn("Error in doExport.", ex);
 		}
@@ -368,7 +368,7 @@ public class EternaServlet extends HttpServlet
 			{
 				this.getFactoryManager().destroy();
 			}
-		} catch (ConfigurationException ex) {}
+		} catch (EternaException ex) {}
 	}
 
 }

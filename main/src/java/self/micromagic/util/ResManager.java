@@ -288,7 +288,7 @@ public class ResManager
 	 */
 	public String getRes(String resName, Map paramBind, int indentCount)
 	{
-      StringAppender buf = this.printRes(resName, paramBind, indentCount, null);
+		StringAppender buf = this.printRes(resName, paramBind, indentCount, null);
 		return buf.toString();
 	}
 

@@ -24,7 +24,6 @@ import java.util.HashMap;
 
 import javax.sql.DataSource;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -32,6 +31,7 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.QueryAdapter;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.util.Utils;
@@ -78,7 +78,7 @@ public class NoParamQueryExecute extends AbstractExecute
 	protected EternaFactory factory;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -114,13 +114,13 @@ public class NoParamQueryExecute extends AbstractExecute
 	}
 
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "noParamQuery";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		String name = this.queryName != null ? this.queryName
 				: data.getRequestParameter(this.queryNameTag);
@@ -158,7 +158,7 @@ public class NoParamQueryExecute extends AbstractExecute
 	}
 
 	protected ResultIterator queryCodes(QueryAdapter query, Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		Connection myConn = conn;
 		try
@@ -213,7 +213,7 @@ public class NoParamQueryExecute extends AbstractExecute
 		 * 获取缓存的查询结果, 会将结果集复制后返回.
 		 */
 		public ResultIterator getQueryResult()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.queryResult.copy();
 		}

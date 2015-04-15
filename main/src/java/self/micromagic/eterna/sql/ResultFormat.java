@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.sql;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -25,12 +25,12 @@ public interface ResultFormat
 	/**
 	 * 初始化format.
 	 */
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获取这个format的名称.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 对一个对象进行格式化输出. <p>
@@ -41,14 +41,14 @@ public interface ResultFormat
 	 * @param reader      当前格式化的reader对象
 	 * @param permission  相关的权限信息
 	 * @return   格式化后的字符串
-	 * @throws ConfigurationException     当相关配置出错或无法格式化时.
+	 * @throws EternaException     当相关配置出错或无法格式化时.
 	 */
 	Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
-			throws ConfigurationException;
+			throws EternaException;
 
 	/**
 	 * 当格式化结果为null时, 是否使用空字符串代替.
 	 */
-	boolean useEmptyString() throws ConfigurationException;
+	boolean useEmptyString() throws EternaException;
 
 }

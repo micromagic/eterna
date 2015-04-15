@@ -18,7 +18,7 @@ package self.micromagic.util.converter;
 
 import java.text.NumberFormat;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.ObjectRef;
 import self.micromagic.util.StringRef;
@@ -45,7 +45,7 @@ public class DoubleConverter extends ObjectConverter
 	}
 
 	public double getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -129,7 +129,10 @@ public class DoubleConverter extends ObjectConverter
 			}
 			else
 			{
-				return format.parse(value).doubleValue();
+				synchronized (format)
+				{
+					return format.parse(value).doubleValue();
+				}
 			}
 		}
 		catch (Exception ex) {}

@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.BaseManager;
 import self.micromagic.eterna.view.Function;
@@ -37,7 +37,7 @@ public class ModifiableViewResImpl
 	protected Set resourceNames = null;
 
 	public String addFunction(Function fn)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.functionMap == null) this.functionMap = new HashMap(2);
 		EternaFactory shareFactory = fn.getFactory().getShareFactory();
@@ -73,7 +73,7 @@ public class ModifiableViewResImpl
 					fName += "_EFID_" + fnId;
 				}
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
 				// 出现异常, 说明shareFactory中没有找到同名的方法
 			}
@@ -120,7 +120,7 @@ public class ModifiableViewResImpl
 	}
 
 	public void addAll(ViewAdapter.ViewRes res)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.addAllFunction(res.getFunctionMap());
 		if (this.typicalComponentNames == null)

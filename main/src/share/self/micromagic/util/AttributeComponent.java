@@ -23,9 +23,9 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.ComponentGenerator;
 import self.micromagic.eterna.view.ViewAdapter;
@@ -54,7 +54,7 @@ public final class AttributeComponent extends ComponentImpl
 	}
 
 	public void initialize(EternaFactory factory, Component parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -101,7 +101,7 @@ public final class AttributeComponent extends ComponentImpl
 	}
 
 	private void initbodyHTML()
-			throws ConfigurationException
+			throws EternaException
 	{
 		String tmp;
 		Map bindRes = null;
@@ -117,7 +117,7 @@ public final class AttributeComponent extends ComponentImpl
 			tmp = (String) this.getAttribute(FILE_SOURCE_NAME);
 			if (tmp == null)
 			{
-				throw new ConfigurationException("Must set attribute [" + FACTORY_ATTRIBUTE_NAME
+				throw new EternaException("Must set attribute [" + FACTORY_ATTRIBUTE_NAME
 						+ "] or [" + FILE_SOURCE_NAME + "] in AttributeComponent.");
 			}
 			String fileRoot = (String) factory.getAttribute(FILE_ROOT_ATTRIBUTE_NAME);
@@ -132,7 +132,7 @@ public final class AttributeComponent extends ComponentImpl
 			File htmlFile = new File(fileRoot, tmp);
 			if (!htmlFile.isFile())
 			{
-				throw new ConfigurationException("Not found html source [" + htmlFile.getPath() + "].");
+				throw new EternaException("Not found html source [" + htmlFile.getPath() + "].");
 			}
 			tmp = (String) this.getAttribute("charset");
 			if (tmp != null)
@@ -161,7 +161,7 @@ public final class AttributeComponent extends ComponentImpl
 			}
 			catch (IOException ex)
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 		else
@@ -169,14 +169,14 @@ public final class AttributeComponent extends ComponentImpl
 			this.bodyHTML = (String) factory.getAttribute(tmp);
 			if (this.bodyHTML == null)
 			{
-				throw new ConfigurationException("Not found attribute [" + tmp + "] in factory.");
+				throw new EternaException("Not found attribute [" + tmp + "] in factory.");
 			}
 		}
 		this.bodyHTML = Utility.resolveDynamicPropnames(this.bodyHTML, bindRes);
 	}
 
 	public void setType(String type)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (NORMAL_TYPE_DIV.equals(type) || SPECIAL_TYPE_INHERIT.equals(type))
 		{
@@ -184,13 +184,13 @@ public final class AttributeComponent extends ComponentImpl
 		}
 		else
 		{
-			throw new ConfigurationException("Must set type as [" + NORMAL_TYPE_DIV + "] or ["
+			throw new EternaException("Must set type as [" + NORMAL_TYPE_DIV + "] or ["
 					+ SPECIAL_TYPE_INHERIT + "] in AttributeComponent.");
 		}
 	}
 
 	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		super.printSpecialBody(out, data, view);
 		out.write(',');

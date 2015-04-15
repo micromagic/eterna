@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -28,6 +27,7 @@ import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.ObjectRef;
 import org.apache.commons.logging.Log;
@@ -68,7 +68,7 @@ public class BaseExecute extends AbstractExecute
 	 * @see #plusInit
 	 */
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -84,7 +84,7 @@ public class BaseExecute extends AbstractExecute
 	 * 特殊初始化内容可重写此方法实现.
 	 */
 	protected void plusInit()
-			throws ConfigurationException
+			throws EternaException
 	{
 	}
 
@@ -93,7 +93,7 @@ public class BaseExecute extends AbstractExecute
 	 * 返回当前执行器的类型.
 	 */
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.executeType;
 	}
@@ -105,7 +105,7 @@ public class BaseExecute extends AbstractExecute
 	 * @see #plusInit
 	 */
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		try
 		{
@@ -121,7 +121,7 @@ public class BaseExecute extends AbstractExecute
 	 * 具体的业务逻辑可重写此方法实现.
 	 */
 	protected ModelExport dealProcess(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException, InnerExport
+			throws EternaException, SQLException, IOException, InnerExport
 	{
 		return null;
 	}
@@ -132,7 +132,7 @@ public class BaseExecute extends AbstractExecute
 	 * @param exportName    执行跳转的export的名称
 	 */
 	protected ModelExport doExport(String exportName)
-			throws ConfigurationException, SQLException, IOException, InnerExport
+			throws EternaException, SQLException, IOException, InnerExport
 	{
 		ModelExport export = this.factory.getModelExport(exportName);
 		if (export == null)
@@ -152,7 +152,7 @@ public class BaseExecute extends AbstractExecute
 	 * @param modelName    要调用的model的名称
 	 */
 	protected ModelExport callModel(AppData data, Connection conn, String modelName)
-			throws ConfigurationException, SQLException, IOException, InnerExport
+			throws EternaException, SQLException, IOException, InnerExport
 	{
 		return this.callModel(data, conn, modelName, false);
 	}
@@ -164,7 +164,7 @@ public class BaseExecute extends AbstractExecute
 	 * @param noJump       设为<code>true</code>, 则任何情况都不会跳出
 	 */
 	protected ModelExport callModel(AppData data, Connection conn, String modelName, boolean noJump)
-			throws ConfigurationException, SQLException, IOException, InnerExport
+			throws EternaException, SQLException, IOException, InnerExport
 	{
 		ObjectRef preConn = (ObjectRef) data.getSpcialData(ModelAdapter.MODEL_CACHE, ModelAdapter.PRE_CONN);
 		ModelAdapter tmpModel = this.factory.createModelAdapter(modelName);

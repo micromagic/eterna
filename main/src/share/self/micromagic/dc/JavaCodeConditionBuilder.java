@@ -21,7 +21,7 @@ import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.dc.CodeClassTool;
 import self.micromagic.util.StringTool;
 import self.micromagic.cg.ClassGenerator;
@@ -51,7 +51,7 @@ public class JavaCodeConditionBuilder extends AbstractGenerator
 	private ConditionBuilderCode conditionBuilderCode;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.conditionBuilderCode != null)
 		{
@@ -68,11 +68,11 @@ public class JavaCodeConditionBuilder extends AbstractGenerator
 		{
 			if ("true".equalsIgnoreCase((String) this.getAttribute("throwCompileError")))
 			{
-				if (ex instanceof ConfigurationException)
+				if (ex instanceof EternaException)
 				{
-					throw (ConfigurationException) ex;
+					throw (EternaException) ex;
 				}
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 			else
 			{
@@ -83,7 +83,7 @@ public class JavaCodeConditionBuilder extends AbstractGenerator
 	}
 
 	public ConditionBuilder.Condition buildeCondition(String colName, String value, ConditionProperty cp)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -94,11 +94,11 @@ public class JavaCodeConditionBuilder extends AbstractGenerator
 		}
 		catch (Exception ex)
 		{
-			if (ex instanceof ConfigurationException)
+			if (ex instanceof EternaException)
 			{
-				throw (ConfigurationException) ex;
+				throw (EternaException) ex;
 			}
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 		return null;
 	}
@@ -146,13 +146,13 @@ public class JavaCodeConditionBuilder extends AbstractGenerator
 	}
 
 	public ConditionBuilder createConditionBuilder()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this;
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createConditionBuilder();
 	}
@@ -160,7 +160,7 @@ public class JavaCodeConditionBuilder extends AbstractGenerator
 	public interface ConditionBuilderCode
 	{
 		public void setGenerator(JavaCodeConditionBuilder generator, EternaFactory factory)
-				throws ConfigurationException;
+				throws EternaException;
 
 		public ConditionBuilder.Condition invoke(String colName, String value, ConditionProperty cp)
 				throws Exception;

@@ -16,7 +16,7 @@
 
 package self.micromagic.eterna.model;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface SearchExecuteGenerator
 {
@@ -28,31 +28,31 @@ public interface SearchExecuteGenerator
 	/**
 	 * 设置读取search名称的标签名
 	 */
-	void setSearchNameTag(String tag) throws ConfigurationException;
+	void setSearchNameTag(String tag) throws EternaException;
 
-	void setSearchName(String name) throws ConfigurationException;
+	void setSearchName(String name) throws EternaException;
 
-	void setQueryResultName(String name) throws ConfigurationException;
+	void setQueryResultName(String name) throws EternaException;
 
-	void setSearchManagerName(String name) throws ConfigurationException;
+	void setSearchManagerName(String name) throws EternaException;
 
-	void setSearchCountName(String name) throws ConfigurationException;
+	void setSearchCountName(String name) throws EternaException;
 
-	void setSaveCondition(boolean saveCondition) throws ConfigurationException;
+	void setSaveCondition(boolean saveCondition) throws EternaException;
 
-	void setStart(int start) throws ConfigurationException;
+	void setStart(int start) throws EternaException;
 
-	void setCount(int count) throws ConfigurationException;
+	void setCount(int count) throws EternaException;
 
-	void setDoExecute(boolean execute) throws ConfigurationException;
+	void setDoExecute(boolean execute) throws EternaException;
 
 	/**
 	 * 设置是否以保持数据库链接的方式查询. <p>
 	 * 如果此属性设置了true, 那么此SearchExecute必须在事务方式为hold的model下执行。
 	 * 另：此属性设置为true后，会忽略saveCondition, start, count这3个属性。
 	 */
-	void setHoldConnection(boolean hold) throws ConfigurationException;
+	void setHoldConnection(boolean hold) throws EternaException;
 
-	Execute createExecute() throws ConfigurationException;
+	Execute createExecute() throws EternaException;
 
 }

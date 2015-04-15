@@ -19,7 +19,7 @@ package self.micromagic.eterna.view.impl;
 import java.io.IOException;
 import java.io.Writer;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.BaseManager;
@@ -48,14 +48,14 @@ public abstract class AbstractTable extends ComponentImpl
 
 	private ViewAdapterGenerator.ModifiableViewRes viewRes = null;
 
-	protected abstract void initSubs(EternaFactory factory) throws ConfigurationException;
+	protected abstract void initSubs(EternaFactory factory) throws EternaException;
 
-	protected abstract void initBaseManager(String baseManagerName, EternaFactory factory) throws ConfigurationException;
+	protected abstract void initBaseManager(String baseManagerName, EternaFactory factory) throws EternaException;
 
-	protected abstract void fillSubs(EternaFactory factory) throws ConfigurationException;
+	protected abstract void fillSubs(EternaFactory factory) throws EternaException;
 
 	public void initialize(EternaFactory factory, Component parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -92,7 +92,7 @@ public abstract class AbstractTable extends ComponentImpl
 	}
 
 	protected void fillSubByItem(Sub sub, BaseManager.Item item)
-			throws ConfigurationException
+			throws EternaException
 	{
 		sub.setName(item.getName());
 		if (item.getCaption() != null && item.getCaption().length() > 0)
@@ -136,7 +136,7 @@ public abstract class AbstractTable extends ComponentImpl
 
 	protected void fillEmptySubAttr(Sub nowSub, CommonSub typical, Component typicalComponent,
 			boolean defaultBeforeInit)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (nowSub.getSrcName() == null && typical.getSrcName() != null)
 		{
@@ -205,7 +205,7 @@ public abstract class AbstractTable extends ComponentImpl
 	}
 
 	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (!this.isPercentWidth())
 		{
@@ -282,21 +282,21 @@ public abstract class AbstractTable extends ComponentImpl
 	}
 
 	public void setTR(Component tr)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!"tr".equalsIgnoreCase(tr.getType()))
 		{
-			throw new ConfigurationException("Need the Component type is [tr], but you gived [" + tr.getType() + "].");
+			throw new EternaException("Need the Component type is [tr], but you gived [" + tr.getType() + "].");
 		}
 		if (tr.getName() == null)
 		{
-			throw new ConfigurationException("You must set tr's name.");
+			throw new EternaException("You must set tr's name.");
 		}
 		if (this instanceof TableList || this instanceof TableListGenerator)
 		{
 			if (!tr.getName().startsWith(TableList.TR_NAME_PERFIX))
 			{
-				throw new ConfigurationException("In table-list tr name must start with ["
+				throw new EternaException("In table-list tr name must start with ["
 						+ TableList.TR_NAME_PERFIX + "].");
 			}
 		}
@@ -304,7 +304,7 @@ public abstract class AbstractTable extends ComponentImpl
 		{
 			if (!tr.getName().startsWith(TableForm.TR_NAME_PERFIX))
 			{
-				throw new ConfigurationException("In table-form tr name must start with ["
+				throw new EternaException("In table-form tr name must start with ["
 						+ TableForm.TR_NAME_PERFIX + "].");
 			}
 		}
@@ -332,14 +332,14 @@ public abstract class AbstractTable extends ComponentImpl
 	}
 
 	public void addComponent(Component com)
-			throws ConfigurationException
+			throws EternaException
 	{
-		throw new ConfigurationException("The " + this.getType() + " [" + this.getName()
+		throw new EternaException("The " + this.getType() + " [" + this.getName()
 				+ "] can't add a Component.");
 	}
 
 	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{
@@ -370,7 +370,7 @@ public abstract class AbstractTable extends ComponentImpl
 
 		private ViewAdapterGenerator.ModifiableViewRes viewRes = null;
 
-		public void initialize(EternaFactory factory, Component parent) throws ConfigurationException
+		public void initialize(EternaFactory factory, Component parent) throws EternaException
 		{
 			if (this.initialized)
 			{
@@ -400,16 +400,16 @@ public abstract class AbstractTable extends ComponentImpl
 			return super.checkName(name);
 		}
 
-		protected abstract String getDataName() throws ConfigurationException;
+		protected abstract String getDataName() throws EternaException;
 
-		protected abstract void printSpecialTitle(Writer out, AppData data) throws IOException, ConfigurationException;
+		protected abstract void printSpecialTitle(Writer out, AppData data) throws IOException, EternaException;
 
-		protected abstract void printSpecialContainer(Writer out, AppData data) throws IOException, ConfigurationException;
+		protected abstract void printSpecialContainer(Writer out, AppData data) throws IOException, EternaException;
 
-		protected abstract void printSpecialElse(Writer out, AppData data) throws IOException, ConfigurationException;
+		protected abstract void printSpecialElse(Writer out, AppData data) throws IOException, EternaException;
 
 		public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-				throws IOException, ConfigurationException
+				throws IOException, EternaException
 		{
 			out.write(",title:{");
 			if (this.getCaption() != null)
@@ -616,7 +616,7 @@ public abstract class AbstractTable extends ComponentImpl
 		}
 
 		protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (this.viewRes == null)
 			{
@@ -639,33 +639,33 @@ public abstract class AbstractTable extends ComponentImpl
 
 	protected interface CommonSub
 	{
-		String getTitleParam() throws ConfigurationException;
+		String getTitleParam() throws EternaException;
 
-		String getContainerParam() throws ConfigurationException;
+		String getContainerParam() throws EternaException;
 
-		boolean isIgnoreGlobalTitleParam() throws ConfigurationException;
+		boolean isIgnoreGlobalTitleParam() throws EternaException;
 
-		boolean isIgnoreGlobalContainerParam() throws ConfigurationException;
+		boolean isIgnoreGlobalContainerParam() throws EternaException;
 
-		String getCaption() throws ConfigurationException;
+		String getCaption() throws EternaException;
 
-		String getDefaultValue() throws ConfigurationException;
+		String getDefaultValue() throws EternaException;
 
-		String getSrcName() throws ConfigurationException;
+		String getSrcName() throws EternaException;
 
-		String getDataName() throws ConfigurationException;
+		String getDataName() throws EternaException;
 
-		boolean isOtherData() throws ConfigurationException;
+		boolean isOtherData() throws EternaException;
 
-		String getInitParam() throws ConfigurationException;
+		String getInitParam() throws EternaException;
 
-		String getName() throws ConfigurationException;
+		String getName() throws EternaException;
 
-		boolean isIgnoreGlobalParam() throws ConfigurationException;
+		boolean isIgnoreGlobalParam() throws EternaException;
 
-		String getBeforeInit() throws ConfigurationException;
+		String getBeforeInit() throws EternaException;
 
-		String getInitScript() throws ConfigurationException;
+		String getInitScript() throws EternaException;
 
 	}
 
@@ -680,85 +680,85 @@ public abstract class AbstractTable extends ComponentImpl
 		}
 
 		public String getTitleParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getTitleParam();
 		}
 
 		public String getContainerParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getContainerParam();
 		}
 
 		public boolean isIgnoreGlobalTitleParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.isIgnoreGlobalTitleParam();
 		}
 
 		public boolean isIgnoreGlobalContainerParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.isIgnoreGlobalContainerParam();
 		}
 
 		public String getCaption()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getCaption();
 		}
 
 		public String getDefaultValue()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getDefaultValue();
 		}
 
 		public String getSrcName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getSrcName();
 		}
 
 		public String getDataName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getDataName();
 		}
 
 		public boolean isOtherData()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.isOtherData();
 		}
 
 		public String getInitParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getInitParam();
 		}
 
 		public String getName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getName();
 		}
 
 		public boolean isIgnoreGlobalParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.isIgnoreGlobalParam();
 		}
 
 		public String getBeforeInit()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getBeforeInit();
 		}
 
 		public String getInitScript()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.cell.getInitScript();
 		}
@@ -776,85 +776,85 @@ public abstract class AbstractTable extends ComponentImpl
 		}
 
 		public String getTitleParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getTitleParam();
 		}
 
 		public String getContainerParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getContainerParam();
 		}
 
 		public boolean isIgnoreGlobalTitleParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.isIgnoreGlobalTitleParam();
 		}
 
 		public boolean isIgnoreGlobalContainerParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.isIgnoreGlobalContainerParam();
 		}
 
 		public String getCaption()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getCaption();
 		}
 
 		public String getDefaultValue()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getDefaultValue();
 		}
 
 		public String getSrcName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getSrcName();
 		}
 
 		public String getDataName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getDataName();
 		}
 
 		public boolean isOtherData()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.isOtherData();
 		}
 
 		public String getInitParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getInitParam();
 		}
 
 		public String getName()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getName();
 		}
 
 		public boolean isIgnoreGlobalParam()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.isIgnoreGlobalParam();
 		}
 
 		public String getBeforeInit()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getBeforeInit();
 		}
 
 		public String getInitScript()
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.column.getInitScript();
 		}

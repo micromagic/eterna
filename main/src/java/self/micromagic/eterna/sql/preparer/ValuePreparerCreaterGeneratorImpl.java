@@ -22,7 +22,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
@@ -77,7 +77,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	protected boolean emptyStringToNull = true;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -148,11 +148,11 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public void setName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
-			throw new ConfigurationException("Initialized ValuePreparerCreaterGenerator can't change name.");
+			throw new EternaException("Initialized ValuePreparerCreaterGenerator can't change name.");
 		}
 		super.setName(name);
 	}
@@ -178,7 +178,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createNullPreparer(int index, int type)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.nullPreparer.createPreparer(type);
 		preparer.setRelativeIndex(index);
@@ -186,7 +186,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createBooleanPreparer(int index, boolean v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.booleanPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -194,7 +194,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createBytePreparer(int index, byte v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.bytePreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -202,7 +202,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createBytesPreparer(int index, byte[] v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.bytesPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -210,7 +210,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createShortPreparer(int index, short v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.shortPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -218,7 +218,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createIntPreparer(int index, int v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.intPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -226,7 +226,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createLongPreparer(int index, long v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.longPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -234,7 +234,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createFloatPreparer(int index, float v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.floatPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -242,7 +242,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createDoublePreparer(int index, double v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.doublePreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -250,7 +250,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createStringPreparer(int index, String v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.stringPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -258,7 +258,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createStreamPreparer(int index, InputStream v, int length)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.streamPreparer.createPreparer(v, length);
 		preparer.setRelativeIndex(index);
@@ -266,7 +266,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createReaderPreparer(int index, Reader v, int length)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.readerPreparer.createPreparer(v, length);
 		preparer.setRelativeIndex(index);
@@ -274,7 +274,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createDatePreparer(int index, Date v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.datePreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -282,7 +282,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createTimePreparer(int index, Time v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.timePreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -290,7 +290,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createTimestampPreparer(int index, Timestamp v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.timpstampPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);
@@ -298,7 +298,7 @@ public class ValuePreparerCreaterGeneratorImpl extends AbstractGenerator
 	}
 
 	public ValuePreparer createObjectPreparer(int index, Object v)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ValuePreparer preparer = this.objectPreparer.createPreparer(v);
 		preparer.setRelativeIndex(index);

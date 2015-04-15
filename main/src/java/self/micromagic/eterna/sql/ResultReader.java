@@ -20,7 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.CallableStatement;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -40,7 +40,7 @@ public interface ResultReader
 	 *
 	 * @param factory  EternaFactory的实例, 可以从中获得format对象
 	 */
-	void initialize(EternaFactory factory) throws ConfigurationException;
+	void initialize(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获取该reader的类型.
@@ -48,59 +48,59 @@ public interface ResultReader
 	 * @return  一个代表该reader类型的整数
 	 * @see self.micromagic.eterna.share.TypeManager
 	 */
-	int getType() throws ConfigurationException;
+	int getType() throws EternaException;
 
 	/**
 	 * 是否Type的类型为TYPE_IGNORE.
 	 * 如果为true则表示忽略此ResultReader, 可以将其删除, 这样可以在ResultReaderManager
 	 * 继承时去掉父对象中不需要的ResultReader.
 	 */
-	boolean isIgnore() throws ConfigurationException;
+	boolean isIgnore() throws EternaException;
 
 	/**
 	 * 获取format的名称.
 	 */
-	String getFormatName() throws ConfigurationException;
+	String getFormatName() throws EternaException;
 
 	/**
 	 * 获取format对象.
 	 */
-	ResultFormat getFormat() throws ConfigurationException;
+	ResultFormat getFormat() throws EternaException;
 
 	/**
 	 * 获取本reader的名称.
 	 */
-	String getName() throws ConfigurationException;
+	String getName() throws EternaException;
 
 	/**
 	 * 获得作为排序列, 即出现在"ORDER BY"之后的列名.
 	 * 在多个表时, 也可以是"[表名].[列名]"的形式.
 	 */
-	String getOrderName() throws ConfigurationException;
+	String getOrderName() throws EternaException;
 
 	/**
 	 * 读取数据时, 读取的列名. <p>
 	 * 该方法和{@link #getColumnIndex}方法只有一个有效, 当索引值有效
 	 * 时，返回的列名为null.
 	 */
-	String getColumnName() throws ConfigurationException;
+	String getColumnName() throws EternaException;
 
 	/**
 	 * 读取数据时, 读取的列索引. <p>
 	 * 该方法和{@link #getColumnName}方法只有一个有效, 当列名有效时,
 	 * 返回的索引值为-1.
 	 */
-	int getColumnIndex() throws ConfigurationException;
+	int getColumnIndex() throws EternaException;
 
 	/**
 	 * 在向html页面输出时, 是否需要进行特殊标签的过滤.
 	 */
-	boolean needHtmlFilter() throws ConfigurationException;
+	boolean needHtmlFilter() throws EternaException;
 
 	/**
 	 * 该ResultReader是否可见.
 	 */
-	boolean isVisible() throws ConfigurationException;
+	boolean isVisible() throws EternaException;
 
 	/**
 	 * 该ResultReader是否有效.
@@ -109,52 +109,52 @@ public interface ResultReader
 	 *
 	 * 注: 如果不设置空的ResultReader占位的话, 用index访问时就会出错.
 	 */
-	boolean isValid() throws ConfigurationException;
+	boolean isValid() throws EternaException;
 
 	/**
 	 * 判断读取数据时, 是否是通过列名来读取.
 	 */
-	boolean isUseColumnName() throws ConfigurationException;
+	boolean isUseColumnName() throws EternaException;
 
 	/**
 	 * 判断读取数据时, 是否是通过索引值来读取.
 	 */
-	boolean isUseColumnIndex() throws ConfigurationException;
+	boolean isUseColumnIndex() throws EternaException;
 
 	/**
 	 * 获得一个attribute.
 	 *
 	 * @param name    要获得的attribute的名称
 	 */
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
 	/**
 	 * 获得所有attribute的名称.
 	 */
-	String[] getAttributeNames() throws ConfigurationException;
+	String[] getAttributeNames() throws EternaException;
 
 	/**
 	 * 获取可读取该列的权限集合, 只有拥有集合中的任意1个权限就可以
 	 * 读取该列. <p>
 	 * 如果没有设置权限集合, 则返回null, 表示读取该列不需要权限.
 	 */
-	PermissionSet getPermissionSet() throws ConfigurationException;
+	PermissionSet getPermissionSet() throws EternaException;
 
 	/**
 	 * 获取该列的标题.
 	 */
-	String getCaption() throws ConfigurationException;
+	String getCaption() throws EternaException;
 
 	/**
 	 * 获取填充完的标题. <p>
 	 * 如果标题为空, 则会使用列名来代替.
 	 */
-	String getFilledCaption() throws ConfigurationException;
+	String getFilledCaption() throws EternaException;
 
 	/**
 	 * 获取该列显示时的宽度.
 	 */
-	int getWidth() throws ConfigurationException;
+	int getWidth() throws EternaException;
 
 	/**
 	 * 从<code>ResultSet</code>对象中读取数据, 并以相应的对象返回.
@@ -169,6 +169,6 @@ public interface ResultReader
 	/**
 	 * 从<code>Object</code>对象中读取数据, 并以相应的对象返回.
 	 */
-	Object readObject(Object obj) throws ConfigurationException;
+	Object readObject(Object obj) throws EternaException;
 
 }

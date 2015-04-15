@@ -21,7 +21,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -38,7 +38,7 @@ public class UpdateExecute extends SQLExecute
 	protected int updateAdapterIndex = -1;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -49,7 +49,7 @@ public class UpdateExecute extends SQLExecute
 	}
 
 	protected SQLAdapter getSQL()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.updateAdapterIndex == -1 ? this.factory.createUpdateAdapter(this.getName())
 				: this.factory.createUpdateAdapter(this.updateAdapterIndex);
@@ -66,7 +66,7 @@ public class UpdateExecute extends SQLExecute
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		boolean inCache = false;
 		UpdateAdapter update = null;

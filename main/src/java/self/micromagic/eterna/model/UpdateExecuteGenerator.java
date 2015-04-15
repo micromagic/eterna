@@ -17,20 +17,20 @@
 package self.micromagic.eterna.model;
 
 import self.micromagic.eterna.share.Generator;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 public interface UpdateExecuteGenerator extends Generator
 {
-	void setCache(int cacheIndex) throws ConfigurationException;
+	void setCache(int cacheIndex) throws EternaException;
 
-	void setDoExecute(boolean execute) throws ConfigurationException;
+	void setDoExecute(boolean execute) throws EternaException;
 
-	void setPushResult(boolean push) throws ConfigurationException;
+	void setPushResult(boolean push) throws EternaException;
 
-	void setMultiType(boolean multi) throws ConfigurationException;
+	void setMultiType(boolean multi) throws EternaException;
 
-	void addParamBind(ParamBind bind) throws ConfigurationException;
+	void addParamBind(ParamBind bind) throws EternaException;
 
-	Execute createExecute() throws ConfigurationException;
+	Execute createExecute() throws EternaException;
 
 }

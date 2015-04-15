@@ -19,8 +19,8 @@ package self.micromagic.util.converter;
 import java.io.Reader;
 import java.io.StringReader;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryChars;
 import self.micromagic.util.StringRef;
 import self.micromagic.util.ObjectRef;
@@ -38,7 +38,7 @@ public class ReaderConverter extends ObjectConverter
 	}
 
 	public Reader getResult(Object result)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{

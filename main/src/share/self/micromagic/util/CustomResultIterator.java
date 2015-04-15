@@ -19,13 +19,13 @@ package self.micromagic.util;
 import java.util.LinkedList;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultReaderManager;
 import self.micromagic.eterna.sql.ResultRow;
 import self.micromagic.eterna.sql.impl.AbstractResultIterator;
 import self.micromagic.eterna.sql.impl.ResultRowImpl;
+import self.micromagic.eterna.share.EternaException;
 
 public class CustomResultIterator extends AbstractResultIterator
 		implements ResultIterator
@@ -35,7 +35,7 @@ public class CustomResultIterator extends AbstractResultIterator
 	private int rowNum;
 
 	public CustomResultIterator(ResultReaderManager rrm, Permission permission)
-			throws ConfigurationException
+			throws EternaException
 	{
 		super(rrm, permission);
 		this.permission = permission;
@@ -48,11 +48,11 @@ public class CustomResultIterator extends AbstractResultIterator
 	}
 
 	public ResultRow createRow(Object[] values)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (values.length != this.readerManager.getReaderCount())
 		{
-			throw new ConfigurationException("The values count must same as the ResultReaderManager's readers count.");
+			throw new EternaException("The values count must same as the ResultReaderManager's readers count.");
 		}
 		try
 		{
@@ -63,7 +63,7 @@ public class CustomResultIterator extends AbstractResultIterator
 		}
 		catch (SQLException ex)
 		{
-			throw new ConfigurationException(ex);
+			throw new EternaException(ex);
 		}
 	}
 
@@ -94,7 +94,7 @@ public class CustomResultIterator extends AbstractResultIterator
 	}
 
 	public ResultIterator copy()
-			throws ConfigurationException
+			throws EternaException
 	{
 		CustomResultIterator ritr = new CustomResultIterator(this.permission);
 		this.copy(ritr);
@@ -102,7 +102,7 @@ public class CustomResultIterator extends AbstractResultIterator
 	}
 
 	protected void copy(ResultIterator copyObj)
-			throws ConfigurationException
+			throws EternaException
 	{
 		super.copy(copyObj);
 		CustomResultIterator ritr = (CustomResultIterator) copyObj;

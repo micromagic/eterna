@@ -24,11 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Element;
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.ResultIterator;
 import self.micromagic.eterna.sql.ResultReader;
 import self.micromagic.eterna.sql.ResultReaderManager;
@@ -45,7 +45,7 @@ import self.micromagic.util.logging.TimeLogger;
 public class CallQuery extends QueryAdapterImpl
 {
 	public QueryAdapter createQueryAdapter()
-			throws ConfigurationException
+			throws EternaException
 	{
 		CallQuery other = new CallQuery();
 		this.copy(other);
@@ -53,7 +53,7 @@ public class CallQuery extends QueryAdapterImpl
 	}
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -68,15 +68,15 @@ public class CallQuery extends QueryAdapterImpl
 			ResultReader reader = (ResultReader) itr.next();
 			if (!reader.isUseColumnName())
 			{
-				throw new ConfigurationException("You can't use colIndex in reader for CallQuery.");
+				throw new EternaException("You can't use colIndex in reader for CallQuery.");
 			}
 			try
 			{
 				this.getParameter(reader.getColumnName());
 			}
-			catch (ConfigurationException ex)
+			catch (EternaException ex)
 			{
-				throw new ConfigurationException("The reader[" + reader.getName()
+				throw new EternaException("The reader[" + reader.getName()
 						+ "]'s colName must in parameters.");
 			}
 		}
@@ -88,13 +88,13 @@ public class CallQuery extends QueryAdapterImpl
 	}
 
 	public ResultIterator executeQueryHoldConnection(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
-		throw new ConfigurationException("You can't use executeQueryHoldConnection in CallQuery.");
+		throw new EternaException("You can't use executeQueryHoldConnection in CallQuery.");
 	}
 
 	public ResultIterator executeQuery(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		long startTime = TimeLogger.getTime();
 		Statement stmt = null;
@@ -142,7 +142,7 @@ public class CallQuery extends QueryAdapterImpl
 			result = critr;
 			return critr;
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			exception = ex;
 			throw ex;
@@ -187,7 +187,7 @@ public class CallQuery extends QueryAdapterImpl
 	}
 
 	public void execute(Connection conn)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		this.executeQuery(conn);
 	}

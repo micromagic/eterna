@@ -18,18 +18,18 @@ package self.micromagic.eterna.model;
 
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 public interface ParamBind
 {
-	void initialize(ModelAdapter model, Execute execute) throws ConfigurationException;
+	void initialize(ModelAdapter model, Execute execute) throws EternaException;
 
 	public int setParam(AppData data, ParamSetManager psm, int loopIndex)
-			throws ConfigurationException, SQLException;
+			throws EternaException, SQLException;
 
-	public boolean isLoop() throws ConfigurationException;
+	public boolean isLoop() throws EternaException;
 
-	public boolean isSubSQL() throws ConfigurationException;
+	public boolean isSubSQL() throws EternaException;
 
 }

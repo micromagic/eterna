@@ -16,8 +16,8 @@
 
 package self.micromagic.eterna.share;
 
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.FactoryManager;
-import self.micromagic.eterna.digester.ConfigurationException;
 
 public abstract class AbstractFactory
 		implements Factory
@@ -26,63 +26,63 @@ public abstract class AbstractFactory
 
 	protected String name;
 	protected Factory shareFactory;
-	protected FactoryManager.Instance factoryManager;
+	protected FactoryManager.Instance instance;
 
-	public void initialize(FactoryManager.Instance factoryManager, Factory shareFactory)
-			throws ConfigurationException
+	public void initialize(FactoryManager.Instance instance, Factory shareFactory)
+			throws EternaException
 	{
 		if (shareFactory == this)
 		{
-			throw new ConfigurationException("The parent can't same this.");
+			throw new EternaException("The parent can't same this.");
 		}
-		this.factoryManager = factoryManager;
+		this.instance = instance;
 		this.shareFactory = shareFactory;
 	}
 
 	public String getName()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.name;
 	}
 
 	public void setName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.name = name;
 	}
 
-	public FactoryManager.Instance getFactoryManager()
-			throws ConfigurationException
+	public FactoryManager.Instance getFactoryContainer()
+			throws EternaException
 	{
-		return this.factoryManager;
+		return this.instance;
 	}
 
 	public Object getAttribute(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.attributes.getAttribute(name);
 	}
 
 	public String[] getAttributeNames()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.attributes.getAttributeNames();
 	}
 
 	public Object setAttribute(String name, Object value)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.attributes.setAttribute(name, value);
 	}
 
 	public Object removeAttribute(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.attributes.removeAttribute(name);
 	}
 
 	public boolean hasAttribute(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.attributes.hasAttribute(name);
 	}

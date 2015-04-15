@@ -24,7 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -60,7 +60,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 	protected boolean initialized = false;
 
 	public void initialize(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -158,7 +158,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 	}
 
 	public ModelExport doModel(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		if (!this.checkPosition(data))
 		{
@@ -224,17 +224,17 @@ public class ModelAdapterImpl extends AbstractGenerator
 	}
 
 	public Execute getExecute(int index)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (index < 1 || index > this.executes.size())
 		{
-			throw new ConfigurationException("Error execute index:" + index + ".");
+			throw new EternaException("Error execute index:" + index + ".");
 		}
 		return (Execute) this.executes.get(index - 1);
 	}
 
 	protected ModelExport doModelExt(AppData data, Connection conn, boolean needLogApp, ObjectRef errorRef)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		boolean executed = false;
 		int index = 0;
@@ -269,7 +269,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 			}
 			executed = true;
 		}
-		catch (ConfigurationException ex)
+		catch (EternaException ex)
 		{
 			errorRef.setObject(ex);
 			throw ex;
@@ -316,7 +316,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 	}
 
 	public void setTransactionType(String tType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.transactionType = parseTransactionType(tType);
 	}
@@ -403,12 +403,12 @@ public class ModelAdapterImpl extends AbstractGenerator
 	}
 
 	public void addExecute(Execute execute)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.executes.add(execute);
 	}
 
-	public Object create() throws ConfigurationException
+	public Object create() throws EternaException
 	{
 		return this.createModelAdapter();
 	}
@@ -419,7 +419,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 	}
 
 	public static int parseTransactionType(String tType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if ("requared".equals(tType))
 		{
@@ -445,7 +445,7 @@ public class ModelAdapterImpl extends AbstractGenerator
 		{
 			return T_IDLE;
 		}
-		throw new ConfigurationException("Error transaction type:" + tType + ".");
+		throw new EternaException("Error transaction type:" + tType + ".");
 	}
 
 	public void destroy()

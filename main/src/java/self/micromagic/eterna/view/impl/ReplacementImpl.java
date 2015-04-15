@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
@@ -84,7 +84,7 @@ public class ReplacementImpl extends ComponentImpl
 	private List replacedList;
 
 	public void initialize(EternaFactory factory, Component parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -112,7 +112,7 @@ public class ReplacementImpl extends ComponentImpl
 						}
 						else
 						{
-							throw new ConfigurationException("The direct match component \""
+							throw new EternaException("The direct match component \""
 									+ sub.getName() + "\" appeared more than once.");
 						}
 					}
@@ -123,7 +123,7 @@ public class ReplacementImpl extends ComponentImpl
 		{
 			if (parent == null || !(parent instanceof Replacement))
 			{
-				throw new ConfigurationException("Top replacement must set base component.");
+				throw new EternaException("Top replacement must set base component.");
 			}
 			topReplace = false;
 			this.directMatchMap = ((Replacement) parent).getDirectMatchMap();
@@ -135,7 +135,7 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public void initReplace(EternaFactory factory, Component base, Replacement parent)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (base != null)
 		{
@@ -188,7 +188,7 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public void initBase(EternaFactory factory, Component base)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.baseComponent == null)
 		{
@@ -243,7 +243,7 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public void replaceComponent(EternaFactory factory, Component newReplace)
-			throws ConfigurationException
+			throws EternaException
 	{
 		ListIterator itr = this.replacedList.listIterator();
 		while (itr.hasNext())
@@ -284,7 +284,7 @@ public class ReplacementImpl extends ComponentImpl
 	 * 对剩余节点自动打包
 	 */
 	private void dealAutoWrap(EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		// 将其它的节点替换掉
 		ListIterator itr = this.replacedList.listIterator();
@@ -395,7 +395,7 @@ public class ReplacementImpl extends ComponentImpl
 	 * 当直接引用baseComponent时, 将其转换为非直接引用, 并初始化变量.
 	 */
 	private void changeLinkTypical()
-			throws ConfigurationException
+			throws EternaException
 	{
 		Component base = this.getBaseComponent();
 		if (this.linkTypical && base != null)
@@ -433,13 +433,13 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public void printBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		super.printBody(out, data, view);
 	}
 
 	public void printSpecialBody(Writer out, AppData data, ViewAdapter view)
-			throws IOException, ConfigurationException
+			throws IOException, EternaException
 	{
 		if (this.linkTypical)
 		{
@@ -455,7 +455,7 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public void setBaseComponentName(String name)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.baseComponentName = name;
 		if (name != null)
@@ -499,7 +499,7 @@ public class ReplacementImpl extends ComponentImpl
 					rInfo = (ReplacementInfo) this.directMatchMap.put(rInfo.name, rInfo);
 					if (rInfo != null && rInfo.addIndex(tmpIndex))
 					{
-						throw new ConfigurationException("The name \"" + tmpName
+						throw new EternaException("The name \"" + tmpName
 								+ "\" appeared more than once in config:[" + name + "].");
 					}
 				}
@@ -508,14 +508,14 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public void setIgnoreGlobalParam(boolean ignore)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.ignoreGlobalSetted = true;
 		super.setIgnoreGlobalParam(ignore);
 	}
 
 	public String getType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!this.linkTypical && this.baseComponent != null)
 		{
@@ -536,7 +536,7 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	public Iterator getEvents()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.baseComponent == null || this.linkTypical)
 		{
@@ -554,7 +554,7 @@ public class ReplacementImpl extends ComponentImpl
 	 * @param nameExp  要查找控件的名称表达式
 	 */
 	protected Component findBaseComponent(String nameExp, EternaFactory factory)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (nameExp == null)
 		{
@@ -568,7 +568,7 @@ public class ReplacementImpl extends ComponentImpl
 			String bName = this.parseBaseName(nameExp.substring(5), subName, subIndex);
 			if (bName == null)
 			{
-				throw new ConfigurationException("Error base name expression [" + nameExp + "].");
+				throw new EternaException("Error base name expression [" + nameExp + "].");
 			}
 			ViewAdapter view = factory.createViewAdapter(bName);
 			tmpCom = new ViewWrapComponent(view);
@@ -586,12 +586,12 @@ public class ReplacementImpl extends ComponentImpl
 			}
 			if (bName == null)
 			{
-				throw new ConfigurationException("Error base name expression [" + nameExp + "].");
+				throw new EternaException("Error base name expression [" + nameExp + "].");
 			}
 			tmpCom = this.unWrapReplacement(factory.getTypicalComponent(bName));
 			if (tmpCom == null)
 			{
-				throw new ConfigurationException("The Typical Component [" + nameExp + "] not found.");
+				throw new EternaException("The Typical Component [" + nameExp + "] not found.");
 			}
 		}
 		// 这里要先对baseComponent初始化, 因为后面需要初始化好的baseComponent
@@ -602,7 +602,7 @@ public class ReplacementImpl extends ComponentImpl
 			tmpCom = this.findSubComponent(tmpCom, subName.getString(), subIndex.value, new IntegerRef());
 			if (tmpCom == null)
 			{
-				throw new ConfigurationException("The Typical Component [" + nameExp + "] not found.");
+				throw new EternaException("The Typical Component [" + nameExp + "] not found.");
 			}
 		}
 		return tmpCom;
@@ -612,7 +612,7 @@ public class ReplacementImpl extends ComponentImpl
 	 * 根据名称及索引值查找一个子控件对象.
 	 */
 	private Component findSubComponent(Component root, String name, int index, IntegerRef nowIndex)
-			throws ConfigurationException
+			throws EternaException
 	{
 		Iterator itr = root.getSubComponents();
 		while (itr.hasNext())
@@ -663,7 +663,7 @@ public class ReplacementImpl extends ComponentImpl
 	}
 
 	protected ViewAdapterGenerator.ModifiableViewRes getModifiableViewRes()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.viewRes == null)
 		{

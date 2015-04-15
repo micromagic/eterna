@@ -21,13 +21,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.impl.AbstractExecute;
 import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 
@@ -37,7 +37,7 @@ public class EditParameterMapExecute extends AbstractExecute
 	protected Map initValues = null;
 
 	public void initialize(ModelAdapter model)
-				throws ConfigurationException
+				throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -53,13 +53,13 @@ public class EditParameterMapExecute extends AbstractExecute
 		}
 	}
 
-	public String getExecuteType() throws ConfigurationException
+	public String getExecuteType() throws EternaException
 	{
 		return "editParameterMap";
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		Map map = data.getRequestParameterMap();
 		boolean changeMap = true;

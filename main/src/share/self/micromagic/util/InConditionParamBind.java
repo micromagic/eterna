@@ -18,7 +18,6 @@ package self.micromagic.util;
 
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -27,6 +26,7 @@ import self.micromagic.eterna.model.ParamBindGenerator;
 import self.micromagic.eterna.model.ParamSetManager;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.sql.preparer.PreparerManager;
 import self.micromagic.eterna.sql.preparer.ValuePreparer;
 import self.micromagic.eterna.sql.preparer.ValuePreparerCreater;
@@ -42,14 +42,14 @@ public class InConditionParamBind extends AbstractGenerator
 	private ValuePreparerCreater vpg;
 
 	public void initialize(ModelAdapter model, Execute execute)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.vpg = model.getFactory().createValuePreparerCreater(
 				TypeManager.getPureType(TypeManager.getTypeId(this.paramType)));
 	}
 
 	public int setParam(AppData data, ParamSetManager psm, int loopIndex)
-			throws ConfigurationException, SQLException
+			throws EternaException, SQLException
 	{
 		Object obj = this.cacheIndex != -1 ? data.caches[this.cacheIndex]
 				: data.getRequestParameterMap().get(this.paramName);
@@ -122,7 +122,7 @@ public class InConditionParamBind extends AbstractGenerator
 	}
 
 	public void setSrc(String src)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -150,13 +150,13 @@ public class InConditionParamBind extends AbstractGenerator
 		}
 		catch (Exception ex)
 		{
-			throw new ConfigurationException("[IN condition] src pattern is:"
+			throw new EternaException("[IN condition] src pattern is:"
 					+ "[(paramName|cache:N)(;paramType(;seperate)?)?], but you give:[" + src + "].");
 		}
 	}
 
 	public void setNames(String names)
-			throws ConfigurationException
+			throws EternaException
 	{
 		try
 		{
@@ -169,41 +169,41 @@ public class InConditionParamBind extends AbstractGenerator
 		}
 		catch (Exception ex)
 		{
-			throw new ConfigurationException("[IN condition] names must set sub sql indexs, not like this:["
+			throw new EternaException("[IN condition] names must set sub sql indexs, not like this:["
 					+ names + "].");
 		}
 	}
 
 	public void setLoop(boolean loop)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (loop)
 		{
-			throw new ConfigurationException("[IN condition] can't used in loop.");
+			throw new EternaException("[IN condition] can't used in loop.");
 		}
 	}
 
 	public void setSubSQL(boolean subSQL)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (!subSQL)
 		{
-			throw new ConfigurationException("[IN condition] must use in sub sql.");
+			throw new EternaException("[IN condition] must use in sub sql.");
 		}
 	}
 
 	public ParamBind createParamBind()
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.subIndexs == null || this.paramName == null)
 		{
-			throw new ConfigurationException("Must set src and names attribute.");
+			throw new EternaException("Must set src and names attribute.");
 		}
 		return this;
 	}
 
 	public Object create()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.createParamBind();
 	}

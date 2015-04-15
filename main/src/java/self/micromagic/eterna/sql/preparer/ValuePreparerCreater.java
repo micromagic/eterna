@@ -17,7 +17,7 @@
 package self.micromagic.eterna.sql.preparer;
 
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 
 /**
  * 值准备器创建者.
@@ -40,7 +40,7 @@ public interface ValuePreparerCreater
 	/**
 	 * 获取生成值准备器创建者的工厂.
 	 */
-	EternaFactory getFactory() throws ConfigurationException;
+	EternaFactory getFactory() throws EternaException;
 
 	/**
 	 * 获得一个配置的属性.
@@ -48,7 +48,7 @@ public interface ValuePreparerCreater
 	 * @param name    属性的名称
 	 * @return        属性的值
 	 */
-	Object getAttribute(String name) throws ConfigurationException;
+	Object getAttribute(String name) throws EternaException;
 
 	/**
 	 * 是否要将空字符串变为null.
@@ -61,7 +61,7 @@ public interface ValuePreparerCreater
 	 * @param value    值
 	 * @return      值准备器
 	 */
-	ValuePreparer createPreparer(Object value) throws ConfigurationException;
+	ValuePreparer createPreparer(Object value) throws EternaException;
 
 	/**
 	 * 根据一个String类型的值创建一个值准备器.
@@ -69,6 +69,6 @@ public interface ValuePreparerCreater
 	 * @param value    值
 	 * @return      值准备器
 	 */
-	ValuePreparer createPreparer(String value) throws ConfigurationException;
+	ValuePreparer createPreparer(String value) throws EternaException;
 
 }

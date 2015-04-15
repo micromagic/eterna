@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.ModelAdapter;
@@ -39,7 +39,7 @@ public class ModelExecute extends AbstractExecute
 	protected int transactionType = -1;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -67,13 +67,13 @@ public class ModelExecute extends AbstractExecute
 	}
 
 	public String getExecuteType()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return "model";
 	}
 
 	public String getName()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return super.getName() == null ? "#export" : super.getName();
 	}
@@ -89,13 +89,13 @@ public class ModelExecute extends AbstractExecute
 	}
 
 	public void setTransactionType(String tType)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.transactionType = ModelAdapterImpl.parseTransactionType(tType);
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		if (this.exeModelIndex != -1)
 		{

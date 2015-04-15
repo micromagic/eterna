@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import self.micromagic.eterna.digester.ConfigurationException;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.digester.ObjectCreateRule;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.Execute;
@@ -66,7 +66,7 @@ public class TransExecute extends AbstractExecute
 	protected boolean pushResult = false;
 
 	public void initialize(ModelAdapter model)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.initialized)
 		{
@@ -81,7 +81,7 @@ public class TransExecute extends AbstractExecute
 	}
 
 	public String getName()
-			throws ConfigurationException
+			throws EternaException
 	{
 		return this.toHandler == null ? this.pushResult ? "#stack" : "#none"
 				: this.toHandler.getConfig();
@@ -98,7 +98,7 @@ public class TransExecute extends AbstractExecute
 	}
 
 	public void setFrom(String theFrom)
-			throws ConfigurationException
+			throws EternaException
 	{
 		this.fromHandler.setConfig(theFrom);
 	}
@@ -114,7 +114,7 @@ public class TransExecute extends AbstractExecute
 	}
 
 	public void setOpt(String opt)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (opt.startsWith("class:"))
 		{
@@ -124,7 +124,7 @@ public class TransExecute extends AbstractExecute
 			}
 			catch (Exception ex)
 			{
-				throw new ConfigurationException(ex);
+				throw new EternaException(ex);
 			}
 		}
 		else
@@ -207,13 +207,13 @@ public class TransExecute extends AbstractExecute
 			}
 			else
 			{
-				throw new ConfigurationException("Error opt:[" + opt + "].");
+				throw new EternaException("Error opt:[" + opt + "].");
 			}
 		}
 	}
 
 	public void setTo(String theTo)
-			throws ConfigurationException
+			throws EternaException
 	{
 		if (this.toHandler == null)
 		{
@@ -223,14 +223,14 @@ public class TransExecute extends AbstractExecute
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
-			throws ConfigurationException, SQLException, IOException
+			throws EternaException, SQLException, IOException
 	{
 		Object value = this.fromHandler.getData(data, this.removeFrom);
 		if (value == null)
 		{
 			if (this.mustExist)
 			{
-				throw new ConfigurationException("There is no value in [" + this.fromHandler.getConfig() + "].");
+				throw new EternaException("There is no value in [" + this.fromHandler.getConfig() + "].");
 			}
 		}
 		Element nowNode = null;
@@ -297,7 +297,7 @@ public class TransExecute extends AbstractExecute
 		}
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -312,10 +312,10 @@ public class TransExecute extends AbstractExecute
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -336,7 +336,7 @@ public class TransExecute extends AbstractExecute
 		}
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -353,7 +353,7 @@ public class TransExecute extends AbstractExecute
 				SearchManager.Condition condition = sm.getCondition(this.param);
 				return condition != null ? condition.value : null;
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -369,7 +369,7 @@ public class TransExecute extends AbstractExecute
 		static TransStrings instance = new TransStrings();
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -388,7 +388,7 @@ public class TransExecute extends AbstractExecute
 			{
 				return value;
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -404,7 +404,7 @@ public class TransExecute extends AbstractExecute
 		static TransToIterator instance = new TransToIterator();
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -434,7 +434,7 @@ public class TransExecute extends AbstractExecute
 			{
 				return new PreFetchIterator(new EnumerationIterator((Enumeration) value));
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -450,7 +450,7 @@ public class TransExecute extends AbstractExecute
 		static TransNext instance = new TransNext();
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -465,7 +465,7 @@ public class TransExecute extends AbstractExecute
 				}
 				return null;
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -481,7 +481,7 @@ public class TransExecute extends AbstractExecute
 		static TransToResultIterator instance = new TransToResultIterator();
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -495,7 +495,7 @@ public class TransExecute extends AbstractExecute
 			{
 				return ((SearchAdapter.Result) value).queryResult;
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -511,7 +511,7 @@ public class TransExecute extends AbstractExecute
 		static TransBeforeFirst instance = new TransBeforeFirst();
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -526,7 +526,7 @@ public class TransExecute extends AbstractExecute
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 				return ritr;
 			}
@@ -539,11 +539,11 @@ public class TransExecute extends AbstractExecute
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 				return value;
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -559,7 +559,7 @@ public class TransExecute extends AbstractExecute
 		static TransResultRow instance = new TransResultRow();
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -576,7 +576,7 @@ public class TransExecute extends AbstractExecute
 					}
 					catch (SQLException ex)
 					{
-						throw new ConfigurationException(ex);
+						throw new EternaException(ex);
 					}
 				}
 				return null;
@@ -596,12 +596,12 @@ public class TransExecute extends AbstractExecute
 					}
 					catch (SQLException ex)
 					{
-						throw new ConfigurationException(ex);
+						throw new EternaException(ex);
 					}
 				}
 				return null;
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -629,7 +629,7 @@ public class TransExecute extends AbstractExecute
 		}
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			if (value == null)
 			{
@@ -648,7 +648,7 @@ public class TransExecute extends AbstractExecute
 				}
 				catch (SQLException ex)
 				{
-					throw new ConfigurationException(ex);
+					throw new EternaException(ex);
 				}
 				String[] temp = new String[list.size()];
 				list.toArray(temp);
@@ -658,7 +658,7 @@ public class TransExecute extends AbstractExecute
 			{
 				return StringTool.separateString((String) value, this.param, true);
 			}
-			throw new ConfigurationException("Error Object type:" + value.getClass() + ".");
+			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
 
 		public String toString()
@@ -679,7 +679,7 @@ public class TransExecute extends AbstractExecute
 		}
 
 		public Object change(Object value)
-				throws ConfigurationException
+				throws EternaException
 		{
 			return this.converter.convert(value);
 		}
