@@ -17,6 +17,9 @@
 package self.micromagic.eterna.digester2;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import self.micromagic.util.StringTool;
 
@@ -50,8 +53,23 @@ public class InjectRule extends ParseRule
 			ElementProcessor[] epArrOld = (ElementProcessor[]) f.get(target);
 			ElementProcessor[] epArrCurr = (ElementProcessor[]) f.get(this);
 			ElementProcessor[] epArrNew = new ElementProcessor[epArrOld.length + epArrCurr.length];
-			System.arraycopy(epArrOld, 0, epArrNew, 0, epArrOld.length);
-			System.arraycopy(epArrCurr, 0, epArrNew, epArrOld.length, epArrCurr.length);
+			List tmp = new LinkedList();
+			boolean currAdded = false;
+			for (int i = 0; i < epArrOld.length; i++)
+			{
+				if (!currAdded && epArrOld[i] instanceof StackBinder)
+				{
+					// 如果遇到StackBinder, 将curr添加到其之前
+					currAdded = true;
+					tmp.addAll(Arrays.asList(epArrCurr));
+				}
+				tmp.add(epArrOld[i]);
+			}
+			if (!currAdded)
+			{
+				tmp.addAll(Arrays.asList(epArrCurr));
+			}
+			tmp.toArray(epArrNew);
 			f.set(target, epArrNew);
 		}
 		catch (RuntimeException ex)

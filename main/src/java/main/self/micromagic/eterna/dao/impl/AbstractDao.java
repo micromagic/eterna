@@ -109,12 +109,31 @@ public abstract class AbstractDao extends AbstractGenerator
 			}
 			if (this.daoManager.getParameterCount() > paramArray.length)
 			{
-				throw new EternaException(
-						"Not all parameter has been bound in [" + this.getName() + "].");
+				String msg = "Not all parameter has been bound in "
+						+ this.getType() + " [" + this.getName() + "].";
+				throw new EternaException(msg);
 			}
+			this.checkParamPermission();
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * 检查设置了权限的参数是否为动态参数.
+	 */
+	protected void checkParamPermission()
+	{
+		for (int i = 0; i < this.parameterArray.length; i++)
+		{
+			Parameter p = this.parameterArray[i];
+			if (p.getPermissionSet() != null && !this.daoManager.isDynamicParameter(i))
+			{
+				String msg = this.getType() + " [" + this.getName() + "]'s parameter ["
+						+ p.getName() + "] isn't dynamic, can't set permission.";
+				throw new EternaException(msg);
+			}
+		}
 	}
 
 	/**

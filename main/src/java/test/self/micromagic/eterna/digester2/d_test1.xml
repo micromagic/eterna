@@ -33,7 +33,7 @@
 		<objs>
 
 			<entity name="e1" order="i2,i1">
-				<item name="i1" colName="c1" type="Blob" x1="a"/>
+				<item name="i1" colName="c1" type="Blob" x1="a" permission="t_i_1"/>
 				<item name="i2" type="Stream" x2="b">
 					<attribute name="a" value="2"/>
 					<attribute name="v" value="0"/>
@@ -69,7 +69,7 @@
 			<constant name="c.test" value="123"/>
 			<query name="q1">
 				<prepared_sql>
-					sql #const(c.test) ? ? ? ? ?
+					sql #const(c.test) ? ? #param(i1)[?] ? ?
 				</prepared_sql>
 				<parameters>
 					<parameter name="p1" type="String"/>
@@ -87,7 +87,7 @@
 						]]></test:config>
 					</reader>
 					<entity-ref entityName="e2"/>
-					<reader name="r3" alias="c2" type="BigString"/>
+					<reader name="r3" alias="c2" type="BigString" permission="p1"/>
 				</readers>
 				<attribute name="v" value="0"/>
 				<attribute name="i" value="-1"/>
@@ -97,7 +97,7 @@
 			<query name="q2">
 				<prepared-sql>
 					select #auto[select]
-					where id = ? and (#auto[or;2,i=p2]) #auto[and,dynamic;i+p2]
+					where id = ? and (#auto[or,dynamic;2,i=p2]) #auto[and,dynamic;i+p2]
 				</prepared-sql>
 				<readers readerOrder=";r3,i6,p3;rEnd">
 					<reader name="r1" type="double"/>
@@ -179,6 +179,23 @@
 					<parameter name="k2" type="String"/>
 				</parameters>
 			</update>
+			
+			<update name="update7">
+				<prepared-sql>?, ?</prepared-sql>
+				<parameters>
+					<entity-ref entityName="tmp_e_7" include="t1"/>
+					<entity-ref entityName="tmp_e_7" include="t2"/>
+				</parameters>
+			</update>
+			<entity name="tmp_e_7">
+				<item name="t1" type="int" generator="self.micromagic.eterna.digester2.TestItemImpl"/>
+				<item name="t2" type="int" generator="self.micromagic.eterna.digester2.TestItemImpl">
+					<attribute name="myType" value="int"/>
+				</item>
+				<item name="t3" type="int" generator="self.micromagic.eterna.digester2.TestItemImpl">
+					<attribute name="myType" value="int"/>
+				</item>
+			</entity>
 
 			<search name="s1" queryName="q2" conditionIndex="2">
 				<conditions>
@@ -251,6 +268,8 @@
 			<resource name="testR">begin${test.page}end</resource>
 
 		</objs>
+
+		<permission-set className="self.micromagic.eterna.security.TestPermissionSetCreater"/>
 
 		<attributes>
 			<attribute name="1" value="a"/>

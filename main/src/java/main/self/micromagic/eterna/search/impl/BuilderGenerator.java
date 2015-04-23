@@ -16,9 +16,6 @@
 
 package self.micromagic.eterna.search.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
@@ -30,51 +27,23 @@ import self.micromagic.util.StringTool;
  */
 public class BuilderGenerator extends AbstractGenerator
 {
-	// 操作的名称列表
-	private static final String[] OPERATOR_NAMES = {
-		"isNull", "notNull", "checkNull",
-		"equal", "notEqual", "large", "below", "notLarge", "notBelow",
-		"beginWith", "endWith", "include", "match"
-	};
-
-	private static Map builderMap = new HashMap();
-
-	private String caption;
-	private String operator;
-
-	static
-	{
-		int index = 0;
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl("IS NULL", -1));
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl("IS NOT NULL", -1));
-		builderMap.put(OPERATOR_NAMES[index++],
-				new ConditionBuilderImpl(ConditionBuilderImpl.CHECK_OPT_TAG, -1));
-
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl("=", 0));
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl("<>", 0));
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl(">", 0));
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl("<", 0));
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl("<=", 0));
-		builderMap.put(OPERATOR_NAMES[index++], new ConditionBuilderImpl(">=", 0));
-		builderMap.put(OPERATOR_NAMES[index++],
-				new ConditionBuilderImpl(ConditionBuilderImpl.LIKE_OPT_TAG, 1));
-		builderMap.put(OPERATOR_NAMES[index++],
-				new ConditionBuilderImpl(ConditionBuilderImpl.LIKE_OPT_TAG, 2));
-		builderMap.put(OPERATOR_NAMES[index++],
-				new ConditionBuilderImpl(ConditionBuilderImpl.LIKE_OPT_TAG, 3));
-		builderMap.put(OPERATOR_NAMES[index++],
-				new ConditionBuilderImpl(ConditionBuilderImpl.LIKE_OPT_TAG, 0));
-	}
-
 	public void setCaption(String caption)
 	{
 		this.caption = caption;
 	}
+	private String caption;
 
 	public void setOperator(String operator)
 	{
 		this.operator = operator;
 	}
+	private String operator;
+
+	public void setPrepare(String prepare)
+	{
+		this.prepare = prepare;
+	}
+	private String prepare;
 
 	public Object create()
 			throws EternaException
@@ -85,15 +54,13 @@ public class BuilderGenerator extends AbstractGenerator
 	public ConditionBuilder createConditionBuilder()
 			throws EternaException
 	{
-		ConditionBuilderImpl cb = (ConditionBuilderImpl) builderMap.get(this.operator);
-		if (cb == null)
+		boolean needValue = true;
+		if (this.operator != null && this.operator.trim().toUpperCase().endsWith(" NULL"))
 		{
-			cb = new ConditionBuilderImpl("=", 0);
+			needValue = false;
 		}
-		else
-		{
-			cb = cb.copy();
-		}
+		ConditionBuilderImpl cb = new ConditionBuilderImpl(this.operator, needValue);
+		cb.prepareName = this.prepare;
 		cb.name = this.name;
 		cb.caption = this.caption == null ? this.name : this.caption;
 		return cb;

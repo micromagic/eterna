@@ -24,7 +24,7 @@ sub:{factory}
 factory
 log:{$factory}
 create:{type,${factory},1}
-sub:{include,objs,factoryAttributes}
+sub:{include,objs,permissionSet,factoryAttributes}
 
 
 ## include
@@ -40,6 +40,13 @@ method:{registerInclude}
 param
 log:{$include.param}
 method:{addParam,name(i=0),$body(attr=value)}
+
+
+## permissionSet
+permission-set
+log:{$permissionSet}
+create:{className}
+stack:{setPermissionSetCreater,n:0,g:0}
 
 
 ## factoryAttributes
@@ -159,7 +166,7 @@ log:{$}
 create:{generator,${reader}}
 attr:{
 	name,alias(m=0),colIndex(m=0,i=0):columnIndex,format(m=0):formatName,
-	colName(m=0):columnName,caption(m=0),permissions(m=0),type(m=0,i=0)
+	colName(m=0):columnName,caption(m=0),permission(m=0),type(m=0,i=0)
 }
 sub:{attribute}
 stack:{addResultReader,n:0,g:1}
@@ -174,7 +181,10 @@ sub:{parameter,entityRef}
 parameter
 log:{$}
 create:{generator,${parameter}}
-attr:{name,colName(m=0):columnName,type(m=0,i=0):paramType,prepare(m=0):prepareName}
+attr:{
+	name,colName(m=0):columnName,type(m=0,i=0):paramType,
+	prepare(m=0):prepareName,permission(m=0)
+}
 sub:{attribute}
 stack:{addParameter,n:0,g:0}
 
@@ -184,7 +194,7 @@ builder
 same:{name}
 log:{name}
 create:{generator,${builder}}
-attr:{name,caption(m=0),operator(m=0)}
+attr:{name,caption(m=0),operator(m=0),prepare(m=0)}
 sub:{attribute}
 stack:{registerObject,n:0,g:1}
 

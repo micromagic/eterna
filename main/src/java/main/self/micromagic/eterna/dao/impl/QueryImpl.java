@@ -26,6 +26,7 @@ import java.util.ListIterator;
 
 import org.dom4j.Element;
 
+import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultMetaData;
@@ -58,6 +59,15 @@ public class QueryImpl extends AbstractQuery
 	private int totalCount = TOTAL_COUNT_NONE;
 	private TotalCountInfo totalCountExt;
 
+	protected void copy(Dao copyObj)
+	{
+		super.copy(copyObj);
+		QueryImpl other = (QueryImpl) copyObj;
+		other.totalCount = this.totalCount;
+		other.totalCountExt = this.totalCountExt;
+		other.startRow = this.startRow;
+		other.maxRows = this.maxRows;
+	}
 
 	public int getStartRow()
 	{

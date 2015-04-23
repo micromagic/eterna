@@ -32,6 +32,11 @@ public interface ParameterGenerator extends Generator
 	void setColumnName(String name) throws EternaException;
 
 	/**
+	 * 设置需要的权限.
+	 */
+	void setPermission(String permission) throws EternaException;
+
+	/**
 	 * 设置要构造的SQLParameter的类型.
 	 */
 	void setParamType(String type) throws EternaException;

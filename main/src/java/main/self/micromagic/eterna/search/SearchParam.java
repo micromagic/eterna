@@ -29,6 +29,17 @@ public class SearchParam
 	public Map condition;
 
 	/**
+	 * 是否为特殊的条件格式.
+	 * 此时condition数据的格式为, group => [ConditionInfo, ...]
+	 */
+	public boolean specialFormat;
+
+	/**
+	 * 是否需要忽略空字符串.
+	 */
+	public boolean skipEmpty;
+
+	/**
 	 * 是否清除条件.
 	 * 当设置为true时将忽略condition属性.
 	 */

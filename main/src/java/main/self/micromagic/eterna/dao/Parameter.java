@@ -17,6 +17,7 @@
 package self.micromagic.eterna.dao;
 
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -56,6 +57,11 @@ public interface Parameter
 	 * 获取这个SQLParameter的数据类型名称.
 	 */
 	String getTypeName() throws EternaException;
+
+	/**
+	 * 获取需要的权限集合.
+	 */
+	PermissionSet getPermissionSet();
 
 	/**
 	 * 根据名称获取一个属性.

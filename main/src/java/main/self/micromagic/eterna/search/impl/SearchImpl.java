@@ -58,9 +58,9 @@ import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.AttributeManager;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
@@ -530,7 +530,7 @@ public class SearchImpl extends AbstractGenerator
 					for (int j = 0; j < pNames.length; j++)
 					{
 						el_cp.addElement("parameter").addAttribute("name", pNames[j])
-								.addAttribute("value", cp.getAttribute(pNames[j]));
+								.addAttribute("value", String.valueOf(cp.getAttribute(pNames[j])));
 					}
 				}
 
@@ -1070,17 +1070,24 @@ public class SearchImpl extends AbstractGenerator
 					condition.inputType = (String) item.getAttribute(n);
 				}
 			}
-			else if (DEFAULT_BUILDER_FLAG.equals(n))
+			else if (DEFAULT_BUILDER_FLAG.equals(n) || BUILDER_FLAG.equals(n))
 			{
 				condition.defaultBuilderName = (String) item.getAttribute(n);
+			}
+			else if (BUILDER_LIST_FLAG.equals(n))
+			{
+				condition.listName = (String) item.getAttribute(n);
 			}
 			else
 			{
 				condition.attributes.setAttribute(n, item.getAttribute(n));
 			}
 		}
-		condition.listName = PropertyGenerator.getListName(
-				condition.inputType, item.getType());
+		if (condition.listName == null)
+		{
+			condition.listName = PropertyGenerator.getListName(
+					condition.inputType, item.getType());
+		}
 		return condition;
 	}
 

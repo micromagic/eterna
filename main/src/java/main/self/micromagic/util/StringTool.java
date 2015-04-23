@@ -300,6 +300,27 @@ public class StringTool
 	}
 
 	/**
+	 * 判断字符串是否为空. <p>
+	 * 空串<code>""</code>和空对象<code>null</code>都返回<code>true</code>, 其他
+	 * 情况则返回<code>false</code>.
+	 *
+	 * @param str    被判断的对象
+	 * @return       是否为空
+	 */
+	public static boolean isEmpty(Object str)
+	{
+		if (str == null)
+		{
+			return true;
+		}
+		if (str instanceof CharSequence)
+		{
+			return ((CharSequence) str).length() == 0;
+		}
+		return false;
+	}
+
+	/**
 	 * 根据指定的分隔符<code>delimiter</code>分割一个字符串
 	 * <code>str</code>. <p>
 	 * 如果给出的字符串<code>str</code>为<code>null</code>、空串

@@ -24,6 +24,11 @@ import self.micromagic.util.ref.StringRef;
 public interface FactoryContainer
 {
 	/**
+	 * 在attribute中存放需要额外预留空间的键值.
+	 */
+	String LEAVE_SIZE_FLAG = "eterna.leaveSize";
+
+	/**
 	 * 在attribute中存放ServletContext对象的键值.
 	 */
 	String SERVLET_FLAG = "eterna.servlet";
@@ -34,7 +39,7 @@ public interface FactoryContainer
 	String CLASSLOADER_FLAG = "eterna.classLoader";
 
 	/**
-	 * 在attribute中存放配置参数的键值.
+	 * 在attribute中存放配置中需要替换的参数的键值.
 	 */
 	String CONFIG_PARAM_FLAG = "eterna.config.param";
 

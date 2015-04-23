@@ -28,6 +28,7 @@ import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.EntityRef;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.ParameterGenerator;
+import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
@@ -147,6 +148,11 @@ public class ParameterGroup
 			colName = tableAlias.concat(".").concat(colName);
 		}
 		pg.setColumnName(colName);
+		PermissionSet pSet = item.getPermissionSet();
+		if (pSet != null)
+		{
+			pg.setPermission(pSet.toString());
+		}
 		pg.setParamType(TypeManager.getTypeName(item.getType()));
 		String[] attrNames = item.getAttributeNames();
 		boolean hasPrepare = false;
@@ -224,6 +230,11 @@ public class ParameterGroup
 			{
 				itemG.setAttribute(PREPARE_FLAG, tmp);
 			}
+		}
+		PermissionSet pSet = param.getPermissionSet();
+		if (pSet != null)
+		{
+			itemG.setPermission(pSet.toString());
 		}
 		String[] attrNames = param.getAttributeNames();
 		for (int i = 0; i < attrNames.length; i++)

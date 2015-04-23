@@ -53,7 +53,7 @@ class ConditionPropertyImpl
 	String defaultValue;
 	String listName;
 	String defaultBuilderName;
-	String permissions;
+	String permissionConfig;
 	PermissionSet permissionSet = null;
 	List conditionBuilderList;
 	boolean useDefaultConditionBuilder = false;
@@ -88,13 +88,12 @@ class ConditionPropertyImpl
 			}
 		}
 
-		if (this.permissions != null && this.permissions.trim().length() > 0)
+		if (!StringTool.isEmpty(this.permissionConfig))
 		{
-			this.permissionSet = new PermissionSet(
-					StringTool.separateString(this.permissions, ",", true));
-			this.permissionSet.initialize(factory);
+			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
 		}
-		this.prepare = CreaterManager.createPrepareCreater(this.columnType, this.prepareName, factory);
+		this.prepare = CreaterManager.createPrepareCreater(
+				this.columnType, this.prepareName, factory);
 
 		if (this.columnCaption == null)
 		{
@@ -159,9 +158,9 @@ class ConditionPropertyImpl
 		return this.defaultValue;
 	}
 
-	public String getAttribute(String name)
+	public Object getAttribute(String name)
 	{
-		return (String) this.attributes.getAttribute(name);
+		return this.attributes.getAttribute(name);
 	}
 
 	public String[] getAttributeNames()

@@ -52,6 +52,9 @@ import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.search.impl.SearchManagerImpl;
+import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.security.PermissionSetCreater;
+import self.micromagic.eterna.security.PermissionSetCreaterImpl;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
@@ -62,6 +65,7 @@ import self.micromagic.eterna.view.View;
 import self.micromagic.eterna.view.impl.StringCoderImpl;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.IntegerConverter;
 
 public class EternaFactoryImpl extends AbstractFactory
 		implements EternaFactory
@@ -71,12 +75,13 @@ public class EternaFactoryImpl extends AbstractFactory
 	/**
 	 * 当前是否在执行初始化.
 	 */
-	private boolean inInit = false;
+	private boolean inInit;
 
 	private EternaFactory shareEternaFactory;
-	private boolean initialized = false;
-	private UserManager userManager = null;
-	private DataSourceManager dataSourceManager = null;
+	private boolean initialized;
+	private UserManager userManager;
+	private PermissionSetCreater permissionSetCreater;
+	private DataSourceManager dataSourceManager;
 
 
 	//----------------------------------  初始化及公共  --------------------------------------
@@ -113,6 +118,32 @@ public class EternaFactoryImpl extends AbstractFactory
 				um.initUserManager(this);
 			}
 			this.userManager = um;
+		}
+	}
+
+	public PermissionSet createPermissionSet(String permission)
+			throws EternaException
+	{
+		return this.permissionSetCreater.createPermissionSet(permission);
+	}
+
+	public void setPermissionSetCreater(PermissionSetCreater creater)
+			throws EternaException
+	{
+		if (this.permissionSetCreater != null)
+		{
+			if (ContainerManager.getSuperInitLevel() == 0)
+			{
+				log.warn("Duplicate PermissionSetCreater.");
+			}
+		}
+		else if (creater != null)
+		{
+			if (this.initialized)
+			{
+				creater.initialize(this);
+			}
+			this.permissionSetCreater = creater;
 		}
 	}
 
@@ -228,6 +259,14 @@ public class EternaFactoryImpl extends AbstractFactory
 			Tool.registerBean(beans);
 		}
 
+		// 初始化, PermissionSetCreater
+		ParseException.setContextInfo("permissionSetCreater");
+		if (this.permissionSetCreater == null)
+		{
+			this.permissionSetCreater = new PermissionSetCreaterImpl();
+		}
+		this.permissionSetCreater.initialize(this);
+
 		// 初始化, dataSourceManager
 		if (this.dataSourceManager != null)
 		{
@@ -242,22 +281,6 @@ public class EternaFactoryImpl extends AbstractFactory
 				ParseException.setContextInfo("dataSourceManager");
 				this.dataSourceManager.initialize(this);
 			}
-		}
-
-		// 重新构造列表, 去除对象列表中的多余空间
-		List temp = new ArrayList(this.objectList.size() + 8);
-		temp.addAll(this.objectList);
-		this.objectList = temp;
-
-		// 初始化注册的对象
-		int size = this.objectList.size();
-		ObjectContainer container;
-		for (int i = 0; i < size; i++)
-		{
-			container = (ObjectContainer) this.objectList.get(i);
-			String objName = container.getName() + "(" + container.getType().getName() + ")";
-			ParseException.setContextInfo(objName);
-			container.initialize(this);
 		}
 
 		// 初始化, userManager
@@ -277,11 +300,43 @@ public class EternaFactoryImpl extends AbstractFactory
 		// 初始化, model-caller
 		// model-caller不能使用共享工厂中的对象.
 		ParseException.setContextInfo("modelCaller");
+		if (this.modelCaller == null)
+		{
+			this.modelCaller = new ModelCallerImpl();
+		}
 		this.modelCaller.initModelCaller(this);
 
 		// 初始化, string-coder
 		ParseException.setContextInfo("stringCoder");
+		if (this.stringCoder == null)
+		{
+			this.stringCoder = new StringCoderImpl();
+		}
 		this.stringCoder.initStringCoder(this);
+
+		// 初始化注册的对象
+		int size = this.objectList.size();
+		ObjectContainer container;
+		// 这里不使用迭代方式, 可以在初始化时继续添加对象
+		for (int i = 0; i < size; i++)
+		{
+			container = (ObjectContainer) this.objectList.get(i);
+			String objName = container.getName() + "(" + container.getType().getName() + ")";
+			ParseException.setContextInfo(objName);
+			container.initialize(this);
+		}
+		// 新添加的对象不需要再初始化, 因为在添加时已经初始化了
+
+		// 重新构造列表, 去除对象列表中的多余空间
+		Object leaveSizeObj = factoryContainer.getAttribute(FactoryContainer.LEAVE_SIZE_FLAG);
+		int leaveSize = 2;
+		if (leaveSizeObj != null)
+		{
+			leaveSize = (new IntegerConverter()).convertToInt(leaveSizeObj);
+		}
+		List temp = new ArrayList(this.objectList.size() + leaveSize);
+		temp.addAll(this.objectList);
+		this.objectList = temp;
 	}
 
 	public DataSourceManager getDataSourceFromCache()
@@ -503,8 +558,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	//----------------------------------  model  --------------------------------------
 
 	private String modelNameTag;
-	private final ModelCaller defaultModelCaller = new ModelCallerImpl();
-	private ModelCaller modelCaller = this.defaultModelCaller;
+	private ModelCaller modelCaller;
 
 	public String getModelNameTag()
 			throws EternaException
@@ -528,7 +582,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public void setModelCaller(ModelCaller mc)
 		throws EternaException
 	{
-		if (this.modelCaller != this.defaultModelCaller)
+		if (this.modelCaller != null)
 		{
 			if (ContainerManager.getSuperInitLevel() == 0)
 			{
@@ -567,8 +621,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	//----------------------------------  view  --------------------------------------
 
 	private String viewGlobalSetting;
-	private final StringCoder defaultStringCoder = new StringCoderImpl();
-	private StringCoder stringCoder = this.defaultStringCoder;
+	private StringCoder stringCoder;
 
 	public String getViewGlobalSetting() throws EternaException
 	{
@@ -609,7 +662,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public void setStringCoder(StringCoder sc)
 			throws EternaException
 	{
-		if (this.stringCoder != this.defaultStringCoder)
+		if (this.stringCoder != null)
 		{
 			if (ContainerManager.getSuperInitLevel() == 0)
 			{

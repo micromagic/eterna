@@ -48,7 +48,7 @@ public final class SearchAttributes
 	public final String pageSizeTag;
 
 	/**
-	 * 存储XML格式查询条件的参数名称.
+	 * 存储特殊格式查询条件的参数名称.
 	 */
 	public final String querySettingTag;
 

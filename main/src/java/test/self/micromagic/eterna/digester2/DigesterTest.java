@@ -228,6 +228,15 @@ public class DigesterTest extends TestCase
 		update.setSubSQL(1, "a = 1");
 		tmpSQL = update.getPreparedSQL();
 		assertTrue(tmpSQL.indexOf("endW") != -1);
+
+		update = f.createUpdate("update7");
+		try
+		{
+			update.setObject("t1", new Object());
+			fail();
+		}
+		catch (Exception ex) {}
+		update.setObject("t2", new Object());
 	}
 
 	public void testElse()

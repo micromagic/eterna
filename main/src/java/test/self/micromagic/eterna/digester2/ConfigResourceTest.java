@@ -31,10 +31,31 @@ public class ConfigResourceTest extends TestCase
 		FactoryContainer fc = new FactoryContainerImpl();
 		ConfigResource cr = ContainerManager.createResource("cp:/", fc);
 		ConfigResource[] arr = cr.listResources(false);
+		boolean hasJavax = false;
 		for (int i = 0; i < arr.length; i++)
 		{
+			if ("cp:/javax/".equals(arr[i].getConfig()))
+			{
+				hasJavax = true;
+			}
 			System.out.println(arr[i].getConfig() + ", " + arr[i].getURI());
 		}
+		assertTrue(hasJavax);
+	}
+
+	public void testURL1()
+			throws Exception
+	{
+		String tmp = "jar:file:/D:/project/eterna2/code/pub/libs/dom4j-1.6.jar!/org/dom4j/dom/DOMAttribute.class";
+		FactoryContainer fc = new FactoryContainerImpl();
+		ConfigResource cr = ContainerManager.createResource(tmp, fc);
+		assertNotNull(cr.getAsStream());
+		cr = cr.getResource("../bean/BeanElement.class");
+		assertNotNull(cr.getAsStream());
+		cr = cr.getResource("../");
+		assertTrue(cr.getURI().endsWith("org/dom4j/"));
+		assertNull(cr.getAsStream());
+		assertNull(cr.listResources(false));
 	}
 
 	public void testParsePath1()

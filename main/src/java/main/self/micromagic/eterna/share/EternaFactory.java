@@ -33,6 +33,8 @@ import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
+import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.security.PermissionSetCreater;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
@@ -77,6 +79,18 @@ public interface EternaFactory extends Factory
 	 * 设置一个UserManager对象.
 	 */
 	void setUserManager(UserManager um) throws EternaException;
+
+	/**
+	 * 创建一个权限集合对象.
+	 *
+	 * @param permission  权限配置字符串
+	 */
+	PermissionSet createPermissionSet(String permission) throws EternaException;
+
+	/**
+	 * 设置权限集合创建器.
+	 */
+	void setPermissionSetCreater(PermissionSetCreater creater) throws EternaException;
 
 	/**
 	 * 获得一个DataSourceManager对象.

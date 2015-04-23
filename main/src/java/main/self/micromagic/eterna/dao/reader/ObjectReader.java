@@ -53,6 +53,7 @@ public class ObjectReader
 	protected ResultFormat format;
 	private String caption;
 
+	protected String permissionConfig;
 	protected PermissionSet permissionSet;
 
 	protected boolean useIndexOrAlias;
@@ -103,9 +104,9 @@ public class ObjectReader
 				}
 			}
 		}
-		if (this.permissionSet != null)
+		if (this.permissionConfig != null)
 		{
-			this.permissionSet.initialize(factory);
+			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
 		}
 		if (this.caption == null)
 		{
@@ -220,12 +221,15 @@ public class ObjectReader
 
 	public void setPermission(String permission)
 	{
-		if (permission == null || permission.trim().length() == 0)
+		if (!StringTool.isEmpty(permission))
 		{
-			return;
+			this.permissionConfig = permission;
 		}
-		this.permissionSet = new PermissionSet(
-				StringTool.separateString(permission, ",", true));
+	}
+
+	public void setPermissionSet(PermissionSet permissionSet)
+	{
+		this.permissionSet = permissionSet;
 	}
 
 	public PermissionSet getPermissionSet()

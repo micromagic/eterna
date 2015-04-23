@@ -67,9 +67,9 @@ public class PropertyGenerator extends AbstractGenerator
 		this.conditionProperty.visible = visible;
 	}
 
-	public void setPermissions(String permissions)
+	public void setPermissions(String permission)
 	{
-		this.conditionProperty.permissions = permissions;
+		this.conditionProperty.permissionConfig = permission;
 	}
 
 	public void setUseDefaultConditionBuilder(boolean use)

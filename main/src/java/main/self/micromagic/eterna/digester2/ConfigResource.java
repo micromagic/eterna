@@ -367,6 +367,19 @@ class ClassPathResource extends AbstractResource
 		return this.loader.getResourceAsStream(this.path);
 	}
 
+	/**
+	 * 检查一个地址中是否包含protocol.
+	 */
+	private static String checkProtocol(String url)
+	{
+		if (url.indexOf(':') == -1)
+		{
+			// 如果字符串中没有protocol, 默认添上file
+			url = "file:".concat(url);
+		}
+		return url;
+	}
+
 	public ConfigResource[] listResources(boolean recursive)
 	{
 		if (this.getType() != RES_TYPE_DIR)
@@ -375,8 +388,9 @@ class ClassPathResource extends AbstractResource
 		}
 		try
 		{
-			// path中最后的"/"会被去掉, 这里需要补上
-			String tmpRoot = this.path.length() == 0 ? "" : this.path.concat("/");
+			boolean rootPath = this.path.length() == 0;
+			// path中最后的"/"会被去掉, 这里需要补上, 但root不需要
+			String tmpRoot = rootPath ? "" : this.path.concat("/");
 			Enumeration resources = this.loader.getResources(this.path);
 			Map result = new HashMap();
 			while (resources.hasMoreElements())
@@ -392,7 +406,7 @@ class ClassPathResource extends AbstractResource
 				{
 					String tmp = res.toString();
 					int index = tmp.indexOf('!');
-					tmp = tmp.substring(4 /* jar: or zip: */, index);
+					tmp = checkProtocol(tmp.substring(4 /* jar: or zip: */, index));
 					URL tmpRes = new URL(tmp);
 					ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
 					this.findResources(result, stream, recursive, tmpRoot);
@@ -400,6 +414,26 @@ class ClassPathResource extends AbstractResource
 				else
 				{
 					Tool.log.error("Error URL [" + res + "].");
+				}
+			}
+			if (rootPath)
+			{
+				// 如果是根目录, 只能搜到目录路径, 这里需要将所有的jar搜一边
+				// 正常的jar包都会有META-INF目录
+				resources = this.loader.getResources("META-INF/");
+				while (resources.hasMoreElements())
+				{
+					URL res = (URL) resources.nextElement();
+					String protocol = res.getProtocol();
+					if ("jar".equals(protocol) || "zip".equals(protocol))
+					{
+						String tmp = res.toString();
+						int index = tmp.indexOf('!');
+						tmp = checkProtocol(tmp.substring(4 /* jar: or zip: */, index));
+						URL tmpRes = new URL(tmp);
+						ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
+						this.findResources(result, stream, recursive, tmpRoot);
+					}
 				}
 			}
 			int count = result.size();
@@ -410,7 +444,7 @@ class ClassPathResource extends AbstractResource
 			for (int i = 0; i < count; i++)
 			{
 				String config = tmpPrefix.concat((String) itr.next());
-				arr[i] = this.create(config, this.container);
+				arr[i] = this.create0(config, this.container, this.loader);
 			}
 			return arr;
 		}
@@ -502,11 +536,11 @@ class ClassPathResource extends AbstractResource
 		String[] pArr = parsePath(path, pCount);
 		if (pCount.value == -1)
 		{
-			return this.create(this.prefix.concat(path), this.container);
+			return this.create0(this.prefix.concat(path), this.container, this.loader);
 		}
 		int upCount = pCount.value + (this.getType() == RES_TYPE_FILE ? 1 : 0);
 		String mPath = mergePath(parsePath(this.path, null), upCount, pArr);
-		return this.create(this.prefix.concat(mPath), this.container);
+		return this.create0(this.prefix.concat(mPath), this.container, this.loader);
 	}
 
 }
@@ -698,7 +732,6 @@ class FileResource extends AbstractResource
 
 }
 
-
 /**
  * web中的资源.
  */
@@ -812,6 +845,80 @@ class WebResource extends AbstractResource
 		int upCount = pCount.value + (this.getType() == RES_TYPE_FILE ? 1 : 0);
 		String mPath = mergePath(parsePath(this.path, null), upCount, pArr);
 		return this.create(this.prefix.concat(mPath), this.container);
+	}
+
+}
+
+/**
+ * url中的资源.
+ */
+class UrlResource extends AbstractResource
+		implements ConfigResource
+{
+	public ConfigResource create(String config, FactoryContainer container)
+	{
+		UrlResource res = new UrlResource();
+		try
+		{
+			res.url = new URL(config);
+		}
+		catch (IOException ex)
+		{
+			throw new EternaException(ex);
+		}
+		res.init(config, container, res.url);
+		return res;
+	}
+
+	private URL url;
+
+	public String getURI()
+	{
+		if (this.url != null)
+		{
+			return this.url.toString();
+		}
+		return null;
+	}
+
+	public InputStream getAsStream()
+	{
+		if (this.getType() != RES_TYPE_FILE)
+		{
+			return null;
+		}
+		try
+		{
+			return this.url.openStream();
+		}
+		catch (IOException ex)
+		{
+			return null;
+		}
+	}
+
+	public ConfigResource[] listResources(boolean recursive)
+	{
+		// url模式无法列出子目录
+		return null;
+	}
+
+	public ConfigResource getResource(String path)
+	{
+		ConfigResource res = this.checkFlag(path);
+		if (res != null)
+		{
+			return res;
+		}
+		try
+		{
+			URL tmp = new URL(this.url, path);
+			return this.create(tmp.toString(), this.container);
+		}
+		catch (IOException ex)
+		{
+			return null;
+		}
 	}
 
 }

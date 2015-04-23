@@ -537,7 +537,8 @@ public class ContainerManager
 		ConfigResource res = (ConfigResource) crCache.get(flag);
 		if (res == null)
 		{
-			throw new EternaException("Can't create ConfigResource for flag [" + flag + "].");
+			//throw new EternaException("Can't create ConfigResource for flag [" + flag + "].");
+			return (new UrlResource()).create(config, container);
 		}
 		return res.create(config, container);
 	}

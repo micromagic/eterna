@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.Condition;
@@ -111,6 +112,10 @@ public class TemplateBuilder extends AbstractGenerator
 		if (this.factory == null)
 		{
 			this.factory = factory;
+			if (!StringTool.isEmpty(this.prepareName))
+			{
+				this.prepare = factory.getPrepare(this.prepareName);
+			}
 			return false;
 		}
 		return true;
@@ -125,6 +130,19 @@ public class TemplateBuilder extends AbstractGenerator
 		this.caption = caption;
 	}
 	private String caption;
+
+	public void setPrepare(String prepare)
+			throws EternaException
+	{
+		this.prepareName = prepare;
+	}
+	private String prepareName;
+	public PreparerCreater getPreparerCreater()
+			throws EternaException
+	{
+		return this.prepare;
+	}
+	private PreparerCreater prepare;
 
 	public void setOperator(String operator)
 	{
@@ -328,6 +346,7 @@ public class TemplateBuilder extends AbstractGenerator
 			sqlPart = buf.toString();
 		}
 
+		PreparerCreater pCreater = this.getPreparerCreater();
 		ValuePreparer[] preparers;
 		if (this.hasSub)
 		{
@@ -339,9 +358,19 @@ public class TemplateBuilder extends AbstractGenerator
 			else
 			{
 				preparers = new ValuePreparer[values.length];
-				for (int i = 0; i < values.length; i++)
+				if (pCreater == null)
 				{
-					preparers[i] = cp.createValuePreparer(values[i]);
+					for (int i = 0; i < values.length; i++)
+					{
+						preparers[i] = cp.createValuePreparer(values[i]);
+					}
+				}
+				else
+				{
+					for (int i = 0; i < values.length; i++)
+					{
+						preparers[i] = pCreater.createPreparer(values[i]);
+					}
 				}
 			}
 		}
@@ -350,7 +379,14 @@ public class TemplateBuilder extends AbstractGenerator
 			preparers = new ValuePreparer[this.paramCount];
 			if (this.paramCount > 0)
 			{
-				Arrays.fill(preparers, cp.createValuePreparer(value));
+				if (pCreater == null)
+				{
+					Arrays.fill(preparers, cp.createValuePreparer(value));
+				}
+				else
+				{
+					Arrays.fill(preparers, pCreater.createPreparer(value));
+				}
 			}
 		}
 		preparers = this.specialParam(preparers, colName, value, cp);

@@ -28,7 +28,7 @@ public class ReaderGenerator extends AbstractGenerator
 	private String formatName;
 	private String type;
 	private String columnName;
-	private String permissions;
+	private String permission;
 
 	private String caption;
 
@@ -70,9 +70,9 @@ public class ReaderGenerator extends AbstractGenerator
 		this.formatName = name;
 	}
 
-	public void setPermissions(String permissions)
+	public void setPermission(String permission)
 	{
-		this.permissions = permissions;
+		this.permission = permission;
 	}
 
 	public void setType(String type)
@@ -105,9 +105,9 @@ public class ReaderGenerator extends AbstractGenerator
 		{
 			reader.setColumnName(this.columnName);
 		}
-		if (this.permissions != null)
+		if (this.permission != null)
 		{
-			reader.setPermission(this.permissions);
+			reader.setPermission(this.permission);
 		}
 		if (this.caption != null)
 		{

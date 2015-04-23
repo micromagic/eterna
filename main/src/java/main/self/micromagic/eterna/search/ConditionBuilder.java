@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.search;
 
+import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -35,6 +36,11 @@ public interface ConditionBuilder extends EternaObject
 		"beginWith", "endWith", "include", "match"
 	};
 
+	/**
+	 *
+	 */
+	public static final String DEFAULT_PREPARE_FLAG = "defaultPrepare";
+
 	public static ValuePreparer[] EMPTY_PREPARERS = new ValuePreparer[0];
 
 	boolean initialize(EternaFactory factory) throws EternaException;
@@ -53,5 +59,14 @@ public interface ConditionBuilder extends EternaObject
 	 */
 	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException;
+
+	/**
+	 * 获取与此builder绑定的PreparerCreater.
+	 */
+	PreparerCreater getPreparerCreater() throws EternaException;
+
+	Object getAttribute(String name) throws EternaException;
+
+	String[] getAttributeNames() throws EternaException;
 
 }

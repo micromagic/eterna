@@ -89,13 +89,24 @@ public class FactoryContainerImpl
 			Factory factory = ContainerManager.getCurrentFactory();
 			Factory shareFactory = this.shareContainer == null ?
 					null : this.shareContainer.getFactory();
-			factory.initialize(this, shareFactory);
+			// 在初始化执行前先对factory赋值, 这样可以在初始化期间获取对象
 			this.factory = factory;
+			factory.initialize(this, shareFactory);
 			this.initializeElse();
 			this.initialized = true;
 		}
 		catch (Throwable ex)
 		{
+			if (this.factory != null)
+			{
+				// 如果初始化时失败, 需要销毁工厂
+				try
+				{
+					this.factory.destroy();
+				}
+				catch (Throwable err) {}
+				this.factory = null;
+			}
 			Digester.log.error("Error in initialize [" + this.id + "].", ex);
 			if (msg != null)
 			{
@@ -369,6 +380,11 @@ public class FactoryContainerImpl
 			// 设置了重载时间需要进行重载检查
 			this.checkReload();
 		}
+		Factory f = this.factory;
+		if (f != null)
+		{
+			return f;
+		}
 		if (!this.initialized)
 		{
 			synchronized (this)
@@ -379,9 +395,10 @@ public class FactoryContainerImpl
 					throw new EternaException("The factory container ["
 							+ this.id + "] hasn't initialized.");
 				}
+				f = this.factory;
 			}
 		}
-		return this.factory;
+		return f;
 	}
 	private Factory factory;
 
@@ -427,10 +444,11 @@ public class FactoryContainerImpl
 
 	public void destroy()
 	{
-		if (this.factory != null)
+		Factory tmp = this.factory;
+		if (tmp != null)
 		{
-			this.factory.destroy();
 			this.factory = null;
+			tmp.destroy();
 		}
 	}
 

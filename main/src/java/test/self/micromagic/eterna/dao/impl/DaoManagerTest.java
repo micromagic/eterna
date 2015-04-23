@@ -40,7 +40,7 @@ public class DaoManagerTest extends TestCase
 		for (int i = 0; i < paramArray.length; i++)
 		{
 			paramArray[i] = new ParameterImpl( "name_" + i, "col_" + i, "String", i + 1,
-					null, new AttributeManager());
+					null, null, new AttributeManager());
 		}
 		query = new TestQuery(paramArray);
 		//this.factory = EternaFactoryCreater.getEternaFactory(this.getClass());

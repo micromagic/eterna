@@ -16,49 +16,53 @@
 
 package self.micromagic.eterna.search.impl;
 
+import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.Condition;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * @author micromagic@sina.com
+ * builder的实现类.
  */
 class ConditionBuilderImpl
 		implements ConditionBuilder
 {
 	static final String EQUALS_OPT_TAG = "=";
 	static final String LIKE_OPT_TAG = "LIKE";
-	static final String CHECK_OPT_TAG = "CHECK";
 
-	String name;
-	String caption;
-	private final String operator;
-
-	/**
-	 *   -1 : 是否为空的判断
-	 *    0 : 一般情况
-	 *  0x1 : 针对字符串, 在后面加上通配符
-	 *  0x2 : 针对字符串, 在前面加上通配符
-	 *  0x3 : 针对字符串, 在两边加上通配符
-	 */
-	private final int optType;
-
-	public ConditionBuilderImpl(String operator, int optType)
+	public ConditionBuilderImpl(String operator, boolean needValue)
 	{
 		this.operator = operator;
-		this.optType = optType;
+		this.needValue = needValue;
 	}
+	private final String operator;
+	private final boolean needValue;
 
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.factory != null)
+		{
+			return true;
+		}
+		this.factory = factory;
+		if (!StringTool.isEmpty(this.prepareName))
+		{
+			this.prepare = factory.getPrepare(this.prepareName);
+		}
 		return false;
+	}
+	private EternaFactory factory;
+	String prepareName;
+
+	public EternaFactory getFactory()
+	{
+		return this.factory;
 	}
 
 	public String getName()
@@ -66,92 +70,72 @@ class ConditionBuilderImpl
 	{
 		return this.name;
 	}
+	String name;
 
 	public String getCaption()
 			throws EternaException
 	{
 		return this.caption;
 	}
+	String caption;
+
+	public PreparerCreater getPreparerCreater()
+			throws EternaException
+	{
+		return this.prepare;
+	}
+	private PreparerCreater prepare;
 
 	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
-		if (this.optType == -1)
+		if (this.needValue)
 		{
-			if (CHECK_OPT_TAG.equalsIgnoreCase(this.operator))
+			if (StringTool.isEmpty(value))
 			{
-				return "1".equals(value) ? new Condition(colName + " IS NULL")
-						: new Condition(colName + " IS NOT NULL");
+				return this.getNullCheckCondition(colName);
 			}
-			else
-			{
-				int count = colName.length() + this.operator.length() + 1;
-				StringAppender temp = StringTool.createStringAppender(count);
-				temp.append(colName).append(' ').append(this.operator);
-				return new Condition(temp.toString());
-			}
-		}
 
-		String strValue = value == null ? null : value.toString();
-		if (value == null || strValue.length() == 0)
-		{
-			return this.getNullCheckCondition(colName);
-		}
-
-		int count = colName.length() + this.operator.length() + 3;
-		StringAppender sqlPart = StringTool.createStringAppender(count);
-		sqlPart.append(colName).append(' ').append(this.operator).append(" ?");
-		ValuePreparer[] preparers = new ValuePreparer[1];
-		if (TypeManager.isString(cp.getColumnType()))
-		{
+			int count = colName.length() + this.operator.length() + 3;
+			StringAppender sqlPart = StringTool.createStringAppender(count);
+			sqlPart.append(colName).append(' ').append(this.operator).append(" ?");
+			PreparerCreater pCreater = this.getPreparerCreater();
 			if (LIKE_OPT_TAG.equalsIgnoreCase(this.operator))
 			{
-				if (this.optType == 0)
-				{
-					// 对于match, 默认加上escape
-					sqlPart.append(" escape '\\'");
-				}
-				else
+				String strValue = value == null ? null : value.toString();
+				if (pCreater != null)
 				{
 					String newStr = BuilderGenerator.dealEscapeString(strValue);
 					if (newStr != strValue)
 					{
-						strValue = newStr;
+						value = strValue = newStr;
 						sqlPart.append(" escape '\\'");
 					}
 				}
+				else
+				{
+					// 对于没有设置prepare的, 默认加上escape
+					sqlPart.append(" escape '\\'");
+				}
 			}
-			String tmpValue = "";
-			if (this.optType == 0)
+			ValuePreparer[] preparers = new ValuePreparer[1];
+			if (pCreater == null)
 			{
-				tmpValue = strValue;
+				preparers[0] = cp.createValuePreparer(value);
 			}
 			else
 			{
-				StringAppender temp = StringTool.createStringAppender(strValue.length() + 2);
-				if ((this.optType & 0x2) != 0)
-				{
-					temp.append('%');
-				}
-				temp.append(strValue);
-				if ((this.optType & 0x1) != 0)
-				{
-					temp.append('%');
-				}
-				tmpValue = temp.toString();
+				preparers[0] = pCreater.createPreparer(value);
 			}
-			preparers[0] = cp.createValuePreparer(tmpValue);
+			return new Condition(sqlPart.toString(), preparers);
 		}
 		else
 		{
-			String opt = this.operator;
-			if (LIKE_OPT_TAG.equalsIgnoreCase(opt))
-			{
-				opt = "=";
-			}
-			preparers[0] = cp.createValuePreparer(value);
+			int count = colName.length() + this.operator.length() + 1;
+			StringAppender temp = StringTool.createStringAppender(count);
+			temp.append(colName).append(' ').append(this.operator);
+			return new Condition(temp.toString());
 		}
-		return new Condition(sqlPart.toString(), preparers);
 	}
 
 	protected Condition getNullCheckCondition(String colName)
@@ -160,47 +144,20 @@ class ConditionBuilderImpl
 				|| LIKE_OPT_TAG.equalsIgnoreCase(this.operator);
 		String temp = equalsFlag ? colName + " IS NULL" : colName + " IS NOT NULL";
 		return new Condition(temp);
-		/*
-		对于字符串的情况, 这里不做是否为空字符串的判断, 如果需要可以重写这个方法,
-		然后在配置中定义自己的builder
-		if (TypeManager.isTypeString(cp.getColumnType()))
-		{
-			String tempOp1, tempOp2;
-			String linkOp;
-			if ("=".equals(this.operator))
-			{
-				tempOp1 = " IS NULL";
-				tempOp2 = " = ''";
-				linkOp = " OR ";
-			}
-			else if (LIKE_OPT_TAG.equalsIgnoreCase(this.operator))
-			{
-				tempOp1 = " LIKE '%'";
-				tempOp2 = " IS NULL";
-				linkOp = " OR ";
-			}
-			else
-			{
-				tempOp1 = " IS NOT NULL";
-				tempOp2 = " <> ''";
-				linkOp = " AND ";
-			}
-			int count = colName.length() + tempOp1.length() + tempOp2.length() + 8;
-			count = count * 2;
-			StringAppender temp = StringTool.createStringAppender(count);
-			temp.append('(').append(colName).append(tempOp1).append(linkOp);
-			temp.append(colName).append(tempOp2).append(')');
-			return new Condition(temp.toString());
-		}
-		*/
 	}
 
-	protected ConditionBuilderImpl copy()
+	public Object getAttribute(String name)
+			throws EternaException
 	{
-		ConditionBuilderImpl result = new ConditionBuilderImpl(this.operator, this.optType);
-		result.name = this.name;
-		result.caption = this.caption;
-		return result;
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String[] getAttributeNames()
+			throws EternaException
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

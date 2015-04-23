@@ -21,6 +21,7 @@ import self.micromagic.eterna.dao.ParameterGenerator;
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
@@ -31,12 +32,18 @@ public class ParameterGeneratorImpl extends AbstractGenerator
 		implements ParameterGenerator
 {
 	private String colName;
+	private String permission;
 	private String type;
 	private String prepareName;
 
 	public void setColumnName(String name)
 	{
 		this.colName = name;
+	}
+
+	public void setPermission(String permission)
+	{
+		this.permission = permission;
 	}
 
 	public void setParamType(String type)
@@ -59,7 +66,7 @@ public class ParameterGeneratorImpl extends AbstractGenerator
 			throws EternaException
 	{
 		return new ParameterImpl(this.getName(), this.colName, this.type,
-				paramIndex, this.prepareName, this.attributes);
+				paramIndex, this.prepareName, this.permission, this.attributes);
 	}
 
 }
@@ -69,6 +76,7 @@ class ParameterImpl
 {
 	protected String name;
 	private final String colName;
+	protected String permissionConfig;
 	protected String prepareName;
 	protected PreparerCreater prepare;
 	protected int type;
@@ -76,13 +84,14 @@ class ParameterImpl
 	protected AttributeManager attrs;
 
 	public ParameterImpl(String name, String colName, String typeName,
-			int index, String prepareName, AttributeManager attrs)
+			int index, String prepareName, String permission, AttributeManager attrs)
 	{
 		this.name = name;
 		this.colName = colName == null ? name : colName;
 		this.type = TypeManager.getTypeId(typeName);
 		this.index = index;
 		this.prepareName = prepareName;
+		this.permissionConfig = permission;
 		this.attrs = attrs;
 	}
 
@@ -91,6 +100,10 @@ class ParameterImpl
 	{
 		this.prepare = CreaterManager.createPrepareCreater(this.type, this.prepareName, factory);
 		this.attrs.convertType(factory, "parameter");
+		if (this.permissionConfig != null)
+		{
+			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
+		}
 	}
 
 	/**
@@ -110,6 +123,13 @@ class ParameterImpl
 	{
 		return this.colName;
 	}
+
+	public PermissionSet getPermissionSet()
+			throws EternaException
+	{
+		return this.permissionSet;
+	}
+	private PermissionSet permissionSet;
 
 	public int getType()
 	{

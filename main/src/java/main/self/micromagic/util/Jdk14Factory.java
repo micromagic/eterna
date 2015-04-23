@@ -174,7 +174,7 @@ public class Jdk14Factory extends LogFactory
 			}
 			if ("default".equals(name))
 			{
-				System.err.println("Error log name can not be [default].");
+				System.err.println("The log name can not be [default].");
 				return;
 			}
 		}

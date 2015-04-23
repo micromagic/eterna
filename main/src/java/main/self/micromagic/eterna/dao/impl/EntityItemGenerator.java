@@ -30,7 +30,7 @@ public class EntityItemGenerator extends AbstractGenerator
 	{
 		return new EntityItemImpl(this.attributes, this.getName(),
 				this.columnName == null ? this.getName() : this.columnName,
-				this.type, this.caption);
+				this.type, this.caption, this.permission);
 	}
 
 	public void setColumnName(String colName)
@@ -51,10 +51,11 @@ public class EntityItemGenerator extends AbstractGenerator
 	}
 	private String caption;
 
-	public void setPermission()
+	public void setPermission(String permission)
 	{
-		// TODO Auto-generated method stub
+		this.permission = permission;
 	}
+	private String permission;
 
 }
 
@@ -62,13 +63,14 @@ class EntityItemImpl
 		implements EntityItem
 {
 	public EntityItemImpl(AttributeManager attrs, String name, String colName,
-			String type, String caption)
+			String type, String caption, String permission)
 	{
 		this.attrs = attrs;
 		this.name = name;
 		this.colName = colName;
 		this.caption = caption;
 		this.type = TypeManager.getTypeId(type);
+		this.permissionConfig = permission;
 	}
 	private final AttributeManager attrs;
 
@@ -76,6 +78,11 @@ class EntityItemImpl
 			throws EternaException
 	{
 		this.attrs.convertType(entity.getFactory(), "item");
+		if (this.permissionConfig != null)
+		{
+			this.permissionSet = entity.getFactory().createPermissionSet(
+					this.permissionConfig);
+		}
 		this.entity = entity;
 	}
 	private Entity entity;
@@ -122,8 +129,9 @@ class EntityItemImpl
 	public PermissionSet getPermissionSet()
 			throws EternaException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.permissionSet;
 	}
+	private PermissionSet permissionSet;
+	private final String permissionConfig;
 
 }

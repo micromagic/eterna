@@ -72,7 +72,7 @@ public interface ConditionProperty
 
 	String getDefaultValue() throws EternaException;
 
-	String getAttribute(String name) throws EternaException;
+	Object getAttribute(String name) throws EternaException;
 
 	String[] getAttributeNames() throws EternaException;
 

@@ -139,11 +139,15 @@ public class SearchManagerImpl extends AbstractGenerator
 				Search.ATTR_SEARCH_PARAM);
 		if (sParam != null)
 		{
-			this.pageNum = sParam.pageNum;
+			this.pageNum = sParam.pageNum - this.attributes.pageStart;
 			if (sParam.pageSize > 0)
 			{
 				this.pageSize = sParam.pageSize > MAX_PAGE_SIZE ?
 						MAX_PAGE_SIZE : sParam.pageSize;
+			}
+			if (sParam.allRow)
+			{
+				raMap.put(Search.READ_ALL_ROW, "1");
 			}
 			boolean saveCondition = raMap.get(SAVE_CONDITION) != null || search.isSpecialCondition();
 			this.setConditionValues(sParam, search, saveCondition);
@@ -225,39 +229,67 @@ public class SearchManagerImpl extends AbstractGenerator
 	private void setConditionValues(Document doc, Search search, boolean saveCondition)
 			throws EternaException
 	{
-		StringAppender buf = StringTool.createStringAppender(512);
-
-		List preparerList = new LinkedList();
+		// 将doc中的数据整理成特殊的条件map
+		Map specialFormat = new HashMap();
 		List groups = doc.getRootElement().element("groups").elements("group");
 		Iterator gitr = groups.iterator();
 		Element group;
-		String value;
 		while (gitr.hasNext())
 		{
 			group = (Element) gitr.next();
+			String gName = group.attributeValue("name");
+			List infos = new ArrayList();
+			specialFormat.put(gName, infos);
 			List conditions = group.elements("condition");
+			if (conditions.size() > 0)
+			{
+				Iterator citr = conditions.iterator();
+				while (citr.hasNext())
+				{
+					Element condition = (Element) citr.next();
+					ConditionInfo info = new ConditionInfo(condition.attributeValue("name"),
+							gName, condition.attributeValue("value"), condition.attributeValue("builder"));
+					infos.add(info);
+				}
+			}
+		}
+		this.setConditionValues(specialFormat, search, saveCondition);
+	}
+
+	/**
+	 * 根据特殊的条件格式设置查询条件。
+	 */
+	private void setConditionValues(Map specialFormat, Search search, boolean saveCondition)
+			throws EternaException
+	{
+		StringAppender buf = StringTool.createStringAppender(512);
+
+		List preparerList = new LinkedList();
+		Iterator gitr = specialFormat.entrySet().iterator();
+		while (gitr.hasNext())
+		{
+			Map.Entry e = (Map.Entry) gitr.next();
+			String gName = (String) e.getKey();
+			List conditions = (List) e.getValue();
 			if (conditions.size() > 0)
 			{
 				Iterator citr = conditions.iterator();
 				int index = 0;
 				while (citr.hasNext())
 				{
-					Element condition = (Element) citr.next();
-					// 这里不捕获异常, 因为在方法外已经捕获了
-					ConditionProperty cp = search.getConditionProperty(
-							condition.attributeValue("name"));
-					if (cp != null && !cp.isIgnore())
+					ConditionInfo condition = (ConditionInfo) citr.next();
+					ConditionProperty cp = search.getConditionProperty(condition.name);
+					if (cp != null)
 					{
 						ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ? cp.getDefaultConditionBuilder()
-								: search.getFactory().getConditionBuilder(condition.attributeValue("builder"));
-						value = condition.attributeValue("value");
+								: search.getFactory().getConditionBuilder(condition.builderName);
 						Condition cbCon = null;
 						try
 						{
-							cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
+							cbCon = cb.buildeCondition(cp.getColumnName(), condition.value, cp);
 							if (saveCondition)
 							{
-								this.addCondition(new ConditionInfo(cp.getName(), group.attributeValue("name"), value, cb));
+								this.addCondition(new ConditionInfo(cp.getName(), gName, condition.value, cb));
 							}
 						}
 						catch (Exception ex)
@@ -345,14 +377,19 @@ public class SearchManagerImpl extends AbstractGenerator
 			this.conditionVersion++;
 			return;
 		}
-		if (param.condition == null || param.condition.isEmpty())
+		if (param.condition == null)
 		{
-			// 没有条件则直接返回
+			// 没有条件则直接返回, 注: condition为空map不表示没有条件
 			return;
 		}
 		this.clearCondition();
 		this.conditionVersion++;
 		this.resetConditionSearch = search;
+		if (param.specialFormat)
+		{
+			this.setConditionValues(param.condition, search, saveCondition);
+			return;
+		}
 		StringAppender buf = StringTool.createStringAppender(512);
 
 		List preparerList = new LinkedList();
@@ -363,7 +400,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			// 这里不捕获异常, 因为在方法外已经捕获了
 			ConditionProperty cp = search.getConditionProperty(i);
 			Object value = param.condition.get(cp.getName());
-			if (!cp.isIgnore() && value != null)
+			if (!cp.isIgnore() && !(param.skipEmpty ? StringTool.isEmpty(value) : value == null))
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
 				Condition cbCon = null;

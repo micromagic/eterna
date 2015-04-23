@@ -16,18 +16,30 @@
 
 package self.micromagic.eterna.security;
 
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
+
 /**
- * 权限集合.
+ * 权限集合的创建器.
  */
-public interface PermissionSet
+public interface PermissionSetCreater
 {
 	/**
-	 * 检测参数permission中是否包含本权限集合中的某个权限.
+	 * 执行初始化.
 	 *
-	 * 注:
-	 * 如果参数为permission空, 则返回true.
-	 * 如果本权限集合为空, 则也返回true.
+	 * @return  是否已初始化
+	 *          false表示是第一次初始化, true表示已执行过初始化
 	 */
-	boolean checkPermission(Permission permission);
+	boolean initialize(EternaFactory factory) throws EternaException;
+
+	/**
+	 * 获取创建器所在的工厂.
+	 */
+	EternaFactory getFactory() throws EternaException;
+
+	/**
+	 * 根据给出的权限配置字符串创建一个权限集合.
+	 */
+	public PermissionSet createPermissionSet(String permission);
 
 }

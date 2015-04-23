@@ -583,6 +583,11 @@ public class ReaderManagerImpl
 		{
 			itemG.setAttribute(FORMAT_FLAG, reader.getFormatName());
 		}
+		Object pSet = reader.getPermissionSet();
+		if (pSet != null)
+		{
+			itemG.setPermission(pSet.toString());
+		}
 		String[] attrNames = reader.getAttributeNames();
 		for (int i = 0; i < attrNames.length; i++)
 		{
@@ -608,6 +613,7 @@ public class ReaderManagerImpl
 			reader.setCaption(item.getCaption());
 		}
 		reader.setAlias(item.getName());
+		reader.setPermissionSet(item.getPermissionSet());
 		String colName = item.getColumnName();
 		if (tableAlias != null)
 		{

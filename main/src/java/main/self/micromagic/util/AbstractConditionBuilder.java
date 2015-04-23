@@ -16,6 +16,7 @@
 
 package self.micromagic.util;
 
+import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
@@ -32,6 +33,10 @@ public abstract class AbstractConditionBuilder extends AbstractGenerator
 		if (this.factory == null)
 		{
 			this.factory = factory;
+			if (!StringTool.isEmpty(this.prepareName))
+			{
+				this.prepare = factory.getPrepare(this.prepareName);
+			}
 			return false;
 		}
 		return true;
@@ -52,6 +57,19 @@ public abstract class AbstractConditionBuilder extends AbstractGenerator
 		this.operator = operator;
 	}
 	protected String operator;
+
+	public void setPrepare(String prepare)
+			throws EternaException
+	{
+		this.prepareName = prepare;
+	}
+	private String prepareName;
+	public PreparerCreater getPreparerCreater()
+			throws EternaException
+	{
+		return this.prepare;
+	}
+	private PreparerCreater prepare;
 
 	public Object create()
 			throws EternaException

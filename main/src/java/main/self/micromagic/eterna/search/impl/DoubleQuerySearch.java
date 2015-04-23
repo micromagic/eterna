@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.search;
+package self.micromagic.eterna.search.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -31,7 +31,9 @@ import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.search.impl.SearchImpl;
+import self.micromagic.eterna.search.Search;
+import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.security.EmptyPermission;
 import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;

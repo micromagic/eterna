@@ -20,6 +20,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.search.Condition;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
@@ -85,6 +86,82 @@ public class BuilderTest extends TestCase
 		assertEquals("a3b c2d", con.sqlPart);
 		con = t.buildeCondition("x,y", "a", null);
 		assertEquals("ab cyd", con.sqlPart);
+	}
+
+	public void testTemplate2()
+			throws Exception
+	{
+		EternaFactory f = (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
+		TemplateBuilder t = new TemplateBuilder();
+		t.setPrepare("strInclude");
+		t.setAttribute("template", "([C0] like ? or [C1] like ?)");
+		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
+		t.initialize(f);
+		Condition condition = t.buildeCondition("a,b", "str", null);
+		assertEquals("(a like ? or b like ?)", condition.sqlPart);
+		assertEquals(2, condition.preparers.length);
+		assertEquals("%str%", PrivateAccessor.get(condition.preparers[0], "value"));
+	}
+
+	public void testBase()
+			throws Exception
+	{
+		EternaFactory f = (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
+		ConditionBuilder b;
+		Condition condition;
+		EmptyConditionProperty cp = new EmptyConditionProperty("a");
+
+		b = f.getConditionBuilder("isNull");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a IS NULL", condition.sqlPart);
+		b = f.getConditionBuilder("notNull");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a IS NOT NULL", condition.sqlPart);
+		b = f.getConditionBuilder("equal");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a = ?", condition.sqlPart);
+		assertNull(condition.preparers[0]);
+		b = f.getConditionBuilder("notEqual");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a <> ?", condition.sqlPart);
+		assertNull(condition.preparers[0]);
+
+		b = f.getConditionBuilder("include");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a LIKE ?", condition.sqlPart);
+		assertEquals("%x%", PrivateAccessor.get(condition.preparers[0], "value"));
+		condition = b.buildeCondition("a", "x%", cp);
+		assertEquals("a LIKE ? escape '\\'", condition.sqlPart);
+		assertEquals("%x\\%%", PrivateAccessor.get(condition.preparers[0], "value"));
+		b = f.getConditionBuilder("beginWith");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a LIKE ?", condition.sqlPart);
+		assertEquals("x%", PrivateAccessor.get(condition.preparers[0], "value"));
+		b = f.getConditionBuilder("endWith");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a LIKE ?", condition.sqlPart);
+		assertEquals("%x", PrivateAccessor.get(condition.preparers[0], "value"));
+		b = f.getConditionBuilder("match");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a LIKE ? escape '\\'", condition.sqlPart);
+		assertNull(condition.preparers[0]);
+
+		b = f.getConditionBuilder("more");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a > ?", condition.sqlPart);
+		assertNull(condition.preparers[0]);
+		b = f.getConditionBuilder("less");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a < ?", condition.sqlPart);
+		assertNull(condition.preparers[0]);
+		b = f.getConditionBuilder("moreEqual");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a >= ?", condition.sqlPart);
+		assertNull(condition.preparers[0]);
+		b = f.getConditionBuilder("lessEqual");
+		condition = b.buildeCondition("a", "x", cp);
+		assertEquals("a <= ?", condition.sqlPart);
+		assertNull(condition.preparers[0]);
 	}
 
 }
@@ -157,7 +234,7 @@ class EmptyConditionProperty
 		return null;
 	}
 
-	public String getAttribute(String name)
+	public Object getAttribute(String name)
 	{
 		return null;
 	}
