@@ -149,6 +149,20 @@ public class DigesterTest extends TestCase
 		assertTrue(query2.getPreparedSQL().endsWith(")  and t.x2 = ?"));
 	}
 
+	public void testQuery3()
+			throws Exception
+	{
+		Query query3 = f.createQuery("q3");
+		ResultReaderManager rm = query3.getReaderManager();
+		assertEquals(3, rm.getReaderCount());
+		assertNull(rm.getReader(0).getFormat());
+		assertNull(rm.getReader(1).getFormat());
+		assertNotNull(rm.getReader(2).getFormat());
+		assertEquals("r1", rm.getReader(0).getName());
+		assertEquals("r2", rm.getReader(1).getName());
+		assertEquals("tmp", rm.getReader(2).getName());
+	}
+
 	public void testSearch()
 			throws Exception
 	{

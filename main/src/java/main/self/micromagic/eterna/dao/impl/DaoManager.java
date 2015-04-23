@@ -219,13 +219,20 @@ public class DaoManager
 		return other;
 	}
 
-	public String frontParse(String sql, Dao dao)
+	/**
+	 * 对数据操作脚本进行预解析.
+	 *
+	 * @param script  要预解析的数据操作脚本
+	 * @param dao     脚本所在的数据操作对象
+	 * @return  解析后的数据操作脚本
+	 */
+	public String preParse(String script, Dao dao)
 			throws EternaException
 	{
 		ResultReader[] readerArray = null;
 		Parameter[] paramArray = null;
-		StringAppender buf = StringTool.createStringAppender(sql.length() + 16);
-		String dealedSql = sql;
+		StringAppender buf = StringTool.createStringAppender(script.length() + 16);
+		String dealedSql = script;
 		int index = dealedSql.indexOf(EXTEND_FLAG + AUTO_NAME);
 		while (index != -1)
 		{
@@ -371,8 +378,8 @@ public class DaoManager
 			}
 			else
 			{
-				buf.append(sql.substring(0, index + 1 + AUTO_NAME.length()));
-				dealedSql = sql.substring(index + 1 + AUTO_NAME.length());
+				buf.append(script.substring(0, index + 1 + AUTO_NAME.length()));
+				dealedSql = script.substring(index + 1 + AUTO_NAME.length());
 			}
 			index = dealedSql.indexOf(EXTEND_FLAG + AUTO_NAME);
 		}

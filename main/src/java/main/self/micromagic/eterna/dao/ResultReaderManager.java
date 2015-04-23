@@ -30,6 +30,11 @@ public interface ResultReaderManager
 	String FORMAT_FLAG = "format";
 
 	/**
+	 * 在ResultReader的arrtibute中设置格式化值只显示列的名称.
+	 */
+	String SHOW_NAME_FLAG = "showName";
+
+	/**
 	 * 在item的arrtibute中设置读取的列表别名的名称.
 	 */
 	String ALIAS_FLAG = "alias";

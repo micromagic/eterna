@@ -32,6 +32,7 @@ import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.reader.InvalidReader;
 import self.micromagic.eterna.dao.reader.ObjectReader;
 import self.micromagic.eterna.dao.reader.ReaderFactory;
+import self.micromagic.eterna.dao.reader.ReaderWrapper;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
@@ -160,12 +161,37 @@ public class ReaderManagerImpl
 			// 重新构造allReaderList并进行初始化
 			this.allReaderList.clear();
 			this.allReaderList.addAll(this.readerList);
-			itr = this.allReaderList.iterator();
 			count = this.allReaderList.size();
 			for (int i = 0; i < count; i++)
 			{
-				ResultReader reader = (ResultReader) itr.next();
+				// 这里不能用迭代, 因为有可能需要添加值
+				ResultReader reader = (ResultReader) this.allReaderList.get(i);
 				reader.initialize(factory);
+				String showName = (String) reader.getAttribute(SHOW_NAME_FLAG);
+				if (showName != null)
+				{
+					if (this.nameToIndexMap.containsKey(showName))
+					{
+						String msg = "The ReaderManager [" + reader.getName()
+								+ "]'s attribute showName [" + showName
+								+ "] is exists in ReaderManager [" + this.getName() + "].";
+						DaoManager.log.error(msg);
+					}
+					else
+					{
+						// 这里需要同时更新allReaderList和readerList
+						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName());
+						tmp.setNeedFormat(false);
+						this.allReaderList.set(i, tmp);
+						this.readerList.set(i, tmp);
+						tmp = new ReaderWrapper(reader, showName);
+						tmp.setNeedFormat(true);
+						this.allReaderList.add(tmp);
+						this.readerList.add(tmp);
+						this.nameToIndexMap.put(showName,
+								Utility.createInteger(this.allReaderList.size()));
+					}
+				}
 				if (this.nonePermission && reader.getPermissionSet() != null)
 				{
 					this.nonePermission = false;

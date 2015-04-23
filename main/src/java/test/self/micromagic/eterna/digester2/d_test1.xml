@@ -114,6 +114,16 @@
 					<parameter name="pEnd" colName="t.x2" type="int"/>
 				</parameters>
 			</query>
+			
+			<query name="q3">
+				<prepared-sql>t</prepared-sql>
+				<readers>
+					<reader name="r1" type="double" format="pattern:#0.00">
+						<attribute name="showName" value="tmp"/>
+					</reader>
+					<reader name="r2" type="String"/>
+				</readers>
+			</query>
 
 			<update name="update1xx">
 				<prepared-sql/>

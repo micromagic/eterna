@@ -96,8 +96,9 @@ public abstract class AbstractDao extends AbstractGenerator
 			this.initElse(factory);
 
 			this.daoManager = new DaoManager();
-			String tmpSQL = this.daoManager.frontParse(this.preparedSQL, this);
-			this.daoManager.parse(tmpSQL);
+			String tmpScript = this.preChange(this.preparedSQL);
+			tmpScript = this.daoManager.preParse(tmpScript, this);
+			this.daoManager.parse(tmpScript);
 			this.preparerManager = new PreparerManager(this, paramArray);
 			this.daoManager.initialize(this);
 
@@ -107,16 +108,26 @@ public abstract class AbstractDao extends AbstractGenerator
 				Parameter param = paramArray[i];
 				this.addParameterNameMap(param);
 			}
-			if (this.daoManager.getParameterCount() > paramArray.length)
+			if (this.daoManager.getParameterCount() != paramArray.length)
 			{
-				String msg = "Not all parameter has been bound in "
-						+ this.getType() + " [" + this.getName() + "].";
+				String msg = "There are " + paramArray.length + " parameter(s) in "
+						+ this.getType() + " [" + this.getName() + "], but the script ["
+						+ tmpScript + "] need " + this.daoManager.getParameterCount()
+						+ " parameter(s).";
 				throw new EternaException(msg);
 			}
 			this.checkParamPermission();
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * 预先对需要处理的数据操作脚本进行转换.
+	 */
+	protected String preChange(String script)
+	{
+		return script;
 	}
 
 	/**

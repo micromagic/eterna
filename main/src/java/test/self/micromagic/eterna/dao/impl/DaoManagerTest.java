@@ -51,23 +51,23 @@ public class DaoManagerTest extends TestCase
 	{
 		try
 		{
-			String str = daoManager.frontParse("#auto[update;1,3]", query);
+			String str = daoManager.preParse("#auto[update;1,3]", query);
 			String result = "col_0 = ?, col_1 = ?, col_2 = ?";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]", query);
+			str = daoManager.preParse("##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]", query);
 			result = "##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("#auto[and;6,-2]", query);
+			str = daoManager.preParse("#auto[and;6,-2]", query);
 			result = "col_5 = ? and col_6 = ? and col_7 = ? and col_8 = ?";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("#auto[insertN;1,3] ###auto[insertV;1,-1]", query);
+			str = daoManager.preParse("#auto[insertN;1,3] ###auto[insertV;1,-1]", query);
 			result = "col_0, col_1, col_2 ##?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("#auto[or;i-name_2,i+name_3] ###auto[and;i=name_5,i+name_5]", query);
+			str = daoManager.preParse("#auto[or;i-name_2,i+name_3] ###auto[and;i=name_5,i+name_5]", query);
 			result = "col_1 = ? or col_2 = ? or col_3 = ? or col_4 = ? ##col_5 = ? and col_6 = ?";
 			assertEquals(result, str);
 		}
@@ -81,20 +81,20 @@ public class DaoManagerTest extends TestCase
 	{
 		try
 		{
-			String str = daoManager.frontParse("#auto[update,dynamic;1,3]", query);
+			String str = daoManager.preParse("#auto[update,dynamic;1,3]", query);
 			String result = "#param(dAuto_0)[, col_0 = ?]#param(dAuto_1)[, col_1 = ?]#param(dAuto_2)[, col_2 = ?]";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("##auto[update;1,3] #? #param(t)[t = ?] #sub[($)]", query);
+			str = daoManager.preParse("##auto[update;1,3] #? #param(t)[t = ?] #sub[($)]", query);
 			result = "##auto[update;1,3] #? #param(t)[t = ?] #sub[($)]";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("#auto[and,dynamic;6,-2]", query);
+			str = daoManager.preParse("#auto[and,dynamic;6,-2]", query);
 			result = "#param(dAuto_5)[ and col_5 = ?]#param(dAuto_6)[ and col_6 = ?]"
 					+ "#param(dAuto_7)[ and col_7 = ?]#param(dAuto_8)[ and col_8 = ?]";
 			assertEquals(result, str);
 
-			str = daoManager.frontParse("#auto[insertN,dynamic;1,3] ###auto[insertV,dynamic;1,-1]", query);
+			str = daoManager.preParse("#auto[insertN,dynamic;1,3] ###auto[insertV,dynamic;1,-1]", query);
 			result = "#param(dAuto_0)[, col_0]#param(dAuto_1)[, col_1]#param(dAuto_2)[, col_2] ##"
 					+ "#param(dAuto_0)[, ?]#param(dAuto_1)[, ?]#param(dAuto_2)[, ?]#param(dAuto_3)[, ?]"
 					+ "#param(dAuto_4)[, ?]#param(dAuto_5)[, ?]#param(dAuto_6)[, ?]#param(dAuto_7)[, ?]"
@@ -112,31 +112,31 @@ public class DaoManagerTest extends TestCase
 	{
 		try
 		{
-			daoManager.frontParse("#auto[other,1,3]", query);
+			daoManager.preParse("#auto[other,1,3]", query);
 			fail("设置类型错误时应抛出异常");
 		}
 		catch (EternaException ex) {}
 		try
 		{
-			daoManager.frontParse("#auto[other,1]", query);
+			daoManager.preParse("#auto[other,1]", query);
 			fail("参数个数错误时应抛出异常");
 		}
 		catch (EternaException ex) {}
 		try
 		{
-			daoManager.frontParse("#auto[other,1,3,a]", query);
+			daoManager.preParse("#auto[other,1,3,a]", query);
 			fail("参数个数错误时应抛出异常");
 		}
 		catch (EternaException ex) {}
 		try
 		{
-			daoManager.frontParse("#auto[or,i-name_1,i+col]", query);
+			daoManager.preParse("#auto[or,i-name_1,i+col]", query);
 			fail("参数名错误时应抛出异常");
 		}
 		catch (EternaException ex) {}
 		try
 		{
-			daoManager.frontParse("#auto[or,iXname_1,i+name_3]", query);
+			daoManager.preParse("#auto[or,iXname_1,i+name_3]", query);
 			fail("标签错误时应抛出异常");
 		}
 		catch (EternaException ex) {}
