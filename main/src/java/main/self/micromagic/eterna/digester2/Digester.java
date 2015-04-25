@@ -47,6 +47,15 @@ import self.micromagic.util.ref.StringRef;
 public class Digester
 {
 	/**
+	 * 默认的规则的文件名.
+	 */
+	public static final String DEFAULT_RULES = "rules.res";
+	/**
+	 * 默认的配置项的文件名.
+	 */
+	public static final String DEFAULT_CINFIG = "config.properties";
+
+	/**
 	 * 在classes目录中存放扩展规则的文件名.
 	 */
 	public static final String RULES_EXT_FILE = "rules_ext.res";
@@ -72,6 +81,20 @@ public class Digester
 	}
 
 	/**
+	 * 构造一个Digester.
+	 *
+	 * @param resList     存放规则的资源管理器的列表
+	 * @param resConfig   规则定义中需要使用的配置参数
+	 */
+	public Digester(ResManager[] resList, Map resConfig)
+	{
+		for (int i = 0; i < resList.length; i++)
+		{
+			this.initRules(resList[i], resConfig);
+		}
+	}
+
+	/**
 	 * 无参的构造函数用于生成默认的Digester.
 	 */
 	private Digester()
@@ -86,9 +109,9 @@ public class Digester
 			throws IOException
 	{
 		ResManager rm = new ResManager();
-		rm.load(Digester.class.getResourceAsStream("rules.res"));
+		rm.load(Digester.class.getResourceAsStream(DEFAULT_RULES));
 		Properties rConfig = new Properties();
-		rConfig.load(Digester.class.getResourceAsStream("config.properties"));
+		rConfig.load(Digester.class.getResourceAsStream(DEFAULT_CINFIG));
 		InputStream in = Digester.class.getResourceAsStream("/" + RULES_CINFIG_FILE);
 		if (in != null)
 		{

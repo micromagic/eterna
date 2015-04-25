@@ -20,15 +20,14 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 数据库列类型的定义者.
  */
-public class ColumnTypeDefiner
+public class TypeDefiner
 		implements EternaObject
 {
-	public ColumnTypeDefiner()
+	public TypeDefiner()
 	{
 		this.init();
 	}
@@ -39,7 +38,7 @@ public class ColumnTypeDefiner
 		this.types[TypeManager.TYPE_BYTE] = new TypeDefineDesc("byte");
 		this.types[TypeManager.TYPE_LONG] = new TypeDefineDesc("long");
 		this.types[TypeManager.TYPE_DOUBLE] = new TypeDefineDesc("double");
-		this.types[TypeManager.TYPE_STRING] = new StringDefineDesc("String");
+		this.types[TypeManager.TYPE_STRING] = new CommonString("String");
 		this.types[TypeManager.TYPE_TIMPSTAMP] = new TypeDefineDesc("Datetime");
 		this.types[TypeManager.TYPE_BLOB] = new TypeDefineDesc("Blob");
 		this.types[TypeManager.TYPE_CLOB] = new TypeDefineDesc("Clob");
@@ -90,57 +89,20 @@ public class ColumnTypeDefiner
 	}
 	private String name;
 
-	public void modifyTypeDesc(String type, String name)
+	public void modifyTypeDefineDesc(TypeDefineDesc desc)
 	{
-		int id = TypeManager.getTypeId(type);
-		this.types[id] = createSpecialType(name, type);
-	}
-
-	private static TypeDefineDesc createSpecialType(String name, String constName)
-	{
-		if ("mysql.string".equals(name))
-		{
-			return new MySqlString(constName);
-		}
-		else if ("oracle.double".equals(name))
-		{
-			return new OracleDouble(constName);
-		}
-		throw new EternaException("Unknow type [" + name + "].");
+		int id = TypeManager.getTypeId(desc.getConstName());
+		this.types[id] = desc;
 	}
 
 }
 
 /**
- * 类型定义的描述信息.
+ * 通用的字符串类型定义.
  */
-class TypeDefineDesc
+class CommonString extends TypeDefineDesc
 {
-	public TypeDefineDesc(String constName)
-	{
-		this.constName = constName;
-	}
-	protected final String constName;
-
-	public void init(EternaFactory factory)
-	{
-		this.define = factory.getConstantValue(this.constName);
-	}
-	protected String define;
-
-	/**
-	 * 获取类型的定义.
-	 */
-	public String getDefine(int type)
-	{
-		return this.define;
-	}
-
-}
-
-class StringDefineDesc extends TypeDefineDesc
-{
-	public StringDefineDesc(String constName)
+	public CommonString(String constName)
 	{
 		super(constName);
 	}
@@ -152,58 +114,6 @@ class StringDefineDesc extends TypeDefineDesc
 	{
 		int ext = TypeManager.getTypeExtend(type, null);
 		return this.define.concat("(" + ext + ")");
-	}
-
-}
-
-class MySqlString extends TypeDefineDesc
-{
-	public MySqlString(String constName)
-	{
-		super(constName);
-	}
-
-	/**
-	 * 获取类型的定义.
-	 */
-	public String getDefine(int type)
-	{
-		int ext = TypeManager.getTypeExtend(type, null);
-		if (ext < 200)
-		{
-			return this.define.concat("(" + ext + ")");
-		}
-		else
-		{
-			return "text(" .concat(ext + ")");
-		}
-	}
-
-}
-
-class OracleDouble extends TypeDefineDesc
-{
-	public OracleDouble(String constName)
-	{
-		super(constName);
-	}
-
-	/**
-	 * 获取类型的定义.
-	 */
-	public String getDefine(int type)
-	{
-		IntegerRef sub = new IntegerRef();
-		int ext = TypeManager.getTypeExtend(type, sub);
-		if (ext > 0)
-		{
-			if (sub.value > 0)
-			{
-				return this.define.concat("(" + ext + "," + sub + ")");
-			}
-			return this.define.concat("(" + ext + ")");
-		}
-		return this.define;
 	}
 
 }
