@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.impl.AbstractExecute;
+import self.micromagic.eterna.search.ConditionInfo;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchResult;
@@ -495,7 +496,7 @@ public class AppDataLogExecute extends AbstractExecute
 				Iterator itr = sm.getConditions().iterator();
 				while (itr.hasNext())
 				{
-					SearchManager.ConditionInfo con = (SearchManager.ConditionInfo) itr.next();
+					ConditionInfo con = (ConditionInfo) itr.next();
 					Element vNode = parent.addElement("value");
 					vNode.addAttribute("conditionName", con.name);
 					if (con.value == null)
@@ -504,8 +505,7 @@ public class AppDataLogExecute extends AbstractExecute
 					}
 					else
 					{
-						vNode.addAttribute("type", "String");
-						vNode.addAttribute("value", con.value);
+						this.printObject(vNode, con.value);
 					}
 				}
 			}

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!--
+	将数据库锁住防止多个同时进行更新的数据库操作
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<!-- 创建用于锁住数据库的信息表 -->
+			<update name="createLockTabel">
+				<prepared-sql noLine="true">
+					create table #const(db_lock_table)
+					(
+						lockName  #const(String)(100) not null,
+						lockValue #const(String)(100),
+						userId    #const(String)(100),
+						lockTime  #const(Datetime),
+						PRIMARY KEY (lockName)
+					)
+				</prepared-sql>
+			</update>
+
+			<!-- 获取数据库锁信息 -->
+			<query name="getLockInfo">
+				<prepared-sql noLine="true">
+					select lockName, lockValue from #const(db_lock_table)
+					where lockName = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="lockName" type="String" />
+				</parameters>
+				<readers>
+					<reader name="lockName" type="String" />
+					<reader name="lockValue" type="String" />
+				</readers>
+			</query>
+			<!-- 添加数据库锁信息 -->
+			<update name="addLockInfo">
+				<prepared-sql noLine="true">
+					insert into #const(db_lock_table) (lockName, lockValue, userId, lockTime)
+					values (?, ?, ?, #const(now))
+				</prepared-sql>
+				<parameters>
+					<parameter name="lockName" type="String" />
+					<parameter name="lockValue" type="String" />
+					<parameter name="userId" type="String" />
+				</parameters>
+			</update>
+			<!-- 修改数据库锁信息 -->
+			<update name="modifyLockInfo">
+				<prepared-sql noLine="true">
+					update #const(db_lock_table) set lockTime = #const(now), userId = ?
+							#param(1)[, lockValue = ?]
+					where lockName = ? #param(2)[and lockValue = ?]
+				</prepared-sql>
+				<parameters>
+					<parameter name="userId" type="String" />
+					<parameter name="lockValue1" type="String" />
+					<parameter name="lockName" type="String" />
+					<parameter name="lockValue2" type="String" />
+				</parameters>
+			</update>
+
+		</objs>
+	</factory>
+</eterna-config>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ public class ReaderManagerImpl
 				ResultReader reader = (ResultReader) this.allReaderList.get(i);
 				reader.initialize(factory);
 				String showName = (String) reader.getAttribute(SHOW_NAME_FLAG);
-				if (showName != null)
+				if (!StringTool.isEmpty(showName))
 				{
 					if (this.nameToIndexMap.containsKey(showName))
 					{
@@ -186,10 +186,10 @@ public class ReaderManagerImpl
 						this.readerList.set(i, tmp);
 						tmp = new ReaderWrapper(reader, showName);
 						tmp.setNeedFormat(true);
-						this.allReaderList.add(tmp);
-						this.readerList.add(tmp);
 						this.nameToIndexMap.put(showName,
 								Utility.createInteger(this.allReaderList.size()));
+						this.allReaderList.add(tmp);
+						this.readerList.add(tmp);
 					}
 				}
 				if (this.nonePermission && reader.getPermissionSet() != null)

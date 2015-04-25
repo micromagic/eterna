@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class StackBinder
 
 	/**
 	 * 解析配置信息, 生成StackBinder.
-	 * 格式: stack:{mName,t:1,o:1,n:0,g:0}
+	 * 格式: stack:{mName,t:1,o:0,n:0,g:0}
 	 * mName: 需要调用的方法名
 	 * t: 方法所在对象在堆栈中的位置, 默认为1
 	 * o: 参数对象在堆栈中的位置, 默认为0
@@ -116,12 +116,12 @@ public class StackBinder
 		Object obj = digester.peek(this.objIndex);
 		if (obj instanceof BeanMap)
 		{
-         obj = ((BeanMap) obj).getBean();
+			obj = ((BeanMap) obj).getBean();
 		}
 		Object target = digester.peek(this.targetIndex);
 		if (target instanceof BeanMap)
 		{
-         target = ((BeanMap) target).getBean();
+			target = ((BeanMap) target).getBean();
 		}
 		this.bind(target, obj);
 	}

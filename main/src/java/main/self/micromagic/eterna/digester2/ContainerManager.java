@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -455,6 +455,32 @@ public class ContainerManager
 	 * 在线程中存储当前ConfigResource的键值.
 	 */
 	private static final String THREAD_RESOURCE_KEY = "eterna.current.resource";
+
+	/**
+	 * 获取下一个序列号.
+	 */
+	public static int getNextSerial()
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		IntegerRef serial = (IntegerRef) cache.getProperty(THREAD_SERIAL_KEY);
+		if (serial == null)
+		{
+			serial = new IntegerRef(1);
+			cache.setProperty(THREAD_SERIAL_KEY, serial);
+		}
+		return serial.value++;
+	}
+	/**
+	 * 重置序列号.
+	 */
+	public static void resetSerial()
+	{
+		ThreadCache.getInstance().removeProperty(THREAD_SERIAL_KEY);
+	}
+	/**
+	 * 在线程中存储当序列号的键值.
+	 */
+	private static final String THREAD_SERIAL_KEY = "eterna.serial";
 
 	/**
 	 * 添加一个在工厂容器重新初始化时需要清除的属性名.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,9 @@ import org.dom4j.Element;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.search.Condition;
+import self.micromagic.eterna.search.BuildeResult;
 import self.micromagic.eterna.search.ConditionBuilder;
+import self.micromagic.eterna.search.ConditionInfo;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchAttributes;
@@ -283,7 +284,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					{
 						ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ? cp.getDefaultConditionBuilder()
 								: search.getFactory().getConditionBuilder(condition.builderName);
-						Condition cbCon = null;
+						BuildeResult cbCon = null;
 						try
 						{
 							cbCon = cb.buildeCondition(cp.getColumnName(), condition.value, cp);
@@ -318,7 +319,7 @@ public class SearchManagerImpl extends AbstractGenerator
 									buf.append("( (");
 								}
 							}
-							buf.append(cbCon.sqlPart);
+							buf.append(cbCon.scriptPart);
 							for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
 							{
 								cbCon.preparers[pIndex].setName(cp.getName());
@@ -403,7 +404,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			if (!cp.isIgnore() && !(param.skipEmpty ? StringTool.isEmpty(value) : value == null))
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
-				Condition cbCon = null;
+				BuildeResult cbCon = null;
 				try
 				{
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
@@ -431,7 +432,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					{
 						buf.append('(');
 					}
-					buf.append(cbCon.sqlPart);
+					buf.append(cbCon.scriptPart);
 					for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
 					{
 						cbCon.preparers[pIndex].setName(cp.getName());
@@ -515,7 +516,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			if (!cp.isIgnore() && value != null && value.length() > 0)
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
-				Condition cbCon = null;
+				BuildeResult cbCon = null;
 				try
 				{
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
@@ -543,7 +544,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					{
 						buf.append('(');
 					}
-					buf.append(cbCon.sqlPart);
+					buf.append(cbCon.scriptPart);
 					for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
 					{
 						cbCon.preparers[pIndex].setName(cp.getName());
@@ -696,7 +697,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		StringAppender buf = StringTool.createStringAppender(512);
 		List preparerList = new LinkedList();
 		Iterator gitr = consMap.values().iterator();
-		String value;
+		Object value;
 		while (gitr.hasNext())
 		{
 			List conditions = (List) gitr.next();
@@ -711,7 +712,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ?
 							cp.getDefaultConditionBuilder() : condition.builder;
 					value = condition.value;
-					Condition cbCon = null;
+					BuildeResult cbCon = null;
 					try
 					{
 						cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
@@ -742,7 +743,7 @@ public class SearchManagerImpl extends AbstractGenerator
 								buf.append("( (");
 							}
 						}
-						buf.append(cbCon.sqlPart);
+						buf.append(cbCon.scriptPart);
 						for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
 						{
 							cbCon.preparers[pIndex].setName(cp.getName());

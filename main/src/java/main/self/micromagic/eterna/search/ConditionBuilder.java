@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import self.micromagic.eterna.share.EternaObject;
 
 /**
  * SQL语句条件的生成器. <p>
- * {@link self.micromagic.eterna.search.Condition}将通过该生成器来生成SQL条件。
+ * {@link self.micromagic.eterna.search.BuildeResult}将通过该生成器来生成SQL条件。
  *
  * @author  micromagic@sina.com
  */
@@ -57,7 +57,7 @@ public interface ConditionBuilder extends EternaObject
 	 * @param cp       与此条件生成器的相对应的ConditionProperty
 	 * @return         所生成的条件, 及相关参数
 	 */
-	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
+	public BuildeResult buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException;
 
 	/**

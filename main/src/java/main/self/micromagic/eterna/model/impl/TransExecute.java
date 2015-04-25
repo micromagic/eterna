@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
 import self.micromagic.eterna.model.TransExecuteGenerator;
 import self.micromagic.eterna.model.TransOperator;
+import self.micromagic.eterna.search.ConditionInfo;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.share.EternaException;
@@ -352,7 +353,7 @@ public class TransExecute extends AbstractExecute
 			else if (value instanceof SearchManager)
 			{
 				SearchManager sm = (SearchManager) value;
-				SearchManager.ConditionInfo condition = sm.getCondition(this.param);
+				ConditionInfo condition = sm.getCondition(this.param);
 				return condition != null ? condition.value : null;
 			}
 			throw new EternaException("Error Object type:" + value.getClass() + ".");

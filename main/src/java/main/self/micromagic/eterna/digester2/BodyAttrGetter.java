@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class BodyAttrGetter
 	 */
 	public static BodyAttrGetter parseConfig(String config, IntegerRef position)
 	{
-      int beginPos = config.indexOf(BODY_FLAG, position.value);
+		int beginPos = config.indexOf(BODY_FLAG, position.value);
 		if (beginPos == -1 || config.substring(position.value, beginPos).trim().length() > 0)
 		{
 			// 不是以$body起始的不能解析为BodyAttrGetter

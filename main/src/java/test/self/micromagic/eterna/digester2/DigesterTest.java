@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public class DigesterTest extends TestCase
 		q1.setString("p3", "2015-02");
 	}
 
-	public void testEntity()
+	public void testEntity1()
 			throws Exception
 	{
 		Entity entity = f.getEntity("e1");
@@ -123,7 +123,12 @@ public class DigesterTest extends TestCase
 		assertEquals("2", entity.getItem("i2").getAttribute("a"));
 		assertEquals("c1", entity.getItem("i1").getColumnName());
 		assertEquals("i2", entity.getItem("i2").getColumnName());
-		entity = f.getEntity("e2");
+	}
+
+	public void testEntity2()
+			throws Exception
+	{
+		Entity entity = f.getEntity("e2");
 		assertEquals(6, entity.getItemCount());
 		assertEquals("i2", entity.getItem(0).getName());
 		assertEquals("i2_1", entity.getItem(3).getName());
@@ -133,6 +138,14 @@ public class DigesterTest extends TestCase
 		assertEquals("1 a\n2\n3", entity.getItem("tmp1").getAttribute("x"));
 		entity = f.getEntity("entity5");
 		assertEquals("v", entity.getItem("tmp2").getAttribute("x"));
+
+		entity = f.getEntity("e5");
+		assertEquals(3, entity.getItemCount());
+		assertEquals("ID00001", entity.getItem(0).getName());
+		assertEquals("i2", entity.getItem(1).getName());
+		assertEquals("iName", entity.getItem(0).getCaption());
+		assertNull(entity.getItem(1).getCaption());
+		assertEquals("ID00002", entity.getItem(2).getName());
 	}
 
 	public void testQuery2()
@@ -177,7 +190,7 @@ public class DigesterTest extends TestCase
 		assertEquals("s1", sArr[1].getName());
 	}
 
-	public void testUpdate()
+	public void testUpdate1()
 			throws Exception
 	{
 		String tmpSQL;
@@ -222,8 +235,13 @@ public class DigesterTest extends TestCase
 		update.setString("k2", "2");
 		tmpSQL = update.getPreparedSQL();
 		assertTrue(tmpSQL.indexOf(" or ") != -1);
+	}
 
-		update = f.createUpdate("update5");
+	public void testUpdate2()
+			throws Exception
+	{
+		String tmpSQL;
+		Update update = f.createUpdate("update5");
 		update.setSubSQL(1, "");
 		update.setSubSQL(2, "");
 		tmpSQL = update.getPreparedSQL();

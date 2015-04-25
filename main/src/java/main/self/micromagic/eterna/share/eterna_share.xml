@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+  Copyright 2015 xinjunli (micromagic@sina.com).
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -17,58 +17,13 @@
 
 <!--
 	eterna框架的一些基本定义
-	如: 一些基本的 大于 小于 的builder, 包含的vpc 等
+	如: 一些基本的 大于 小于 的builder, 包含的prepare 等
 
 	@author micromagic@sina.com
 -->
 <eterna-config>
 	<factory>
 		<objs>
-
-			<query name="eterna.search.get.search_setting">
-				<prepared-sql>
-					SELECT settingIndex, settingXML
-					FROM eterna_search_setting
-					WHERE username = ? AND searchName = ? AND saveId = ?
-					ORDER BY settingIndex
-				</prepared-sql>
-				<readers>
-					<reader name="settingIndex" colName="settingIndex" type="int"/>
-					<reader name="settingXML" colName="settingXML" type="String"/>
-				</readers>
-				<parameters>
-					<parameter name="username" type="String"/>
-					<parameter name="searchName" type="String"/>
-					<parameter name="saveId" type="String"/>
-				</parameters>
-			</query>
-
-			<update name="eterna.search.delete.search_setting">
-				<prepared-sql>
-					DELETE FROM eterna_search_setting
-					WHERE username = ? AND searchName = ? AND saveId = ?
-				</prepared-sql>
-				<parameters>
-					<parameter name="username" type="String"/>
-					<parameter name="searchName" type="String"/>
-					<parameter name="saveId" type="String"/>
-				</parameters>
-			</update>
-
-			<update name="eterna.search.insert.search_setting">
-				<prepared-sql>
-					INSERT INTO eterna_search_setting
-					(username, searchName, saveId, settingIndex, settingXML)
-					VALUES (?, ?, ?, ?, ?)
-				</prepared-sql>
-				<parameters>
-					<parameter name="username" type="String"/>
-					<parameter name="searchName" type="String"/>
-					<parameter name="saveId" type="String"/>
-					<parameter name="settingIndex" type="int"/>
-					<parameter name="settingXML" type="String"/>
-				</parameters>
-			</update>
 
 			<prepare name="strBegin" type="String" pattern="$%"/>
 			<prepare name="strEnd" type="String" pattern="%$"/>
@@ -135,6 +90,9 @@
 					<component-param><![CDATA[html:"&nbsp; "]]></component-param>
 				</component>
 			</typical-component>
+
+			<!-- 存放数据库锁信息的默认表名 -->
+			<constant name="db_lock_table" value="T_SYS_DB_LOCK" />
 			
 		</objs>
 	</factory>

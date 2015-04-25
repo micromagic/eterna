@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <!--
-  Copyright 2009-2015 xinjunli (micromagic@sina.com).
+  Copyright 2015 xinjunli (micromagic@sina.com).
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@
 					<attribute name="myObj" value="abc/123"/>
 				</item>
 			</entity>
-
 			<entity name="e2">
 				<entity-ref entityName="e1" include="p3,i2,i5,i6"/>
 				<item name="i2_1" colName="c1" type="Blob"/>
@@ -55,6 +54,11 @@
 					<attribute name="alias" value="test2"/>
 				</item>
 				<item name="i6" type="int"/>
+			</entity>
+			<entity name="e5">
+				<item2 type="String"/>
+				<item name="i2" type="int"/>
+				<item2 type="double"/>
 			</entity>
 			
 			<format name="f1" type="Date">

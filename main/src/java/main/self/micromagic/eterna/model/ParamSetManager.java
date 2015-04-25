@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.search.ConditionInfo;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
@@ -433,7 +434,7 @@ public class ParamSetManager
 			if (!this.dao.isParameterSetted(i))
 			{
 				Parameter param = this.dao.getParameter(i);
-				SearchManager.ConditionInfo con = searchManager.getCondition(param.getName());
+				ConditionInfo con = searchManager.getCondition(param.getName());
 				if (con != null)
 				{
 					preparerValue(this.dao, param, con.value);
@@ -449,7 +450,7 @@ public class ParamSetManager
 		{
 			Parameter param = names[i].daoIndex == -1 ? this.dao.getParameter(names[i].daoName)
 					: this.dao.getParameter(names[i].daoIndex);
-			SearchManager.ConditionInfo con = searchManager.getCondition(names[i].srcName);
+			ConditionInfo con = searchManager.getCondition(names[i].srcName);
 			if (con != null)
 			{
 				preparerValue(this.dao, param, con.value);

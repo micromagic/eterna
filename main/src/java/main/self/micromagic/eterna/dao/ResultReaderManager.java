@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,9 @@ public interface ResultReaderManager
 
 	/**
 	 * 在ResultReader的arrtibute中设置格式化值只显示列的名称.
+	 * 如果设置了此属性, 将会以此属性值作为名称添加一个相同的
+	 * ResultReader到最后, 并将当前ResultReader的format设为
+	 * 无效.
 	 */
 	String SHOW_NAME_FLAG = "showName";
 

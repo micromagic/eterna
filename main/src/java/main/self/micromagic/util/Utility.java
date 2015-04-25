@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,6 +160,14 @@ public class Utility
 	public static Integer createInteger(int i)
 	{
 		return i >= 0 && i <= 15 ? INTEGER_ARRAY[i] : new Integer(i);
+	}
+
+	/**
+	 * 获取工具类中的属性管理器.
+	 */
+	public static PropertiesManager getPropertiesManager()
+	{
+		return propertiesManager;
 	}
 
 	public static String getProperty(String key)

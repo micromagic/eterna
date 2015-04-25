@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,13 +29,15 @@ public class ConfigResourceTest extends TestCase
 			throws Exception
 	{
 		FactoryContainer fc = new FactoryContainerImpl();
-		ConfigResource cr = ContainerManager.createResource("cp:/", fc);
+		ConfigResource cr = ContainerManager.createResource("classpath:/", fc);
+		assertEquals("", cr.getName());
 		ConfigResource[] arr = cr.listResources(false);
 		boolean hasJavax = false;
 		for (int i = 0; i < arr.length; i++)
 		{
-			if ("cp:/javax/".equals(arr[i].getConfig()))
+			if ("classpath:/javax/".equals(arr[i].getConfig()))
 			{
+				assertEquals("javax", arr[i].getName());
 				hasJavax = true;
 			}
 			System.out.println(arr[i].getConfig() + ", " + arr[i].getURI());
@@ -51,9 +53,11 @@ public class ConfigResourceTest extends TestCase
 		ConfigResource cr = ContainerManager.createResource(tmp, fc);
 		assertNotNull(cr.getAsStream());
 		cr = cr.getResource("../bean/BeanElement.class");
+		assertEquals("BeanElement.class", cr.getName());
 		assertNotNull(cr.getAsStream());
 		cr = cr.getResource("../");
 		assertTrue(cr.getURI().endsWith("org/dom4j/"));
+		assertEquals("dom4j", cr.getName());
 		assertNull(cr.getAsStream());
 		assertNull(cr.listResources(false));
 	}
@@ -125,14 +129,16 @@ public class ConfigResourceTest extends TestCase
 
 	public void testCreateResource1()
 	{
-		System.out.println("------------------------------------");
+		System.out.println("--testCreateResource1----------------------------------");
 		ConfigResource cr;
 		cr = ContainerManager.createResource("../../src/java/.project", null);
 		assertEquals("../../src/java/.project", cr.getConfig());
+		assertEquals(".project", cr.getName());
 		System.out.println(cr.getURI());
 		assertEquals("../../src/java/./.classpath", cr.getResource("./.classpath").getConfig());
 		System.out.println(cr.getResource("./.classpath").getURI());
 		cr = ContainerManager.createResource("../../src/", null);
+		assertEquals("src", cr.getName());
 		assertEquals("../../src/java/main", cr.getResource("java/main").getConfig());
 		System.out.println(cr.getResource("java/test/eterna.config").getURI());
 		cr = ContainerManager.createResource(".classpath", null);
@@ -146,7 +152,7 @@ public class ConfigResourceTest extends TestCase
 
 	public void testCreateResource2()
 	{
-		System.out.println("------------------------------------");
+		System.out.println("--testCreateResource2----------------------------------");
 		FactoryContainer fc = new FactoryContainerImpl();
 		ConfigResource cr;
 		cr = ContainerManager.createResource("cp:eterna.config", fc);
@@ -166,12 +172,13 @@ public class ConfigResourceTest extends TestCase
 
 	public void testCreateResource5()
 	{
-		System.out.println("------------------------------------");
+		System.out.println("--testCreateResource5----------------------------------");
 		ConfigResource cr;
 		String tmpPath;
 		FactoryContainer fc = new FactoryContainerImpl();
 
 		cr = ContainerManager.createResource("cp:/eterna.config", fc);
+		assertEquals("eterna.config", cr.getName());
 		assertEquals(ClassPathResource.class, cr.getClass());
 		System.out.println(cr.getURI());
 		cr = ContainerManager.createResource("classpath:eterna.config", fc);
@@ -183,12 +190,16 @@ public class ConfigResourceTest extends TestCase
 		System.out.println(cr.getURI());
 		cr = cr.getResource("rules_ext.res");
 		System.out.println(cr.getURI());
+		System.out.println(cr.getConfig());
 		System.out.println(cr.getResource("/test_error00.log").getURI());
 		System.out.println(cr.getResource("/test_error00.log").getConfig());
 		System.out.println(cr.getResource("../../.classpath").getURI());
+		System.out.println(cr.getResource("../../.classpath").getConfig());
 		cr = ContainerManager.createResource("D:\\test_error00.log", fc);
+		assertEquals("test_error00.log", cr.getName());
 		assertEquals(FileResource.class, cr.getClass());
 		System.out.println(cr.getURI());
+		assertEquals("", cr.getResource("/").getName());
 	}
 
 	public void xtestFilePath()

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Map;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ConverterFinder;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.IntegerRef;
 
 public class TypeManager
 {
@@ -258,6 +259,28 @@ public class TypeManager
 			temp += "(" + ((id & 0xffff00) >> 8) + ")";
 		}
 		return temp;
+	}
+
+	/**
+	 * 根据类型id获取类型的扩展定义.
+	 *
+	 * @param id   类型的id
+	 * @param sub  出参, 子扩展部分
+	 * @return  主扩展部分, -1 没有扩展
+	 */
+	public static int getTypeExtend(int id, IntegerRef sub)
+	{
+		int realId = id & 0xff;
+		if (realId < 0 || realId >= typeNames.length)
+		{
+			return -1;
+		}
+		int r = (id & 0xffff00) >> 8;
+		if (sub != null)
+		{
+			sub.value = (id & 0xff000000) >>> 24;
+		}
+		return r;
 	}
 
 	/**

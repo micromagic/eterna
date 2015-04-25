@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package self.micromagic.eterna.search.impl;
 
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
-import self.micromagic.eterna.search.Condition;
+import self.micromagic.eterna.search.BuildeResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.EternaException;
@@ -86,7 +86,7 @@ class ConditionBuilderImpl
 	}
 	private PreparerCreater prepare;
 
-	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
+	public BuildeResult buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
 		if (this.needValue)
@@ -127,23 +127,23 @@ class ConditionBuilderImpl
 			{
 				preparers[0] = pCreater.createPreparer(value);
 			}
-			return new Condition(sqlPart.toString(), preparers);
+			return new BuildeResult(sqlPart.toString(), preparers);
 		}
 		else
 		{
 			int count = colName.length() + this.operator.length() + 1;
 			StringAppender temp = StringTool.createStringAppender(count);
 			temp.append(colName).append(' ').append(this.operator);
-			return new Condition(temp.toString());
+			return new BuildeResult(temp.toString());
 		}
 	}
 
-	protected Condition getNullCheckCondition(String colName)
+	protected BuildeResult getNullCheckCondition(String colName)
 	{
 		boolean equalsFlag = EQUALS_OPT_TAG.equalsIgnoreCase(this.operator)
 				|| LIKE_OPT_TAG.equalsIgnoreCase(this.operator);
 		String temp = equalsFlag ? colName + " IS NULL" : colName + " IS NOT NULL";
-		return new Condition(temp);
+		return new BuildeResult(temp);
 	}
 
 	public Object getAttribute(String name)

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,11 @@ public interface ConfigResource
 	String getURI();
 
 	/**
+	 * 获取资源的名称.
+	 */
+	String getName();
+
+	/**
 	 * 如果资源类型是文件, 可通过此方法获取数据流.
 	 * 如果资源不存在则返回null.
 	 */
@@ -148,6 +153,24 @@ class AbstractResource
 	public int getType()
 	{
 		return this.type;
+	}
+
+	public String getName()
+	{
+		if (!StringTool.isEmpty(this.config))
+		{
+			int end = this.config.length();
+			if (this.config.charAt(end - 1) == '/')
+			{
+				end--;
+			}
+			int begin = this.config.lastIndexOf('/', end - 1);
+			if (begin != -1 && begin < end)
+			{
+				return this.config.substring(begin + 1, end);
+			}
+		}
+		return "";
 	}
 
 	public long getLastModified()
@@ -694,8 +717,9 @@ class FileResource extends AbstractResource
 		{
 			return this.create0(path, tFile);
 		}
-		int lastPos = config.lastIndexOf('/');
-		String mPath = lastPos == -1 ? path : config.substring(0, lastPos + 1).concat(path);
+		int lastPos = this.config.lastIndexOf('/');
+		String mPath = lastPos == -1 ? path
+				: this.config.substring(0, lastPos + 1).concat(path);
 		return this.create0(mPath, tFile);
 	}
 

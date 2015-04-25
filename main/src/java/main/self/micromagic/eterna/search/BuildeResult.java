@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,21 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * 一个条件对象.
+ * 一个通过ConditionBuilder构造的条件对象.
  */
-public class Condition
+public class BuildeResult
 {
-	public final String sqlPart;
+	public final String scriptPart;
 	public final ValuePreparer[] preparers;
 
-	public Condition(String sqlPart)
+	public BuildeResult(String scriptPart)
 	{
-		this(sqlPart, null);
+		this(scriptPart, null);
 	}
 
-	public Condition(String sqlPart, ValuePreparer[] preparers)
+	public BuildeResult(String sqlPart, ValuePreparer[] preparers)
 	{
-		this.sqlPart = sqlPart;
+		this.scriptPart = sqlPart;
 		this.preparers = preparers == null ? ConditionBuilder.EMPTY_PREPARERS : preparers;
 	}
 
@@ -43,9 +43,9 @@ public class Condition
 	{
 		if (this.strBuf == null)
 		{
-			int count = this.sqlPart.length() + 39;
+			int count = this.scriptPart.length() + 39;
 			StringAppender buf = StringTool.createStringAppender(count);
-			buf.append("Condition[sqlPart:(").append(this.sqlPart);
+			buf.append("Condition[sqlPart:(").append(this.scriptPart);
 			buf.append("),preparerCount:").append(this.preparers.length).append(']');
 			this.strBuf = buf.toString();
 		}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2015 xinjunli (micromagic@sina.com).
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+<!--
+	oracle的类型定义
+-->
+<eterna-config>
+	<factory>
+		<objs>
+
+			<constant name="int" value="NUMBER(9)" />
+			<constant name="short" value="NUMBER(5)" />
+			<constant name="byte" value="NUMBER(2)" />
+			<constant name="long" value="NUMBER(18)" />
+			<constant name="double" value="NUMBER" />
+			<constant name="String" value="VARCHAR2" />
+			<constant name="Datetime" value="DATE" />
+			<constant name="Blob" value="BLOB" />
+			<constant name="Clob" value="CLOB" />
+
+			<constant name="now" value="sysdate" />
+			<constant name="now_script" value="select sysdate from dual" />
+
+			<constant name="modify" value="modify" />
+
+		</objs>
+	</factory>
+</eterna-config>

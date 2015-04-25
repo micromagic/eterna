@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import java.util.Map;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.search.Condition;
+import self.micromagic.eterna.search.BuildeResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.AbstractGenerator;
@@ -310,7 +310,7 @@ public class TemplateBuilder extends AbstractGenerator
 		return subTemplate;
 	}
 
-	public Condition buildeCondition(String colName, Object value, ConditionProperty cp)
+	public BuildeResult buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
 		if (this.template.length() == 0)
@@ -390,7 +390,7 @@ public class TemplateBuilder extends AbstractGenerator
 			}
 		}
 		preparers = this.specialParam(preparers, colName, value, cp);
-		return new Condition(sqlPart, preparers);
+		return new BuildeResult(sqlPart, preparers);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.digester2.ContainerManager;
-import self.micromagic.eterna.search.Condition;
+import self.micromagic.eterna.search.BuildeResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.security.PermissionSet;
@@ -39,10 +39,10 @@ public class BuilderTest extends TestCase
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
 		int[] indexs = (int[]) PrivateAccessor.get(t, "indexs");
 		assertEquals(3, indexs.length);
-		Condition con = t.buildeCondition(
+		BuildeResult con = t.buildeCondition(
 				"a,b", "1,2,3, 4, 5", new EmptyConditionProperty("a,b"));
 		assertEquals(5, con.preparers.length);
-		assertEquals("b.a.b IN (?, ?, ?, ?, ?)", con.sqlPart);
+		assertEquals("b.a.b IN (?, ?, ?, ?, ?)", con.scriptPart);
 
 		t = new TemplateBuilder();
 		t.setAttribute("template", "[C1] x ($)");
@@ -52,7 +52,7 @@ public class BuilderTest extends TestCase
 		con = t.buildeCondition(
 				"a,b", "1,2,3", new EmptyConditionProperty("a,b"));
 		assertEquals(3, con.preparers.length);
-		assertEquals("b x (a like ? or a like ? or a like ?)", con.sqlPart);
+		assertEquals("b x (a like ? or a like ? or a like ?)", con.scriptPart);
 	}
 
 	public void testTemplate1()
@@ -76,16 +76,16 @@ public class BuilderTest extends TestCase
 		t = new TemplateBuilder();
 		t.setAttribute("template", "123 456");
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
-		Condition con = t.buildeCondition("a", "1", null);
-		assertEquals("123 456", con.sqlPart);
+		BuildeResult con = t.buildeCondition("a", "1", null);
+		assertEquals("123 456", con.scriptPart);
 
 		t = new TemplateBuilder();
 		t.setAttribute("template", "a[C2]b c[C1]d");
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
 		con = t.buildeCondition("1,2,3", "a", null);
-		assertEquals("a3b c2d", con.sqlPart);
+		assertEquals("a3b c2d", con.scriptPart);
 		con = t.buildeCondition("x,y", "a", null);
-		assertEquals("ab cyd", con.sqlPart);
+		assertEquals("ab cyd", con.scriptPart);
 	}
 
 	public void testTemplate2()
@@ -97,8 +97,8 @@ public class BuilderTest extends TestCase
 		t.setAttribute("template", "([C0] like ? or [C1] like ?)");
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
 		t.initialize(f);
-		Condition condition = t.buildeCondition("a,b", "str", null);
-		assertEquals("(a like ? or b like ?)", condition.sqlPart);
+		BuildeResult condition = t.buildeCondition("a,b", "str", null);
+		assertEquals("(a like ? or b like ?)", condition.scriptPart);
 		assertEquals(2, condition.preparers.length);
 		assertEquals("%str%", PrivateAccessor.get(condition.preparers[0], "value"));
 	}
@@ -108,59 +108,59 @@ public class BuilderTest extends TestCase
 	{
 		EternaFactory f = (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
 		ConditionBuilder b;
-		Condition condition;
+		BuildeResult condition;
 		EmptyConditionProperty cp = new EmptyConditionProperty("a");
 
 		b = f.getConditionBuilder("isNull");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a IS NULL", condition.sqlPart);
+		assertEquals("a IS NULL", condition.scriptPart);
 		b = f.getConditionBuilder("notNull");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a IS NOT NULL", condition.sqlPart);
+		assertEquals("a IS NOT NULL", condition.scriptPart);
 		b = f.getConditionBuilder("equal");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a = ?", condition.sqlPart);
+		assertEquals("a = ?", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 		b = f.getConditionBuilder("notEqual");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a <> ?", condition.sqlPart);
+		assertEquals("a <> ?", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 
 		b = f.getConditionBuilder("include");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a LIKE ?", condition.sqlPart);
+		assertEquals("a LIKE ?", condition.scriptPart);
 		assertEquals("%x%", PrivateAccessor.get(condition.preparers[0], "value"));
 		condition = b.buildeCondition("a", "x%", cp);
-		assertEquals("a LIKE ? escape '\\'", condition.sqlPart);
+		assertEquals("a LIKE ? escape '\\'", condition.scriptPart);
 		assertEquals("%x\\%%", PrivateAccessor.get(condition.preparers[0], "value"));
 		b = f.getConditionBuilder("beginWith");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a LIKE ?", condition.sqlPart);
+		assertEquals("a LIKE ?", condition.scriptPart);
 		assertEquals("x%", PrivateAccessor.get(condition.preparers[0], "value"));
 		b = f.getConditionBuilder("endWith");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a LIKE ?", condition.sqlPart);
+		assertEquals("a LIKE ?", condition.scriptPart);
 		assertEquals("%x", PrivateAccessor.get(condition.preparers[0], "value"));
 		b = f.getConditionBuilder("match");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a LIKE ? escape '\\'", condition.sqlPart);
+		assertEquals("a LIKE ? escape '\\'", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 
 		b = f.getConditionBuilder("more");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a > ?", condition.sqlPart);
+		assertEquals("a > ?", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 		b = f.getConditionBuilder("less");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a < ?", condition.sqlPart);
+		assertEquals("a < ?", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 		b = f.getConditionBuilder("moreEqual");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a >= ?", condition.sqlPart);
+		assertEquals("a >= ?", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 		b = f.getConditionBuilder("lessEqual");
 		condition = b.buildeCondition("a", "x", cp);
-		assertEquals("a <= ?", condition.sqlPart);
+		assertEquals("a <= ?", condition.scriptPart);
 		assertNull(condition.preparers[0]);
 	}
 

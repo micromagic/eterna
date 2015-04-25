@@ -1,5 +1,5 @@
 /*
- * Copyright 2009-2015 xinjunli (micromagic@sina.com).
+ * Copyright 2015 xinjunli (micromagic@sina.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package self.micromagic.eterna.digester2;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,8 @@ import org.dom4j.Element;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.CellAccessInfo;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.util.FormatTool;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.ref.IntegerRef;
@@ -39,6 +43,16 @@ public class AttrBinder
 	 * 获取整个元素节点的标识.
 	 */
 	static final String ELEMENT_FLAG = "$element";
+
+	/**
+	 * 以后面的文字作为值的前缀.
+	 */
+	static final String TEXT_PREFIX = "$text.";
+
+	/**
+	 * 生成一个序号的标识.
+	 */
+	static final String SERIAL_FLAG = "$serial";
 
 	static final String __FLAG = "attr:";
 	public static AttrBinder getInstance()
@@ -107,29 +121,50 @@ public class AttrBinder
 			tmpName = config.substring(beginPos, sFlag).trim();
 		}
 		AttrGetter ag;
-		if (BodyAttrGetter.BODY_FLAG.equals(tmpName))
+		if (checkSpecialName(tmpName))
 		{
-			// $body
-			ag = BodyAttrGetter.parseConfig(config, position);
-			endPos = ParseRule.findItemEnd(config, position);
+			if (BodyAttrGetter.BODY_FLAG.equals(tmpName))
+			{
+				// $body
+				ag = BodyAttrGetter.parseConfig(config, position);
+				endPos = ParseRule.findItemEnd(config, position);
+			}
+			else if (ELEMENT_FLAG.equals(tmpName))
+			{
+				// $element
+				ag = new ElementGetter();
+				endPos = ParseRule.findItemEnd(config, position);
+			}
+			else if (SERIAL_FLAG.equals(tmpName))
+			{
+				// $serial
+				NumberFormat format = null;
+				if (pFlag != -1 && pFlag < endPos)
+				{
+					position.value = pFlag;
+					Map params = ParseRule.parseParam(config, position);
+					String pattern;
+					if ((pattern = (String) params.get("pattern")) != null)
+					{
+						format = new DecimalFormat(pattern);
+					}
+				}
+				ag = new SerialGetter(format);
+				endPos = ParseRule.findItemEnd(config, position);
+			}
+			else if (tmpName.startsWith(TEXT_PREFIX))
+			{
+				// $text.xxx
+				ag = new TextGetter(tmpName.substring(TEXT_PREFIX.length()));
+				endPos = ParseRule.findItemEnd(config, position);
+			}
+			else
+			{
+				throw new EternaException("Error name [" + tmpName +"].");
+			}
 			if (name != null && (sFlag == -1 || sFlag > endPos))
 			{
-				// $body必须设置绑定的属性名
-				throw new ParseException("Error config [" + config + "] for " + caption + ".");
-			}
-			else if (name != null)
-			{
-				name.setString(config.substring(sFlag + 1, endPos).trim());
-			}
-		}
-		else if (ELEMENT_FLAG.equals(tmpName))
-		{
-			// $element
-			ag = new ElementGetter();
-			endPos = ParseRule.findItemEnd(config, position);
-			if (name != null && (sFlag == -1 || sFlag > endPos))
-			{
-				// $element必须设置绑定的属性名
+				// 特殊标识必须设置绑定的属性名
 				throw new ParseException("Error config [" + config + "] for " + caption + ".");
 			}
 			else if (name != null)
@@ -179,6 +214,19 @@ public class AttrBinder
 		}
 		position.value = endPos + 1;
 		return ag;
+	}
+
+	/**
+	 * 检查当前名称是否为特殊标识.
+	 */
+	static boolean checkSpecialName(String name)
+	{
+		if (BodyAttrGetter.BODY_FLAG.equals(name) || ELEMENT_FLAG.equals(name)
+				|| SERIAL_FLAG.equals(name) || name.startsWith(TEXT_PREFIX))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	public boolean begin(Digester digester, Element element)
@@ -290,6 +338,49 @@ class ElementGetter
 	public Object get(Element el)
 	{
 		return el;
+	}
+
+}
+
+/**
+ * 文本值的获取者.
+ */
+class TextGetter
+		implements AttrGetter
+{
+	public TextGetter(String text)
+	{
+		this.text = text;
+	}
+	private final String text;
+
+	public Object get(Element el)
+	{
+		return this.text;
+	}
+
+}
+
+/**
+ * 序列号的获取者.
+ */
+class SerialGetter
+		implements AttrGetter
+{
+	public SerialGetter(NumberFormat format)
+	{
+		this.format = format;
+	}
+	private final NumberFormat format;
+
+	public Object get(Element el)
+	{
+		int s = ContainerManager.getNextSerial();
+		if (this.format == null)
+		{
+			return Integer.toString(s);
+		}
+		return FormatTool.getThreadFormat(format).format(s);
 	}
 
 }
