@@ -95,5 +95,12 @@
 			<constant name="db_lock_table" value="T_SYS_DB_LOCK" />
 			
 		</objs>
+		<attributes>
+
+			<!-- 数据库的操作语句是否可多行 -->
+			<attribute name="db.script.mutipleLine" value="true"/>
+
+		</attributes>
+		
 	</factory>
 </eterna-config>

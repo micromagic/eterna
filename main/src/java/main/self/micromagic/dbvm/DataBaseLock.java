@@ -23,15 +23,19 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.digester2.ContainerManager;
+import self.micromagic.eterna.digester2.Digester;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
+import self.micromagic.util.ResManager;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -55,6 +59,27 @@ public class DataBaseLock
 		{
 			throw new EternaException(ex);
 		}
+	}
+
+	/**
+	 * 释放连接所对应的数据库.
+	 *
+	 * @param conn      数据库连接
+	 * @param lockName  数据库锁的名称
+	 */
+	public static void releaseDB(Connection conn, String lockName)
+			throws SQLException, EternaException
+	{
+		String dbName = conn.getMetaData().getDatabaseProductName();
+		EternaFactory f = getFactory(dbName);
+		Update modify = f.createUpdate("modifyLockInfo");
+		modify.setString("lockValue1", RELEASED_VALUE);
+		modify.setString("lockName", lockName);
+		String nowLockValue = getRuntimeName() + ":" + conn.hashCode();
+		modify.setString("lockValue2", nowLockValue);
+		modify.setIgnore("userId");
+		modify.executeUpdate(conn);
+		conn.commit();
 	}
 
 	/**
@@ -220,26 +245,25 @@ public class DataBaseLock
 		}
 	}
 
-	static EternaFactory getFactory(String dbName)
-			throws EternaException
+	static FactoryContainer getContainer(String dbName)
 	{
 		FactoryContainer c = (FactoryContainer) containerCache.get(dbName);
 		if (c != null)
 		{
-			return (EternaFactory) c.getFactory();
+			return c;
 		}
 		synchronized (containerCache)
 		{
 			c = (FactoryContainer) containerCache.get(dbName);
 			if (c != null)
 			{
-				return (EternaFactory) c.getFactory();
+				return c;
 			}
 			ClassLoader loader = DataBaseLock.class.getClassLoader();
 			String config = CONFIG_PREFIX + "def_" + dbName + ".xml;"
 					+ CONFIG_PREFIX + "db_lock.xml;" + CONFIG_PREFIX + "db_common.xml;";
-			c = ContainerManager.createFactoryContainer(dbName, config, null, null, null,
-					loader, ContainerManager.getGlobalContainer(), false);
+			c = ContainerManager.createFactoryContainer(dbName, config, null, getDigester(),
+					null, loader, ContainerManager.getGlobalContainer(), false);
 			StringRef msg = new StringRef();
 			c.reInit(msg);
 			if (!StringTool.isEmpty(msg.getString()))
@@ -247,7 +271,40 @@ public class DataBaseLock
 				throw new EternaException(msg.getString());
 			}
 			containerCache.put(dbName, c);
-			return (EternaFactory) c.getFactory();
+			return c;
+		}
+	}
+
+	static EternaFactory getFactory(String dbName)
+			throws EternaException
+	{
+
+		return (EternaFactory) getContainer(dbName).getFactory();
+	}
+
+	/**
+	 * 获取配置文件的解析对象.
+	 */
+	public static Digester getDigester()
+	{
+		return digester;
+	}
+	private static Digester digester;
+	static
+	{
+		try
+		{
+			ResManager rm1 = new ResManager();
+			rm1.load(Digester.class.getResourceAsStream(Digester.DEFAULT_RULES));
+			Properties rConfig = new Properties();
+			rConfig.load(Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
+			ResManager rm2 = new ResManager();
+			rm2.load(DataBaseLock.class.getResourceAsStream("dbvm_rules.res"));
+			digester = new Digester(new ResManager[]{rm1, rm2}, rConfig);
+		}
+		catch (Exception ex)
+		{
+			Utility.createLog("eterna.dbvm").error("Error in init dbvm rules", ex);
 		}
 	}
 
@@ -259,7 +316,7 @@ public class DataBaseLock
 	/**
 	 * 配置文件的前缀.
 	 */
-	private static final String CONFIG_PREFIX = "cp:/self/micromagic/dbvm/";
+	public static final String CONFIG_PREFIX = "cp:/self/micromagic/dbvm/";
 
 	/**
 	 * 锁已被释放的值.

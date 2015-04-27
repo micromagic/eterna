@@ -71,8 +71,8 @@ public class ObjectCreater
 			throw new ParseException("Error config [" + config + "] for ObjectCreater.");
 		}
 		ObjectCreater r = new ObjectCreater();
-		r.attrName = aName;
-		r.defaultValue = dValue;
+		r.attrName = StringTool.isEmpty(aName) ? null : aName;
+		r.defaultValue = StringTool.isEmpty(dValue) ? null : dValue;
 		r.registerFactory = registerFactory;
 		return r;
 	}

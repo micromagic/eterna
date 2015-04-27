@@ -98,7 +98,7 @@ class ParameterImpl
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
-		this.prepare = CreaterManager.createPrepareCreater(this.type, this.prepareName, factory);
+		this.prepare = CreaterManager.createPreparerCreater(this.type, this.prepareName, factory);
 		this.attrs.convertType(factory, "parameter");
 		if (this.permissionConfig != null)
 		{

@@ -40,6 +40,7 @@ public class StackBinder
 	private int targetIndex;
 	private int objIndex;
 	private boolean needName;
+	private AttrGetter attrGetter;
 	private boolean needGenerate;
 
 	public ElementProcessor parse(Digester digester, ParseRule rule,
@@ -70,6 +71,7 @@ public class StackBinder
 		int tIndex = 1;
 		int oIndex = 0;
 		boolean needName = false;
+		AttrGetter attrGetter = null;
 		boolean needGenerate = false;
 		position.value = mEnd + 1;
 		while (config.charAt(position.value - 1) != ParseRule.BLOCK_END)
@@ -95,6 +97,13 @@ public class StackBinder
 				needGenerate = ParseRule.booleanConverter.convertToBoolean(
 						tmpStr.substring(2).trim());
 			}
+			else if (tmpStr.startsWith("attrName:"))
+			{
+				needName = true;
+				position.value += "attrName:".length();
+				attrGetter = AttrBinder.parseGetter(config, position, null, "StackBinder");
+				tmpEnd = position.value - 1;
+			}
 			position.value = tmpEnd + 1;
 		}
 		StackBinder stackBind = new StackBinder();
@@ -102,6 +111,7 @@ public class StackBinder
 		stackBind.targetIndex = tIndex;
 		stackBind.objIndex = oIndex;
 		stackBind.needName = needName;
+		stackBind.attrGetter = attrGetter;
 		stackBind.needGenerate = needGenerate;
 		return stackBind;
 	}
@@ -123,10 +133,10 @@ public class StackBinder
 		{
 			target = ((BeanMap) target).getBean();
 		}
-		this.bind(target, obj);
+		this.bind(target, obj, element);
 	}
 
-	public void bind(Object target, Object obj)
+	public void bind(Object target, Object obj, Element element)
 	{
 		Object[] args;
 		if (obj instanceof Generator)
@@ -136,9 +146,16 @@ public class StackBinder
 		if (this.needName)
 		{
 			args = new Object[2];
-			Generator g = (Generator) obj;
-			args[0] = g.getName();
-			args[1] = this.needGenerate ? g.create() : g;
+			if (this.attrGetter == null)
+			{
+				Generator g = (Generator) obj;
+				args[0] = g.getName();
+			}
+			else
+			{
+				args[0] = this.attrGetter.get(element);
+			}
+			args[1] = this.needGenerate ? ((Generator) obj).create() : obj;
 		}
 		else
 		{

@@ -35,7 +35,7 @@
 			<constant name="now" value="CURRENT_TIMESTAMP()" />
 			<constant name="now_script" value="select CURRENT_TIMESTAMP()" />
 
-			<constant name="modify" value="alter" />
+			<constant name="rename" value="rename" />
 
 		</objs>
 	</factory>

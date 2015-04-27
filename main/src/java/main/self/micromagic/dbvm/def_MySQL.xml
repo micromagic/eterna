@@ -20,6 +20,9 @@
 -->
 <eterna-config>
 	<factory>
+
+		<include src="impl/config_MySQL.xml"/>
+
 		<objs>
 
 			<constant name="int" value="INT" />
@@ -35,7 +38,7 @@
 			<constant name="now" value="now()" />
 			<constant name="now_script" value="select now()" />
 
-			<constant name="modify" value="alter" />
+			<constant name="rename" value="rename" />
 
 		</objs>
 	</factory>

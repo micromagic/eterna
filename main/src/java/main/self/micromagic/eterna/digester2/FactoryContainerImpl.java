@@ -254,9 +254,13 @@ public class FactoryContainerImpl
 				{
 					ConfigInclude include = (ConfigInclude) itr.next();
 					Object tmp = include.getIncludeRes(res);
-					ConfigResource cr = ContainerManager.getCurrentResource();
-					ParseException.setContextInfo(cr.getURI(), include.getSrc());
-					this.parseXML(tmp, cr);
+					if (tmp != null)
+					{
+						ParseException.clearContextInfo();
+						ConfigResource cr = ContainerManager.getCurrentResource();
+						ParseException.setContextInfo(cr.getURI(), include.getSrc());
+						this.parseXML(tmp, cr);
+					}
 				}
 			}
 		}

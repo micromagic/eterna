@@ -92,7 +92,7 @@ class ConditionPropertyImpl
 		{
 			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
 		}
-		this.prepare = CreaterManager.createPrepareCreater(
+		this.prepare = CreaterManager.createPreparerCreater(
 				this.columnType, this.prepareName, factory);
 
 		if (this.columnCaption == null)

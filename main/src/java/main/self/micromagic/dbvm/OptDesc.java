@@ -16,22 +16,17 @@
 
 package self.micromagic.dbvm;
 
-import self.micromagic.eterna.share.EternaObject;
-import self.micromagic.util.ref.ObjectRef;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
- * 数据库列的定义者.
+ * 数据库操作的描述.
  */
-public interface ColumnDefiner extends EternaObject
+public interface OptDesc
 {
 	/**
-	 * 获取列的定义.
-	 *
-	 * @param tableDesc  表的描述信息
-	 * @param colDesc    列的描述信息
-	 * @param param      出参
-	 * @return  列定义字符串
+	 * 执行描述所定义的数据库操作.
 	 */
-	String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, ObjectRef param);
+	void exec(Connection conn) throws SQLException;
 
 }

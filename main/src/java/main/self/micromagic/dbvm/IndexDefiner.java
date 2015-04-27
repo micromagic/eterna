@@ -20,18 +20,17 @@ import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.util.ref.ObjectRef;
 
 /**
- * 数据库列的定义者.
+ * 数据库索引的定义者.
  */
-public interface ColumnDefiner extends EternaObject
+public interface IndexDefiner extends EternaObject
 {
 	/**
-	 * 获取列的定义.
+	 * 获取索引的定义.
 	 *
-	 * @param tableDesc  表的描述信息
-	 * @param colDesc    列的描述信息
+	 * @param indexDesc    列的描述信息
 	 * @param param      出参
 	 * @return  列定义字符串
 	 */
-	String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, ObjectRef param);
+	String getIndexDefine(IndexDesc indexDesc, ObjectRef param);
 
 }

@@ -57,7 +57,7 @@ public class SearchParamSetting
 		PreparerManager pm = new PreparerManager(2);
 		for (int i = 0; i < 2; i++)
 		{
-			ValuePreparer preparer = CreaterManager.createPrepareCreater(TypeManager.TYPE_STRING, null, query.getFactory())
+			ValuePreparer preparer = CreaterManager.createPreparerCreater(TypeManager.TYPE_STRING, null, query.getFactory())
 					.createPreparer("userId");
 			preparer.setRelativeIndex(i + 1);
 			pm.setValuePreparer(preparer);

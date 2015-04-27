@@ -28,7 +28,7 @@
 					create table #const(db_lock_table)
 					(
 						lockName  #const(String)(100) not null,
-						lockValue #const(String)(100),
+						lockValue #const(String)(120),
 						userId    #const(String)(100),
 						lockTime  #const(Datetime),
 						PRIMARY KEY (lockName)
@@ -65,8 +65,8 @@
 			<!-- 修改数据库锁信息 -->
 			<update name="modifyLockInfo">
 				<prepared-sql noLine="true">
-					update #const(db_lock_table) set lockTime = #const(now), userId = ?
-							#param(1)[, lockValue = ?]
+					update #const(db_lock_table) set lockTime = #const(now)
+							#param(u)[, userId = ?] #param(1)[, lockValue = ?]
 					where lockName = ? #param(2)[and lockValue = ?]
 				</prepared-sql>
 				<parameters>

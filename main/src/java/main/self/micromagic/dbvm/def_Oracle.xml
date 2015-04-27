@@ -35,7 +35,7 @@
 			<constant name="now" value="sysdate" />
 			<constant name="now_script" value="select sysdate from dual" />
 
-			<constant name="modify" value="modify" />
+			<constant name="rename" value="rename to" />
 
 		</objs>
 	</factory>

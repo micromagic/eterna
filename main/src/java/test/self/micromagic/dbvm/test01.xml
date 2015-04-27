@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+	
+	<!-- opt 默认为create -->
+	<table name="T1" desc="表说明1">
+		<column name="c1" type="String(100)" desc="列说明1"/>
+	</table>
+	
+	<!-- type 默认为normal -->
+	<index name="T1_KEY" type="key" tableName="T1">
+		<column name="c1"/>
+	</index>
+	
+	<data>update t set c1 = 2</data>
+	
+</dbVersion>

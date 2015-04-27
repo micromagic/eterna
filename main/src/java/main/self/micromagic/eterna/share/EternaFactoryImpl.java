@@ -464,7 +464,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public ValuePreparer createValuePreparer(int type, Object value)
 			throws EternaException
 	{
-		PreparerCreater pc = CreaterManager.createPrepareCreater(type, null, this);
+		PreparerCreater pc = CreaterManager.createPreparerCreater(type, null, this);
 		return pc.createPreparer(value);
 	}
 
@@ -749,6 +749,39 @@ public class EternaFactoryImpl extends AbstractFactory
 			container.initialize(this);
 		}
 	}
+	public void registerObject(String name, Object obj)
+			throws EternaException
+	{
+		if (obj == null)
+		{
+			throw new NullPointerException("Param obj is null.");
+		}
+		int id = this.findEmptyPosition();
+		if (id >= Factory.MAX_OBJECT_COUNT)
+		{
+			String msg = "Max object count:" + id
+					+ "," + Factory.MAX_OBJECT_COUNT + ".";
+			throw new ParseException(msg);
+		}
+		if (this.objectMap.containsKey(name))
+		{
+			throw new ParseException("Duplicate object name [" + name + "].");
+		}
+		ObjectContainer container = new NormalObjectCon(id, name, obj);
+		if (id == this.objectList.size())
+		{
+			this.objectList.add(container);
+		}
+		else
+		{
+			this.objectList.set(id, container);
+		}
+		this.objectMap.put(name, container);
+		if (this.initialized)
+		{
+			container.initialize(this);
+		}
+	}
 	private int findEmptyPosition()
 	{
 		if (this.hasEmptyPosition)
@@ -972,6 +1005,57 @@ abstract class ObjectContainer
 	 * 销毁存放的对象.
 	 */
 	public abstract void destroy();
+
+}
+
+
+/**
+ * 普通Object的容器.
+ */
+class NormalObjectCon extends ObjectContainer
+{
+	NormalObjectCon(int id, String name, Object obj)
+	{
+		super(id);
+		this.obj = obj;
+		this.name = name;
+	}
+	private final String name;
+	private final Object obj;
+
+	public String getName()
+	{
+		return this.name;
+	}
+
+	public boolean isSingleton()
+	{
+		return true;
+	}
+
+	public Class getType()
+	{
+		return this.obj.getClass();
+	}
+
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		return false;
+	}
+
+	public Object create(boolean needInit, EternaFactory factory)
+	{
+		if (needInit)
+		{
+			this.initialize(factory);
+		}
+		return this.obj;
+	}
+
+	public void destroy()
+	{
+	}
 
 }
 

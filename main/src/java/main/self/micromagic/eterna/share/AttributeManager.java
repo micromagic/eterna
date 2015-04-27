@@ -110,4 +110,13 @@ public class AttributeManager
 		return this.attributes.containsKey(name);
 	}
 
+	public int size()
+	{
+		if (this.attributes == null)
+		{
+			return 0;
+		}
+		return this.attributes.size();
+	}
+
 }

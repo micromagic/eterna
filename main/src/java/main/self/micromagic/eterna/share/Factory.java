@@ -55,8 +55,16 @@ public interface Factory
 
 	/**
 	 * 注册一个对象到工厂中.
+	 * 所注册的对象需要实现特定的方法能够获取名称.
 	 */
 	void registerObject(Object obj) throws EternaException;
+
+	/**
+	 * 注册一个对象到工厂中.
+	 *
+	 * @param name  对象注册的名称
+	 */
+	void registerObject(String name, Object obj) throws EternaException;
 
 	/**
 	 * 从工厂中创建一个对象.

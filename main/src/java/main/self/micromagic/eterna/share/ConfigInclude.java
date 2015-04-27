@@ -47,20 +47,25 @@ public class ConfigInclude
 			throws IOException
 	{
 		ConfigResource tmp = res.getResource(this.src);
-		ContainerManager.setCurrentResource(tmp);
 		InputStream in = tmp.getAsStream();
 		if (in == null)
 		{
+			Tool.log.info("The config \"" + tmp.getConfig() + "\" isn't avilable.");
 			return null;
+		}
+		ContainerManager.setCurrentResource(tmp);
+		if (this.params.size() == 0)
+		{
+			if (ContainerManager.checkResourceURI(tmp.getURI()))
+			{
+				// 如果没设置参数且以被加载过了, 则不再初始化
+				return null;
+			}
+			return in;
 		}
 		ParamText pt = new ParamText();
 		pt.parse(in);
 		Parameter[] params = pt.getParams();
-		if (params.length == 0 && ContainerManager.checkResourceURI(res.getURI()))
-		{
-			// 如果没设置参数且以被加载过了, 则不再初始化
-			return null;
-		}
 		for (int i = 0; i < params.length; i++)
 		{
 			String v = (String) this.params.getAttribute(params[i].getName());
