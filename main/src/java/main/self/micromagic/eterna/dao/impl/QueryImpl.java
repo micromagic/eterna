@@ -122,6 +122,19 @@ public class QueryImpl extends AbstractQuery
 		return this.totalCountExt;
 	}
 
+	/**
+	 * 获取一个用于统计总记录数的Query对象.
+	 */
+	protected Query getCountQuery()
+	{
+		if (this.countQuery == null)
+		{
+			this.countQuery = new CountQuery(this);
+		}
+		return this.countQuery;
+	}
+	private Query countQuery;
+
 	public ResultIterator executeQuery(Connection conn)
 			throws EternaException, SQLException
 	{
@@ -184,11 +197,7 @@ public class QueryImpl extends AbstractQuery
 				stmt.close();
 				rs = null;
 				stmt = null;
-				if (this.countQuery == null)
-				{
-					this.countQuery = new CountQuery(this);
-				}
-				int count = this.countQuery.executeQuery(conn).nextRow().getInt(1);
+				int count = this.getCountQuery().executeQuery(conn).nextRow().getInt(1);
 				ritr.realRecordCount = count;
 				ritr.realRecordCountAvailable = true;
 			}
@@ -242,7 +251,6 @@ public class QueryImpl extends AbstractQuery
 			}
 		}
 	}
-	private Query countQuery;
 
 	public ResultIterator executeQueryHoldConnection(Connection conn)
 			throws EternaException, SQLException

@@ -27,10 +27,10 @@ import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.ref.ObjectRef;
 
 /**
  * 数据库表定义的描述.
@@ -90,6 +90,33 @@ public class TableDesc extends AbstractObject
 		}
 	}
 
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (super.initialize(factory))
+		{
+			return true;
+		}
+		this.comment = (TableComment) factory.createObject(TABLE_COMM_NAME);
+		this.renameOpt = factory.getConstantValue("rename");
+		if (this.tableName.startsWith("${") && this.tableName.endsWith("}"))
+		{
+			String cName = this.tableName.substring(2, this.tableName.length() - 1);
+			String tmp = factory.getConstantValue(cName);
+			if (!StringTool.isEmpty(tmp))
+			{
+				this.tableName = tmp;
+			}
+			else
+			{
+				throw new EternaException("Not found constant value [" + cName + "].");
+			}
+		}
+		return false;
+	}
+	protected String renameOpt;
+	private TableComment comment;
+
 	/**
 	 * 执行表描述中所有定义的操作.
 	 */
@@ -101,6 +128,7 @@ public class TableDesc extends AbstractObject
 		{
 			u.setSubSQL(1, "drop table " + this.tableName);
 			u.execute(conn);
+			return;
 		}
 		else if (this.optType == OPT_TYPE_CREATE)
 		{
@@ -132,12 +160,7 @@ public class TableDesc extends AbstractObject
 				{
 					buf.append("   ");
 				}
-				ObjectRef param = new ObjectRef();
-				buf.append(this.columnDefiner.getColumnDefine(this, cDesc, param));
-				if (param.getObject() != null)
-				{
-					paramList.add(param.getObject());
-				}
+				buf.append(this.columnDefiner.getColumnDefine(this, cDesc, paramList));
 			}
 			if (this.mutipleLine)
 			{
@@ -155,6 +178,11 @@ public class TableDesc extends AbstractObject
 			}
 			u.execute(conn);
 			this.exec(paramList, conn);
+			if (!StringTool.isEmpty(this.desc))
+			{
+				u.setSubSQL(1, this.comment.getComment(this));
+				u.execute(conn);
+			}
 		}
 		else if (this.optType == OPT_TYPE_MODIFY)
 		{
@@ -166,6 +194,12 @@ public class TableDesc extends AbstractObject
 				u.execute(conn);
 			}
 			this.execColumnModify(u, conn);
+			if (this.desc != null)
+			{
+				// 修改时注释需要判空
+				u.setSubSQL(1, this.comment.getComment(this));
+				u.execute(conn);
+			}
 		}
 	}
 
@@ -179,14 +213,9 @@ public class TableDesc extends AbstractObject
 		while (itr.hasNext())
 		{
 			ColumnDesc cDesc = (ColumnDesc) itr.next();
-			ObjectRef param = new ObjectRef();
 			List paramList = new LinkedList();
 			StringAppender buf = StringTool.createStringAppender(32);
-			buf.append(this.columnDefiner.getColumnDefine(this, cDesc, param));
-			if (param.getObject() != null)
-			{
-				paramList.add(param.getObject());
-			}
+			buf.append(this.columnDefiner.getColumnDefine(this, cDesc, paramList));
 
 			PreparerManager m = this.filterPreparer(paramList);
 			if (m == null)

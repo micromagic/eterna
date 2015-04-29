@@ -22,7 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
+import self.micromagic.util.StringTool;
 
 /**
  * 数据库索引定义的描述.
@@ -92,6 +95,29 @@ public class IndexDesc extends AbstractObject
 		{
 			this.optType = OPT_TYPE_DROP;
 		}
+	}
+
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (super.initialize(factory))
+		{
+			return true;
+		}
+		if (this.tableName.startsWith("${") && this.tableName.endsWith("}"))
+		{
+			String cName = this.tableName.substring(2, this.tableName.length() - 1);
+			String tmp = factory.getConstantValue(cName);
+			if (!StringTool.isEmpty(tmp))
+			{
+				this.tableName = tmp;
+			}
+			else
+			{
+				throw new EternaException("Not found constant value [" + cName + "].");
+			}
+		}
+		return false;
 	}
 
 	/**

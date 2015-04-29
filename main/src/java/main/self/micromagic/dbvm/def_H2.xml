@@ -20,6 +20,9 @@
 -->
 <eterna-config>
 	<factory>
+
+		<include src="impl/config_H2.xml"/>
+
 		<objs>
 
 			<constant name="int" value="INT" />
@@ -27,7 +30,7 @@
 			<constant name="byte" value="TINYINT" />
 			<constant name="long" value="BIGINT" />
 			<constant name="double" value="DOUBLE" />
-			<constant name="String" value="VARCHAR2" />
+			<constant name="String" value="VARCHAR" />
 			<constant name="Datetime" value="DATETIME" />
 			<constant name="Blob" value="BLOB" />
 			<constant name="Clob" value="CLOB" />
@@ -35,7 +38,7 @@
 			<constant name="now" value="CURRENT_TIMESTAMP()" />
 			<constant name="now_script" value="select CURRENT_TIMESTAMP()" />
 
-			<constant name="rename" value="rename" />
+			<constant name="rename" value="rename to" />
 
 		</objs>
 	</factory>

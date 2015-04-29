@@ -16,8 +16,9 @@
 
 package self.micromagic.dbvm;
 
+import java.util.List;
+
 import self.micromagic.eterna.share.EternaObject;
-import self.micromagic.util.ref.ObjectRef;
 
 /**
  * 数据库列的定义者.
@@ -29,9 +30,9 @@ public interface ColumnDefiner extends EternaObject
 	 *
 	 * @param tableDesc  表的描述信息
 	 * @param colDesc    列的描述信息
-	 * @param param      出参
+	 * @param paramList  出参
 	 * @return  列定义字符串
 	 */
-	String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, ObjectRef param);
+	String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, List paramList);
 
 }

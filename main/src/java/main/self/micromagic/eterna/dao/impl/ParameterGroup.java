@@ -33,6 +33,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.UnmodifiableIterator;
 
 /**
@@ -44,6 +45,11 @@ public class ParameterGroup
 	 * 在item的arrtibute中设置使用prepare的名称.
 	 */
 	public static final String PREPARE_FLAG = "prepare";
+
+	/**
+	 * 在parameter的arrtibute中设置使用caption的名称.
+	 */
+	public static final String CAPTION_FLAG = "caption";
 
 	private boolean initialized;
 
@@ -154,6 +160,10 @@ public class ParameterGroup
 			pg.setPermission(pSet.toString());
 		}
 		pg.setParamType(TypeManager.getTypeName(item.getType()));
+		if (!StringTool.isEmpty(item.getCaption()))
+		{
+			pg.setAttribute(CAPTION_FLAG, item.getCaption());
+		}
 		String[] attrNames = item.getAttributeNames();
 		boolean hasPrepare = false;
 		for (int i = 0; i < attrNames.length; i++)
@@ -236,11 +246,21 @@ public class ParameterGroup
 		{
 			itemG.setPermission(pSet.toString());
 		}
+
 		String[] attrNames = param.getAttributeNames();
 		for (int i = 0; i < attrNames.length; i++)
 		{
 			String n = attrNames[i];
-			itemG.setAttribute(n, param.getAttribute(n));
+			if (CAPTION_FLAG.equals(n))
+			{
+				Object caption = param.getAttribute(n);
+				if (!StringTool.isEmpty(caption));
+				itemG.setCaption(caption.toString());
+			}
+			else
+			{
+				itemG.setAttribute(n, param.getAttribute(n));
+			}
 		}
 		return (EntityItem) itemG.create();
 	}

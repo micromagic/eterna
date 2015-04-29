@@ -42,12 +42,10 @@ public abstract class AbstractObject
 					TypeManager.TYPE_STRING, null, factory);
 			this.mutipleLine = boolConverter.convertToBoolean(
 					factory.getAttribute(MUTIPLE_LINE_FLAG));
-			this.renameOpt = factory.getConstantValue("rename");
 			return false;
 		}
 		return true;
 	}
-	protected String renameOpt;
 	protected boolean mutipleLine;
 	protected TypeDefiner typeDefiner;
 	protected ColumnDefiner columnDefiner;

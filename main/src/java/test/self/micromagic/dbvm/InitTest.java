@@ -16,6 +16,9 @@
 
 package self.micromagic.dbvm;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+
 import junit.framework.TestCase;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.EternaFactory;
@@ -31,7 +34,7 @@ public class InitTest extends TestCase
 		ClassLoader loader = DataBaseLock.class.getClassLoader();
 		String config = DataBaseLock.CONFIG_PREFIX + "test01.xml";
 		FactoryContainer c = ContainerManager.createFactoryContainer("mysql",
-				config, null, DataBaseLock.getDigester(), null, loader,
+				config, null, VersionManager.getDigester(), null, loader,
 				DataBaseLock.getContainer("MySQL"), false);
 		StringRef msg = new StringRef();
 		c.reInit(msg);
@@ -51,6 +54,21 @@ public class InitTest extends TestCase
 		names = f.getObjectNames(DataDesc.class);
 		DataDesc dataDesc = (DataDesc) f.createObject(names[0]);
 		System.out.println(names[0] + ":" + dataDesc.script);
+	}
+
+	public void testTestdb()
+			throws Exception
+	{
+		VersionManager.checkVersion(
+				getConnection(), "cp:/self/micromagic/dbvm/testdb/", null);
+	}
+
+	static Connection getConnection()
+			throws Exception
+	{
+		Class.forName("org.h2.Driver");
+		Connection conn = DriverManager.getConnection("jdbc:h2:~/vTest", "sa", "sa");
+		return conn;
 	}
 
 }

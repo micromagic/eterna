@@ -23,7 +23,7 @@
 		<objs>
 
 			<!-- 创建用于锁住数据库的信息表 -->
-			<update name="createLockTabel">
+			<update name="createLockTable">
 				<prepared-sql noLine="true">
 					create table #const(db_lock_table)
 					(

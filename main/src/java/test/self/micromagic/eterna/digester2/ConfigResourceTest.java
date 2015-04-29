@@ -43,6 +43,9 @@ public class ConfigResourceTest extends TestCase
 			System.out.println(arr[i].getConfig() + ", " + arr[i].getURI());
 		}
 		assertTrue(hasJavax);
+		cr = ContainerManager.createResource("cp:/org/dom4j/", fc);
+		arr = cr.listResources(false);
+		assertEquals(38, arr.length);  // org/dom4j/ 目录下只有38个对象
 	}
 
 	public void testURL1()

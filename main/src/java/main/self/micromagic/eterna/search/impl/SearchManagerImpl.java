@@ -282,8 +282,15 @@ public class SearchManagerImpl extends AbstractGenerator
 					ConditionProperty cp = search.getConditionProperty(condition.name);
 					if (cp != null)
 					{
-						ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ? cp.getDefaultConditionBuilder()
-								: search.getFactory().getConditionBuilder(condition.builderName);
+						ConditionBuilder cb;
+						if (cp.isUseDefaultConditionBuilder() || StringTool.isEmpty(condition.builderName))
+						{
+							cb = cp.getDefaultConditionBuilder();
+						}
+						else
+						{
+							cb = search.getFactory().getConditionBuilder(condition.builderName);
+						}
 						BuildeResult cbCon = null;
 						try
 						{

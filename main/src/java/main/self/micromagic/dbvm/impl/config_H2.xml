@@ -16,16 +16,15 @@
 -->
 
 <!--
-	mysql的生成定义
+	h2的生成定义
 -->
 <dbVersion>
 	<config>
 
-		<table-comment className="self.micromagic.dbvm.impl.MySqlComment"/>
-		<column-def className="self.micromagic.dbvm.impl.MySqlColumn"/>
-		<index-def className="self.micromagic.dbvm.impl.MySqlIndex"/>
+		<table-comment className="self.micromagic.dbvm.impl.H2Comment"/>
+		<column-def className="self.micromagic.dbvm.impl.H2Column"/>
+		<index-def className="self.micromagic.dbvm.impl.H2Index"/>
 		<type-def className="self.micromagic.dbvm.TypeDefiner">
-			<type-desc constName="String" className="self.micromagic.dbvm.impl.MySqlString"/>
 		</type-def>
 
 	</config>

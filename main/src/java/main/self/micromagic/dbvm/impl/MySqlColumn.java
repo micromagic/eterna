@@ -16,6 +16,8 @@
 
 package self.micromagic.dbvm.impl;
 
+import java.util.List;
+
 import self.micromagic.dbvm.AbstractObject;
 import self.micromagic.dbvm.ColumnDefiner;
 import self.micromagic.dbvm.ColumnDesc;
@@ -23,7 +25,6 @@ import self.micromagic.dbvm.TableDesc;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.ref.ObjectRef;
 
 /**
  * mysql的数据库列定义.
@@ -31,7 +32,7 @@ import self.micromagic.util.ref.ObjectRef;
 public class MySqlColumn extends AbstractObject
 		implements ColumnDefiner
 {
-	public String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, ObjectRef param)
+	public String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, List paramList)
 	{
 		String tableName = tableDesc.tableName;
 		if (!StringTool.isEmpty(tableDesc.newName))
@@ -88,12 +89,12 @@ public class MySqlColumn extends AbstractObject
 		{
 			throw new EternaException("Error opt type [" + colDesc.optType + "].");
 		}
-		if (!StringTool.isEmpty(colDesc.desc) && colDesc.optType != OPT_TYPE_DROP)
+		if (colDesc.desc != null && colDesc.optType != OPT_TYPE_DROP)
 		{
-			buf.append(" comment ?");
-			if (param != null)
+			if (!StringTool.isEmpty(colDesc.desc) || colDesc.optType == OPT_TYPE_MODIFY)
 			{
-				param.setObject(this.preparerCreater.createPreparer(colDesc.desc));
+				buf.append(" comment '")
+						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");
 			}
 		}
 		return buf.toString();

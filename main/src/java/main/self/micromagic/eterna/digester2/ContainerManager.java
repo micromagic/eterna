@@ -551,9 +551,9 @@ public class ContainerManager
 		}
 		int index = config.indexOf(':');
 		String flag;
-		if (index == -1 || index == 1)
+		if (index == -1 || index <= 1)
 		{
-			// 没有":"获取只有一个字符, 如: d:时作为文件资源
+			// 没有":"或只有一个字符, 如: d:时作为文件资源
 			flag = "file";
 		}
 		else

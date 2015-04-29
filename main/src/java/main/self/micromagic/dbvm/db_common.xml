@@ -22,6 +22,22 @@
 	<factory>
 		<objs>
 
+			<!-- 添加版本更新的执行脚本 -->
+			<update name="addVersionScript">
+				<prepared-sql noLine="true">
+					insert into #const(version_script) (#auto[insertN])
+					values (#auto[insertV])
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+					<parameter name="versionValue" type="int" />
+					<parameter name="executed" type="byte" />
+					<parameter name="scriptText" type="String" />
+					<parameter name="scriptIndex" type="int" />
+					<parameter name="execTime" type="Datetime" />
+				</parameters>
+			</update>
+
 			<!-- 获取数据库的时间 -->
 			<query name="getDataBaseTime">
 				<prepared-sql>#const(now_script)</prepared-sql>
@@ -31,10 +47,62 @@
 			</query>
 
 			<!-- 公共的数据库更新的执行对象 -->
-			<update name="commonExec">
+			<update name="commonExec" generator="self.micromagic.dbvm.impl.CommonUpdate">
 				<prepared-sql>#sub</prepared-sql>
 			</update>
 
+			<!-- 获取版本信息 -->
+			<query name="getVersionValue">
+				<prepared-sql noLine="true">
+					select versionValue, errInfo
+					from #const(version_info) where versionName = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+				</parameters>
+				<readers>
+					<reader name="versionValue" type="int" />
+					<reader name="errInfo" type="String" />
+				</readers>
+			</query>
+			<!-- 添加版本信息 -->
+			<update name="addVersionValue">
+				<prepared-sql noLine="true">
+					insert into #const(version_info) (versionName, versionValue, lastModified, errInfo)
+					values (?, ?, #const(now), ?)
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+					<parameter name="versionValue" type="int" />
+					<parameter name="errInfo" type="String" />
+				</parameters>
+			</update>
+			<!-- 设置版本信息 -->
+			<update name="setVersionValue">
+				<prepared-sql noLine="true">
+					update #const(version_info) set versionValue = ?, lastModified = #const(now),
+							errInfo = ?
+					where versionName = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionValue" type="int" />
+					<parameter name="errInfo" type="String" />
+					<parameter name="versionName" type="String" />
+				</parameters>
+			</update>
+			<!-- 添加版本日志 -->
+			<update name="addVersionLog">
+				<prepared-sql noLine="true">
+					insert into #const(version_log) (versionName, versionValue, lastModified, errInfo)
+					values (?, ?, #const(now), ?)
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+					<parameter name="versionValue" type="int" />
+					<parameter name="errInfo" type="String" />
+				</parameters>
+			</update>
+			
 		</objs>
 	</factory>
 </eterna-config>

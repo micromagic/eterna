@@ -37,6 +37,11 @@ public interface ConstantDef
 	int OPT_TYPE_DROP = -1;
 
 	/**
+	 * TableComment对象在工厂中的名称.
+	 */
+	String TABLE_COMM_NAME = "tableComment";
+
+	/**
 	 * TypeDefiner对象在工厂中的名称.
 	 */
 	String TYPE_DEF_NAME = "typeDefiner";

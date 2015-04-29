@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+	
+	<!-- 版本信息表 -->
+	<table name="T01" desc="表1">
+		<column name="versionName" type="String(300)" desc="版本名称" nullable="false"/>
+		<column name="versionValue" type="int" desc="版本值"/>
+		<column name="errInfo" type="String(1000)" desc="错误信息"/>
+		<column name="lastModified" type="Datetime" desc="最后修改时间"/>
+	</table>
+
+	<!-- 版本信息表主键 -->
+	<index name="KEY_t01" type="key" tableName="T01">
+		<column name="versionName"/>
+	</index>
+	<index name="index_t01" tableName="T01">
+		<column name="lastModified"/>
+	</index>
+
+</dbVersion>

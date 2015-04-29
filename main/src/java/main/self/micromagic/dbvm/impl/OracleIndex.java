@@ -16,21 +16,22 @@
 
 package self.micromagic.dbvm.impl;
 
+import java.util.List;
+
 import self.micromagic.dbvm.AbstractObject;
 import self.micromagic.dbvm.IndexDefiner;
 import self.micromagic.dbvm.IndexDesc;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.ref.ObjectRef;
 
 /**
- * mysql的数据库列定义.
+ * oracle的数据库索引定义.
  */
 public class OracleIndex extends AbstractObject
 		implements IndexDefiner
 {
-	public String getIndexDefine(IndexDesc indexDesc, ObjectRef param)
+	public String getIndexDefine(IndexDesc indexDesc, List paramList)
 	{
 		StringAppender buf = StringTool.createStringAppender(128);
 		if (indexDesc.optType == OPT_TYPE_CREATE)

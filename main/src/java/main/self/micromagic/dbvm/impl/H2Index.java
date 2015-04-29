@@ -26,9 +26,9 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * mysql的数据库索引定义.
+ * h2的数据库索引定义.
  */
-public class MySqlIndex extends AbstractObject
+public class H2Index extends AbstractObject
 		implements IndexDefiner
 {
 	public String getIndexDefine(IndexDesc indexDesc, List paramList)
@@ -38,33 +38,25 @@ public class MySqlIndex extends AbstractObject
 		{
 			String[] arr = new String[indexDesc.columns.size()];
 			indexDesc.columns.toArray(arr);
+			buf.append("create ");
 			if (indexDesc.key)
 			{
-				buf.append("alter table ").append(indexDesc.tableName)
-						.append(" add primary key ")
-						.append(indexDesc.indexName).append(" (")
-						.append(StringTool.linkStringArr(arr, ", ")).append(')');
+				buf.append("primary key ");
 			}
 			else
 			{
-				buf.append("alter table ").append(indexDesc.tableName).append(" add ")
-						.append(indexDesc.unique ? "unique " : "index ")
-						.append(indexDesc.indexName).append(" (")
-						.append(StringTool.linkStringArr(arr, ", ")).append(')');
+				if (indexDesc.unique)
+				{
+					buf.append("unique ");
+				}
+				buf.append("index ");
 			}
+			buf.append(indexDesc.indexName).append(" on ").append(indexDesc.tableName)
+					.append(" (").append(StringTool.linkStringArr(arr, ", ")).append(')');
 		}
 		else if (indexDesc.optType == OPT_TYPE_DROP)
 		{
-			if (indexDesc.key)
-			{
-				buf.append("alter table ").append(indexDesc.tableName)
-						.append(" drop primary key");
-			}
-			else
-			{
-				buf.append("alter table ").append(indexDesc.tableName)
-						.append(" drop index ").append(indexDesc.indexName);
-			}
+			buf.append("drop index ").append(indexDesc.indexName);
 		}
 		else
 		{

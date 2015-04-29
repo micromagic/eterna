@@ -46,7 +46,10 @@ stack:{registerObject,n:0,g:0}
 column
 log:{$column}
 create:{,self.micromagic.dbvm.ColumnDesc}
-attr:{name(i=0):colName,newName(m=0),opt(m=0,i=0):optName,desc(m=0,i=0),type(i=0):typeName}
+attr:{
+	name(i=0):colName,newName(m=0),opt(m=0,i=0):optName,desc(m=0,i=0),
+	type(i=0):typeName,nullable(i=0,m=0)
+}
 stack:{addColumn,n:0,g:0}
 
 
@@ -69,7 +72,13 @@ method:{addColumn,name(i=0)}
 
 ## config
 config
-sub:{column-def,index-def,type-def}
+sub:{table-comment,column-def,index-def,type-def}
+
+
+## table-comment
+table-comment
+create:{className}
+stack:{registerObject,attrName:$text.tableComment,g:0}
 
 
 ## column-def

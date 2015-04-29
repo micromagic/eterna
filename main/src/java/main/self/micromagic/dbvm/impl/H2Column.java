@@ -1,15 +1,15 @@
 /*
- * Copyright 2015 xinjunli (micromagimport self.micromagic.dbvm.ColumnDefiner;
-import self.micromagic.dbvm.ColumnDesc;
-import self.micromagic.dbvm.TableDesc;
-import self.micromagic.eterna.dao.Update;
-import self.micromagic.eterna.dao.preparer.PreparerManager;
-import self.micromagic.eterna.dao.preparer.ValuePreparer;
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.util.StringAppender;
-import self.micromagic.util.StringTool;
-import self.micromagic.util.ref.ObjectRef;
-lied.
+ * Copyright 2015 xinjunli (micromagic@sina.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -28,9 +28,9 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * mysql的数据库列定义.
+ * h2的数据库列定义.
  */
-public class OracleColumn extends AbstractObject
+public class H2Column extends AbstractObject
 		implements ColumnDefiner
 {
 	public String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, List paramList)
@@ -65,9 +65,9 @@ public class OracleColumn extends AbstractObject
 		}
 		else if (colDesc.optType == OPT_TYPE_MODIFY)
 		{
-			buf.append("alter table ").append(tableName).append(" modify ")
-					.append(colDesc.colName).append(' ')
-					.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
+			buf.append("alter table ").append(tableName).append(" alter column ")
+					.append(colDesc.colName).append(' ');
+			buf.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
 			if (!colDesc.nullable)
 			{
 				buf.append(" not null");
@@ -75,8 +75,8 @@ public class OracleColumn extends AbstractObject
 			if (!StringTool.isEmpty(colDesc.newName))
 			{
 				StringAppender s = StringTool.createStringAppender(16);
-				s.append("alter table ").append(tableName).append(" rename column ")
-						.append(colDesc.colName).append(" to ").append(colDesc.newName);
+				s.append("alter table ").append(tableName).append(" alter column ")
+						.append(colDesc.colName).append(" rename to ").append(colDesc.newName);
 				Update u = this.factory.createUpdate(COMMON_EXEC);
 				u.setSubSQL(1, s.toString());
 				if (paramList != null)

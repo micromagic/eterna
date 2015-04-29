@@ -20,6 +20,9 @@
 -->
 <eterna-config>
 	<factory>
+
+		<include src="impl/config_Oracle.xml"/>
+	
 		<objs>
 
 			<constant name="int" value="NUMBER(9)" />

@@ -395,9 +395,10 @@ class ClassPathResource extends AbstractResource
 	 */
 	private static String checkProtocol(String url)
 	{
-		if (url.indexOf(':') == -1)
+		int index = url.indexOf(':');
+		if (index == -1 || index <= 1)
 		{
-			// 如果字符串中没有protocol, 默认添上file
+			// 如果字符串中没有protocol或只是盘符, 默认添上file
 			url = "file:".concat(url);
 		}
 		return url;
@@ -484,8 +485,9 @@ class ClassPathResource extends AbstractResource
 		while (entry != null)
 		{
 			String name = entry.getName();
-			if (name.startsWith(parent))
+			if (name.length() > parent.length() && name.startsWith(parent))
 			{
+				// name > parent 不要包含parent目录
 				this.dealEntryName(result, parent, name, recursive);
 			}
 			entry = zipStream.getNextEntry();

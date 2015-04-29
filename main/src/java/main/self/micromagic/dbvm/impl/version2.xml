@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+
+	<table name="${version_script}" desc="版本更新的脚本表">
+		<column name="versionName" type="String(300)" desc="版本名称"/>
+		<column name="versionValue" type="int" desc="版本值"/>
+		<column name="executed" type="byte" desc="是否已执行"/>
+		<column name="scriptText" type="Clob" desc="执行的脚本"/>
+		<column name="scriptIndex" type="int" desc="脚本的顺序"/>
+		<column name="execTime" type="Datetime" desc="执行的时间"/>
+	</table>
+
+</dbVersion>

@@ -16,16 +16,11 @@
 
 package self.micromagic.eterna.dao.impl;
 
-import java.io.InputStream;
-import java.io.Reader;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -41,12 +36,14 @@ import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.dao.reader.ObjectReader;
 import self.micromagic.eterna.dao.reader.ReaderFactory;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.logging.TimeLogger;
@@ -56,23 +53,36 @@ class CountQuery
 {
 	private final Query query;
 	private final String name;
-	private final ResultReaderManager readerManager;
 	private String cacheSQL;
 	private String oldSQL;
+
+	private static ResultReaderManager readerManager;
+	static
+	{
+		try
+		{
+			ObjectReader tmpReader
+					= (ObjectReader) ReaderFactory.createReader("long", "theCount");
+			tmpReader.setColumnIndex(1);
+			ReaderManagerImpl temp = new ReaderManagerImpl();
+			temp.setName("<readers>/count");
+			temp.addReader(tmpReader);
+			EternaFactory factory = (EternaFactory) ContainerManager
+					.getGlobalContainer().getFactory();
+			temp.initialize(factory);
+			readerManager = temp;
+		}
+		catch (Exception ex)
+		{
+			Tool.log.error("Error in init count reader manager.", ex);
+		}
+	}
 
 	public CountQuery(Query query)
 			throws EternaException
 	{
 		this.query = query;
-		this.name = "<count>/" + query.getName();
-		ObjectReader tmpReader
-				= (ObjectReader) ReaderFactory.createReader("int", "theCount");
-		tmpReader.setColumnIndex(1);
-		ReaderManagerImpl temp = new ReaderManagerImpl();
-		temp.setName("<readers>/" + this.name);
-		temp.addReader(tmpReader);
-		temp.initialize(query.getFactory());
-		this.readerManager = temp;
+		this.name = "<count>/".concat(query.getName());
 	}
 
 	public String getName()
@@ -110,7 +120,7 @@ class CountQuery
 
 			rs.next();
 			Object[] values = new Object[]{new Integer(rs.getInt(1))};
-			CountResultIterator critr = new CountResultIterator(this.readerManager, this);
+			CountResultIterator critr = new CountResultIterator(readerManager, this);
 			ResultRowImpl rowSet = new ResultRowImpl(values, critr, 1, null);
 			ArrayList results = new ArrayList(2);
 			results.add(rowSet);
@@ -193,7 +203,7 @@ class CountQuery
 	public ResultReaderManager getReaderManager()
 			throws EternaException
 	{
-		return this.readerManager.copy();
+		return readerManager.copy();
 	}
 
 	public void prepareValues(PreparedStatement stmt)
@@ -431,142 +441,12 @@ class CountQuery
 		throw new UnsupportedOperationException();
 	}
 
-	public void setNull(int parameterIndex, int sqlType)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setNull(String parameterName, int sqlType)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setBoolean(int parameterIndex, boolean x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setBoolean(String parameterName, boolean x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setByte(int parameterIndex, byte x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setByte(String parameterName, byte x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setShort(int parameterIndex, short x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setShort(String parameterName, short x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setInt(int parameterIndex, int x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setInt(String parameterName, int x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setLong(int parameterIndex, long x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setLong(String parameterName, long x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setFloat(int parameterIndex, float x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setFloat(String parameterName, float x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setDouble(int parameterIndex, double x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setDouble(String parameterName, double x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
 	public void setString(int parameterIndex, String x)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	public void setString(String parameterName, String x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setBytes(int parameterIndex, byte[] x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setBytes(String parameterName, byte[] x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setDate(int parameterIndex, Date x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setDate(String parameterName, Date x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setTime(int parameterIndex, Time x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setTime(String parameterName, Time x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setTimestamp(int parameterIndex, Timestamp x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setTimestamp(String parameterName, Timestamp x)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setBinaryStream(int parameterIndex, InputStream x, int length)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	public void setBinaryStream(String parameterName, InputStream x, int length)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -581,64 +461,54 @@ class CountQuery
 		throw new UnsupportedOperationException();
 	}
 
-	public void setCharacterStream(int parameterIndex, Reader reader, int length)
+}
+
+class CountResultIterator extends AbstractResultIterator
+		implements ResultIterator
+{
+	public CountResultIterator(ResultReaderManager readerManager, Query query)
+			throws EternaException
 	{
-		throw new UnsupportedOperationException();
+		super(readerManager, null);
+		this.query = query;
 	}
 
-	public void setCharacterStream(String parameterName, Reader reader, int length)
+	private CountResultIterator()
 	{
-		throw new UnsupportedOperationException();
 	}
 
-	private static class CountResultIterator extends AbstractResultIterator
-			implements ResultIterator
+	public void setResult(List result)
 	{
-		public CountResultIterator(ResultReaderManager readerManager, Query query)
-				throws EternaException
-		{
-			super(readerManager, null);
-			this.query = query;
-		}
+		this.result = result;
+		this.resultItr = this.result.iterator();
+	}
 
-		private CountResultIterator()
-		{
-		}
+	public int getTotalCount()
+	{
+		return 1;
+	}
 
-		public void setResult(List result)
-		{
-			this.result = result;
-			this.resultItr = this.result.iterator();
-		}
+	public int getCount()
+	{
+		return 1;
+	}
 
-		public int getTotalCount()
-		{
-			return 1;
-		}
+	public boolean isTotalCountAvailable()
+	{
+		return true;
+	}
 
-		public int getCount()
-		{
-			return 1;
-		}
+	public boolean hasMoreRecord()
+	{
+		return false;
+	}
 
-		public boolean isTotalCountAvailable()
-		{
-			return true;
-		}
-
-		public boolean hasMoreRecord()
-		{
-			return false;
-		}
-
-		public ResultIterator copy()
-				throws EternaException
-		{
-			CountResultIterator ritr = new CountResultIterator();
-			super.copy(ritr);
-			return ritr;
-		}
-
+	public ResultIterator copy()
+			throws EternaException
+	{
+		CountResultIterator ritr = new CountResultIterator();
+		super.copy(ritr);
+		return ritr;
 	}
 
 }

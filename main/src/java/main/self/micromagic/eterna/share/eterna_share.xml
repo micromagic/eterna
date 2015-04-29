@@ -93,6 +93,12 @@
 
 			<!-- 存放数据库锁信息的默认表名 -->
 			<constant name="db_lock_table" value="T_SYS_DB_LOCK" />
+			<!-- 存放数据库版本信息的表名 -->
+			<constant name="version_info" value="T_SYS_VERSION_INFO" />
+			<!-- 存放数据库版本日志的表名 -->
+			<constant name="version_log" value="T_SYS_VERSION_LOG" />
+			<!-- 存放数据库版本更新时脚本的表名 -->
+			<constant name="version_script" value="T_SYS_VERSION_SCRIPT" />
 			
 		</objs>
 		<attributes>

@@ -21,6 +21,7 @@
 <dbVersion>
 	<config>
 
+		<table-comment className="self.micromagic.dbvm.impl.OracleComment"/>
 		<column-def className="self.micromagic.dbvm.impl.OracleColumn"/>
 		<index-def className="self.micromagic.dbvm.impl.OracleIndex"/>
 		<type-def className="self.micromagic.dbvm.TypeDefiner">

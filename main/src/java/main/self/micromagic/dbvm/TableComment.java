@@ -16,22 +16,18 @@
 
 package self.micromagic.dbvm;
 
-import java.util.List;
-
-import self.micromagic.eterna.share.EternaObject;
 
 /**
- * 数据库索引的定义者.
+ * 数据库表注释定义者.
  */
-public interface IndexDefiner extends EternaObject
+public interface TableComment
 {
 	/**
-	 * 获取索引的定义.
+	 * 获取数据库表注释的定义.
 	 *
-	 * @param indexDesc  列的描述信息
-	 * @param paramList  出参
-	 * @return  列定义字符串
+	 * @param tableDesc    表的描述信息
+	 * @return  表注释定义字符串
 	 */
-	String getIndexDefine(IndexDesc indexDesc, List paramList);
+	String getComment(TableDesc tableDesc);
 
 }

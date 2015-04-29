@@ -23,19 +23,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.digester2.ContainerManager;
-import self.micromagic.eterna.digester2.Digester;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
-import self.micromagic.util.ResManager;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.Utility;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -80,6 +76,30 @@ public class DataBaseLock
 		modify.setIgnore("userId");
 		modify.executeUpdate(conn);
 		conn.commit();
+	}
+
+	/**
+	 * 锁住连接所对应的数据库.
+	 *
+	 * @param conn             数据库连接
+	 * @param lockName         数据库锁的名称
+	 * @param userId           当前登录的用户名
+	 */
+	public static void lock(Connection conn, String lockName, String userId)
+			throws SQLException, EternaException
+	{
+		String dbName = conn.getMetaData().getDatabaseProductName();
+		EternaFactory f = getFactory(dbName);
+		Update modify = f.createUpdate("modifyLockInfo");
+		modify.setString("userId", userId);
+		modify.setIgnore("lockValue1");
+		modify.setIgnore("lockValue2");
+		modify.setString("lockName", lockName);
+		if (tryGetLock(conn, modify, null))
+		{
+			// 如果没有获取到锁, 那可能记录或表不存在
+			lock(conn, lockName, userId, false);
+		}
 	}
 
 	/**
@@ -136,7 +156,7 @@ public class DataBaseLock
 				// lockValue为null, 说明表不存在, 创建表, 然后重新执行查询
 				try
 				{
-					Update update = f.createUpdate("createLockTabel");
+					Update update = f.createUpdate("createLockTable");
 					update.execute(conn);
 					conn.commit();
 				}
@@ -262,8 +282,9 @@ public class DataBaseLock
 			ClassLoader loader = DataBaseLock.class.getClassLoader();
 			String config = CONFIG_PREFIX + "def_" + dbName + ".xml;"
 					+ CONFIG_PREFIX + "db_lock.xml;" + CONFIG_PREFIX + "db_common.xml;";
-			c = ContainerManager.createFactoryContainer(dbName, config, null, getDigester(),
-					null, loader, ContainerManager.getGlobalContainer(), false);
+			c = ContainerManager.createFactoryContainer(dbName, config, null,
+					VersionManager.getDigester(), null, loader,
+					ContainerManager.getGlobalContainer(), false);
 			StringRef msg = new StringRef();
 			c.reInit(msg);
 			if (!StringTool.isEmpty(msg.getString()))
@@ -283,32 +304,6 @@ public class DataBaseLock
 	}
 
 	/**
-	 * 获取配置文件的解析对象.
-	 */
-	public static Digester getDigester()
-	{
-		return digester;
-	}
-	private static Digester digester;
-	static
-	{
-		try
-		{
-			ResManager rm1 = new ResManager();
-			rm1.load(Digester.class.getResourceAsStream(Digester.DEFAULT_RULES));
-			Properties rConfig = new Properties();
-			rConfig.load(Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
-			ResManager rm2 = new ResManager();
-			rm2.load(DataBaseLock.class.getResourceAsStream("dbvm_rules.res"));
-			digester = new Digester(new ResManager[]{rm1, rm2}, rConfig);
-		}
-		catch (Exception ex)
-		{
-			Utility.createLog("eterna.dbvm").error("Error in init dbvm rules", ex);
-		}
-	}
-
-	/**
 	 * 各类型数据库相关的工厂容器的缓存.
 	 */
 	private static Map containerCache = new HashMap();
@@ -324,9 +319,9 @@ public class DataBaseLock
 	private static final String RELEASED_VALUE = "<released>";
 
 	/**
-	 * 最大等待时间, 3min.
+	 * 最大等待时间, 15min.
 	 */
-	private static final long MAX_WAIT_TIME =  3 * 60 * 1000L;
+	private static final long MAX_WAIT_TIME =  15 * 60 * 1000L;
 
 	/**
 	 * 获取当前运行环境的名称.
