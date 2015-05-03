@@ -99,7 +99,7 @@
 			<constant name="version_log" value="T_SYS_VERSION_LOG" />
 			<!-- 存放数据库版本更新时脚本的表名 -->
 			<constant name="version_script" value="T_SYS_VERSION_SCRIPT" />
-			
+
 		</objs>
 		<attributes>
 

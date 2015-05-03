@@ -96,8 +96,12 @@ public class CommonUpdate extends UpdateImpl
 
 	private void log(String sql)
 	{
-		String msg = "exec sql:".concat(sql);
-		VersionManager.log(msg, null);
+		if (!logScriptMode)
+		{
+			// 不记录脚本模式才输出日志
+			String msg = "exec sql:".concat(sql);
+			VersionManager.log(msg, null);
+		}
 		//System.out.println(msg);
 	}
 

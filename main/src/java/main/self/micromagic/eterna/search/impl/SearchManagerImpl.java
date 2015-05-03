@@ -48,6 +48,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * @author micromagic@sina.com
@@ -230,126 +231,57 @@ public class SearchManagerImpl extends AbstractGenerator
 	private void setConditionValues(Document doc, Search search, boolean saveCondition)
 			throws EternaException
 	{
-		// 将doc中的数据整理成特殊的条件map
-		Map specialFormat = new HashMap();
-		List groups = doc.getRootElement().element("groups").elements("group");
-		Iterator gitr = groups.iterator();
-		Element group;
-		while (gitr.hasNext())
+		List conditions = doc.getRootElement().element("conditions").elements();
+		this.setConditionValues(this.makeConditionStruct(conditions),
+				search, saveCondition);
+	}
+	private Object[] makeConditionStruct(List conditions)
+	{
+		List result = new ArrayList();
+		Iterator itr = conditions.iterator();
+		Element item;
+		while (itr.hasNext())
 		{
-			group = (Element) gitr.next();
-			String gName = group.attributeValue("name");
-			List infos = new ArrayList();
-			specialFormat.put(gName, infos);
-			List conditions = group.elements("condition");
-			if (conditions.size() > 0)
+			item = (Element) itr.next();
+			if ("conditions".equals(item.getName()))
 			{
-				Iterator citr = conditions.iterator();
-				while (citr.hasNext())
-				{
-					Element condition = (Element) citr.next();
-					ConditionInfo info = new ConditionInfo(condition.attributeValue("name"),
-							gName, condition.attributeValue("value"), condition.attributeValue("builder"));
-					infos.add(info);
-				}
+				result.add(this.makeConditionStruct(item.elements()));
+			}
+			else
+			{
+				ConditionInfo info = new ConditionInfo(item.attributeValue("name"),
+						item.attributeValue("linkOpt"), item.attributeValue("value"),
+						item.attributeValue("builder"));
+				result.add(info);
 			}
 		}
-		this.setConditionValues(specialFormat, search, saveCondition);
+		return result.toArray();
 	}
 
 	/**
 	 * 根据特殊的条件格式设置查询条件。
 	 */
-	private void setConditionValues(Map specialFormat, Search search, boolean saveCondition)
+	private void setConditionValues(Object[] conditionStruct, Search search, boolean saveCondition)
 			throws EternaException
 	{
-		StringAppender buf = StringTool.createStringAppender(512);
-
+		StringRef tmpOpt = new StringRef();
 		List preparerList = new LinkedList();
-		Iterator gitr = specialFormat.entrySet().iterator();
-		while (gitr.hasNext())
+		String tmpScript = this.makeConditionScript(conditionStruct,
+				saveCondition, search, preparerList, tmpOpt);
+		if (tmpScript == null)
 		{
-			Map.Entry e = (Map.Entry) gitr.next();
-			String gName = (String) e.getKey();
-			List conditions = (List) e.getValue();
-			if (conditions.size() > 0)
-			{
-				Iterator citr = conditions.iterator();
-				int index = 0;
-				while (citr.hasNext())
-				{
-					ConditionInfo condition = (ConditionInfo) citr.next();
-					ConditionProperty cp = search.getConditionProperty(condition.name);
-					if (cp != null)
-					{
-						ConditionBuilder cb;
-						if (cp.isUseDefaultConditionBuilder() || StringTool.isEmpty(condition.builderName))
-						{
-							cb = cp.getDefaultConditionBuilder();
-						}
-						else
-						{
-							cb = search.getFactory().getConditionBuilder(condition.builderName);
-						}
-						BuildeResult cbCon = null;
-						try
-						{
-							cbCon = cb.buildeCondition(cp.getColumnName(), condition.value, cp);
-							if (saveCondition)
-							{
-								this.addCondition(new ConditionInfo(cp.getName(), gName, condition.value, cb));
-							}
-						}
-						catch (Exception ex)
-						{
-							log.error("Error wen builde condition: ConditionProperty[" + cp.getName()
-									+ "], search[" + search.getName() + "]", ex);
-						}
-						if (log.isDebugEnabled())
-						{
-							log.debug("OneCondition:" + cbCon != null  ? cbCon.toString() : null);
-						}
-						if (cbCon != null)
-						{
-							if (index != 0)
-							{
-								buf.append(" AND ");
-							}
-							else
-							{
-								if (buf.length() > 0)
-								{
-									buf.append(" OR (");
-								}
-								else
-								{
-									buf.append("( (");
-								}
-							}
-							buf.append(cbCon.scriptPart);
-							for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
-							{
-								cbCon.preparers[pIndex].setName(cp.getName());
-							}
-							preparerList.addAll(Arrays.asList(cbCon.preparers));
-							index++;
-						}
-					}
-				}
-				if (index > 0)
-				{
-					buf.append(')');
-				}
-			}
+			this.preparedCondition = "";
+			this.generatedPM = null;
+			return;
 		}
-		if (buf.length() > 0)
+		if (tmpOpt.getString() != null && tmpOpt.getString().endsWith("NOT"))
 		{
-			buf.append(" )");
+			tmpScript = "NOT ".concat(tmpScript);
 		}
-		this.preparedCondition = buf.toString();
+		this.preparedCondition = tmpScript;
 		if (log.isDebugEnabled())
 		{
-			log.debug("Condition:" + buf.toString());
+			log.debug("Condition:" + tmpScript);
 		}
 		int pSize = preparerList.size();
 		if (pSize > 0)
@@ -369,6 +301,115 @@ public class SearchManagerImpl extends AbstractGenerator
 			this.generatedPM = null;
 		}
 	}
+	private String makeConditionScript(Object[] conditionStruct, boolean saveCondition,
+			Search search, List preparerList, StringRef firstLink)
+	{
+		if (conditionStruct == null || conditionStruct.length == 0)
+		{
+			return null;
+		}
+		StringAppender buf = StringTool.createStringAppender(128);
+		for (int i = 0; i < conditionStruct.length; i++)
+		{
+			Object obj = conditionStruct[i];
+			if (obj == null)
+			{
+				continue;
+			}
+			if (obj instanceof ConditionInfo)
+			{
+				ConditionInfo info = (ConditionInfo) obj;
+				ConditionProperty cp = search.getConditionProperty(info.name);
+				if (cp != null)
+				{
+					ConditionBuilder cb;
+					if (cp.isUseDefaultConditionBuilder() || StringTool.isEmpty(info.builderName))
+					{
+						cb = cp.getDefaultConditionBuilder();
+					}
+					else
+					{
+						cb = search.getFactory().getConditionBuilder(info.builderName);
+					}
+					BuildeResult cbCon = null;
+					try
+					{
+						cbCon = cb.buildeCondition(cp.getColumnName(), info.value, cp);
+						if (saveCondition)
+						{
+							this.addCondition(new ConditionInfo(cp.getName(), info.linkOpt, info.value, cb));
+						}
+					}
+					catch (Exception ex)
+					{
+						String msg = "Error wen builde condition [" + cp.getName()
+								+ "] in search [" + search.getName() + "].";
+						log.error(msg, ex);
+					}
+					if (log.isDebugEnabled())
+					{
+						log.debug("OneCondition:" + (cbCon != null ? cbCon.toString() : null));
+					}
+					if (cbCon != null)
+					{
+						if (buf.length() == 0)
+						{
+							firstLink.setString(info.linkOpt);
+							buf.append('(');
+						}
+						else
+						{
+							buf.append(' ').append(info.linkOpt).append(' ');
+						}
+						buf.append(cbCon.scriptPart);
+						for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
+						{
+							cbCon.preparers[pIndex].setName(cp.getName());
+						}
+						preparerList.addAll(Arrays.asList(cbCon.preparers));
+					}
+				}
+				else
+				{
+					String msg = "Not found condition [" + info.name
+							+ "] in search [" + search.getName() + "].";
+					log.error(msg);
+				}
+			}
+			else if (obj instanceof Object[])
+			{
+				StringRef tmpOpt = new StringRef();
+				String tmpScript = this.makeConditionScript((Object[]) obj,
+						saveCondition, search, preparerList, tmpOpt);
+				if (tmpScript != null)
+				{
+					if (buf.length() == 0)
+					{
+						firstLink.setString(tmpOpt.getString());
+						buf.append('(');
+					}
+					else
+					{
+						buf.append(' ').append(tmpOpt.getString()).append(' ');
+					}
+					buf.append(tmpScript);
+				}
+			}
+			else
+			{
+				throw new EternaException("Error type: " + obj.getClass() + ".");
+			}
+		}
+		if (buf.length() == 0)
+		{
+			return null;
+		}
+		else
+		{
+			buf.append(')');
+			return buf.toString();
+		}
+	}
 
 	/**
 	 * 根据参数对象, 设置查询条件.
@@ -385,7 +426,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			this.conditionVersion++;
 			return;
 		}
-		if (param.condition == null)
+		if (param.condition == null && param.conditionStruct == null)
 		{
 			// 没有条件则直接返回, 注: condition为空map不表示没有条件
 			return;
@@ -393,9 +434,9 @@ public class SearchManagerImpl extends AbstractGenerator
 		this.clearCondition();
 		this.conditionVersion++;
 		this.resetConditionSearch = search;
-		if (param.specialFormat)
+		if (param.conditionStruct != null)
 		{
-			this.setConditionValues(param.condition, search, saveCondition);
+			this.setConditionValues(param.conditionStruct, search, saveCondition);
 			return;
 		}
 		StringAppender buf = StringTool.createStringAppender(512);
@@ -417,7 +458,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
 					if (saveCondition)
 					{
-						this.addCondition(new ConditionInfo(cp.getName(), null, String.valueOf(value), cb));
+						this.addCondition(new ConditionInfo(cp.getName(), "and", value, cb));
 					}
 				}
 				catch (Exception ex)
@@ -427,7 +468,7 @@ public class SearchManagerImpl extends AbstractGenerator
 				}
 				if (log.isDebugEnabled())
 				{
-					log.debug("OneCondition:" + cbCon != null  ? cbCon.toString() : null);
+					log.debug("OneCondition:" + (cbCon != null ? cbCon.toString() : null));
 				}
 				if (cbCon != null)
 				{
@@ -529,7 +570,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
 					if (saveCondition)
 					{
-						this.addCondition(new ConditionInfo(cp.getName(), null, value, cb));
+						this.addCondition(new ConditionInfo(cp.getName(), "and", value, cb));
 					}
 				}
 				catch (Exception ex)
@@ -539,7 +580,7 @@ public class SearchManagerImpl extends AbstractGenerator
 				}
 				if (log.isDebugEnabled())
 				{
-					log.debug("OneCondition:" + cbCon != null  ? cbCon.toString() : null);
+					log.debug("OneCondition:" + (cbCon != null ? cbCon.toString() : null));
 				}
 				if (cbCon != null)
 				{
@@ -674,17 +715,14 @@ public class SearchManagerImpl extends AbstractGenerator
 		while (itr.hasNext())
 		{
 			ConditionInfo con = (ConditionInfo) itr.next();
+			if (result.containsKey(con.name))
+			{
+				continue;
+			}
 			ConditionProperty cp = search.getConditionProperty(con.name);
 			if (cp != null && !cp.isIgnore())
 			{
-				List group = (List) result.get(con.group);
-				if (group == null)
-				{
-					group = new LinkedList();
-					result.put(con.group, group);
-				}
-				group.add(con);
-				group.add(cp);
+				result.put(con.name, new Object[]{cp, con.value});
 			}
 		}
 		return result;
@@ -703,65 +741,49 @@ public class SearchManagerImpl extends AbstractGenerator
 		}
 		StringAppender buf = StringTool.createStringAppender(512);
 		List preparerList = new LinkedList();
-		Iterator gitr = consMap.values().iterator();
+		Iterator conItr = consMap.values().iterator();
 		Object value;
-		while (gitr.hasNext())
+		while (conItr.hasNext())
 		{
-			List conditions = (List) gitr.next();
-			if (conditions.size() > 0)
+			int index = 0;
+			Object[] pair = (Object[]) conItr.next();
+			if (pair != null)
 			{
-				Iterator citr = conditions.iterator();
-				int index = 0;
-				while (citr.hasNext())
+				ConditionProperty cp = (ConditionProperty) pair[0];
+				value = pair[1];
+				ConditionBuilder cb = cp.getDefaultConditionBuilder();
+				BuildeResult cbCon = null;
+				try
 				{
-					ConditionInfo condition = (ConditionInfo) citr.next();
-					ConditionProperty cp = (ConditionProperty) citr.next();
-					ConditionBuilder cb = cp.isUseDefaultConditionBuilder() ?
-							cp.getDefaultConditionBuilder() : condition.builder;
-					value = condition.value;
-					BuildeResult cbCon = null;
-					try
-					{
-						cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
-					}
-					catch (Exception ex)
-					{
-						log.error("Error wen builde condition: ConditionProperty[" + cp.getName()
-								+ "], search[" + search.getName() + "]", ex);
-					}
-					if (log.isDebugEnabled())
-					{
-						log.debug("OneCondition:" + cbCon.toString());
-					}
-					if (cbCon != null)
-					{
-						if (index != 0)
-						{
-							buf.append(" AND ");
-						}
-						else
-						{
-							if (buf.length() > 0)
-							{
-								buf.append(" OR (");
-							}
-							else
-							{
-								buf.append("( (");
-							}
-						}
-						buf.append(cbCon.scriptPart);
-						for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
-						{
-							cbCon.preparers[pIndex].setName(cp.getName());
-						}
-						preparerList.addAll(Arrays.asList(cbCon.preparers));
-						index++;
-					}
+					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
 				}
-				if (buf.length() > 0)
+				catch (Exception ex)
 				{
-					buf.append(')');
+					String msg = "Error when builde condition: ConditionProperty["
+							+ cp.getName() + "], search[" + search.getName() + "].";
+					log.error(msg, ex);
+				}
+				if (log.isDebugEnabled())
+				{
+					log.debug("OneCondition:" + cbCon.toString());
+				}
+				if (cbCon != null)
+				{
+					if (index != 0)
+					{
+						buf.append(" AND ");
+					}
+					else
+					{
+						buf.append("(");
+					}
+					buf.append(cbCon.scriptPart);
+					for (int pIndex = 0; pIndex < cbCon.preparers.length; pIndex++)
+					{
+						cbCon.preparers[pIndex].setName(cp.getName());
+					}
+					preparerList.addAll(Arrays.asList(cbCon.preparers));
+					index++;
 				}
 			}
 		}

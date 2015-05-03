@@ -29,10 +29,10 @@ public class SearchParam
 	public Map condition;
 
 	/**
-	 * 是否为特殊的条件格式.
-	 * 此时condition数据的格式为, group => [ConditionInfo, ...]
+	 * 特殊格式的条件.
+	 * 数组中每个元素可以是一个ConditionInfo对象或一个数组.
 	 */
-	public boolean specialFormat;
+	public Object[] conditionStruct;
 
 	/**
 	 * 是否需要忽略空字符串.

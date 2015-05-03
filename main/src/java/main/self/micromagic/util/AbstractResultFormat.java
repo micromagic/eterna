@@ -30,8 +30,14 @@ public abstract class AbstractResultFormat extends AbstractGenerator
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		return false;
+		if (this.factory == null)
+		{
+			this.factory = factory;
+			return false;
+		}
+		return true;
 	}
+	protected EternaFactory factory;
 
 	public boolean useEmptyString()
 	{

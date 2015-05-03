@@ -16,13 +16,11 @@
 
 package self.micromagic.eterna.search;
 
-import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -127,13 +125,6 @@ public interface Search
 	 * 获取其它辅助设置条件及参数的search, 用于分布式条件查询的时候使用.
 	 */
 	Search[] getOtherSearchs() throws EternaException;
-
-	String getConditionPropertyOrderWithOther() throws EternaException;
-
-	/**
-	 * 获得关于这个查询的相关条件说明的XML文档.
-	 */
-	Reader getConditionDocument(Permission permission) throws EternaException;
 
 	/**
 	 * 是否是特殊的条件, 需要重新构造条件子语句..

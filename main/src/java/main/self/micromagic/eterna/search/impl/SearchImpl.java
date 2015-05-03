@@ -16,24 +16,15 @@
 
 package self.micromagic.eterna.search.impl;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.StringTokenizer;
-
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.io.XMLWriter;
 
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.EntityRef;
@@ -45,15 +36,12 @@ import self.micromagic.eterna.dao.impl.ParameterGroup;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.search.ColumnSetting;
-import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.search.ParameterSetting;
 import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.security.EmptyPermission;
-import self.micromagic.eterna.security.Permission;
-import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.share.AbstractGenerator;
@@ -63,9 +51,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.view.Component;
-import self.micromagic.util.MemoryChars;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.SessionCache;
 import self.micromagic.util.ref.BooleanRef;
@@ -76,8 +62,6 @@ import self.micromagic.util.ref.BooleanRef;
 public class SearchImpl extends AbstractGenerator
 		implements Search, EternaCreater
 {
-	private static final int[] conditionDocumentCounts = {1, 3, 7};
-
 	private int pageSize = -1;
 
 	private String sessionQueryTag;
@@ -94,21 +78,15 @@ public class SearchImpl extends AbstractGenerator
 
 	private String otherName;
 	private Search[] others = null;
-	private String conditionPropertyOrderWithOther = null;
 
 	private boolean needWrap = true;
 	private boolean specialCondition = false;
 	private int conditionIndex;
 
 	private String conditionPropertyOrder = null;
-	private PermissionSet[] permissionSets = null;
 	private final Map conditionPropertyMap =  new HashMap();
 	private List conditionProperties = new LinkedList();
 	private ConditionProperty[] allConditionProperties = null;
-	private ConditionProperty[] allConditionPropertiesWithOther = null;
-	private int conditionDocumentCount = 1;
-	private MemoryChars conditionDocument = null;
-	private MemoryChars[] conditionDocuments = null;
 
 	/**
 	 * 执行搜索时(doSearch), 是否要加同步锁.
@@ -377,193 +355,6 @@ public class SearchImpl extends AbstractGenerator
 	public void setOtherSearchManagerName(String otherName)
 	{
 		this.otherName = otherName;
-	}
-
-	public String getConditionPropertyOrderWithOther()
-	{
-		return this.conditionPropertyOrderWithOther;
-	}
-
-	public void setConditionPropertyOrderWithOther(String order)
-	{
-		this.conditionPropertyOrderWithOther = order;
-	}
-
-	private PermissionSet[] getPermissionSet(ConditionProperty[] cps)
-			throws EternaException
-	{
-		Set psSet = null;
-		for (int i = 0; i < cps.length; i++)
-		{
-			PermissionSet ps = cps[i].getPermissionSet();
-			if (ps != null)
-			{
-				if (psSet == null)
-				{
-					psSet = new HashSet();
-				}
-				psSet.add(ps);
-			}
-		}
-		if (psSet == null)
-		{
-			this.conditionDocuments = null;
-			this.conditionDocumentCount = 1;
-			return new PermissionSet[0];
-		}
-		else
-		{
-			PermissionSet[] result = new PermissionSet[psSet.size()];
-			psSet.toArray(result);
-			if (result.length <= conditionDocumentCounts.length)
-			{
-				this.conditionDocuments = new MemoryChars[conditionDocumentCounts[result.length - 1]];
-			}
-			else
-			{
-				this.conditionDocuments = null;
-			}
-			this.conditionDocumentCount = (int) Math.pow(2, result.length);
-			return result;
-		}
-	}
-
-	private MemoryChars getConditionDocument0(Permission permission)
-			throws EternaException
-	{
-		int cdId = 0;
-		int addInt = 1;
-		for (int i = 0; i < this.permissionSets.length; i++)
-		{
-			if (this.permissionSets[i].checkPermission(permission))
-			{
-				cdId += addInt;
-			}
-			addInt *= 2;
-		}
-		if (cdId == this.conditionDocumentCount - 1)
-		{
-			if (this.conditionDocument == null)
-			{
-				this.conditionDocument = this.createConditionDocument(permission);
-			}
-			return this.conditionDocument;
-		}
-		if (this.conditionDocuments != null)
-		{
-			if (this.conditionDocuments[cdId] == null)
-			{
-				this.conditionDocuments[cdId] = this.createConditionDocument(permission);
-			}
-			return this.conditionDocuments[cdId];
-		}
-		return this.createConditionDocument(permission);
-	}
-
-	private MemoryChars createConditionDocument(Permission permission)
-			throws EternaException
-	{
-		Document document = DocumentHelper.createDocument();
-		Element root = document.addElement("eterna");
-		Element el_cps = root.addElement("condition-propertys");
-		if (this.others != null && this.others.length > 0)
-		{
-			el_cps.addAttribute("noGroup", "1");
-		}
-		Element el_cbls = root.addElement("condition-builder-lists");
-
-		this.list2Document(this.getConditionPropertysWithOther(),
-				el_cps, el_cbls, permission);
-		MemoryChars mcs = new MemoryChars(2, 256);
-		XMLWriter writer = new XMLWriter(mcs.getWriter());
-		try
-		{
-			writer.write(document);
-			writer.close();
-		}
-		catch (IOException ex)
-		{
-			//use MemoryChars, so not IOException
-		}
-		return mcs;
-	}
-
-	public Reader getConditionDocument(Permission permission)
-			throws EternaException
-	{
-		if (this.permissionSets == null)
-		{
-			synchronized (this)
-			{
-				if (this.permissionSets == null)
-				{
-					this.permissionSets = this.getPermissionSet(this.getConditionPropertysWithOther());
-				}
-			}
-		}
-		return this.getConditionDocument0(permission).getReader();
-	}
-
-	private void list2Document(ConditionProperty[] cps, Element el_conditionPropertys,
-			Element el_conditionBuilserLists, Permission permission)
-			throws EternaException
-	{
-		Set addedBuilders = new HashSet();
-
-		for (int i = 0; i < cps.length; i++)
-		{
-			ConditionProperty cp = cps[i];
-			if (checkPermission(cp, permission))
-			{
-				Element el_cp = el_conditionPropertys.addElement("condition-property");
-				el_cp.addAttribute("name", cp.getName());
-				el_cp.addAttribute("colId", i + "");
-				el_cp.addAttribute("caption", cp.getColumnCaption());
-				el_cp.addAttribute("inputType", cp.getConditionInputType());
-				el_cp.addAttribute("type",
-						TypeManager.getTypeName(TypeManager.getPureType(cp.getColumnType())));
-				el_cp.addAttribute("builderList", cp.getConditionBuilderListName());
-
-				String[] pNames = cp.getAttributeNames();
-				if (pNames.length > 0)
-				{
-					for (int j = 0; j < pNames.length; j++)
-					{
-						el_cp.addElement("parameter").addAttribute("name", pNames[j])
-								.addAttribute("value", String.valueOf(cp.getAttribute(pNames[j])));
-					}
-				}
-
-				if (!addedBuilders.contains(cp.getConditionBuilderListName()))
-				{
-					addedBuilders.add(cp.getConditionBuilderListName());
-					Element el_cbl = el_conditionBuilserLists.addElement("builder-list");
-					el_cbl.addAttribute("name", cp.getConditionBuilderListName());
-					Iterator cbl = cp.getConditionBuilderList().iterator();
-					while (cbl.hasNext())
-					{
-						ConditionBuilder cb = (ConditionBuilder) cbl.next();
-						el_cbl.addElement("builder").addAttribute("name", cb.getName())
-								.addAttribute("caption", cb.getCaption());
-					}
-				}
-			}
-		}
-	}
-
-	private boolean checkPermission(ConditionProperty cp, Permission permission)
-			throws EternaException
-	{
-		if (permission == null)
-		{
-			return true;
-		}
-		PermissionSet ps = cp.getPermissionSet();
-		if (ps == null)
-		{
-			return true;
-		}
-		return ps.checkPermission(permission);
 	}
 
 	public String getConditionPropertyOrder()
@@ -995,21 +786,6 @@ public class SearchImpl extends AbstractGenerator
 		return this.allConditionProperties;
 	}
 
-	private ConditionProperty[] getConditionPropertysWithOther()
-			throws EternaException
-	{
-		if (this.allConditionPropertiesWithOther != null)
-		{
-			return this.allConditionPropertiesWithOther;
-		}
-		OrderManager om = new OrderManager("other");
-		Map temp = new HashMap(this.conditionPropertyMap);
-		List resultList = om.getOrder(new MyOrderItem(), this.others, this.conditionPropertyOrderWithOther,
-				this.conditionProperties, temp);
-		this.allConditionPropertiesWithOther = (ConditionProperty[]) resultList.toArray(new ConditionProperty[0]);
-		return this.allConditionPropertiesWithOther;
-	}
-
 	/**
 	 * 销毁search.
 	 */
@@ -1091,101 +867,20 @@ public class SearchImpl extends AbstractGenerator
 		return condition;
 	}
 
-	private static class MyOrderItem extends OrderManager.OrderItem
+}
+
+class QueryContainer
+{
+	public final Query query;
+	public final int conditionVersion;
+
+	public QueryContainer(Query query, int conditionVersion)
 	{
-		private ConditionProperty cp;
-
-		public MyOrderItem()
-		{
-			super("", null);
-		}
-
-		protected MyOrderItem(String name, Object obj)
-		{
-			super(name, obj);
-			this.cp = (ConditionProperty) obj;
-		}
-
-		public boolean isIgnore()
-				throws EternaException
-		{
-			return this.cp.isIgnore();
-		}
-
-		public OrderManager.OrderItem create(Object obj)
-				throws EternaException
-		{
-			if (obj == null)
-			{
-				return null;
-			}
-			ConditionProperty cp = (ConditionProperty) obj;
-			return new MyOrderItem(cp.getName(), cp);
-		}
-
-		public Iterator getOrderItemIterator(Object container)
-				throws EternaException
-		{
-			Search search = (Search) container;
-			return new MyIterator(search);
-		}
-
-	}
-
-	private static class MyIterator
-			implements Iterator
-	{
-		private int index = 0;
-		private final int count;
-		Search search;
-
-		public MyIterator(Search search)
-				throws EternaException
-		{
-			this.search = search;
-			this.count = search.getConditionPropertyCount();
-		}
-
-		public boolean hasNext()
-		{
-			return this.index < this.count;
-		}
-
-		public Object next()
-		{
-			try
-			{
-				return this.search.getConditionProperty(this.index++);
-			}
-			catch (EternaException ex)
-			{
-				log.error("Search my iterator next.", ex);
-				throw new UnsupportedOperationException(ex.getMessage());
-			}
-		}
-
-		public void remove()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-	}
-
-	protected static class QueryContainer
-	{
-		public final Query query;
-		public final int conditionVersion;
-
-		public QueryContainer(Query query, int conditionVersion)
-		{
-			this.query = query;
-			this.conditionVersion = conditionVersion;
-		}
-
+		this.query = query;
+		this.conditionVersion = conditionVersion;
 	}
 
 }
-
 
 /**
  * 处理EntityRef的容器.

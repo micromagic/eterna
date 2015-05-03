@@ -50,8 +50,14 @@ public class TemplateFormat extends AbstractGenerator
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		return false;
+		if (this.factory == null)
+		{
+			this.factory = factory;
+			return false;
+		}
+		return true;
 	}
+	protected EternaFactory factory;
 
 	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
 			throws EternaException

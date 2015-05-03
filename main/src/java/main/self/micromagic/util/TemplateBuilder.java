@@ -120,6 +120,7 @@ public class TemplateBuilder extends AbstractGenerator
 		}
 		return true;
 	}
+	protected EternaFactory factory;
 
 	public String getCaption()
 	{

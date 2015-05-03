@@ -41,6 +41,7 @@ public abstract class AbstractConditionBuilder extends AbstractGenerator
 		}
 		return true;
 	}
+	protected EternaFactory factory;
 
 	public String getCaption()
 	{

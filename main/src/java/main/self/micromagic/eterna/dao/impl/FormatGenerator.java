@@ -152,7 +152,7 @@ public class FormatGenerator extends AbstractGenerator
 			{
 				// 类型错误, 无法生成需要的格式化对象
 				throw new EternaException(
-						"Error format type id [" + type + "].");
+						"Error format type [" + TypeManager.getPureTypeName(type) + "].");
 			}
 			format = (ResultFormat) fg.create();
 			formatCache.put(pattern, format);

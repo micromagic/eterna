@@ -30,7 +30,7 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.Utility;
 
-public class SearchAdapterImplTest extends TestCase
+public class SearchImplTest extends TestCase
 {
 	private EternaFactory factory;
 

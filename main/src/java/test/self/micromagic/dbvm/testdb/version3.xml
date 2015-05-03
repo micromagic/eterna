@@ -11,4 +11,8 @@
 		<column name="test" type="String(3)" desc="信息" opt="modify"/>
 	</table>
 
+	<table name="T03" desc="表3">
+		<column name="test" type="String(3)" desc="信息"/>
+	</table>
+	
 </dbVersion>

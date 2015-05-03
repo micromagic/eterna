@@ -64,40 +64,40 @@ public class VersionManager
 			loader = VersionManager.class.getClassLoader();
 		}
 		boolean success = false;
-		synchronized (conn)
+		try
+		{
+			conn.setAutoCommit(false);
+			DataBaseLock.lock(conn, VERSION_LOCK_NAME, null, true);
+			synchronized (VersionManager.class)
+			{
+				checkVersion0(conn, packagePath, loader);
+			}
+			success = true;
+		}
+		catch (Throwable ex)
+		{
+			log.error("Upper data base version fail!", ex);
+		}
+		finally
 		{
 			try
 			{
-				conn.setAutoCommit(false);
-				DataBaseLock.lock(conn, VERSION_LOCK_NAME, null, true);
-				checkVersion0(conn, packagePath, loader);
-				success = true;
-			}
-			catch (Throwable ex)
-			{
-				log.error("Upper data base version fail!", ex);
-			}
-			finally
-			{
-				try
+				if (success)
 				{
-					if (success)
-					{
-						conn.commit();
-					}
-					else
-					{
-						conn.rollback();
-					}
-					DataBaseLock.releaseDB(conn, VERSION_LOCK_NAME);
-					conn.close();
+					conn.commit();
 				}
-				catch (Exception ex) {}
+				else
+				{
+					conn.rollback();
+				}
+				DataBaseLock.releaseDB(conn, VERSION_LOCK_NAME);
+				conn.close();
 			}
+			catch (Exception ex) {}
 		}
 	}
 	private static void checkVersion0(Connection conn, String packagePath, ClassLoader loader)
-			throws SQLException
+			throws Exception
 	{
 		ConfigResource res = ContainerManager.createClassPathResource(packagePath, loader);
 		String vName = isFullPackageName() ? res.getConfig() : res.getName();
@@ -116,26 +116,26 @@ public class VersionManager
 					ETERNA_VERSION_TABLE, 1, VersionManager.class.getClassLoader());
 			version = 0;
 		}
-		if (!eternaVersionChecked)
+		int tVersion = getVersionValue(conn, ETERNA_VERSION_TABLE, f);
+		if (tVersion < eternaMaxVersion)
 		{
-			ClassLoader tmpLoader = VersionManager.class.getClassLoader();
-			ConfigResource tmp = ContainerManager.createClassPathResource(
-					DataBaseLock.CONFIG_PREFIX + "impl/", tmpLoader);
-			int tVersion = getVersionValue(conn, ETERNA_VERSION_TABLE, f);
+			// 版本表的版本小于目前系统定义的最大版本, 需要升级
 			if (tVersion == -2)
 			{
 				log.error("Version tables has error.");
 				return;
 			}
+			ClassLoader tmpLoader = VersionManager.class.getClassLoader();
+			ConfigResource tmp = ContainerManager.createClassPathResource(
+					DataBaseLock.CONFIG_PREFIX + "impl/", tmpLoader);
 			checkVersion0(conn, tVersion + 1, ETERNA_VERSION_TABLE, tmp, tmpLoader);
-			eternaVersionChecked = true;
 		}
 		version++;
 		checkVersion0(conn, version, vName, res, loader);
 	}
 	private static void checkVersion0(Connection conn, int version, String vName,
 			ConfigResource packagePath, ClassLoader loader)
-			throws SQLException
+			throws Exception
 	{
 		// 循环执行更新到最新版本
 		String versionFile = "version".concat(version + ".xml");
@@ -164,7 +164,7 @@ public class VersionManager
 	}
 	private static void upperVersion(Connection conn, String config, String vName,
 			int version, ClassLoader loader)
-			throws SQLException
+			throws Exception
 	{
 		log.info("Begin " + vName + " up to " + version + ". --------------------");
 		String dbName = conn.getMetaData().getDatabaseProductName();
@@ -184,7 +184,7 @@ public class VersionManager
 		{
 			success = upperVersion0(conn, config, vName, version, loader, f);
 		}
-		catch (SQLException ex)
+		catch (Exception ex)
 		{
 			errMsg = ex.getMessage();
 			throw ex;
@@ -203,7 +203,6 @@ public class VersionManager
 					errMsg = "Other error.";
 				}
 			}
-			//conn.rollback();
 			// 更新版本信息后提交
 			addVersionLog(conn, vName, version, errMsg, f);
 			conn.commit();
@@ -221,10 +220,10 @@ public class VersionManager
 	}
 	private static boolean upperVersion0(Connection conn, String config, String vName,
 			int version, ClassLoader loader, Factory factory)
-			throws SQLException
+			throws Exception
 	{
 		String[] names = factory.getObjectNames(OptDesc.class);
-		SQLException err = null;
+		Exception err = null;
 		for (int i = 0; i < names.length; i++)
 		{
 			Object obj = factory.createObject(names[i]);
@@ -234,7 +233,7 @@ public class VersionManager
 				{
 					((OptDesc) obj).exec(conn);
 				}
-				catch (SQLException ex)
+				catch (Exception ex)
 				{
 					err = ex;
 					// 如果出错, 接下来的执行设置为记录模式
@@ -332,9 +331,9 @@ public class VersionManager
 	private static final String VERSION_LOCK_NAME = "eterna.version.lock";
 
 	/**
-	 * 版本系统表的版本是否已检查.
+	 * 版本系统表的当前最高版本.
 	 */
-	private static boolean eternaVersionChecked = false;
+	private static final int eternaMaxVersion = 2;
 
 	/**
 	 * 版本系统表的版本标识.
