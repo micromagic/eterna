@@ -78,7 +78,7 @@ public class H2Column extends AbstractObject
 				s.append("alter table ").append(tableName).append(" alter column ")
 						.append(colDesc.colName).append(" rename to ").append(colDesc.newName);
 				Update u = this.factory.createUpdate(COMMON_EXEC);
-				u.setSubSQL(1, s.toString());
+				u.setSubScript(1, s.toString());
 				if (paramList != null)
 				{
 					paramList.add(u);
@@ -108,7 +108,7 @@ public class H2Column extends AbstractObject
 						.append(colName).append(" is '")
 						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");
 				Update u = this.factory.createUpdate(COMMON_EXEC);
-				u.setSubSQL(1, s.toString());
+				u.setSubScript(1, s.toString());
 				if (paramList != null)
 				{
 					paramList.add(u);

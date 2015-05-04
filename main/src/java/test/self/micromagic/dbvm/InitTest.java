@@ -29,20 +29,9 @@ import self.micromagic.util.ref.StringRef;
 public class InitTest extends TestCase
 		implements ConstantDef
 {
-	public void testInit()
+	public void testInit1()
 	{
-		ClassLoader loader = DataBaseLock.class.getClassLoader();
-		String config = DataBaseLock.CONFIG_PREFIX + "test01.xml";
-		FactoryContainer c = ContainerManager.createFactoryContainer("mysql",
-				config, null, VersionManager.getDigester(), null, loader,
-				DataBaseLock.getContainer("MySQL"), false);
-		StringRef msg = new StringRef();
-		c.reInit(msg);
-		if (!StringTool.isEmpty(msg.getString()))
-		{
-			fail(msg.getString());
-		}
-		EternaFactory f = (EternaFactory) c.getFactory();
+		EternaFactory f = initTestFactory("test01.xml");
 		String[] names;
 		ColumnDefiner columnDefiner = (ColumnDefiner) f.createObject(COLUMN_DEF_NAME);
 
@@ -54,6 +43,18 @@ public class InitTest extends TestCase
 		names = f.getObjectNames(DataDesc.class);
 		DataDesc dataDesc = (DataDesc) f.createObject(names[0]);
 		System.out.println(names[0] + ":" + dataDesc.script);
+		assertTrue(dataDesc.script.endsWith(" now()"));
+	}
+
+	public void testInit2()
+	{
+		EternaFactory f = initTestFactory("test02.xml");
+		String[] names;
+
+		names = f.getObjectNames(DataDesc.class);
+		DataDesc dataDesc = (DataDesc) f.createObject(names[0]);
+		System.out.println(names[0] + ":" + dataDesc.script);
+		assertEquals("set c1,= now()", dataDesc.script);
 	}
 
 	public void testTestdb()
@@ -61,6 +62,22 @@ public class InitTest extends TestCase
 	{
 		VersionManager.checkVersion(
 				getConnection(), "cp:/self/micromagic/dbvm/testdb/", null);
+	}
+
+	static EternaFactory initTestFactory(String file)
+	{
+		ClassLoader loader = DataBaseLock.class.getClassLoader();
+		String config = DataBaseLock.CONFIG_PREFIX + file;
+		FactoryContainer c = ContainerManager.createFactoryContainer(file,
+				config, null, VersionManager.getDigester(), null, loader,
+				DataBaseLock.getContainer("MySQL"), false);
+		StringRef msg = new StringRef();
+		c.reInit(msg);
+		if (!StringTool.isEmpty(msg.getString()))
+		{
+			fail(msg.getString());
+		}
+		return (EternaFactory) c.getFactory();
 	}
 
 	static Connection getConnection()

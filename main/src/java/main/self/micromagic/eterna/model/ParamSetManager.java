@@ -136,13 +136,13 @@ public class ParamSetManager
 	public void setSubSQL(int index, String subSQL, PreparerManager pm)
 			throws EternaException
 	{
-		this.dao.setSubSQL(index, subSQL, pm);
+		this.dao.setSubScript(index, subSQL, pm);
 	}
 
 	public void setSubSQL(int index, String subSQL)
 			throws EternaException
 	{
-		this.dao.setSubSQL(index, subSQL);
+		this.dao.setSubScript(index, subSQL);
 	}
 
 	public void setParam(int index, Object value)

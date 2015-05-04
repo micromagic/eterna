@@ -62,7 +62,7 @@ public class SearchParamSetting
 			preparer.setRelativeIndex(i + 1);
 			pm.setValuePreparer(preparer);
 		}
-		query.setSubSQL(tmpIndex, subStr, pm);
+		query.setSubScript(tmpIndex, subStr, pm);
 		query.setString(this.userIdParamName, "userId");
 	}
 }

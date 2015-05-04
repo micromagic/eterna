@@ -50,7 +50,7 @@ public class ParamBindImplTest extends TestCase
 		data.caches[2] = "E";
 		exe.execute(data, null);
 		Update update = (Update) data.caches[0];
-		assertEquals("E (E) T E", update.getPreparedSQL());
+		assertEquals("E (E) T E", update.getPreparedScript());
 
 		Map map = new HashMap();
 		map.put("t1", "A");
@@ -60,7 +60,7 @@ public class ParamBindImplTest extends TestCase
 		data.caches[0] = null;
 		exe.execute(data, null);
 		update = (Update) data.caches[0];
-		assertEquals("C (A) T B", update.getPreparedSQL());
+		assertEquals("C (A) T B", update.getPreparedScript());
 	}
 
 }

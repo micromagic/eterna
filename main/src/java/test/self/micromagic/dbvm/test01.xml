@@ -11,6 +11,6 @@
 		<column name="c1"/>
 	</index>
 	
-	<data>update t set c1 = 2</data>
+	<data>update t set c1 = #const(now)</data>
 	
 </dbVersion>

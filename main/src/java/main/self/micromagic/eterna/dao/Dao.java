@@ -38,25 +38,25 @@ public interface Dao
 	/**
 	 * 日志等级, 不记录.
 	 */
-	int SQL_LOG_TYPE_NONE = -1;
+	int DAO_LOG_TYPE_NONE = -1;
 	/**
 	 * 日志等级, 记录到内存.
 	 */
-	int SQL_LOG_TYPE_SAVE = 0x2;
+	int DAO_LOG_TYPE_SAVE = 0x2;
 	/**
 	 * 日志等级, 记录到系统日志.
 	 */
-	int SQL_LOG_TYPE_PRINT = 0x1;
+	int DAO_LOG_TYPE_PRINT = 0x1;
 	/**
 	 * 日志等级, 调用指定的日志记录对象.
 	 */
-	int SQL_LOG_TYPE_SPECIAL = 0x4;
+	int DAO_LOG_TYPE_SPECIAL = 0x4;
 
 
-	String SQL_TYPE_UPDATE = "update";
-	String SQL_TYPE_QUERY = "query";
-	String SQL_TYPE_COUNT = "count";
-	String SQL_TYPE_SQL = "SQL";
+	String DAO_TYPE_UPDATE = "update";
+	String DAO_TYPE_QUERY = "query";
+	String DAO_TYPE_COUNT = "count";
+	String DAO_TYPE_UNKNOW = "unknow";
 
 	/**
 	 * 获取本数据库操作对象的名称.
@@ -80,7 +80,7 @@ public interface Dao
 	String[] getAttributeNames() throws EternaException;
 
 	/**
-	 * 获取本数据库操作对象sql日志的记录方式
+	 * 获取本数据库操作对象日志的记录方式
 	 */
 	int getLogType() throws EternaException;
 
@@ -92,22 +92,17 @@ public interface Dao
 	/**
 	 * 获得参数的个数.
 	 *
-	 * @return    <code>SQLAdapter</code>中参数的个数.
-	 * @throws EternaException     当相关配置出错时.
+	 * @return   数据操作对象中参数的个数
 	 */
 	int getParameterCount() throws EternaException;
 
 	/**
 	 * 获得实际有效的参数个数.
-	 *
-	 * @throws EternaException     当相关配置出错时.
 	 */
 	public int getActiveParamCount() throws EternaException;
 
 	/**
 	 * 判断是否有有效的参数.
-	 *
-	 * @throws EternaException     当相关配置出错时.
 	 */
 	public boolean hasActiveParam() throws EternaException;
 
@@ -137,38 +132,34 @@ public interface Dao
 	/**
 	 * 获得子语句的个数.
 	 *
-	 * @return    <code>SQLAdapter</code>中子语句的个数.
-	 * @throws EternaException     当相关配置出错时.
+	 * @return  此数据操作对象中子语句的个数
 	 */
-	int getSubSQLCount() throws EternaException;
+	int getSubScriptCount() throws EternaException;
 
 	/**
-	 * 获得预备SQL语句. <p>
-	 * 该预备SQL语句是经过第一步处理，将子语句设置完后的预备SQL语句。
+	 * 获得预备数据操作脚本. <p>
+	 * 该脚本是经过预处理，将子语句设置完后的数据操作脚本。
 	 *
-	 * @return    经过第一步处理预备SQL语句.
-	 * @throws EternaException     当相关配置出错时.
+	 * @return  经过预处理的数据操作脚本
 	 */
-	String getPreparedSQL() throws EternaException;
+	String getPreparedScript() throws EternaException;
 
 	/**
 	 * 设置子语句.
 	 *
-	 * @param index    子语句的索引值.
-	 * @param subPart  要设置的子语句.
-	 * @throws EternaException     当相关配置出错时.
+	 * @param index    子语句的索引值
+	 * @param subPart  要设置的子语句
 	 */
-	void setSubSQL(int index, String subPart) throws EternaException;
+	void setSubScript(int index, String subPart) throws EternaException;
 
 	/**
 	 * 设置子语句, 并为其配上相应的参数.
 	 *
-	 * @param index    子语句的索引值.
-	 * @param subPart  要设置的子语句.
-	 * @param pm       要配上的参数.
-	 * @throws EternaException     当相关配置出错时.
+	 * @param index    子语句的索引值
+	 * @param subPart  要设置的子语句
+	 * @param pm       要配上的参数
 	 */
-	void setSubSQL(int index, String subPart, PreparerManager pm) throws EternaException;
+	void setSubScript(int index, String subPart, PreparerManager pm) throws EternaException;
 
 	/**
 	 * 获得本数据库操作对象的参数准备器管理者.
@@ -223,7 +214,6 @@ public interface Dao
 	 * 只有动态参数才可设置为忽略.
 	 *
 	 * @param parameterIndex 第一个参数是1, 第二个是2, ...
-	 * @throws EternaException     当相关配置出错时.
 	 */
 	void setIgnore(int parameterIndex) throws EternaException;
 
@@ -232,7 +222,6 @@ public interface Dao
 	 * 只有动态参数才可设置为忽略.
 	 *
 	 * @param parameterName  这个参数的名称
-	 * @throws EternaException     当相关配置出错时.
 	 */
 	void setIgnore(String parameterName) throws EternaException;
 

@@ -92,7 +92,7 @@ public abstract class AbstractQuery extends BaseDao
 
 	public String getType()
 	{
-		return SQL_TYPE_QUERY;
+		return DAO_TYPE_QUERY;
 	}
 
 	/**
@@ -202,7 +202,7 @@ public abstract class AbstractQuery extends BaseDao
 			{
 				log.debug("Set order at(" + this.orderIndex + "):" + orderStr);
 			}
-			this.setSubSQL(this.orderIndex, orderStr);
+			this.setSubScript(this.orderIndex, orderStr);
 		}
 	}
 
@@ -261,7 +261,7 @@ public abstract class AbstractQuery extends BaseDao
 			// 如果设置了orderIndex, 先置上默认的值
 			try
 			{
-				other.setSubSQL(other.orderIndex, "");
+				other.setSubScript(other.orderIndex, "");
 			}
 			catch (EternaException ex) {}
 		}
@@ -313,17 +313,17 @@ public abstract class AbstractQuery extends BaseDao
 				: this.queryHelper == null ? this.queryHelper = new QueryHelper(this) : this.queryHelper;
 	}
 
-	public String getPreparedSQL()
+	public String getPreparedScript()
 			throws EternaException
 	{
-		String preparedSQL = super.getPreparedSQL();
+		String preparedSQL = super.getPreparedScript();
 		return this.queryHelper == null ? preparedSQL : this.queryHelper.getQuerySQL(preparedSQL);
 	}
 
 	public String getPrimitiveQuerySQL()
 			throws EternaException
 	{
-		return super.getPreparedSQL();
+		return super.getPreparedScript();
 	}
 
 	public void setSingleOrder(String readerName)
@@ -380,7 +380,7 @@ public abstract class AbstractQuery extends BaseDao
 			{
 				log.debug("Set order at(" + this.orderIndex + "):" + orderStr);
 			}
-			this.setSubSQL(this.orderIndex, orderStr);
+			this.setSubScript(this.orderIndex, orderStr);
 		}
 	}
 
@@ -441,7 +441,7 @@ public abstract class AbstractQuery extends BaseDao
 			{
 				log.debug("Set order at(" + this.orderIndex + "):" + realOrderStr);
 			}
-			this.setSubSQL(this.orderIndex, realOrderStr);
+			this.setSubScript(this.orderIndex, realOrderStr);
 		}
 	}
 

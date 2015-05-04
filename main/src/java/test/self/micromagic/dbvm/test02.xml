@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+
+	<data>#const(col1),#const(value1)</data>
+
+	<eterna>
+		<constant name="col1">set c1</constant>
+		<constant name="value1">= #const(now)</constant>
+	</eterna>
+</dbVersion>

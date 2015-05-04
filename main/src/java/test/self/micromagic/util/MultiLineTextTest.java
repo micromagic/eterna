@@ -20,18 +20,6 @@ import junit.framework.TestCase;
 
 public class MultiLineTextTest extends TestCase
 {
-	MultiLineText bodyText;
-
-	protected void setUp()
-	{
-		this.bodyText = new MultiLineText();
-	}
-
-	protected void tearDown()
-	{
-		this.bodyText = null;
-	}
-
 	public void testSkipEmptyEndsLine()
 	{
 		assertEquals("a", MultiLineText.skipEmptyEndsLine("\na\n"));
@@ -47,19 +35,40 @@ public class MultiLineTextTest extends TestCase
 
 	public void testAppend001()
 	{
+		MultiLineText lText = new MultiLineText();
 		String str1 = "  001   ";
-		this.bodyText.append(str1.toCharArray(), 0, str1.length());
+		lText.append(str1.toCharArray(), 0, str1.length());
 		String str2 = "    \n      002";
-		this.bodyText.append(str2.toCharArray(), 0, str2.length());
+		lText.append(str2.toCharArray(), 0, str2.length());
 		String str3 = "    ";
-		this.bodyText.append(str3.toCharArray(), 0, str3.length());
+		lText.append(str3.toCharArray(), 0, str3.length());
 		String str4 = "                 ";
-		this.bodyText.append(str4.toCharArray(), 0, str4.length());
+		lText.append(str4.toCharArray(), 0, str4.length());
 		String str5 = "      \n      end     ";
-		this.bodyText.append(str5.toCharArray(), 0, str5.length());
-		assertEquals(str1 + str2 + str3 + str4 + str5, this.bodyText.toString());
-		assertEquals("001\n002\nend     ", this.bodyText.trimEveryLineSpace(false));
-		assertEquals("001 002 end     ", this.bodyText.trimEveryLineSpace(true));
+		lText.append(str5.toCharArray(), 0, str5.length());
+		assertEquals(str1 + str2 + str3 + str4 + str5, lText.toString());
+		assertEquals("001\n002\nend", lText.trimEveryLineSpace(false));
+		assertEquals("001 002 end", lText.trimEveryLineSpace(true));
+
+		String str6 = "1\n      \n     ";
+		lText.append(str6.toCharArray(), 0, str6.length());
+		assertEquals("001\n002\nend     1\n\n", lText.trimEveryLineSpace(false));
+		assertEquals(str1 + str2 + str3 + str4 + str5 + str6, lText.toString());
+	}
+
+	public void testSingleLine()
+	{
+		MultiLineText lText = new MultiLineText();
+		lText.append("abc".toCharArray(), 0, 3);
+		assertEquals("abc", lText.trimEveryLineSpace(false));
+
+		lText = new MultiLineText();
+		lText.append("abc ".toCharArray(), 0, 4);
+		assertEquals("abc", lText.trimEveryLineSpace(false));
+
+		lText = new MultiLineText();
+		lText.append(" abc ".toCharArray(), 0, 5);
+		assertEquals("abc", lText.trimEveryLineSpace(false));
 	}
 
 }

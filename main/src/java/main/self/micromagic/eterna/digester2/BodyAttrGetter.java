@@ -187,8 +187,9 @@ public class BodyAttrGetter
 			this.resolve = "true".equalsIgnoreCase(strValue);
 		}
 
-		if (this.trimLines)
+		if (this.trimLines && bText.indexOf('\n') != -1)
 		{
+			// 数据多于一行的才进行trimLines
 			MultiLineText bodyText = new MultiLineText();
 			bodyText.append(bText.toCharArray(), 0, bText.length());
 			bText = bodyText.trimEveryLineSpace(this.noLine);

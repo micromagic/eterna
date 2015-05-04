@@ -63,7 +63,7 @@ public class MultiLineText
 		return text.substring(begin, end);
 	}
 
-	private static final char NEW_LINE = '\n';
+	static final char NEW_LINE = '\n';
 
 	private final List elements = new ArrayList();
 	private int count = 0;
@@ -163,13 +163,13 @@ public class MultiLineText
 			int tempCount = 0;
 			for (int i = 0; i < size; i++)
 			{
-				tempCount += ((CharElement) itr.next()).trimSpacelength();
+				tempCount += ((CharElement) itr.next()).trimSpaceLength();
 			}
 			StringAppender sb = StringTool.createStringAppender(tempCount);
 			itr = this.elements.iterator();
 			for (int i = 0; i < size; i++)
 			{
-				((CharElement) itr.next()).trimSpaceAppendTo(sb, noLine);
+				((CharElement) itr.next()).trimSpaceAppendTo(sb, noLine, i == size - 1);
 			}
 			if (noLine)
 			{
@@ -183,144 +183,156 @@ public class MultiLineText
 		return this.cacheTrim;
 	}
 
-	/**
-	 * 文本对象的字符元素
-	 */
-	private class CharElement
+}
+
+
+/**
+ * 文本对象的字符元素
+ */
+class CharElement
+{
+	public final int length;
+
+	private final CharElement preElement;
+	private char[] ch;
+	private int leftTrimCount = 0;
+	private int rightTrimCount = 0;
+	private boolean endNewLine = true;
+
+	public CharElement(char[] ch, int start, int length, CharElement preElement)
 	{
-		public final int length;
-
-		private final CharElement preElement;
-		private char[] ch;
-		private int leftTrimCount = 0;
-		private int rightTrimCount = 0;
-		private boolean endNewLine = true;
-
-		public CharElement(char[] ch, int start, int length, CharElement preElement)
+		this.preElement = preElement;
+		this.length = length;
+		this.parse(ch, start, length);
+		if (this.leftTrimCount + this.rightTrimCount == length)
 		{
-			this.preElement = preElement;
-			this.length = length;
-			this.parse(ch, start, length);
-			if (this.leftTrimCount + this.rightTrimCount == length)
+			this.ch = null;
+			// 如果是以新行结束, 则需要检查前一个, 添加rightTrim数
+			if (this.endNewLine && this.preElement != null)
 			{
-				this.ch = null;
-				// 如果是以新行结束, 则需要检查前一个, 添加rightTrim数
-				if (this.endNewLine && this.preElement != null)
-				{
-					this.rightTrimCount = length;
-					this.leftTrimCount = 0;
-					this.preElement.addRightTrimCount();
-				}
-			}
-			else
-			{
-				this.ch = new char[length];
-				System.arraycopy(ch, start, this.ch, 0, length);
-			}
-		}
-
-		private void parse(char[] ch, int start, int length)
-		{
-			if (this.preElement == null || this.preElement.endNewLine || this.preElement.ch == null)
-			{
-				// 没有前一个元素, 前一个元素是以新行结束, 前一个元素全为空格
-				// 才处理leftTrim数
-				int leftTrimCount = 0;
-				for (; leftTrimCount < length - 1 && ch[leftTrimCount + start] <= ' '; leftTrimCount++);
-				if (leftTrimCount == length - 1)
-				{
-					char c = ch[start + length - 1];
-					if (c != MultiLineText.NEW_LINE && c <= ' ')
-					{
-						leftTrimCount++;
-					}
-				}
-				this.leftTrimCount = leftTrimCount;
-			}
-			if (ch[start + length - 1] == MultiLineText.NEW_LINE)
-			{
-				int rightTrimCount = 0;
-				int count = length - this.leftTrimCount;
-				for (; rightTrimCount < count && ch[start + length - rightTrimCount - 1] <= ' '; rightTrimCount++);
-				this.rightTrimCount = rightTrimCount;
-			}
-			else
-			{
-				this.endNewLine = false;
-			}
-		}
-
-		private void addRightTrimCount()
-		{
-			if (this.endNewLine)
-			{
-				// 如果是以新行结束, 就不需要处理rightTrim数了
-				return;
-			}
-			if (this.ch == null || this.allBlank())
-			{
-				this.ch = null;
-				this.rightTrimCount = this.leftTrimCount;
+				this.rightTrimCount = length;
 				this.leftTrimCount = 0;
-				if (this.preElement != null)
-				{
-					this.preElement.addRightTrimCount();
-				}
-				return;
+				this.preElement.addRightTrimCount();
 			}
+		}
+		else
+		{
+			this.ch = new char[length];
+			System.arraycopy(ch, start, this.ch, 0, length);
+		}
+	}
+
+	private void parse(char[] ch, int start, int length)
+	{
+		if (this.preElement == null || this.preElement.endNewLine || this.preElement.ch == null)
+		{
+			// 没有前一个元素, 前一个元素是以新行结束, 前一个元素全为空格
+			// 才处理leftTrim数
+			int leftTrimCount = 0;
+			for (; leftTrimCount < length - 1 && ch[leftTrimCount + start] <= ' '; leftTrimCount++);
+			if (leftTrimCount == length - 1)
+			{
+				char c = ch[start + length - 1];
+				if (c != MultiLineText.NEW_LINE && c <= ' ')
+				{
+					leftTrimCount++;
+				}
+			}
+			this.leftTrimCount = leftTrimCount;
+		}
+		if (ch[start + length - 1] == MultiLineText.NEW_LINE)
+		{
 			int rightTrimCount = 0;
-			int count = this.length - this.leftTrimCount;
-			for (; rightTrimCount < count && this.ch[this.length - rightTrimCount - 1] <= ' '; rightTrimCount++);
+			int count = length - this.leftTrimCount;
+			for (; rightTrimCount < count && ch[start + length - rightTrimCount - 1] <= ' '; rightTrimCount++);
 			this.rightTrimCount = rightTrimCount;
 		}
-
-		private boolean allBlank()
+		else
 		{
-			for (int i = 0; i < this.ch.length; i++)
-			{
-				if (this.ch[i] > ' ') return false;
-			}
-			return true;
+			this.endNewLine = false;
 		}
+	}
 
-		public void appendTo(StringAppender sb)
+	private void addRightTrimCount()
+	{
+		if (this.endNewLine)
 		{
-			if (this.ch != null)
-			{
-				sb.append(this.ch);
-				return;
-			}
-			for (int i = 0; i < this.length - 1; i++)
-			{
-				sb.append(' ');
-			}
-			sb.append(this.endNewLine ? MultiLineText.NEW_LINE : ' ');
+			// 如果是以新行结束, 就不需要处理rightTrim数了
+			return;
 		}
-
-		public void trimSpaceAppendTo(StringAppender sb, boolean noLine)
+		if (this.ch == null || this.allBlank())
 		{
-			if (this.ch == null)
+			this.ch = null;
+			this.rightTrimCount = this.leftTrimCount;
+			this.leftTrimCount = 0;
+			if (this.preElement != null)
 			{
-				if (this.endNewLine)
-				{
-					sb.append(noLine ? ' ' : MultiLineText.NEW_LINE);
-				}
-				return;
+				this.preElement.addRightTrimCount();
 			}
-			sb.append(this.ch, this.leftTrimCount,
-						 this.ch.length - this.leftTrimCount - this.rightTrimCount);
+			return;
+		}
+		int rightTrimCount = 0;
+		int count = this.length - this.leftTrimCount;
+		for (; rightTrimCount < count && this.ch[this.length - rightTrimCount - 1] <= ' '; rightTrimCount++);
+		this.rightTrimCount = rightTrimCount;
+	}
+
+	private boolean allBlank()
+	{
+		for (int i = 0; i < this.ch.length; i++)
+		{
+			if (this.ch[i] > ' ') return false;
+		}
+		return true;
+	}
+
+	public void appendTo(StringAppender sb)
+	{
+		if (this.ch != null)
+		{
+			sb.append(this.ch);
+			return;
+		}
+		for (int i = 0; i < this.length - 1; i++)
+		{
+			sb.append(' ');
+		}
+		sb.append(this.endNewLine ? MultiLineText.NEW_LINE : ' ');
+	}
+
+	public void trimSpaceAppendTo(StringAppender sb, boolean noLine, boolean last)
+	{
+		if (this.ch == null)
+		{
 			if (this.endNewLine)
 			{
 				sb.append(noLine ? ' ' : MultiLineText.NEW_LINE);
 			}
+			return;
 		}
-
-		public int trimSpacelength()
+		int endPos = this.ch.length - this.rightTrimCount;
+		if (last)
 		{
-			return this.length - this.leftTrimCount - this.rightTrimCount
-					+ (this.endNewLine ? 1 : 0);
+			// 如果是最后一个单元, 需要检测尾部的空格
+			for (; endPos >= this.leftTrimCount; endPos--)
+			{
+				if (this.ch[endPos - 1] > ' ')
+				{
+					break;
+				}
+			}
 		}
+		sb.append(this.ch, this.leftTrimCount, endPos - this.leftTrimCount);
+		if (this.endNewLine)
+		{
+			sb.append(noLine ? ' ' : MultiLineText.NEW_LINE);
+		}
+	}
 
+	public int trimSpaceLength()
+	{
+		return this.length - this.leftTrimCount - this.rightTrimCount
+				+ (this.endNewLine ? 1 : 0);
 	}
 
 }

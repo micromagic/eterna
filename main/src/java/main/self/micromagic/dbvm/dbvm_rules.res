@@ -19,7 +19,7 @@
 dbVersion
 log:{$dbVersion}
 create:{,${factory},1}
-sub:{config,table,index,data}
+sub:{config,eterna,table,index,data}
 
 
 ## data
@@ -68,6 +68,11 @@ stack:{registerObject,n:0,g:0}
 ## indexColumn
 column
 method:{addColumn,name(i=0)}
+
+
+## eterna
+eterna
+sub:{constant,query,update,entity}
 
 
 ## config

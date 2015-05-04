@@ -67,7 +67,7 @@ public class DigesterTest extends TestCase
 
 		Query q2 = f.createQuery("q1");
 		assertFalse(q1 == q2);
-		assertTrue(q1.getPreparedSQL().startsWith("sql 123 "));
+		assertTrue(q1.getPreparedScript().startsWith("sql 123 "));
 		ResultReaderManager readerManager = q1.getReaderManager();
 		ResultReader reader = readerManager.getReader("r1");
 		assertEquals("r1", reader.getAlias());
@@ -154,12 +154,12 @@ public class DigesterTest extends TestCase
 		Query query2 = f.createQuery("q2");
 		query2.setObject("p3", "2015-02");
 		query2.setString("pEnd", "1");
-		String tmpSQL = query2.getPreparedSQL();
+		String tmpSQL = query2.getPreparedScript();
 		//System.out.println(tmpSQL);
 		assertTrue(tmpSQL.indexOf("t.x1 as \"c3\", Tx.i6 as \"i6\", Tx.c3 as \"p3\", t.x2 as \"c2\", t.end as \"cEnd\"") != -1);
 		assertTrue(tmpSQL.endsWith(")  and p3 = ? and t.x2 = ?"));
 		query2.setIgnore("p3");
-		assertTrue(query2.getPreparedSQL().endsWith(")  and t.x2 = ?"));
+		assertTrue(query2.getPreparedScript().endsWith(")  and t.x2 = ?"));
 	}
 
 	public void testQuery3()
@@ -196,44 +196,44 @@ public class DigesterTest extends TestCase
 		String tmpSQL;
 		Update update = f.createUpdate("update1");
 		update.setString("p2", "1");
-		tmpSQL = update.getPreparedSQL();
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf(", p2 =") == -1);
 		update.setString("p1", "1");
-		tmpSQL = update.getPreparedSQL();
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf(", p2 =") != -1);
 
 		update = f.createUpdate("update2");
-		update.setSubSQL(1, "");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.trim().length() == 0);
-		update.setSubSQL(1, "X");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "X");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("where") != -1);
 		update.setString("k2", "1");
-		tmpSQL = update.getPreparedSQL();
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("and") == -1);
 		assertTrue(tmpSQL.indexOf(" or ") != -1);
 		update.setString("k1", "1");
-		tmpSQL = update.getPreparedSQL();
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf(" and ") != -1);
 
 		update = f.createUpdate("update3");
-		update.setSubSQL(1, "");
-		update.setSubSQL(2, "");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "");
+		update.setSubScript(2, "");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("T2") != -1);
 		assertTrue(tmpSQL.indexOf("test") != -1);
 		assertTrue(tmpSQL.indexOf("Y") != -1);
-		update.setSubSQL(2, "ssss");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(2, "ssss");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("X ssss") != -1);
-		update.setSubSQL(1, "a = 1");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "a = 1");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("and (") != -1);
 		assertTrue(tmpSQL.indexOf(")") != -1);
 		update.setString("k1", "1");
 		update.setString("k2", "2");
-		tmpSQL = update.getPreparedSQL();
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf(" or ") != -1);
 	}
 
@@ -242,23 +242,23 @@ public class DigesterTest extends TestCase
 	{
 		String tmpSQL;
 		Update update = f.createUpdate("update5");
-		update.setSubSQL(1, "");
-		update.setSubSQL(2, "");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "");
+		update.setSubScript(2, "");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("tt2") != -1);
 		assertTrue(tmpSQL.indexOf("tt1") == -1);
 
 		update = f.createUpdate("update6");
-		update.setSubSQL(1, "");
-		update.setSubSQL(2, "");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "");
+		update.setSubScript(2, "");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("endW") == -1);
 		update.setString("k2", "2");
-		tmpSQL = update.getPreparedSQL();
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("endW") != -1);
 		update.setIgnore("k2");
-		update.setSubSQL(1, "a = 1");
-		tmpSQL = update.getPreparedSQL();
+		update.setSubScript(1, "a = 1");
+		tmpSQL = update.getPreparedScript();
 		assertTrue(tmpSQL.indexOf("endW") != -1);
 
 		update = f.createUpdate("update7");

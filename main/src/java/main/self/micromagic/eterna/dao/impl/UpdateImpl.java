@@ -44,7 +44,7 @@ public class UpdateImpl extends BaseDao
 
 	public String getType()
 	{
-		return SQL_TYPE_UPDATE;
+		return DAO_TYPE_UPDATE;
 	}
 
 	public Object create()
@@ -65,7 +65,7 @@ public class UpdateImpl extends BaseDao
 		{
 			if (this.hasActiveParam())
 			{
-				PreparedStatement temp = conn.prepareStatement(this.getPreparedSQL());
+				PreparedStatement temp = conn.prepareStatement(this.getPreparedScript());
 				stmt = temp;
 				this.prepareValues(temp);
 				temp.execute();
@@ -73,7 +73,7 @@ public class UpdateImpl extends BaseDao
 			else
 			{
 				stmt = conn.createStatement();
-				stmt.execute(this.getPreparedSQL());
+				stmt.execute(this.getPreparedScript());
 			}
 		}
 		catch (EternaException ex)
@@ -117,7 +117,7 @@ public class UpdateImpl extends BaseDao
 		{
 			if (this.hasActiveParam())
 			{
-				PreparedStatement temp = conn.prepareStatement(this.getPreparedSQL());
+				PreparedStatement temp = conn.prepareStatement(this.getPreparedScript());
 				stmt = temp;
 				this.prepareValues(temp);
 				result = temp.executeUpdate();
@@ -125,7 +125,7 @@ public class UpdateImpl extends BaseDao
 			else
 			{
 				stmt = conn.createStatement();
-				result = stmt.executeUpdate(this.getPreparedSQL());
+				result = stmt.executeUpdate(this.getPreparedScript());
 			}
 			return result;
 		}

@@ -43,7 +43,7 @@ public class CommonUpdate extends UpdateImpl
 	public void execute(Connection conn)
 			throws EternaException, SQLException
 	{
-		this.log(this.getPreparedSQL());
+		this.log(this.getPreparedScript());
 		boolean success = false;
 		try
 		{
@@ -57,11 +57,11 @@ public class CommonUpdate extends UpdateImpl
 		{
 			if (success && !logScriptMode)
 			{
-				executedScript.add(this.getPreparedSQL());
+				executedScript.add(this.getPreparedScript());
 			}
 			else
 			{
-				leftScript.add(this.getPreparedSQL());
+				leftScript.add(this.getPreparedScript());
 			}
 		}
 	}
@@ -69,7 +69,7 @@ public class CommonUpdate extends UpdateImpl
 	public int executeUpdate(Connection conn)
 			throws EternaException, SQLException
 	{
-		this.log(this.getPreparedSQL());
+		this.log(this.getPreparedScript());
 		boolean success = false;
 		try
 		{
@@ -85,11 +85,11 @@ public class CommonUpdate extends UpdateImpl
 		{
 			if (success && !logScriptMode)
 			{
-				executedScript.add(this.getPreparedSQL());
+				executedScript.add(this.getPreparedScript());
 			}
 			else
 			{
-				leftScript.add(this.getPreparedSQL());
+				leftScript.add(this.getPreparedScript());
 			}
 		}
 	}

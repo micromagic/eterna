@@ -92,7 +92,7 @@ class CountQuery
 
 	public String getType()
 	{
-		return SQL_TYPE_COUNT;
+		return DAO_TYPE_COUNT;
 	}
 
 	public ResultIterator executeQuery(Connection conn)
@@ -107,7 +107,7 @@ class CountQuery
 		{
 			if (this.hasActiveParam())
 			{
-				PreparedStatement temp = conn.prepareStatement(this.getPreparedSQL());
+				PreparedStatement temp = conn.prepareStatement(this.getPreparedScript());
 				stmt = temp;
 				this.prepareValues(temp);
 				rs = temp.executeQuery();
@@ -115,7 +115,7 @@ class CountQuery
 			else
 			{
 				stmt = conn.createStatement();
-				rs = stmt.executeQuery(this.getPreparedSQL());
+				rs = stmt.executeQuery(this.getPreparedScript());
 			}
 
 			rs.next();
@@ -176,7 +176,7 @@ class CountQuery
 		}
 	}
 
-	public String getPreparedSQL()
+	public String getPreparedScript()
 			throws EternaException
 	{
 		String tmpSQL = this.query.getPrimitiveQuerySQL();
@@ -346,10 +346,10 @@ class CountQuery
 		return this.query.getParameterIterator();
 	}
 
-	public int getSubSQLCount()
+	public int getSubScriptCount()
 			throws EternaException
 	{
-		return this.query.getSubSQLCount();
+		return this.query.getSubScriptCount();
 	}
 
 	public int getStartRow()
@@ -416,12 +416,12 @@ class CountQuery
 		throw new UnsupportedOperationException();
 	}
 
-	public void setSubSQL(int index, String subPart)
+	public void setSubScript(int index, String subPart)
 	{
 		throw new UnsupportedOperationException();
 	}
 
-	public void setSubSQL(int index, String subPart, PreparerManager pm)
+	public void setSubScript(int index, String subPart, PreparerManager pm)
 	{
 		throw new UnsupportedOperationException();
 	}

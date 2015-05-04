@@ -197,11 +197,11 @@ public class DoubleQuerySearch extends SearchImpl
 					{
 						String subConSQL = manager.getSpecialConditionPart(assistSearch, assistSearch.isNeedWrap());
 						PreparerManager spm = manager.getSpecialPreparerManager(assistSearch);
-						nextQuery.setSubSQL(assistSearch.getConditionIndex(), subConSQL, spm);
+						nextQuery.setSubScript(assistSearch.getConditionIndex(), subConSQL, spm);
 					}
 					else
 					{
-						nextQuery.setSubSQL(assistSearch.getConditionIndex(),
+						nextQuery.setSubScript(assistSearch.getConditionIndex(),
 								manager.getConditionPart(assistSearch.isNeedWrap()), manager.getPreparerManager());
 					}
 				}
@@ -251,7 +251,7 @@ public class DoubleQuerySearch extends SearchImpl
 		boolean multiKey = this.keyIndexs.length > 1;
 		if (keyIterator.getCount() == 0)
 		{
-			nextQuery.setSubSQL(this.keyConditionIndex, "(" + this.colNames[0] + " = null)");
+			nextQuery.setSubScript(this.keyConditionIndex, "(" + this.colNames[0] + " = null)");
 		}
 		else
 		{
@@ -304,11 +304,11 @@ public class DoubleQuerySearch extends SearchImpl
 				{
 					pm.setValuePreparer((ValuePreparer) iterator.next());
 				}
-				nextQuery.setSubSQL(this.keyConditionIndex, buf.toString(), pm);
+				nextQuery.setSubScript(this.keyConditionIndex, buf.toString(), pm);
 			}
 			else
 			{
-				nextQuery.setSubSQL(this.keyConditionIndex, buf.toString());
+				nextQuery.setSubScript(this.keyConditionIndex, buf.toString());
 			}
 		}
 	}

@@ -127,7 +127,7 @@ public class IndexDesc extends AbstractObject
 			throws SQLException
 	{
 		Update u = this.factory.createUpdate(COMMON_EXEC);
-		u.setSubSQL(1, this.indexDefiner.getIndexDefine(this, null));
+		u.setSubScript(1, this.indexDefiner.getIndexDefine(this, null));
 		u.execute(conn);
 	}
 

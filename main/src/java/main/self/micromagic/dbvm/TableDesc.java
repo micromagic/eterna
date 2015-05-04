@@ -126,7 +126,7 @@ public class TableDesc extends AbstractObject
 		Update u = this.factory.createUpdate(COMMON_EXEC);
 		if (this.optType == OPT_TYPE_DROP)
 		{
-			u.setSubSQL(1, "drop table " + this.tableName);
+			u.setSubScript(1, "drop table " + this.tableName);
 			u.execute(conn);
 			return;
 		}
@@ -170,17 +170,17 @@ public class TableDesc extends AbstractObject
 			PreparerManager m = this.filterPreparer(paramList);
 			if (m == null)
 			{
-				u.setSubSQL(1, buf.toString());
+				u.setSubScript(1, buf.toString());
 			}
 			else
 			{
-				u.setSubSQL(1, buf.toString(), m);
+				u.setSubScript(1, buf.toString(), m);
 			}
 			u.execute(conn);
 			this.exec(paramList, conn);
 			if (!StringTool.isEmpty(this.desc))
 			{
-				u.setSubSQL(1, this.comment.getComment(this));
+				u.setSubScript(1, this.comment.getComment(this));
 				u.execute(conn);
 			}
 		}
@@ -190,14 +190,14 @@ public class TableDesc extends AbstractObject
 			{
 				String s = "alter table " + this.tableName + " " + this.renameOpt
 						+ " " + this.newName;
-				u.setSubSQL(1, s);
+				u.setSubScript(1, s);
 				u.execute(conn);
 			}
 			this.execColumnModify(u, conn);
 			if (this.desc != null)
 			{
 				// 修改时注释需要判空
-				u.setSubSQL(1, this.comment.getComment(this));
+				u.setSubScript(1, this.comment.getComment(this));
 				u.execute(conn);
 			}
 		}
@@ -220,11 +220,11 @@ public class TableDesc extends AbstractObject
 			PreparerManager m = this.filterPreparer(paramList);
 			if (m == null)
 			{
-				update.setSubSQL(1, buf.toString());
+				update.setSubScript(1, buf.toString());
 			}
 			else
 			{
-				update.setSubSQL(1, buf.toString(), m);
+				update.setSubScript(1, buf.toString(), m);
 			}
 			update.execute(conn);
 			this.exec(paramList, conn);

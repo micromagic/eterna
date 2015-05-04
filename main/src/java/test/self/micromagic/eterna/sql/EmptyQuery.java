@@ -50,14 +50,14 @@ public class EmptyQuery extends QueryImpl
 		this.specialSQL = specialSQL;
 	}
 
-	public String getPreparedSQL()
+	public String getPreparedScript()
 			throws EternaException
 	{
 		if (this.specialSQL != null)
 		{
 			return this.specialSQL;
 		}
-		return super.getPreparedSQL();
+		return super.getPreparedScript();
 	}
 
 	public ResultIterator executeQueryHoldConnection(Connection conn)

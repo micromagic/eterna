@@ -540,11 +540,11 @@ public class SearchImpl extends AbstractGenerator
 			{
 				String subConSQL = manager.getSpecialConditionPart(this, this.needWrap);
 				PreparerManager spm = manager.getSpecialPreparerManager(this);
-				query.setSubSQL(this.conditionIndex, subConSQL, spm);
+				query.setSubScript(this.conditionIndex, subConSQL, spm);
 			}
 			else
 			{
-				query.setSubSQL(this.conditionIndex, manager.getConditionPart(this.needWrap),
+				query.setSubScript(this.conditionIndex, manager.getConditionPart(this.needWrap),
 						manager.getPreparerManager());
 			}
 		}
@@ -568,7 +568,7 @@ public class SearchImpl extends AbstractGenerator
 
 		if (log.isDebugEnabled())
 		{
-			log.debug("Search SQL:" + query.getPreparedSQL());
+			log.debug("Search SQL:" + query.getPreparedScript());
 			log.debug("End prepare query:" + System.currentTimeMillis());
 		}
 		//System.out.println("Search SQL:" + query.getPreparedSQL());
@@ -640,11 +640,11 @@ public class SearchImpl extends AbstractGenerator
 				{
 					String subConSQL = om.getSpecialConditionPart(other, other.isNeedWrap());
 					PreparerManager spm = om.getSpecialPreparerManager(other);
-					query.setSubSQL(other.getConditionIndex(), subConSQL, spm);
+					query.setSubScript(other.getConditionIndex(), subConSQL, spm);
 				}
 				else
 				{
-					query.setSubSQL(other.getConditionIndex(), om.getConditionPart(other.isNeedWrap()),
+					query.setSubScript(other.getConditionIndex(), om.getConditionPart(other.isNeedWrap()),
 							om.getPreparerManager());
 				}
 			}

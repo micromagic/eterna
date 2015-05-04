@@ -83,7 +83,7 @@ public abstract class BaseDao extends AbstractDao
 
 	public String getType()
 	{
-		return SQL_TYPE_SQL;
+		return DAO_TYPE_UNKNOW;
 	}
 
 	public int getLogType()
@@ -188,19 +188,19 @@ public abstract class BaseDao extends AbstractDao
 				}
 				if ("save".equals(tmp))
 				{
-					tmpType |= SQL_LOG_TYPE_SAVE;
+					tmpType |= DAO_LOG_TYPE_SAVE;
 				}
 				else if ("print".equals(tmp))
 				{
-					tmpType |= SQL_LOG_TYPE_PRINT;
+					tmpType |= DAO_LOG_TYPE_PRINT;
 				}
 				else if ("special".equals(tmp))
 				{
-					tmpType |= SQL_LOG_TYPE_SPECIAL;
+					tmpType |= DAO_LOG_TYPE_SPECIAL;
 				}
 				else if ("none".equals(tmp))
 				{
-					tmpType |= SQL_LOG_TYPE_NONE;
+					tmpType |= DAO_LOG_TYPE_NONE;
 				}
 			}
 			return tmpType;
@@ -217,7 +217,7 @@ public abstract class BaseDao extends AbstractDao
 		{
 			logNode.addElement("error").addText(exception.toString());
 		}
-		logNode.addElement("prepared-sql").addText(base.getPreparedSQL());
+		logNode.addElement("prepared-sql").addText(base.getPreparedScript());
 		Element params = logNode.addElement("parameters");
 		PreparedValueReader rpv = new PreparedValueReader(params);
 		base.prepareValues(rpv);
@@ -246,7 +246,7 @@ public abstract class BaseDao extends AbstractDao
 			return false;
 		}
 		Element theLog;
-		if ((logType & SQL_LOG_TYPE_SAVE) != 0)
+		if ((logType & DAO_LOG_TYPE_SAVE) != 0)
 		{
 			theLog = createLogNode(base.getType());
 			AppData data = AppData.getCurrentData();
@@ -264,7 +264,7 @@ public abstract class BaseDao extends AbstractDao
 			theLog = DocumentHelper.createElement(base.getType());
 		}
 		logSQL(base, usedTime, exception, theLog);
-		if ((logType & SQL_LOG_TYPE_SPECIAL) != 0)
+		if ((logType & DAO_LOG_TYPE_SPECIAL) != 0)
 		{
 			SpecialLog sl = base.getFactory().getSpecialLog();
 			if (sl != null)
@@ -272,11 +272,11 @@ public abstract class BaseDao extends AbstractDao
 				sl.logSQL(base, theLog, usedTime, exception, conn);
 			}
 		}
-		if ((logType & SQL_LOG_TYPE_PRINT) != 0)
+		if ((logType & DAO_LOG_TYPE_PRINT) != 0)
 		{
 			log.info("sql log:\n" + theLog.asXML());
 		}
-		return (logType & SQL_LOG_TYPE_SAVE) != 0;
+		return (logType & DAO_LOG_TYPE_SAVE) != 0;
 	}
 
 	/**

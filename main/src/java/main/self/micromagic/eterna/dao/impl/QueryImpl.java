@@ -151,11 +151,11 @@ public class QueryImpl extends AbstractQuery
 				PreparedStatement temp;
 				if (this.isForwardOnly())
 				{
-					temp = conn.prepareStatement(this.getPreparedSQL());
+					temp = conn.prepareStatement(this.getPreparedScript());
 				}
 				else
 				{
-					temp = conn.prepareStatement(this.getPreparedSQL(),
+					temp = conn.prepareStatement(this.getPreparedScript(),
 							ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 				}
 				stmt = temp;
@@ -173,7 +173,7 @@ public class QueryImpl extends AbstractQuery
 					stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 							ResultSet.CONCUR_READ_ONLY);
 				}
-				rs = stmt.executeQuery(this.getPreparedSQL());
+				rs = stmt.executeQuery(this.getPreparedScript());
 			}
 			ResultReaderManager readerManager = this.getReaderManager0(rs);
 			List readerList = readerManager.getReaderList(this.getPermission0());
@@ -267,11 +267,11 @@ public class QueryImpl extends AbstractQuery
 				PreparedStatement temp;
 				if (this.isForwardOnly())
 				{
-					temp = conn.prepareStatement(this.getPreparedSQL());
+					temp = conn.prepareStatement(this.getPreparedScript());
 				}
 				else
 				{
-					temp = conn.prepareStatement(this.getPreparedSQL(),
+					temp = conn.prepareStatement(this.getPreparedScript(),
 							ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 				}
 				stmt = temp;
@@ -289,7 +289,7 @@ public class QueryImpl extends AbstractQuery
 					stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 							ResultSet.CONCUR_READ_ONLY);
 				}
-				rs = stmt.executeQuery(this.getPreparedSQL());
+				rs = stmt.executeQuery(this.getPreparedScript());
 			}
 			ResultReaderManager rm = this.getReaderManager0(rs);
 			List readerList = rm.getReaderList(this.getPermission0());

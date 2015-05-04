@@ -214,7 +214,7 @@ public abstract class AbstractDao extends AbstractGenerator
 		return this.preparerManager.getParamCount();
 	}
 
-	public int getSubSQLCount()
+	public int getSubScriptCount()
 			throws EternaException
 	{
 		if (this.daoManager == null)
@@ -225,7 +225,7 @@ public abstract class AbstractDao extends AbstractGenerator
 		return this.daoManager.getSubPartCount();
 	}
 
-	public String getPreparedSQL()
+	public String getPreparedScript()
 			throws EternaException
 	{
 		if (this.daoManager == null)
@@ -265,13 +265,13 @@ public abstract class AbstractDao extends AbstractGenerator
 		this.preparedSQL = sql;
 	}
 
-	public void setSubSQL(int index, String subPart)
+	public void setSubScript(int index, String subPart)
 			throws EternaException
 	{
-		this.setSubSQL(index, subPart, null);
+		this.setSubScript(index, subPart, null);
 	}
 
-	public void setSubSQL(int index, String subPart, PreparerManager pm)
+	public void setSubScript(int index, String subPart, PreparerManager pm)
 			throws EternaException
 	{
 		if (this.daoManager == null)
