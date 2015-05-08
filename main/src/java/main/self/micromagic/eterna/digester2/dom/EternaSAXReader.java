@@ -32,6 +32,7 @@ public class EternaSAXReader extends SAXReader
 	public EternaSAXReader(DocumentFactory factory)
 	{
 		super(factory);
+		this.setStringInternEnabled(false);
 		this.setValidation(false);
 		this.setEntityResolver(new EmptyEntityResolver());
 	}

@@ -45,6 +45,17 @@ public class OracleIndex extends AbstractObject
 						.append(indexDesc.indexName).append(" primary key (")
 						.append(StringTool.linkStringArr(arr, ", ")).append(") using index");
 			}
+			else if (indexDesc.foreign)
+			{
+				String[] refArr = new String[indexDesc.refColumns.size()];
+				indexDesc.refColumns.toArray(refArr);
+				buf.append("alter table ").append(indexDesc.tableName)
+						.append(" add constraint ").append(indexDesc.indexName)
+						.append(" foreign key (")
+						.append(StringTool.linkStringArr(arr, ", ")).append(") references ")
+						.append(indexDesc.refName).append(" (")
+						.append(StringTool.linkStringArr(refArr, ", ")).append(')');
+			}
 			else
 			{
 				buf.append("create ");
@@ -64,6 +75,11 @@ public class OracleIndex extends AbstractObject
 				buf.append("alter table ").append(indexDesc.tableName)
 						.append(" drop constraint ").append(indexDesc.indexName)
 						.append(" cascade drop index");
+			}
+			else if (indexDesc.foreign)
+			{
+				buf.append("alter table ").append(indexDesc.tableName)
+						.append(" drop constraint ").append(indexDesc.indexName);
 			}
 			else
 			{

@@ -21,7 +21,10 @@ import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * 抽象的各类对象.
@@ -65,5 +68,79 @@ public abstract class AbstractObject
 	protected String name;
 
 	private static BooleanConverter boolConverter = new BooleanConverter();
+
+	/**
+	 * 生成默认值的表达式.
+	 */
+	protected static String makeDefaultExpression(ColumnDesc colDesc, BooleanRef drop)
+	{
+		if (colDesc.defaultValue == null)
+		{
+			return null;
+		}
+		if (colDesc.defaultValue.length() == 0)
+		{
+			if (drop != null)
+			{
+				drop.value = true;
+			}
+			return "default null";
+		}
+		if (TypeManager.isString(colDesc.typeId))
+		{
+			String dValue = StringTool.replaceAll(colDesc.defaultValue, "'", "''");
+			return "default '".concat(dValue.concat("'"));
+		}
+		return "default ".concat(colDesc.defaultValue);
+	}
+
+	/**
+	 * 处理文本中的常量定义.
+	 */
+	public String resolveConst(String text, EternaFactory factory)
+	{
+		if (text == null)
+		{
+			return text;
+		}
+		String constPrefix = "#const(";
+		String constSuffix = ")";
+		int startIndex = text.indexOf(constPrefix);
+		if (startIndex == -1)
+		{
+			return text;
+		}
+
+		String tempStr = text;
+		StringAppender result = StringTool.createStringAppender(text.length() + 32);
+		int prefixLength = constPrefix.length();
+		while (startIndex != -1)
+		{
+			result.append(tempStr.substring(0, startIndex));
+			int endIndex = tempStr.indexOf(constSuffix, startIndex + prefixLength);
+			if (endIndex != -1)
+			{
+				String cName = tempStr.substring(startIndex + prefixLength, endIndex);
+				String tmp = factory.getConstantValue(cName);
+				if (!StringTool.isEmpty(tmp))
+				{
+					result.append(tmp);
+					tempStr = tempStr.substring(endIndex + constSuffix.length());
+					startIndex = tempStr.indexOf(constPrefix);
+				}
+				else
+				{
+					throw new EternaException("Not found constant value [" + cName + "].");
+				}
+			}
+			else
+			{
+				tempStr = tempStr.substring(startIndex);
+				startIndex = -1;
+			}
+		}
+		result.append(tempStr);
+		return result.toString();
+	}
 
 }

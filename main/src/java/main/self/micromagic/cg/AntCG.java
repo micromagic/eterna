@@ -21,26 +21,27 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.MalformedURLException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.HashMap;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.collections.ReferenceMap;
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Javac;
 import org.apache.tools.ant.types.Path;
-import org.apache.commons.collections.ReferenceMap;
+
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -288,7 +289,7 @@ public class AntCG
 		String srcPath = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "srcPath");
 		if (srcPath == null)
 		{
-			srcPath = System.getProperty("java.io.tmpdir");
+			srcPath = getTempPath();
 		}
 		return resolvePath(srcPath);
 	}
@@ -301,9 +302,17 @@ public class AntCG
 		String destPath = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "destPath");
 		if (destPath == null)
 		{
-			destPath = System.getProperty("java.io.tmpdir");
+			destPath = getTempPath();
 		}
 		return resolvePath(destPath);
+	}
+
+	/**
+	 * 获取系统临时目录路径.
+	 */
+	private static String getTempPath()
+	{
+		return (new File(System.getProperty("java.io.tmpdir"), "eternaCG")).getPath();
 	}
 
 	/**
@@ -382,13 +391,13 @@ public class AntCG
 	 */
 	private static class CCL_KEY
 	{
-		private File basePath;
+		private final File basePath;
 		private int hashCode;
 
 		/**
 		 * 这里使用<code>WeakReference</code>来引用父ClassLoader, 这样就不会影响其正常的释放.
 		 */
-		private WeakReference parent;
+		private final WeakReference parent;
 
 		public CCL_KEY(File basePath, ClassLoader parent)
 		{
@@ -422,8 +431,8 @@ public class AntCG
 
 	private static class CompileClassLoader extends ClassLoader
 	{
-		private File basePath;
-		private Map msgCache = new HashMap();
+		private final File basePath;
+		private final Map msgCache = new HashMap();
 		private Method defineMethod;
 
 		public CompileClassLoader(ClassLoader parent, File basePath)
@@ -527,7 +536,7 @@ public class AntCG
 	private static class CompileLogger
 			implements BuildLogger
 	{
-		private StringAppender out = StringTool.createStringAppender();
+		private final StringAppender out = StringTool.createStringAppender();
 
 		public synchronized void messageLogged(BuildEvent event)
 		{

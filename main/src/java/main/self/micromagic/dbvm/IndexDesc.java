@@ -54,6 +54,11 @@ public class IndexDesc extends AbstractObject
 	public boolean unique;
 
 	/**
+	 * 是否为外键.
+	 */
+	public boolean foreign;
+
+	/**
 	 * 设置索引的类型.
 	 */
 	public void setType(String type)
@@ -65,6 +70,10 @@ public class IndexDesc extends AbstractObject
 		else if ("unique".equalsIgnoreCase(type))
 		{
 			this.unique = true;
+		}
+		else if ("foreign".equalsIgnoreCase(type))
+		{
+			this.foreign = true;
 		}
 	}
 
@@ -79,6 +88,24 @@ public class IndexDesc extends AbstractObject
 	public void addColumn(String colName)
 	{
 		this.columns.add(colName);
+	}
+
+	/**
+	 * 外键关联的表名.
+	 */
+	public String refName;
+
+	/**
+	 * 关联外键的列名列表.
+	 */
+	public List refColumns = new ArrayList();
+
+	/**
+	 * 添加一个列名.
+	 */
+	public void addRefColumn(String colName)
+	{
+		this.refColumns.add(colName);
 	}
 
 	/**
@@ -104,18 +131,16 @@ public class IndexDesc extends AbstractObject
 		{
 			return true;
 		}
-		if (this.tableName.startsWith("${") && this.tableName.endsWith("}"))
+		if (this.foreign && this.columns.size() != this.refColumns.size())
 		{
-			String cName = this.tableName.substring(2, this.tableName.length() - 1);
-			String tmp = factory.getConstantValue(cName);
-			if (!StringTool.isEmpty(tmp))
-			{
-				this.tableName = tmp;
-			}
-			else
-			{
-				throw new EternaException("Not found constant value [" + cName + "].");
-			}
+			String msg = "The foreign key [" + this.indexName + "]'s column isn't same, "
+					+ this.columns.size() + " != " + this.refColumns.size() + " .";
+			throw new EternaException(msg);
+		}
+		this.tableName = resolveConst(this.tableName, factory);
+		if (!StringTool.isEmpty(this.refName))
+		{
+			this.refName = resolveConst(this.refName, factory);
 		}
 		return false;
 	}

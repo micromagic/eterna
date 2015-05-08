@@ -48,7 +48,7 @@ log:{$column}
 create:{,self.micromagic.dbvm.ColumnDesc}
 attr:{
 	name(i=0):colName,newName(m=0),opt(m=0,i=0):optName,desc(m=0,i=0),
-	type(i=0):typeName,nullable(i=0,m=0)
+	type(i=0):typeName,nullable(i=0,m=0),default(i=0,m=0):defaultValue
 }
 stack:{addColumn,n:0,g:0}
 
@@ -59,15 +59,20 @@ log:{$index}
 create:{,self.micromagic.dbvm.IndexDesc}
 attr:{
 	$serial(pattern=DBVM000000):name,name(i=0):indexName,tableName(i=0),
-	opt(m=0,i=0):optName,desc(m=0,i=0),type(m=0,i=0)
+	opt(m=0,i=0):optName,desc(m=0,i=0),type(m=0,i=0),ref(m=0,i=0):refName
 }
-sub:{indexColumn}
+sub:{indexColumn,refColumn}
 stack:{registerObject,n:0,g:0}
 
 
 ## indexColumn
 column
 method:{addColumn,name(i=0)}
+
+
+## refColumn
+refColumn
+method:{addRefColumn,name(i=0)}
 
 
 ## eterna

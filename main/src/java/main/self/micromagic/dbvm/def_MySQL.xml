@@ -31,9 +31,9 @@
 			<constant name="long" value="BIGINT" />
 			<constant name="double" value="DOUBLE" />
 			<constant name="String" value="VARCHAR" />
-			<constant name="Datetime" value="DATETIME" />
+			<constant name="Datetime" value="TIMESTAMP" />
 			<constant name="Blob" value="BLOB" />
-			<constant name="Clob" value="CLOB" />
+			<constant name="Clob" value="TEXT" />
 
 			<constant name="now" value="now()" />
 			<constant name="now_script" value="select now()" />

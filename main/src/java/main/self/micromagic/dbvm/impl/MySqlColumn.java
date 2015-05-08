@@ -22,9 +22,11 @@ import self.micromagic.dbvm.AbstractObject;
 import self.micromagic.dbvm.ColumnDefiner;
 import self.micromagic.dbvm.ColumnDesc;
 import self.micromagic.dbvm.TableDesc;
+import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.BooleanRef;
 
 /**
  * mysql的数据库列定义.
@@ -40,6 +42,8 @@ public class MySqlColumn extends AbstractObject
 			tableName = tableDesc.newName;
 		}
 		StringAppender buf = StringTool.createStringAppender(16);
+		BooleanRef dropDefault = new BooleanRef();
+		String defExp = makeDefaultExpression(colDesc, dropDefault);
 		if (colDesc.optType == OPT_TYPE_CREATE)
 		{
 			if (tableDesc.optType == OPT_TYPE_CREATE)
@@ -50,6 +54,10 @@ public class MySqlColumn extends AbstractObject
 				{
 					buf.append(" not null");
 				}
+				if (defExp != null)
+				{
+					buf.append(' ').append(defExp);
+				}
 			}
 			else
 			{
@@ -59,6 +67,18 @@ public class MySqlColumn extends AbstractObject
 				if (!colDesc.nullable)
 				{
 					buf.append(" not null");
+				}
+				if (defExp != null)
+				{
+					StringAppender s = StringTool.createStringAppender(16);
+					s.append("alter table ").append(tableName).append(" alter column ")
+							.append(colDesc.colName).append(" set ").append(defExp);
+					Update u = this.factory.createUpdate(COMMON_EXEC);
+					u.setSubScript(1, s.toString());
+					if (paramList != null)
+					{
+						paramList.add(u);
+					}
 				}
 			}
 		}
@@ -78,6 +98,26 @@ public class MySqlColumn extends AbstractObject
 			if (!colDesc.nullable)
 			{
 				buf.append(" not null");
+			}
+			if (defExp != null)
+			{
+				StringAppender s = StringTool.createStringAppender(16);
+				s.append("alter table ").append(tableName).append(" alter column ")
+						.append(colDesc.colName);
+				if (dropDefault.value)
+				{
+					buf.append(" drop default");
+				}
+				else
+				{
+					buf.append(" set ").append(defExp);
+				}
+				Update u = this.factory.createUpdate(COMMON_EXEC);
+				u.setSubScript(1, s.toString());
+				if (paramList != null)
+				{
+					paramList.add(u);
+				}
 			}
 		}
 		else if (colDesc.optType == OPT_TYPE_DROP)

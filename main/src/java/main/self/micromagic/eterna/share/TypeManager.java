@@ -131,25 +131,44 @@ public class TypeManager
 	{
 		typeMap.put("null", Utility.INTEGER_0);
 		typeMap.put("String", Utility.INTEGER_1);
+		typeMap.put("string", Utility.INTEGER_1);
 		typeMap.put("int", Utility.INTEGER_2);
 		typeMap.put("double", Utility.INTEGER_3);
 		typeMap.put("Bytes", Utility.INTEGER_4);
+		typeMap.put("bytes", Utility.INTEGER_4);
 		typeMap.put("boolean", Utility.INTEGER_5);
 		typeMap.put("Date", Utility.INTEGER_6);
+		typeMap.put("date", Utility.INTEGER_6);
 		typeMap.put("Timestamp", Utility.INTEGER_7);
+		typeMap.put("timestamp", Utility.INTEGER_7);
 		typeMap.put("Datetime", Utility.INTEGER_7); // 兼容Datetime的设置
+		typeMap.put("datetime", Utility.INTEGER_7); // 兼容Datetime的设置
 		typeMap.put("long", Utility.INTEGER_8);
 		typeMap.put("Time", Utility.INTEGER_9);
+		typeMap.put("time", Utility.INTEGER_9);
 		typeMap.put("short", Utility.INTEGER_10);
 		typeMap.put("byte", Utility.INTEGER_11);
 		typeMap.put("float", Utility.INTEGER_12);
 		typeMap.put("Object", Utility.INTEGER_13);
+		typeMap.put("object", Utility.INTEGER_13);
 		typeMap.put("BigString", Utility.INTEGER_14);
+		typeMap.put("bigstring", Utility.INTEGER_14);
 		typeMap.put("Stream", Utility.INTEGER_15);
-		typeMap.put("Reader", new Integer(16));
-		typeMap.put("Decimal", new Integer(17));
-		typeMap.put("Blob", new Integer(18));
-		typeMap.put("Clob", new Integer(19));
+		typeMap.put("stream", Utility.INTEGER_15);
+		Integer tmp;
+
+		tmp = new Integer(16);
+		typeMap.put("Reader", tmp);
+		typeMap.put("reader", tmp);
+		tmp = new Integer(17);
+		typeMap.put("Decimal", tmp);
+		typeMap.put("decimal", tmp);
+		tmp = new Integer(18);
+		typeMap.put("Blob", tmp);
+		typeMap.put("blob", tmp);
+		tmp = new Integer(19);
+		typeMap.put("Clob", tmp);
+		typeMap.put("clob", tmp);
 
 		converters = new ValueConverter[javaTypes.length];
 		for (int i = 0; i < javaTypes.length; i++)

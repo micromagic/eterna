@@ -41,6 +41,11 @@ public class ColumnDesc
 	public String desc;
 
 	/**
+	 * 默认值.
+	 */
+	public String defaultValue;
+
+	/**
 	 * 是否可空.
 	 */
 	public boolean nullable = true;

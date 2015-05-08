@@ -41,12 +41,17 @@ public class OracleColumn extends AbstractObject
 			tableName = tableDesc.newName;
 		}
 		StringAppender buf = StringTool.createStringAppender(16);
+		String defExp = makeDefaultExpression(colDesc, null);
 		if (colDesc.optType == OPT_TYPE_CREATE)
 		{
 			if (tableDesc.optType == OPT_TYPE_CREATE)
 			{
 				buf.append(colDesc.colName).append(' ')
 						.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
+				if (defExp != null)
+				{
+					buf.append(' ').append(defExp);
+				}
 				if (!colDesc.nullable)
 				{
 					buf.append(" not null");
@@ -57,6 +62,10 @@ public class OracleColumn extends AbstractObject
 				buf.append("alter table ").append(tableName).append(" add ")
 						.append(colDesc.colName).append(' ')
 						.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
+				if (defExp != null)
+				{
+					buf.append(' ').append(defExp);
+				}
 				if (!colDesc.nullable)
 				{
 					buf.append(" not null");
@@ -68,6 +77,10 @@ public class OracleColumn extends AbstractObject
 			buf.append("alter table ").append(tableName).append(" modify ")
 					.append(colDesc.colName).append(' ')
 					.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
+			if (defExp != null)
+			{
+				buf.append(' ').append(defExp);
+			}
 			if (!colDesc.nullable)
 			{
 				buf.append(" not null");

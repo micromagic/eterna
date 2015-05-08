@@ -38,25 +38,47 @@ public class H2Index extends AbstractObject
 		{
 			String[] arr = new String[indexDesc.columns.size()];
 			indexDesc.columns.toArray(arr);
-			buf.append("create ");
-			if (indexDesc.key)
+			if (indexDesc.foreign)
 			{
-				buf.append("primary key ");
+				String[] refArr = new String[indexDesc.refColumns.size()];
+				indexDesc.refColumns.toArray(refArr);
+				buf.append("alter table ").append(indexDesc.tableName)
+						.append(" add constraint ").append(indexDesc.indexName)
+						.append(" foreign key (")
+						.append(StringTool.linkStringArr(arr, ", ")).append(") references ")
+						.append(indexDesc.refName).append(" (")
+						.append(StringTool.linkStringArr(refArr, ", ")).append(')');
+			}
+			else if (indexDesc.key)
+			{
+				buf.append("alter table ").append(indexDesc.tableName)
+						.append(" add constraint ").append(indexDesc.indexName)
+						.append(" primary key (")
+						.append(StringTool.linkStringArr(arr, ", ")).append(')');
 			}
 			else
 			{
+				buf.append("create ");
 				if (indexDesc.unique)
 				{
 					buf.append("unique ");
 				}
 				buf.append("index ");
+				buf.append(indexDesc.indexName).append(" on ").append(indexDesc.tableName)
+						.append(" (").append(StringTool.linkStringArr(arr, ", ")).append(')');
 			}
-			buf.append(indexDesc.indexName).append(" on ").append(indexDesc.tableName)
-					.append(" (").append(StringTool.linkStringArr(arr, ", ")).append(')');
 		}
 		else if (indexDesc.optType == OPT_TYPE_DROP)
 		{
-			buf.append("drop index ").append(indexDesc.indexName);
+			if (indexDesc.foreign || indexDesc.key)
+			{
+				buf.append("alter table ").append(indexDesc.tableName)
+						.append(" drop constraint ").append(indexDesc.indexName);
+			}
+			else
+			{
+				buf.append("drop index ").append(indexDesc.indexName);
+			}
 		}
 		else
 		{

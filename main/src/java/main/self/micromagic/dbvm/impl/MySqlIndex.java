@@ -45,6 +45,17 @@ public class MySqlIndex extends AbstractObject
 						.append(indexDesc.indexName).append(" (")
 						.append(StringTool.linkStringArr(arr, ", ")).append(')');
 			}
+			else if (indexDesc.foreign)
+			{
+				String[] refArr = new String[indexDesc.refColumns.size()];
+				indexDesc.refColumns.toArray(refArr);
+				buf.append("alter table ").append(indexDesc.tableName)
+						.append(" add foreign key ")
+						.append(indexDesc.indexName).append(" (")
+						.append(StringTool.linkStringArr(arr, ", ")).append(") references ")
+						.append(indexDesc.refName).append(" (")
+						.append(StringTool.linkStringArr(refArr, ", ")).append(')');
+			}
 			else
 			{
 				buf.append("alter table ").append(indexDesc.tableName).append(" add ")
@@ -59,6 +70,11 @@ public class MySqlIndex extends AbstractObject
 			{
 				buf.append("alter table ").append(indexDesc.tableName)
 						.append(" drop primary key");
+			}
+			else if (indexDesc.foreign)
+			{
+				buf.append("alter table ").append(indexDesc.tableName)
+					.append(" drop foreign key ").append(indexDesc.indexName);
 			}
 			else
 			{

@@ -99,17 +99,14 @@ public class TableDesc extends AbstractObject
 		}
 		this.comment = (TableComment) factory.createObject(TABLE_COMM_NAME);
 		this.renameOpt = factory.getConstantValue("rename");
-		if (this.tableName.startsWith("${") && this.tableName.endsWith("}"))
+		this.tableName = resolveConst(this.tableName, factory);
+		Iterator itr = this.columns.iterator();
+		while (itr.hasNext())
 		{
-			String cName = this.tableName.substring(2, this.tableName.length() - 1);
-			String tmp = factory.getConstantValue(cName);
-			if (!StringTool.isEmpty(tmp))
+			ColumnDesc colDesc = (ColumnDesc) itr.next();
+			if (!StringTool.isEmpty(colDesc.defaultValue))
 			{
-				this.tableName = tmp;
-			}
-			else
-			{
-				throw new EternaException("Not found constant value [" + cName + "].");
+				colDesc.defaultValue = resolveConst(colDesc.defaultValue, factory);
 			}
 		}
 		return false;

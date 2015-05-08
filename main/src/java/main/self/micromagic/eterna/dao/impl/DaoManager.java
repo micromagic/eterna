@@ -337,27 +337,27 @@ public class DaoManager
 						if (AUTO_TYPE_UPDATE.equals(type))
 						{
 							this.dealAuto(" = ?", ", ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value);
+									true, dynamic.value, true);
 						}
 						else if (AUTO_TYPE_INSERT_N.equals(type))
 						{
 							this.dealAuto("", ", ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value);
+									true, dynamic.value, true);
 						}
 						else if (AUTO_TYPE_INSERT_V.equals(type))
 						{
 							this.dealAuto("?", ", ", autoConfig, buf, paramArray, begin, end,
-									false, dynamic.value);
+									false, dynamic.value, false);
 						}
 						else if (AUTO_TYPE_OR.equals(type))
 						{
 							this.dealAuto(" = ?", " or ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value);
+									true, dynamic.value, false);
 						}
 						else if (AUTO_TYPE_AND.equals(type))
 						{
 							this.dealAuto(" = ?", " and ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value);
+									true, dynamic.value, false);
 						}
 						else
 						{
@@ -471,7 +471,7 @@ public class DaoManager
 	}
 
 	private void dealAuto(String plus, String separator, String template, StringAppender buf,
-			Parameter[] paramArray, int begin, int end, boolean needName, boolean dynamicAuto)
+			Parameter[] paramArray, int begin, int end, boolean needName, boolean dynamicAuto, boolean skipTable)
 			throws EternaException
 	{
 		if (begin > end || begin < 0)
@@ -492,7 +492,16 @@ public class DaoManager
 			first = false;
 			if (needName)
 			{
-				buf.append(paramArray[i].getColumnName());
+				if (skipTable)
+				{
+					String cName = paramArray[i].getColumnName();
+					int tmpI = cName.indexOf('.');
+					buf.append(tmpI == -1 ? cName : cName.substring(tmpI + 1));
+				}
+				else
+				{
+					buf.append(paramArray[i].getColumnName());
+				}
 			}
 			buf.append(plus);
 			if (dynamicAuto)
