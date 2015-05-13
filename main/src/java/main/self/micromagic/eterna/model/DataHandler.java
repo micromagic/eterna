@@ -354,7 +354,7 @@ public class DataHandler
 	 *
 	 * @param subs  添加子名称的列表
 	 */
-	public String parseConfig(String config, List subs)
+	protected String parseConfig(String config, List subs)
 			throws EternaException
 	{
 		GrammerElement ge = rootGE;

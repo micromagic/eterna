@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import junit.framework.TestCase;
+import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.share.InitializeListener;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.util.StringAppender;
@@ -233,7 +234,7 @@ public class ClassGeneratorTest extends TestCase
 				.append("return result;").appendln()
 				.append('}').appendln();
 		cg.addMethod(sa.toString());
-		cg.importPackage("self.micromagic.eterna.sql");
+		cg.importPackage("self.micromagic.eterna.dao");
 		cg.addClassPath(Show.class);
 		Show s = (Show) cg.createClass().newInstance();
 		String exp = "0:null;1:null;2:null;3:null;4:null;5:null;6:null;7:null;8:null;9:null;";
@@ -257,6 +258,7 @@ public class ClassGeneratorTest extends TestCase
 		map.put("setIntValue", "public void setIntValue(int v)\n{\nthis.intValue = v;\n}");
 		map.put("getStringValue", "private String getStringValue()\n{\nreturn this.stringValue;\n}");
 		map.put("createThis", "public static ${thisName} createThis(String name)\n{\nreturn new ${thisName}(name);\n}");
+		map.put("afterInitialize", "public void afterInitialize(FactoryContainer factoryContainer) {}");
 		return map;
 	}
 
@@ -327,6 +329,7 @@ public class ClassGeneratorTest extends TestCase
 	{
 		ClassGenerator cg = new ClassGenerator();
 		cg.setClassName(className);
+		cg.importPackage(ClassGenerator.getPackageString(FactoryContainer.class));
 		cg.setSuperClass(ClassGeneratorTest.class);
 		cg.addConstructor("public ${thisName}(String name)\n{\nthis.stringValue = name;\n}");
 		cg.addConstructor("public ${thisName}()\n{\n}");

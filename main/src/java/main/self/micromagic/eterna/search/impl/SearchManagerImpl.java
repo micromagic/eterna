@@ -34,6 +34,7 @@ import org.dom4j.Element;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.search.BuildeResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionInfo;
@@ -537,23 +538,15 @@ public class SearchManagerImpl extends AbstractGenerator
 		{
 			// 这里不捕获异常, 因为在方法外已经捕获了
 			ConditionProperty cp = search.getConditionProperty(i);
-			String value;
+			Object value;
 			if (dealDefault)
 			{
 				value = cp.getDefaultValue();
 				if (value != null)
 				{
-					if (value.startsWith(DATA_DEFAULT_VALUE_PREFIX))
+					if (value instanceof DataHandler)
 					{
-						Object obj = data.dataMap.get(value.substring(DATA_DEFAULT_VALUE_PREFIX.length()));
-						if (obj == null)
-						{
-							value = null;
-						}
-						else
-						{
-							value = String.valueOf(obj);
-						}
+						value = ((DataHandler) value).getData(data, false);
 					}
 				}
 			}
@@ -561,7 +554,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			{
 				value = data.getRequestParameter(cp.getName());
 			}
-			if (!cp.isIgnore() && value != null && value.length() > 0)
+			if (!cp.isIgnore() && !StringTool.isEmpty(value))
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
 				BuildeResult cbCon = null;

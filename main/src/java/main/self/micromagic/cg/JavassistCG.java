@@ -34,6 +34,7 @@ import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMember;
 import javassist.CtMethod;
+import javassist.LoaderClassPath;
 import javassist.Modifier;
 import javassist.NotFoundException;
 import javassist.bytecode.Bytecode;
@@ -170,6 +171,7 @@ public class JavassistCG
 				{
 					pool = new MyClassPool();
 					pool.appendSystemPath();
+					pool.appendClassPath(new LoaderClassPath(cl));
 					classPoolCache.put(cl, pool);
 				}
 			}

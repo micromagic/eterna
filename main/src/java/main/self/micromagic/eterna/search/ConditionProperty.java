@@ -28,6 +28,11 @@ import self.micromagic.eterna.share.EternaFactory;
  */
 public interface ConditionProperty
 {
+	/**
+	 * 标识当前默认值使用环境变量的前缀.
+	 */
+	String DEFAULT_ENV_PREFIX = "env:";
+
 	void initialize(EternaFactory factory) throws EternaException;
 
 	String getName() throws EternaException;
@@ -70,7 +75,10 @@ public interface ConditionProperty
 
 	String getConditionInputType() throws EternaException;
 
-	String getDefaultValue() throws EternaException;
+	/**
+	 * 获取默认值.
+	 */
+	Object getDefaultValue() throws EternaException;
 
 	Object getAttribute(String name) throws EternaException;
 

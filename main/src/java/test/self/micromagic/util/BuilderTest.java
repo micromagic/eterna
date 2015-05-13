@@ -229,7 +229,7 @@ class EmptyConditionProperty
 		return null;
 	}
 
-	public String getDefaultValue()
+	public Object getDefaultValue()
 	{
 		return null;
 	}

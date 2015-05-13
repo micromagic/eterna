@@ -62,6 +62,30 @@ public class ClassGenerator
 	private final List constructors = new ArrayList();
 	private final List methods = new ArrayList();
 	private String compileType;
+	private final Map extParam = new HashMap();
+
+	/**
+	 * 为编译添加一个扩展参数.
+	 */
+	public void addExtParam(String name, Object value)
+	{
+		if (value == null)
+		{
+			this.extParam.remove(name);
+		}
+		else
+		{
+			this.extParam.put(name, value);
+		}
+	}
+
+	/**
+	 * 获取一个编译的扩展参数.
+	 */
+	public Object getExtParam(String name)
+	{
+		return this.extParam.get(name);
+	}
 
 	/**
 	 * 获取本代码的类名.

@@ -50,7 +50,7 @@ class ConditionPropertyImpl
 	PreparerCreater prepare;
 	boolean visible = true;
 	String inputType;
-	String defaultValue;
+	Object defaultObj;
 	String listName;
 	String defaultBuilderName;
 	String permissionConfig;
@@ -153,9 +153,9 @@ class ConditionPropertyImpl
 		return this.inputType;
 	}
 
-	public String getDefaultValue()
+	public Object getDefaultValue()
 	{
-		return this.defaultValue;
+		return this.defaultObj;
 	}
 
 	public Object getAttribute(String name)

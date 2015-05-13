@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.search.impl;
 
+import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
@@ -59,7 +60,20 @@ public class PropertyGenerator extends AbstractGenerator
 
 	public void setDefaultValue(String value)
 	{
-		this.conditionProperty.defaultValue = value;
+		if (value != null)
+		{
+			if (value.startsWith(ConditionProperty.DEFAULT_ENV_PREFIX))
+			{
+				DataHandler h = new DataHandler("property.default", false, true);
+				String config = value.substring(ConditionProperty.DEFAULT_ENV_PREFIX.length());
+				h.setConfig(config);
+				this.conditionProperty.defaultObj = h;
+			}
+			else
+			{
+				this.conditionProperty.defaultObj = value;
+			}
+		}
 	}
 
 	public void setVisible(boolean visible)

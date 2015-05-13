@@ -46,6 +46,7 @@ import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.BooleanConverter;
 
 /**
  * 通过ant对类进行编译的工具.
@@ -61,9 +62,14 @@ public class AntCG
 	public static final String COMPILE_TYPE = "ant";
 
 	/**
+	 * 用ant作为编译类型时, 设置classpath过滤器的扩展参数名.
+	 */
+	public static final String ANT_CLASSPATH_FILTER = "ant_cp_filter";
+
+	/**
 	 * 配置文件中对ant相关属性进行配置的前缀.
 	 */
-	private static final String ANT_TOOL_CONFIG_PREFIX = "self.micromagic.compile.ant.";
+	private static final String ANT_CONFIG_PREFIX = "self.micromagic.compile.ant.";
 
 	/**
 	 * 配置文件中对ant产生的相关文件是否要放到一个通过UID生成的路径中.
@@ -72,7 +78,7 @@ public class AntCG
 	 * 通过UID设成的唯一目录下.
 	 * 默认值为: false.
 	 */
-	public static final String ANT_TOOL_UID_PATH_PROPERTY = "self.micromagic.compile.ant.uidPath";
+	public static final String ANT_UID_PATH_PROPERTY = "self.micromagic.compile.ant.uidPath";
 
 	/**
 	 * 使用ant生成一个类.
@@ -89,9 +95,9 @@ public class AntCG
 		File destPath = new File(getDestPath());
 		Project p = new Project();
 		p.setName("cg.ant");
-		CompileLogger cl = new CompileLogger();
-		p.addBuildListener(cl);
-		MyJavac javac = new MyJavac();
+		AntCompileLogger cLog = new AntCompileLogger();
+		p.addBuildListener(cLog);
+		SingleFileJavac javac = new SingleFileJavac();
 		javac.setProject(p);
 		javac.setDebug(getDebug());
 		javac.setSourcepath(new Path(p, getSrcPath()));
@@ -103,13 +109,17 @@ public class AntCG
 		try
 		{
 			javac.compile();
-			CompileClassLoader ccl = getClassLoader(destPath, cg.getClassLoader());
-			ccl.addMessage(cg.getClassName(), cl.toString());
-			return ccl.findClass(cg.getClassName());
+			AntClassLoader acl = getClassLoader(destPath, cg.getClassLoader());
+			acl.addMessage(cg.getClassName(), cLog.toString());
+			return acl.findClass(cg.getClassName());
 		}
 		catch (Exception ex)
 		{
-			throw new ClassNotFoundException("message:" + cl, ex);
+			if (ex instanceof IOException)
+			{
+				throw (IOException) ex;
+			}
+			throw new ClassNotFoundException("message:" + cLog, ex);
 		}
 	}
 
@@ -208,17 +218,34 @@ public class AntCG
 	public static void setClassPath(Project p, Javac javac, ClassGenerator cg)
 	{
 		Set paths = new HashSet();
-		parserClassPath(cg.getClassLoader(), paths);
+		parseClassPath(cg.getClassLoader(), paths);
 		Class[] arr = cg.getClassPaths();
 		for (int i = 0; i < arr.length; i++)
 		{
-			parserClassPath(arr[i].getClassLoader(), paths);
+			parseClassPath(arr[i].getClassLoader(), paths);
 		}
+		ClassPathFilter filter = (ClassPathFilter) cg.getExtParam(ANT_CLASSPATH_FILTER);
 		Iterator itr = paths.iterator();
+		Path path = null;
 		while (itr.hasNext())
 		{
-			String path = (String) itr.next();
-			javac.setClasspath(new Path(p, path));
+			String tmp = (String) itr.next();
+			if (filter != null && !filter.isValid(tmp))
+			{
+				continue;
+			}
+			if (path == null)
+			{
+				path = new Path(p, tmp);
+			}
+			else
+			{
+				path.add(new Path(p, tmp));
+			}
+		}
+		if (path != null)
+		{
+			javac.setClasspath(path);
 			if (ClassGenerator.COMPILE_LOG_TYPE > COMPILE_LOG_TYPE_DEBUG)
 			{
 				log.info("Added classpath:" + path);
@@ -229,7 +256,26 @@ public class AntCG
 	/**
 	 * 解析</code>ClassLoader</code>中的路径, 放到结果集合中.
 	 */
-	private static void parserClassPath(ClassLoader cl, Set result)
+	private static void parseClassPath(ClassLoader cl, Set result)
+	{
+		if (cl == null)
+		{
+			return;
+		}
+		int beginSize = result.size();
+		boolean onlyRes = isOnlyResourceClassPath();
+		if (!onlyRes)
+		{
+			parseClassPath0(cl, result);
+		}
+		int endSize = result.size();
+		if (beginSize == endSize)
+		{
+			// 如果未获取到任何路径, 通过classloader的getResources获取
+			parseClassLoaderURLs(cl, result, onlyRes);
+		}
+	}
+	private static void parseClassPath0(ClassLoader cl, Set result)
 	{
 		if (cl == null)
 		{
@@ -252,7 +298,81 @@ public class AntCG
 				}
 			}
 		}
-		parserClassPath(cl.getParent(), result);
+		parseClassPath(cl.getParent(), result);
+	}
+
+	/**
+	 * 解析</code>ClassLoader</code>中的路径, 放到结果集合中.
+	 */
+	private static void parseClassLoaderURLs(ClassLoader cl, Set result, boolean morePkg)
+	{
+		parseClassLoaderURLs0(cl, result, "META-INF/");
+		if (morePkg)
+		{
+			parseClassLoaderURLs0(cl, result, "com/");
+			parseClassLoaderURLs0(cl, result, "self/");
+			parseClassLoaderURLs0(cl, result, "org/");
+		}
+	}
+	private static void parseClassLoaderURLs0(ClassLoader cl, Set result, String pkg)
+	{
+		try
+		{
+			Enumeration resources = cl.getResources(pkg);
+			while (resources.hasMoreElements())
+			{
+				URL res = (URL) resources.nextElement();
+				String protocol = res.getProtocol();
+				if ("file".equals(protocol))
+				{
+					String f = res.getFile();
+					result.add(f.substring(0, f.length() - pkg.length()));
+				}
+				else if ("jar".equals(protocol) || "zip".equals(protocol))
+				{
+					String tmp = res.toString();
+					int index = tmp.indexOf('!');
+					tmp = tmp.substring(4 /* jar: or zip: */, index);
+					if (hasProtocol(tmp))
+					{
+						URL tmpRes = new URL(tmp);
+						if ("file".equals(tmpRes.getProtocol()))
+						{
+							result.add(tmpRes.getFile());
+						}
+						else
+						{
+							result.add(tmpRes.toString());
+						}
+					}
+					else
+					{
+						result.add(tmp);
+					}
+				}
+				else
+				{
+					log.error("Error URL [" + res + "].");
+				}
+			}
+		}
+		catch (IOException ex)
+		{
+			log.error("Error parse classloader [" + cl.getClass().getName() + "].", ex);
+		}
+	}
+	/**
+	 * 检查一个地址中是否包含protocol.
+	 */
+	private static boolean hasProtocol(String url)
+	{
+		int index = url.indexOf(':');
+		if (index == -1 || index <= 1)
+		{
+			// 如果字符串中没有protocol或只是盘符, 默认添上file
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -260,7 +380,7 @@ public class AntCG
 	 */
 	public static String getEncoding()
 	{
-		String encoding = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "encoding");
+		String encoding = Utility.getProperty(ANT_CONFIG_PREFIX + "encoding");
 		if (encoding == null)
 		{
 			encoding = System.getProperty("file.encoding");
@@ -273,7 +393,7 @@ public class AntCG
 	 */
 	public static boolean getDebug()
 	{
-		String debug = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "debug");
+		String debug = Utility.getProperty(ANT_CONFIG_PREFIX + "debug");
 		if (debug == null)
 		{
 			return true;
@@ -286,7 +406,7 @@ public class AntCG
 	 */
 	public static String getSrcPath()
 	{
-		String srcPath = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "srcPath");
+		String srcPath = Utility.getProperty(ANT_CONFIG_PREFIX + "srcPath");
 		if (srcPath == null)
 		{
 			srcPath = getTempPath();
@@ -299,12 +419,21 @@ public class AntCG
 	 */
 	public static String getDestPath()
 	{
-		String destPath = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "destPath");
+		String destPath = Utility.getProperty(ANT_CONFIG_PREFIX + "destPath");
 		if (destPath == null)
 		{
 			destPath = getTempPath();
 		}
 		return resolvePath(destPath);
+	}
+
+	/**
+	 * 是否仅仅通过</code>ClassLoader</code>的getResources方法获取classpath.
+	 */
+	public static boolean isOnlyResourceClassPath()
+	{
+		String b = Utility.getProperty(ANT_CONFIG_PREFIX + "resClassPath");
+		return (new BooleanConverter()).convertToBoolean(b);
 	}
 
 	/**
@@ -318,11 +447,11 @@ public class AntCG
 	/**
 	 * 根据ANT_TOOL_UID_PATH_PROPERTY设置的值来判断是否需要加上唯一的路径.
 	 *
-	 * @see #ANT_TOOL_UID_PATH_PROPERTY
+	 * @see #ANT_UID_PATH_PROPERTY
 	 */
 	private static String resolvePath(String path)
 	{
-		String addUID = Utility.getProperty(ANT_TOOL_UID_PATH_PROPERTY);
+		String addUID = Utility.getProperty(ANT_UID_PATH_PROPERTY);
 		if (addUID == null)
 		{
 			return path;
@@ -343,7 +472,7 @@ public class AntCG
 	 */
 	public static String getCompiler()
 	{
-		String compiler = Utility.getProperty(ANT_TOOL_CONFIG_PREFIX + "compiler");
+		String compiler = Utility.getProperty(ANT_CONFIG_PREFIX + "compiler");
 		if (compiler == null)
 		{
 			compiler = "extJavac";
@@ -352,267 +481,288 @@ public class AntCG
 	}
 
 	/**
-	 * <code>CompileClassLoader</code>的缓存, 主键为编译的输出目录+parent
+	 * <code>AntClassLoader</code>的缓存, 主键为编译的输出目录+parent
 	 */
-	private static Map cclCache = new ReferenceMap(ReferenceMap.HARD, ReferenceMap.WEAK);
+	private static Map aclCache = new ReferenceMap(ReferenceMap.HARD, ReferenceMap.WEAK);
 
 	/**
-	 * 从缓存中获取<code>CompileClassLoader</code>, 如果没有则创建一个.
+	 * 从缓存中获取<code>AntClassLoader</code>, 如果没有则创建一个.
 	 */
-	private static synchronized CompileClassLoader getClassLoader(
+	private static synchronized AntClassLoader getClassLoader(
 			File basePath, ClassLoader parent)
 	{
-		CCL_KEY key = new CCL_KEY(basePath, parent);
-		CompileClassLoader ccl = (CompileClassLoader) cclCache.get(key);
-		if (ccl == null)
+		AntClassLoaderKey key = new AntClassLoaderKey(basePath, parent);
+		AntClassLoader acl = (AntClassLoader) aclCache.get(key);
+		if (acl == null)
 		{
-			ccl = new CompileClassLoader(parent, basePath);
-			cclCache.put(key, ccl);
+			acl = new AntClassLoader(parent, basePath);
+			aclCache.put(key, acl);
 		}
-		return ccl;
-	}
-
-	private static class MyJavac extends Javac
-	{
-		public void setSrcFile(File file)
-		{
-			this.compileList = new File[]{file};
-		}
-
-		public void compile()
-		{
-			super.compile();
-		}
-
+		return acl;
 	}
 
 	/**
-	 * <code>CompileClassLoader</code>缓存的主键类
+	 * classpath的过滤器.
 	 */
-	private static class CCL_KEY
+	public interface ClassPathFilter
 	{
-		private final File basePath;
-		private int hashCode;
-
 		/**
-		 * 这里使用<code>WeakReference</code>来引用父ClassLoader, 这样就不会影响其正常的释放.
+		 * 判断给出的classpath是否有效.
 		 */
-		private final WeakReference parent;
-
-		public CCL_KEY(File basePath, ClassLoader parent)
-		{
-			this.basePath = basePath;
-			this.parent = new WeakReference(parent);
-			this.hashCode = basePath == null ? 0 : basePath.hashCode();
-			this.hashCode ^= parent == null ? 0 : parent.hashCode();
-		}
-
-		public int hashCode()
-		{
-			return this.hashCode;
-		}
-
-		public boolean equals(Object obj)
-		{
-			if (this == obj)
-			{
-				return true;
-			}
-			if (obj instanceof CCL_KEY)
-			{
-				CCL_KEY other = (CCL_KEY) obj;
-				return Utility.objectEquals(this.basePath, other.basePath)
-						&& Utility.objectEquals(this.parent.get(), other.parent.get());
-			}
-			return false;
-		}
+		boolean isValid(String classPath);
 
 	}
 
-	private static class CompileClassLoader extends ClassLoader
+}
+
+/**
+ * 可以设置单个文件的javac.
+ */
+class SingleFileJavac extends Javac
+{
+	public void setSrcFile(File file)
 	{
-		private final File basePath;
-		private final Map msgCache = new HashMap();
-		private Method defineMethod;
+		this.compileList = new File[]{file};
+	}
 
-		public CompileClassLoader(ClassLoader parent, File basePath)
+	public void compile()
+	{
+		super.compile();
+	}
+
+}
+
+/**
+ * <code>AntClassLoader</code>缓存的主键类.
+ */
+class AntClassLoaderKey
+{
+	private final File basePath;
+	private int hashCode;
+
+	/**
+	 * 这里使用<code>WeakReference</code>来引用父ClassLoader, 这样就不会影响其正常的释放.
+	 */
+	private final WeakReference parent;
+
+	public AntClassLoaderKey(File basePath, ClassLoader parent)
+	{
+		this.basePath = basePath;
+		this.parent = new WeakReference(parent);
+		this.hashCode = basePath == null ? 0 : basePath.hashCode();
+		this.hashCode ^= parent == null ? 0 : parent.hashCode();
+	}
+
+	public int hashCode()
+	{
+		return this.hashCode;
+	}
+
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
 		{
-			super(parent);
-			this.basePath = basePath;
-			try
-			{
-				Class cl = Class.forName("java.lang.ClassLoader");
-				Class[] paramTypes = {String.class, byte[].class, int.class, int.class};
-				this.defineMethod = cl.getDeclaredMethod("defineClass", paramTypes);
-				this.defineMethod.setAccessible(true);
-			}
-			catch (Throwable ex)
-			{
-				this.defineMethod = null;
-			}
+			return true;
 		}
-
-		public void addMessage(String className, String msg)
+		if (obj instanceof AntClassLoaderKey)
 		{
-			this.msgCache.put(className, msg);
+			AntClassLoaderKey other = (AntClassLoaderKey) obj;
+			return Utility.objectEquals(this.basePath, other.basePath)
+					&& Utility.objectEquals(this.parent.get(), other.parent.get());
 		}
+		return false;
+	}
 
-		protected Class findClass(String name)
-				throws ClassNotFoundException
+}
+
+/**
+ * 用于载入ant编译后的类的<code>ClassLoader</code>.
+ */
+class AntClassLoader extends ClassLoader
+{
+	private final File basePath;
+	private final Map msgCache = new HashMap();
+	private Method defineMethod;
+
+	public AntClassLoader(ClassLoader parent, File basePath)
+	{
+		super(parent);
+		this.basePath = basePath;
+		try
 		{
-			try
+			Class cl = Class.forName("java.lang.ClassLoader");
+			Class[] paramTypes = {String.class, byte[].class, int.class, int.class};
+			this.defineMethod = cl.getDeclaredMethod("defineClass", paramTypes);
+			this.defineMethod.setAccessible(true);
+		}
+		catch (Throwable ex)
+		{
+			this.defineMethod = null;
+		}
+	}
+
+	public void addMessage(String className, String msg)
+	{
+		this.msgCache.put(className, msg);
+	}
+
+	protected Class findClass(String name)
+			throws ClassNotFoundException
+	{
+		try
+		{
+			File f = new File(this.basePath, name.replace('.', File.separatorChar) + ".class");
+			if (f.isFile())
 			{
-				File f = new File(this.basePath, name.replace('.', File.separatorChar) + ".class");
-				if (f.isFile())
+				FileInputStream fis = new FileInputStream(f);
+				byte[] buf = new byte[(int) f.length()];
+				fis.read(buf);
+				Class c = null;
+				if (this.defineMethod != null)
 				{
-					FileInputStream fis = new FileInputStream(f);
-					byte[] buf = new byte[(int) f.length()];
-					fis.read(buf);
-					Class c = null;
-					if (this.defineMethod != null)
+					try
 					{
-						try
-						{
-							Object[] args = {name, buf, new Integer(0), new Integer(buf.length)};
-							c = (Class) this.defineMethod.invoke(this.getParent(), args);
-						}
-						catch (Throwable ex)
-						{
-							c = this.defineClass(name, buf, 0, buf.length);
-						}
+						Object[] args = {name, buf, new Integer(0), new Integer(buf.length)};
+						c = (Class) this.defineMethod.invoke(this.getParent(), args);
 					}
-					else
+					catch (Throwable ex)
 					{
 						c = this.defineClass(name, buf, 0, buf.length);
 					}
-					// 类载入成功, 可以将缓存的消息清除.
-					this.msgCache.remove(name);
-					return c;
 				}
 				else
 				{
-					Class c = super.findClass(name);
-					if (c == null)
-					{
-						throw new ClassNotFoundException("name:" + name + ", file:" + f
-								+ ", message:" + this.msgCache.get(name));
-					}
-					return c;
+					c = this.defineClass(name, buf, 0, buf.length);
 				}
+				// 类载入成功, 可以将缓存的消息清除.
+				this.msgCache.remove(name);
+				return c;
 			}
-			catch (Exception ex)
+			else
 			{
-				throw new ClassNotFoundException("message:" + this.msgCache.get(name), ex);
-			}
-		}
-
-		public URL findResource(String name)
-		{
-			File f = new File(this.basePath, name.replace('.', File.separatorChar) + ".class");
-			if (f.isFile())
-			{
-				try
+				Class c = super.findClass(name);
+				if (c == null)
 				{
-					return f.toURL();
+					throw new ClassNotFoundException("name:" + name + ", file:" + f
+							+ ", message:" + this.msgCache.get(name));
 				}
-				catch (MalformedURLException ex) {}
+				return c;
 			}
-			return super.getResource(name);
 		}
-
-		protected Enumeration findResources(String name)
-				throws IOException
+		catch (Exception ex)
 		{
-			File f = new File(this.basePath, name.replace('.', File.separatorChar) + ".class");
-			if (f.isFile())
-			{
-				return Collections.enumeration(Arrays.asList(new URL[]{f.toURL()}));
-			}
-			return super.findResources(name);
+			throw new ClassNotFoundException("message:" + this.msgCache.get(name), ex);
 		}
-
 	}
 
-	private static class CompileLogger
-			implements BuildLogger
+	public URL findResource(String name)
 	{
-		private final StringAppender out = StringTool.createStringAppender();
-
-		public synchronized void messageLogged(BuildEvent event)
+		File f = new File(this.basePath, name.replace('.', File.separatorChar) + ".class");
+		if (f.isFile())
 		{
-			Throwable ex = event.getException();
-			int level = event.getPriority();
-			if (level <= Project.MSG_WARN || ex != null)
+			try
 			{
-				if (level == Project.MSG_ERR || ex != null)
-				{
-					this.out.append("Error:").appendln();
-				}
-				else
-				{
-					this.out.append("Warn:").appendln();
-				}
-				this.out.append(event.getMessage());
-				if (ex != null)
-				{
-					this.out.appendln().append("Exception:").appendln();
-					StringTool.appendStackTrace(ex, this.out);
-				}
-				this.out.appendln();
+				return f.toURL();
 			}
+			catch (MalformedURLException ex) {}
 		}
+		return super.getResource(name);
+	}
 
-		public void buildStarted(BuildEvent event)
+	protected Enumeration findResources(String name)
+			throws IOException
+	{
+		File f = new File(this.basePath, name.replace('.', File.separatorChar) + ".class");
+		if (f.isFile())
 		{
-			this.messageLogged(event);
+			return Collections.enumeration(Arrays.asList(new URL[]{f.toURL()}));
 		}
+		return super.findResources(name);
+	}
 
-		public void buildFinished(BuildEvent event)
+}
+
+/**
+ * ant编译时的日志.
+ */
+class AntCompileLogger
+		implements BuildLogger
+{
+	private final StringAppender out = StringTool.createStringAppender();
+
+	public synchronized void messageLogged(BuildEvent event)
+	{
+		Throwable ex = event.getException();
+		int level = event.getPriority();
+		if (level <= Project.MSG_WARN || ex != null)
 		{
-			this.messageLogged(event);
+			if (level == Project.MSG_ERR || ex != null)
+			{
+				this.out.append("Error:").appendln();
+			}
+			else
+			{
+				this.out.append("Warn:").appendln();
+			}
+			this.out.append(event.getMessage());
+			if (ex != null)
+			{
+				this.out.appendln().append("Exception:").appendln();
+				StringTool.appendStackTrace(ex, this.out);
+			}
+			this.out.appendln();
 		}
+	}
 
-		public void targetStarted(BuildEvent event)
-		{
-			this.messageLogged(event);
-		}
+	public void buildStarted(BuildEvent event)
+	{
+		this.messageLogged(event);
+	}
 
-		public void targetFinished(BuildEvent event)
-		{
-			this.messageLogged(event);
-		}
+	public void buildFinished(BuildEvent event)
+	{
+		this.messageLogged(event);
+	}
 
-		public void taskStarted(BuildEvent event)
-		{
-			this.messageLogged(event);
-		}
+	public void targetStarted(BuildEvent event)
+	{
+		this.messageLogged(event);
+	}
 
-		public void taskFinished(BuildEvent event)
-		{
-			this.messageLogged(event);
-		}
+	public void targetFinished(BuildEvent event)
+	{
+		this.messageLogged(event);
+	}
 
-		public String toString()
-		{
-			return this.out.toString();
-		}
+	public void taskStarted(BuildEvent event)
+	{
+		this.messageLogged(event);
+	}
 
-		public void setMessageOutputLevel(int level)
-		{
-		}
+	public void taskFinished(BuildEvent event)
+	{
+		this.messageLogged(event);
+	}
 
-		public void setEmacsMode(boolean emacsMode)
-		{
-		}
+	public String toString()
+	{
+		return this.out.toString();
+	}
 
-		public void setOutputPrintStream(PrintStream output)
-		{
-		}
+	public void setMessageOutputLevel(int level)
+	{
+	}
 
-		public void setErrorPrintStream(PrintStream err)
-		{
-		}
+	public void setEmacsMode(boolean emacsMode)
+	{
+	}
 
+	public void setOutputPrintStream(PrintStream output)
+	{
+	}
+
+	public void setErrorPrintStream(PrintStream err)
+	{
 	}
 
 }
