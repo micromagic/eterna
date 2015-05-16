@@ -91,16 +91,27 @@ public class TemplateBuilder extends AbstractGenerator
 	 * 子元素间的连接符.
 	 */
 	protected String subLink = ", ";
+
+	/**
+	 * 默认子元素列表.
+	 */
+	private static final String[] DEFAULT_CELLS = new String[]{"?"};
 	/**
 	 * 每个子元素的值.
 	 */
-	private static final String[] DEFAULT_CELLS = new String[]{"?"};
 	protected String[] subCells = DEFAULT_CELLS;
+	/**
+	 * 子模板中名称对应的索引值.
+	 */
 	protected int[] subIndexs;
 	/**
 	 * 是否设置了子句标识.
 	 */
 	protected boolean hasSub;
+	/**
+	 * 是否以名称作为生成子句的标准.
+	 */
+	protected boolean nameSub;
 
 	/**
 	 * 模板中参数的个数.
@@ -287,6 +298,11 @@ public class TemplateBuilder extends AbstractGenerator
 			{
 				this.arrayParam = (new BooleanConverter()).convertToBoolean(tmp);
 			}
+			tmp = (String) this.getAttribute("name_sub");
+			if (!StringTool.isEmpty(tmp))
+			{
+				this.nameSub = (new BooleanConverter()).convertToBoolean(tmp);
+			}
 		}
 	}
 
@@ -329,9 +345,9 @@ public class TemplateBuilder extends AbstractGenerator
 		}
 		else
 		{
-			String[] colNames = new String[this.maxIndex + 1];
-			Arrays.fill(colNames, "");
 			String[] tmpArr = StringTool.separateString(colName, VALUE_SPLIT, true);
+			String[] colNames = new String[this.nameSub ? tmpArr.length : this.maxIndex + 1];
+			Arrays.fill(colNames, "");
 			System.arraycopy(tmpArr, 0, colNames, 0, Math.min(tmpArr.length, colNames.length));
 
 			int size = this.template.length() + (this.subTemplates.length - 1) * colName.length();
@@ -430,8 +446,15 @@ public class TemplateBuilder extends AbstractGenerator
 		Object[] values;
 		if (!this.arrayParam)
 		{
-			// 参数不是数组, 需要根据分隔符进行分割
-			values = StringTool.separateString((String) value, this.valueSplit);
+			if (value instanceof Object[])
+			{
+				values = (Object[]) value;
+			}
+			else
+			{
+				// 参数不是数组, 需要根据分隔符进行分割
+				values = StringTool.separateString((String) value, this.valueSplit);
+			}
 		}
 		else
 		{
@@ -481,7 +504,16 @@ class SubFlagTemplate
 	public String getSub(Object value, TemplateBuilder builder, ConditionProperty cp,
 			String[] colNames, ObjectRef valueOut)
 	{
-		Object[] values = builder.getValues(value, cp);
+		Object[] values;
+		if (builder.nameSub)
+		{
+			values = new Object[colNames.length];
+			Arrays.fill(values, value);
+		}
+		else
+		{
+			values = builder.getValues(value, cp);
+		}
 		if (values != null && values.length > 0)
 		{
 			valueOut.setObject(values);
@@ -500,7 +532,24 @@ class SubFlagTemplate
 					{
 						if (j > 0)
 						{
-							sqlPart.append(colNames[builder.subIndexs[j - 1]]);
+							if (builder.nameSub)
+							{
+								int index = builder.subIndexs[j - 1];
+								if (index == 0)
+								{
+									// 如果是以列名作为子元素循环且名称索引值为0, 使用当前列名
+									sqlPart.append(colNames[i]);
+								}
+								else
+								{
+
+									sqlPart.append(colNames[index]);
+								}
+							}
+							else
+							{
+								sqlPart.append(colNames[builder.subIndexs[j - 1]]);
+							}
 						}
 						sqlPart.append(builder.subCells[j]);
 					}

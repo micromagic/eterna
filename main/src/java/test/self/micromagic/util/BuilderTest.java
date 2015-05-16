@@ -53,6 +53,17 @@ public class BuilderTest extends TestCase
 				"a,b", "1,2,3", new EmptyConditionProperty("a,b"));
 		assertEquals(3, con.preparers.length);
 		assertEquals("b x (a like ? or a like ? or a like ?)", con.scriptPart);
+
+		t = new TemplateBuilder();
+		t.setAttribute("template", "($)");
+		t.setAttribute("sub_cell", "[C] like ?");
+		t.setAttribute("sub_link", " or ");
+		t.setAttribute("name_sub", "true");
+		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
+		con = t.buildeCondition(
+				"a,b,c,d,e", "0", new EmptyConditionProperty("a,b,c,d,e"));
+		assertEquals(5, con.preparers.length);
+		assertEquals("(a like ? or b like ? or c like ? or d like ? or e like ?)", con.scriptPart);
 	}
 
 	public void testTemplate1()
