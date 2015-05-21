@@ -142,7 +142,10 @@ public class SearchManagerImpl extends AbstractGenerator
 				Search.ATTR_SEARCH_PARAM);
 		if (sParam != null)
 		{
-			this.pageNum = sParam.pageNum - this.attributes.pageStart;
+			if (sParam.pageNum >= this.attributes.pageStart)
+			{
+				this.pageNum = sParam.pageNum - this.attributes.pageStart;
+			}
 			if (sParam.pageSize > 0)
 			{
 				this.pageSize = sParam.pageSize > MAX_PAGE_SIZE ?
@@ -160,13 +163,20 @@ public class SearchManagerImpl extends AbstractGenerator
 		try
 		{
 			String pn = data.getRequestParameter(this.attributes.pageNumTag);
-			this.pageNum = Integer.parseInt(pn) - this.attributes.pageStart;
+			if (pn != null)
+			{
+				this.pageNum = Integer.parseInt(pn) - this.attributes.pageStart;
+			}
 		}
 		catch (Exception ex) {}
 		try
 		{
-			int tmpI = Integer.parseInt(data.getRequestParameter(this.attributes.pageSizeTag));
-			this.pageSize = tmpI < 0 ? -1 : tmpI > MAX_PAGE_SIZE ? MAX_PAGE_SIZE : tmpI;
+			String ps = data.getRequestParameter(this.attributes.pageSizeTag);
+			if (ps != null)
+			{
+				int tmpI = Integer.parseInt(ps);
+				this.pageSize = tmpI < 0 ? -1 : tmpI > MAX_PAGE_SIZE ? MAX_PAGE_SIZE : tmpI;
+			}
 		}
 		catch (Exception ex) {}
 		try

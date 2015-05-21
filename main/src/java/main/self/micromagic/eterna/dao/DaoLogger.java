@@ -22,31 +22,25 @@ import java.sql.SQLException;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.util.logging.TimeLogger;
 
 /**
  * 用于记录特殊的SQL日志.
  */
-public interface SpecialLog
+public interface DaoLogger extends EternaObject
 {
-	/**
-	 * 初始化这个日志记录器.
-	 */
-	void initSpecialLog(EternaFactory factory) throws EternaException;
-
 	/**
 	 * 记录日志.
 	 *
 	 * @param base       发生日志的数据库操作对象
-	 * @param xmlLog     已记录日志信息的xml节点
-	 * @param usedTime   sql执行用时, 会根据jdk版本给出毫秒或纳秒, 请使用
-	 *                   TimeLogger的formatPassTime方法格式化
-	 * @param exception  出错时抛出的异常
-	 * @param conn       执行<code>SQLAdapter</code>所使用的数据库连接
-	 * @see TimeLogger#formatPassTime(long)
+	 * @param node       记录了相关信息的xml节点
+	 * @param usedTime   数据操作执行用时, 请使用formatPassTime方法格式化后的时间
+	 * @param error      出错时抛出的异常
+	 * @param conn       执行数据操作执所使用的数据库连接
+	 * @see TimeLogger#formatPassTime(boolean)
 	 */
-	void logSQL(Dao base, Element xmlLog, long usedTime, Throwable exception, Connection conn)
+	void log(Dao base, Element node, TimeLogger usedTime, Throwable error, Connection conn)
 			throws EternaException, SQLException;
 
 }

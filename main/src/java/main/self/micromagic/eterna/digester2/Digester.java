@@ -39,6 +39,7 @@ import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.container.ThreadCache;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -335,16 +336,17 @@ public class Digester
 	 */
 	public void push(Object obj)
 	{
-		this.stack.add(obj);
+		this.getStack().add(obj);
 	}
 	/**
 	 * 根据索引, 从堆栈中获取一个对象.
 	 */
 	public Object peek(int index)
 	{
-		if (index < this.stack.size())
+		List stack = this.getStack();
+		if (index < stack.size())
 		{
-			return this.stack.get(this.stack.size() - 1 - index);
+			return stack.get(stack.size() - 1 - index);
 		}
 		return null;
 	}
@@ -353,12 +355,32 @@ public class Digester
 	 */
 	public Object pop()
 	{
-		if (this.stack.size() > 0)
+		List stack = this.getStack();
+		if (stack.size() > 0)
 		{
-			return this.stack.remove(this.stack.size() - 1);
+			return stack.remove(stack.size() - 1);
 		}
 		return null;
 	}
-	private final List stack = new ArrayList();
+
+	/**
+	 * 在线程缓存中存放堆栈对象的名称.
+	 */
+	private static final String DIGESTER_STACK_FLAG = "eterna.digester.stack";
+
+	/**
+	 * 从当前线程中获取一个堆栈.
+	 */
+	private List getStack()
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		List r = (List) cache.getProperty(DIGESTER_STACK_FLAG);
+		if (r == null)
+		{
+			r = new ArrayList();
+			cache.setProperty(DIGESTER_STACK_FLAG, r);
+		}
+		return r;
+	}
 
 }

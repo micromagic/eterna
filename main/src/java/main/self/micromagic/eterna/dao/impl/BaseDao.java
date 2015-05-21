@@ -29,7 +29,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.StringTokenizer;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -38,11 +37,15 @@ import org.dom4j.io.XMLWriter;
 
 import self.micromagic.coder.Base64;
 import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.DaoLogger;
 import self.micromagic.eterna.dao.PreparedStatementWrap;
-import self.micromagic.eterna.dao.SpecialLog;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Factory;
 import self.micromagic.util.FormatTool;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.logging.TimeLogger;
 
@@ -74,10 +77,25 @@ public abstract class BaseDao extends AbstractDao
 		}
 	}
 
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (super.initialize(factory))
+		{
+			return true;
+		}
+		if (this.logTypeName != null)
+		{
+			this.objLogType = parseLogType(this.logTypeName, factory);
+		}
+		return false;
+	}
+
 	protected void copy(Dao copyObj)
 	{
 		super.copy(copyObj);
 		BaseDao other = (BaseDao) copyObj;
+		other.logTypeName = this.logTypeName;
 		other.objLogType = this.objLogType;
 	}
 
@@ -91,10 +109,11 @@ public abstract class BaseDao extends AbstractDao
 		return this.objLogType | LOG_TYPE;
 	}
 
-	public void setLogType(String logType)
+	public void setLogTypeName(String logType)
 	{
-		this.objLogType = parseLogType(logType);
+		this.logTypeName = logType;
 	}
+	private String logTypeName;
 
 	/**
 	 * 生成一个记录日志的节点.
@@ -160,12 +179,13 @@ public abstract class BaseDao extends AbstractDao
 	/**
 	 * 设置全局的日志类型.
 	 */
-	protected static void setGlobalLogType(String type)
+	static void setGlobalLogType(String type)
 	{
-		LOG_TYPE = parseLogType(type);
+		Factory f = ContainerManager.getGlobalContainer().getFactory();
+		LOG_TYPE = parseLogType(type, f instanceof EternaFactory ? (EternaFactory) f : null);
 	}
 
-	private static int parseLogType(String logType)
+	private static int parseLogType(String logType, EternaFactory factory)
 	{
 		try
 		{
@@ -175,49 +195,62 @@ public abstract class BaseDao extends AbstractDao
 		{
 			if (log.isDebugEnabled())
 			{
-				log.debug("SQL log type [" + logType + "] isn't a number.", ex);
+				log.debug("Dao log type [" + logType + "] isn't a number.", ex);
 			}
-			StringTokenizer token = new StringTokenizer(logType, ", ");
+			String[] arr = StringTool.separateString(logType, ", ");
 			int tmpType = 0;
-			while (token.hasMoreTokens())
+			for (int i = 0; i < arr.length; i++)
 			{
-				String tmp = token.nextToken().trim();
-				if ("".equals(tmp))
-				{
-					continue;
-				}
-				if ("save".equals(tmp))
+				String tmp = arr[i];
+				if ("save".equalsIgnoreCase(tmp) || "2".equals(tmp))
 				{
 					tmpType |= DAO_LOG_TYPE_SAVE;
 				}
-				else if ("print".equals(tmp))
+				else if ("print".equalsIgnoreCase(tmp) || "1".equals(tmp))
 				{
 					tmpType |= DAO_LOG_TYPE_PRINT;
 				}
-				else if ("special".equals(tmp))
-				{
-					tmpType |= DAO_LOG_TYPE_SPECIAL;
-				}
-				else if ("none".equals(tmp))
+				else if ("none".equalsIgnoreCase(tmp))
 				{
 					tmpType |= DAO_LOG_TYPE_NONE;
+					// 如果有忽略设置, 则其它的都无效
+					break;
+				}
+				else
+				{
+					if (factory == null)
+					{
+						log.error("Error dao log type [" + tmp + "].");
+					}
+					else
+					{
+						int index = factory.getDaoLoggerIndex(tmp);
+						if (index == -1)
+						{
+							log.error("Error dao log type [" + tmp + "].");
+						}
+						else
+						{
+							tmpType |= (1 << (index + 3));
+						}
+					}
 				}
 			}
 			return tmpType;
 		}
 	}
 
-	private static void logSQL(Dao base, long usedTime, Throwable exception, Element logNode)
+	private static void log(Dao base, TimeLogger usedTime, Throwable error, Element logNode)
 			throws SQLException, EternaException
 	{
 		logNode.addAttribute("name", base.getName());
-		logNode.addAttribute("time", FormatTool.formatDatetime(new java.util.Date(System.currentTimeMillis())));
-		logNode.addAttribute("usedTime", TimeLogger.formatPassTime(usedTime));
-		if (exception != null)
+		logNode.addAttribute("time", FormatTool.getCurrentDatetimeString());
+		logNode.addAttribute("usedTime", usedTime.formatPassTime(false));
+		if (error != null)
 		{
-			logNode.addElement("error").addText(exception.toString());
+			logNode.addElement("error").addText(error.toString());
 		}
-		logNode.addElement("prepared-sql").addText(base.getPreparedScript());
+		logNode.addElement("script").addText(base.getPreparedScript());
 		Element params = logNode.addElement("parameters");
 		PreparedValueReader rpv = new PreparedValueReader(params);
 		base.prepareValues(rpv);
@@ -226,18 +259,14 @@ public abstract class BaseDao extends AbstractDao
 	/**
 	 * 记录sql日志.
 	 *
-	 * @param base       要记录的数据库操作对象
-	 * @param usedTime   sql执行用时, 会根据jdk版本给出毫秒或纳秒, 请使用
-	 *                   TimeLogger的formatPassTime方法格式化
-	 *                   执行时间可使用TimeLogger的getTime方法, 并计算其差值
-	 * @param exception  执行时出现的异常
-	 * @param conn       执行此sql使用的数据库连接
-	 * @return  是否保存了sql日志
-	 * @see TimeLogger#formatPassTime(long)
-	 * @see TimeLogger#getTime()
+	 * @param base      发生日志的数据库操作对象
+	 * @param usedTime  数据操作执行用时, 请使用formatPassTime方法格式化后的时间
+	 * @param error     执行时出现的异常
+	 * @param conn      执行此数据操作使用的数据库连接
+	 * @return  是否成功记录了数据操作日志
+	 * @see TimeLogger#formatPassTime(boolean)
 	 */
-	protected static boolean logSQL(Dao base, long usedTime, Throwable exception,
-			Connection conn)
+	protected static boolean log(Dao base, TimeLogger usedTime, Throwable error, Connection conn)
 			throws SQLException, EternaException
 	{
 		int logType = base.getLogType();
@@ -255,7 +284,7 @@ public abstract class BaseDao extends AbstractDao
 				Element nowNode = data.getCurrentNode();
 				if (nowNode != null)
 				{
-					logSQL(base, usedTime, exception, nowNode.addElement(base.getType()));
+					log(base, usedTime, error, nowNode.addElement(base.getType()));
 				}
 			}
 		}
@@ -263,18 +292,28 @@ public abstract class BaseDao extends AbstractDao
 		{
 			theLog = DocumentHelper.createElement(base.getType());
 		}
-		logSQL(base, usedTime, exception, theLog);
-		if ((logType & DAO_LOG_TYPE_SPECIAL) != 0)
+		log(base, usedTime, error, theLog);
+		if ((logType & SPECIAL_MASK) != 0)
 		{
-			SpecialLog sl = base.getFactory().getSpecialLog();
-			if (sl != null)
+			int flag = 0x8;
+			EternaFactory factory = base.getFactory();
+			int count = factory.getDaoLoggerCount();
+			for (int i = 0; i < count; i++)
 			{
-				sl.logSQL(base, theLog, usedTime, exception, conn);
+				if ((logType & flag) != 0)
+				{
+					DaoLogger sLog = factory.getDaoLogger(i);
+					if (sLog != null)
+					{
+						sLog.log(base, theLog, usedTime, error, conn);
+					}
+				}
+				flag <<= 1;
 			}
 		}
 		if ((logType & DAO_LOG_TYPE_PRINT) != 0)
 		{
-			log.info("sql log:\n" + theLog.asXML());
+			log.info("Dao log:\n" + theLog.asXML());
 		}
 		return (logType & DAO_LOG_TYPE_SAVE) != 0;
 	}
@@ -282,379 +321,375 @@ public abstract class BaseDao extends AbstractDao
 	/**
 	 * 记录sql日志.
 	 *
-	 * @param usedTime   sql执行用时, 会根据jdk版本给出毫秒或纳秒, 请使用
-	 *                   TimeLogger的formatPassTime方法格式化
-	 *                   执行时间可使用TimeLogger的getTime方法, 并计算其差值
-	 * @param exception  执行时出现的异常
-	 * @param conn       执行此sql使用的数据库连接
-	 * @return  是否保存了sql日志
-	 * @see TimeLogger#formatPassTime(long)
-	 * @see TimeLogger#getTime()
+	 * @param usedTime  数据操作执行用时, 请使用formatPassTime方法格式化后的时间
+	 * @param error     执行时出现的异常
+	 * @param conn      执行此数据操作使用的数据库连接
+	 * @return  是否成功记录了数据操作日志
+	 * @see TimeLogger#formatPassTime(boolean)
 	 */
-	protected boolean logSQL(long usedTime, Throwable exception, Connection conn)
+	protected boolean log(TimeLogger usedTime, Throwable error, Connection conn)
 			throws SQLException, EternaException
 	{
-		return logSQL(this, usedTime, exception, conn);
+		return log(this, usedTime, error, conn);
 	}
 
 	public void execute(Connection conn)
 			throws EternaException, SQLException
 	{
-		this.logSQL(0L, null, conn);
+		this.log(new TimeLogger(), null, conn);
 	}
 
-	private static class PreparedValueReader
-			implements PreparedStatementWrap
+}
+
+class PreparedValueReader
+		implements PreparedStatementWrap
+{
+	private final Element paramsRoot;
+	private Base64 base64;
+
+	public PreparedValueReader(Element paramsRoot)
 	{
-		private final Element paramsRoot;
-		private Base64 base64;
+		this.paramsRoot = paramsRoot;
+	}
 
-		public PreparedValueReader(Element paramsRoot)
+	private String getStr(byte[] buf)
+	{
+		if (this.base64 == null)
 		{
-			this.paramsRoot = paramsRoot;
+			this.base64 = new Base64();
 		}
+		return this.base64.byteArrayToBase64(buf);
+	}
 
-		private String getStr(byte[] buf)
+	private void addParameterName(Element parameter, String parameterName)
+	{
+		if (parameterName != null && parameterName.length() > 0)
 		{
-			if (this.base64 == null)
-			{
-				this.base64 = new Base64();
-			}
-			return this.base64.byteArrayToBase64(buf);
+			parameter.addAttribute("name", parameterName);
 		}
+	}
 
-		private void addParameterName(Element parameter, String parameterName)
+	public void setNull(String parameterName, int parameterIndex, int sqlType)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("sqlType", sqlType + "");
+		parameter.addAttribute("isNull", "true");
+	}
+
+	public void setBoolean(String parameterName, int parameterIndex, boolean x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "boolean");
+		parameter.addText(x ? "true" : "false");
+	}
+
+	public void setByte(String parameterName, int parameterIndex, byte x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "byte");
+		parameter.addText(x + "");
+	}
+
+	public void setShort(String parameterName, int parameterIndex, short x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "short");
+		parameter.addText(x + "");
+	}
+
+	public void setInt(String parameterName, int parameterIndex, int x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "int");
+		parameter.addText(x + "");
+	}
+
+	public void setLong(String parameterName, int parameterIndex, long x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "long");
+		parameter.addText(x + "");
+	}
+
+	public void setFloat(String parameterName, int parameterIndex, float x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "float");
+		parameter.addText(x + "");
+	}
+
+	public void setDouble(String parameterName, int parameterIndex, double x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "double");
+		parameter.addText(x + "");
+	}
+
+	public void setString(String parameterName, int parameterIndex, String x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "String");
+		if (x != null)
 		{
-			if (parameterName != null && parameterName.length() > 0)
-			{
-				parameter.addAttribute("name", parameterName);
-			}
+			parameter.addText(x);
 		}
-
-		public void setNull(String parameterName, int parameterIndex, int sqlType)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("sqlType", sqlType + "");
 			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setBoolean(String parameterName, int parameterIndex, boolean x)
+	public void setBytes(String parameterName, int parameterIndex, byte x[])
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Bytes");
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "boolean");
-			parameter.addText(x ? "true" : "false");
+			parameter.addText(this.getStr(x));
 		}
-
-		public void setByte(String parameterName, int parameterIndex, byte x)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "byte");
-			parameter.addText(x + "");
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setShort(String parameterName, int parameterIndex, short x)
+	public void setDate(String parameterName, int parameterIndex, Date x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Date");
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "short");
-			parameter.addText(x + "");
+			parameter.addText(FormatTool.formatDate(x));
 		}
-
-		public void setInt(String parameterName, int parameterIndex, int x)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "int");
-			parameter.addText(x + "");
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setLong(String parameterName, int parameterIndex, long x)
+	public void setDate(String parameterName, int parameterIndex, Date x, Calendar cal)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Date");
+		if (cal != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "long");
-			parameter.addText(x + "");
+			parameter.addAttribute("calendar", cal.toString());
 		}
-
-		public void setFloat(String parameterName, int parameterIndex, float x)
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "float");
-			parameter.addText(x + "");
+			parameter.addText(FormatTool.formatDate(x));
 		}
-
-		public void setDouble(String parameterName, int parameterIndex, double x)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "double");
-			parameter.addText(x + "");
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setString(String parameterName, int parameterIndex, String x)
+	public void setTime(String parameterName, int parameterIndex, Time x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Time");
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "String");
-			if (x != null)
-			{
-				parameter.addText(x);
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addText(FormatTool.formatTime(x));
 		}
-
-		public void setBytes(String parameterName, int parameterIndex, byte x[])
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Bytes");
-			if (x != null)
-			{
-				parameter.addText(this.getStr(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setDate(String parameterName, int parameterIndex, Date x)
+	public void setTime(String parameterName, int parameterIndex, Time x, Calendar cal)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Time");
+		if (cal != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Date");
-			if (x != null)
-			{
-				parameter.addText(FormatTool.formatDate(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("calendar", cal.toString());
 		}
-
-
-		public void setDate(String parameterName, int parameterIndex, Date x, Calendar cal)
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Date");
-			if (cal != null)
-			{
-				parameter.addAttribute("calendar", cal.toString());
-			}
-			if (x != null)
-			{
-				parameter.addText(FormatTool.formatDate(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addText(FormatTool.formatTime(x));
 		}
-
-		public void setTime(String parameterName, int parameterIndex, Time x)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Time");
-			if (x != null)
-			{
-				parameter.addText(FormatTool.formatTime(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setTime(String parameterName, int parameterIndex, Time x, Calendar cal)
+	public void setTimestamp(String parameterName, int parameterIndex, Timestamp x)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Datetime");
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Time");
-			if (cal != null)
-			{
-				parameter.addAttribute("calendar", cal.toString());
-			}
-			if (x != null)
-			{
-				parameter.addText(FormatTool.formatTime(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addText(FormatTool.formatDatetime(x));
 		}
-
-		public void setTimestamp(String parameterName, int parameterIndex, Timestamp x)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Datetime");
-			if (x != null)
-			{
-				parameter.addText(FormatTool.formatDatetime(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setTimestamp(String parameterName, int parameterIndex, Timestamp x, Calendar cal)
+	public void setTimestamp(String parameterName, int parameterIndex, Timestamp x, Calendar cal)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Datetime");
+		if (cal != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Datetime");
-			if (cal != null)
-			{
-				parameter.addAttribute("calendar", cal.toString());
-			}
-			if (x != null)
-			{
-				parameter.addText(FormatTool.formatDatetime(x));
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("calendar", cal.toString());
 		}
-
-		public void setBinaryStream(String parameterName, int parameterIndex, InputStream x, int length)
+		if (x != null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Stream");
-			parameter.addAttribute("length", Integer.toString(length));
-			if (x == null)
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addText(FormatTool.formatDatetime(x));
 		}
-
-		public void setCharacterStream(String parameterName, int parameterIndex, Reader reader, int length)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Chars");
-			parameter.addAttribute("length", Integer.toString(length));
-			if (reader == null)
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setBlob(String parameterName, int parameterIndex, Blob blob)
-				throws SQLException
+	public void setBinaryStream(String parameterName, int parameterIndex, InputStream x, int length)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Stream");
+		parameter.addAttribute("length", Integer.toString(length));
+		if (x == null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Blob");
-			if (blob == null)
-			{
-				parameter.addAttribute("isNull", "true");
-			}
-			else
-			{
-				parameter.addAttribute("length", Long.toString(blob.length()));
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setClob(String parameterName, int parameterIndex, Clob clob)
-				throws SQLException
+	public void setCharacterStream(String parameterName, int parameterIndex, Reader reader, int length)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Chars");
+		parameter.addAttribute("length", Integer.toString(length));
+		if (reader == null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Clob");
-			if (clob == null)
-			{
-				parameter.addAttribute("isNull", "true");
-			}
-			else
-			{
-				parameter.addAttribute("length", Long.toString(clob.length()));
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+	}
 
-		public void setObject(String parameterName, int parameterIndex, Object x, int targetSqlType, int scale)
+	public void setBlob(String parameterName, int parameterIndex, Blob blob)
+			throws SQLException
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Blob");
+		if (blob == null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Object");
-			parameter.addAttribute("sqlType", targetSqlType + "");
-			parameter.addAttribute("scale", scale + "");
-			if (x != null)
-			{
-				parameter.addText(x.toString());
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("isNull", "true");
 		}
-
-		public void setObject(String parameterName, int parameterIndex, Object x, int targetSqlType)
+		else
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Object");
-			parameter.addAttribute("sqlType", targetSqlType + "");
-			if (x != null)
-			{
-				parameter.addText(x.toString());
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("length", Long.toString(blob.length()));
 		}
+	}
 
-		public void setObject(String parameterName, int parameterIndex, Object x) throws SQLException
+	public void setClob(String parameterName, int parameterIndex, Clob clob)
+			throws SQLException
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Clob");
+		if (clob == null)
 		{
-			Element parameter = this.paramsRoot.addElement("parameter");
-			this.addParameterName(parameter, parameterName);
-			parameter.addAttribute("index", Integer.toString(parameterIndex));
-			parameter.addAttribute("type", "Object");
-			if (x != null)
-			{
-				parameter.addText(x.toString());
-			}
-			else
-			{
-				parameter.addAttribute("isNull", "true");
-			}
+			parameter.addAttribute("isNull", "true");
 		}
+		else
+		{
+			parameter.addAttribute("length", Long.toString(clob.length()));
+		}
+	}
 
+	public void setObject(String parameterName, int parameterIndex, Object x, int targetSqlType, int scale)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Object");
+		parameter.addAttribute("sqlType", targetSqlType + "");
+		parameter.addAttribute("scale", scale + "");
+		if (x != null)
+		{
+			parameter.addText(x.toString());
+		}
+		else
+		{
+			parameter.addAttribute("isNull", "true");
+		}
+	}
+
+	public void setObject(String parameterName, int parameterIndex, Object x, int targetSqlType)
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Object");
+		parameter.addAttribute("sqlType", targetSqlType + "");
+		if (x != null)
+		{
+			parameter.addText(x.toString());
+		}
+		else
+		{
+			parameter.addAttribute("isNull", "true");
+		}
+	}
+
+	public void setObject(String parameterName, int parameterIndex, Object x) throws SQLException
+	{
+		Element parameter = this.paramsRoot.addElement("parameter");
+		this.addParameterName(parameter, parameterName);
+		parameter.addAttribute("index", Integer.toString(parameterIndex));
+		parameter.addAttribute("type", "Object");
+		if (x != null)
+		{
+			parameter.addText(x.toString());
+		}
+		else
+		{
+			parameter.addAttribute("isNull", "true");
+		}
 	}
 
 }

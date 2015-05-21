@@ -124,7 +124,7 @@ public abstract class AbstractObject
 				String tmp = factory.getConstantValue(cName);
 				if (!StringTool.isEmpty(tmp))
 				{
-					result.append(tmp);
+					result.append(this.resolveConst(tmp, factory));
 					tempStr = tempStr.substring(endIndex + constSuffix.length());
 					startIndex = tempStr.indexOf(constPrefix);
 				}

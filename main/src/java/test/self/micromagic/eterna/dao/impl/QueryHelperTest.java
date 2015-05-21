@@ -21,12 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import self.micromagic.eterna.dao.EmptyQuery;
+import self.micromagic.eterna.dao.OnlyCountResultSet;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.impl.MySqlQueryHelper;
 import self.micromagic.eterna.dao.impl.OracleQueryHelper;
 import self.micromagic.eterna.dao.impl.QueryHelper;
-import self.micromagic.eterna.sql.EmptyQuery;
-import self.micromagic.eterna.sql.OnlyCountResultSet;
 
 public class QueryHelperTest extends TestCase
 {

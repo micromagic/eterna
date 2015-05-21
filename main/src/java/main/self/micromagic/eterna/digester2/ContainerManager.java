@@ -17,6 +17,7 @@
 package self.micromagic.eterna.digester2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -538,10 +539,37 @@ public class ContainerManager
 	private static final String THREAD_INIT_LEVEL_KEY = "eterna.init.level";
 
 	/**
+	 * 创建一个空的FactoryContainer.
+	 */
+	private static FactoryContainer createEmptyContainer(Map attrs)
+	{
+		FactoryContainerImpl tmp = new FactoryContainerImpl();
+		tmp.setId("<empty>");
+		boolean hasClassLoader = false;
+		if (attrs != null)
+		{
+			int count = attrs.size();
+			Iterator itr = attrs.entrySet().iterator();
+			for (int i = 0; i < count; i++)
+			{
+				Map.Entry e = (Map.Entry) itr.next();
+				tmp.setAttribute((String) e.getKey(), e.getValue());
+			}
+			hasClassLoader = attrs.containsKey(FactoryContainer.CLASSLOADER_FLAG);
+		}
+		if (!hasClassLoader)
+		{
+			tmp.setAttribute(FactoryContainer.CLASSLOADER_FLAG,
+					Utility.getContextClassLoader());
+		}
+		return tmp;
+	}
+
+	/**
 	 * 根据配置字符串创建一个配置资源对象.
 	 *
 	 * @param config     资源的配置
-	 * @param container  需要获取配置对象的FactoryContainer
+	 * @param container  可通过FactoryContainer获取相关的环境对象
 	 */
 	public static ConfigResource createResource(String config, FactoryContainer container)
 	{
@@ -576,7 +604,18 @@ public class ContainerManager
 	 */
 	public static ConfigResource createResource(String config)
 	{
-		return createResource(config, getGlobalContainer());
+		return createResource(config, createEmptyContainer(null));
+	}
+
+	/**
+	 * 根据配置字符串创建一个配置资源对象.
+	 *
+	 * @param config     资源的配置
+	 * @param attrs      存放相关环境对象的map
+	 */
+	public static ConfigResource createResource(String config, Map attrs)
+	{
+		return createResource(config, createEmptyContainer(attrs));
 	}
 
 	/**
@@ -591,7 +630,12 @@ public class ContainerManager
 		{
 			config = "cp:".concat(config);
 		}
-		return (new ClassPathResource()).create(config, loader);
+		if (loader == null)
+		{
+			loader = Utility.getContextClassLoader();
+		}
+		Map attrs = Collections.singletonMap(FactoryContainer.CLASSLOADER_FLAG, loader);
+		return createResource(config, createEmptyContainer(attrs));
 	}
 
 	/**

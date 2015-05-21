@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.sql;
+package self.micromagic.eterna.dao;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.CustomResultIterator;
+import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.impl.QueryImpl;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.util.logging.TimeLogger;
 
 public class EmptyQuery extends QueryImpl
 {
-	private String specialSQL = null;
+	private String specialScript = null;
 
 	public Query createQueryAdapter()
 			throws EternaException
@@ -42,20 +43,20 @@ public class EmptyQuery extends QueryImpl
 	{
 		super.copy(copyObj);
 		EmptyQuery other = (EmptyQuery) copyObj;
-		other.specialSQL = this.specialSQL;
+		other.specialScript = this.specialScript;
 	}
 
-	public void setSpecialSQL(String specialSQL)
+	public void setSpecialScript(String specialScript)
 	{
-		this.specialSQL = specialSQL;
+		this.specialScript = specialScript;
 	}
 
 	public String getPreparedScript()
 			throws EternaException
 	{
-		if (this.specialSQL != null)
+		if (this.specialScript != null)
 		{
-			return this.specialSQL;
+			return this.specialScript;
 		}
 		return super.getPreparedScript();
 	}
@@ -77,7 +78,7 @@ public class EmptyQuery extends QueryImpl
 		}
 		finally
 		{
-			this.logSQL(0L, null, conn);
+			log(new TimeLogger(), null, conn);
 		}
 	}
 

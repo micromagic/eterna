@@ -162,6 +162,8 @@ public class ReaderManagerImpl
 			this.allReaderList.clear();
 			this.allReaderList.addAll(this.readerList);
 			count = this.allReaderList.size();
+			// 初始化完后, 需要将readerList和allReaderList设成一样的
+			this.readerList = this.allReaderList;
 			for (int i = 0; i < count; i++)
 			{
 				// 这里不能用迭代, 因为有可能需要添加值
@@ -179,17 +181,14 @@ public class ReaderManagerImpl
 					}
 					else
 					{
-						// 这里需要同时更新allReaderList和readerList
 						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName());
 						tmp.setNeedFormat(false);
 						this.allReaderList.set(i, tmp);
-						this.readerList.set(i, tmp);
 						tmp = new ReaderWrapper(reader, showName);
 						tmp.setNeedFormat(true);
 						this.nameToIndexMap.put(showName,
 								Utility.createInteger(this.allReaderList.size()));
 						this.allReaderList.add(tmp);
-						this.readerList.add(tmp);
 					}
 				}
 				if (this.nonePermission && reader.getPermissionSet() != null)
@@ -295,9 +294,13 @@ public class ReaderManagerImpl
 			throw new EternaException("Duplicate ResultReader name ["
 					+ readerName + "] at ReaderManager [" + this.getName() + "].");
 		}
-		this.allReaderList.add(reader);
 		this.nameToIndexMap.put(readerName, Utility.createInteger(this.readerList.size()));
 		this.readerList.add(reader);
+		if (this.allReaderList != this.readerList)
+		{
+			// allReaderList和readerList不同时, 需要同时添加到allReaderList
+			this.allReaderList.add(reader);
+		}
 	}
 
 	public void setColNameSensitive(boolean colNameSensitive)
@@ -326,15 +329,15 @@ public class ReaderManagerImpl
 			throw new EternaException("You can't invoke setReaderList when ReaderManager locked.");
 		}
 
-		this.readerList = new ArrayList(names.length);
+		Map tmpNameToIndexMap = new HashMap(names.length * 2);
+		List tmpReaderList = new ArrayList(names.length);
 		this.orderList = new ArrayList(5);
-		this.nameToIndexMap = new HashMap(names.length * 2);
 		this.orderStr = null;
 		for (int i = 0; i < names.length; i++)
 		{
 			StringRef name = new StringRef(names[i]);
 			int orderFlag = checkOrderFlag(name);
-			ResultReader reader = this.getReader(name.getString());
+			ResultReader reader = this.getReader0(name.getString());
 			if (reader == null)
 			{
 				throw new EternaException("Invalid ResultReader name [" + name
@@ -344,18 +347,50 @@ public class ReaderManagerImpl
 			{
 				this.orderList.add(reader.getColumnName() + (orderFlag < 0 ? " DESC" : "" ));
 			}
-			this.readerList.add(reader);
+			tmpReaderList.add(reader);
 			if (this.colNameSensitive)
 			{
-				this.nameToIndexMap.put(reader.getName(),
-						Utility.createInteger(this.readerList.size()));
+				tmpNameToIndexMap.put(reader.getName(),
+						Utility.createInteger(tmpReaderList.size()));
 			}
 			else
 			{
-				this.nameToIndexMap.put(reader.getName().toUpperCase(),
-						Utility.createInteger(this.readerList.size()));
+				tmpNameToIndexMap.put(reader.getName().toUpperCase(),
+						Utility.createInteger(tmpReaderList.size()));
 			}
 		}
+		// 这两个变量需要最后改变, 因为执行的中间会需要使用
+		this.nameToIndexMap = tmpNameToIndexMap;
+		this.readerList = tmpReaderList;
+	}
+
+	/**
+	 * 在重设reader列表时获取reader.
+	 */
+	private ResultReader getReader0(String name)
+	{
+		if (this.allReaderList == this.readerList)
+		{
+			// allReaderList和readerList相同时, 可直接调用getReader
+			return this.getReader(name);
+		}
+		if (!this.colNameSensitive)
+		{
+			name = name.toUpperCase();
+		}
+		Iterator itr = this.allReaderList.iterator();
+		int count = this.allReaderList.size();
+		for (int i = 0; i < count; i++)
+		{
+			ResultReader r = (ResultReader) itr.next();
+			if (name.equals(r.getName()))
+			{
+				return r;
+			}
+		}
+		String msg = "Invalid ResultReader name [" + name
+				+ "] at ReaderManager [" + this.getName() + "].";
+		throw new EternaException(msg);
 	}
 
 	/**

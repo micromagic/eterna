@@ -138,11 +138,11 @@ public class QueryImpl extends AbstractQuery
 	public ResultIterator executeQuery(Connection conn)
 			throws EternaException, SQLException
 	{
-		long startTime = TimeLogger.getTime();
+		TimeLogger startTime = new TimeLogger();
 		QueryHelper qh = this.getQueryHelper(conn);
 		Statement stmt = null;
 		ResultSet rs = null;
-		Throwable exception = null;
+		Throwable error = null;
 		ResultIterator result = null;
 		try
 		{
@@ -206,27 +206,27 @@ public class QueryImpl extends AbstractQuery
 		}
 		catch (EternaException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (SQLException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (RuntimeException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (Error ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		finally
 		{
-			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (log(this, startTime, error, conn))
 			{
 				if (result != null)
 				{
@@ -255,9 +255,9 @@ public class QueryImpl extends AbstractQuery
 	public ResultIterator executeQueryHoldConnection(Connection conn)
 			throws EternaException, SQLException
 	{
-		long startTime = TimeLogger.getTime();
+		TimeLogger startTime = new TimeLogger();
 		Statement stmt = null;
-		Throwable exception = null;
+		Throwable error = null;
 		ResultIterator result = null;
 		try
 		{
@@ -300,27 +300,27 @@ public class QueryImpl extends AbstractQuery
 		}
 		catch (EternaException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (SQLException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (RuntimeException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (Error ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		finally
 		{
-			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (log(this, startTime, error, conn))
 			{
 				if (result != null)
 				{

@@ -58,9 +58,9 @@ public class UpdateImpl extends BaseDao
 	public void execute(Connection conn)
 			throws EternaException, SQLException
 	{
-		long startTime = TimeLogger.getTime();
+		TimeLogger startTime = new TimeLogger();
 		Statement stmt = null;
-		Throwable exception = null;
+		Throwable error = null;
 		try
 		{
 			if (this.hasActiveParam())
@@ -78,27 +78,27 @@ public class UpdateImpl extends BaseDao
 		}
 		catch (EternaException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (SQLException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (RuntimeException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (Error ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		finally
 		{
-			logSQL(this, TimeLogger.getTime() - startTime, exception, conn);
+			log(this, startTime, error, conn);
 			if (stmt != null)
 			{
 				stmt.close();
@@ -109,9 +109,9 @@ public class UpdateImpl extends BaseDao
 	public int executeUpdate(Connection conn)
 			throws EternaException, SQLException
 	{
-		long startTime = TimeLogger.getTime();
+		TimeLogger startTime = new TimeLogger();
 		Statement stmt = null;
-		Throwable exception = null;
+		Throwable error = null;
 		int result = -1;
 		try
 		{
@@ -131,27 +131,27 @@ public class UpdateImpl extends BaseDao
 		}
 		catch (EternaException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (SQLException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (RuntimeException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (Error ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		finally
 		{
-			if (logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (log(this, startTime, error, conn))
 			{
 				if (result != -1)
 				{

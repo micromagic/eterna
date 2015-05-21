@@ -134,22 +134,22 @@ public class ConfigResourceTest extends TestCase
 	{
 		System.out.println("--testCreateResource1----------------------------------");
 		ConfigResource cr;
-		cr = ContainerManager.createResource("../../src/java/.project", null);
+		cr = ContainerManager.createResource("../../src/java/.project");
 		assertEquals("../../src/java/.project", cr.getConfig());
 		assertEquals(".project", cr.getName());
 		System.out.println(cr.getURI());
 		assertEquals("../../src/java/./.classpath", cr.getResource("./.classpath").getConfig());
 		System.out.println(cr.getResource("./.classpath").getURI());
-		cr = ContainerManager.createResource("../../src/", null);
+		cr = ContainerManager.createResource("../../src/");
 		assertEquals("src", cr.getName());
 		assertEquals("../../src/java/main", cr.getResource("java/main").getConfig());
 		System.out.println(cr.getResource("java/test/eterna.config").getURI());
-		cr = ContainerManager.createResource(".classpath", null);
+		cr = ContainerManager.createResource(".classpath");
 		cr = cr.getResource("test/eterna.config");
 		assertEquals("test/eterna.config", cr.getConfig());
 		assertEquals("test/tool/PrivateAccessor.java", cr.getResource("tool/PrivateAccessor.java").getConfig());
 		System.out.println(cr.getResource("tool/PrivateAccessor.java").getURI());
-		cr = ContainerManager.createResource("test/", null);
+		cr = ContainerManager.createResource("test/");
 		assertEquals("test/tool/PrivateAccessor.java", cr.getResource("tool/PrivateAccessor.java").getConfig());
 	}
 

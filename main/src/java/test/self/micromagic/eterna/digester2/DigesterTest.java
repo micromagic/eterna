@@ -34,6 +34,7 @@ import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.Resource;
 import self.micromagic.eterna.view.View;
 import self.micromagic.util.FormatTool;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.ref.StringRef;
 
@@ -45,6 +46,28 @@ public class DigesterTest extends TestCase
 		assertNotNull(container.getAttribute(MetaDataImpl.CATTR_RRM));
 		container.reInit();
 		assertNull(container.getAttribute(MetaDataImpl.CATTR_RRM));
+	}
+
+	public void testThreadInit()
+			throws Exception
+	{
+		InitThread[] arr = new InitThread[32];
+		for (int i = 0; i < arr.length; i++)
+		{
+			arr[i] = new InitThread("t1");
+			arr[i].start();
+		}
+		for (int i = 0; i < arr.length; i++)
+		{
+			arr[i].join();
+		}
+		for (int i = 0; i < arr.length; i++)
+		{
+			if (!StringTool.isEmpty(arr[i].err))
+			{
+				fail(arr[i].err);
+			}
+		}
 	}
 
 	public void testFormat()
@@ -320,6 +343,38 @@ public class DigesterTest extends TestCase
 	static
 	{
 		init();
+	}
+
+}
+
+class InitThread extends Thread
+{
+	public InitThread(String name)
+	{
+		this.name = name;
+	}
+	private final String name;
+	public String err;
+
+	public void run()
+	{
+		try
+		{
+			FactoryContainer container = ContainerManager.createFactoryContainer(
+					this.name, "cp:self/micromagic/eterna/digester2/d_test1.xml",
+					null, null, null, null, null, false);
+			StringRef msg = new StringRef();
+			container.reInit(msg);
+			if (!StringTool.isEmpty(msg.getString()))
+			{
+				this.err = msg.getString();
+			}
+			container.getFactory();
+		}
+		catch (Throwable ex)
+		{
+			this.err = ex.getMessage();
+		}
 	}
 
 }

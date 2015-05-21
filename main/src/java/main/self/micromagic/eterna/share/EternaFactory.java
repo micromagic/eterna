@@ -18,10 +18,10 @@ package self.micromagic.eterna.share;
 
 import java.util.List;
 
+import self.micromagic.eterna.dao.DaoLogger;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultFormat;
-import self.micromagic.eterna.dao.SpecialLog;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
@@ -105,17 +105,29 @@ public interface EternaFactory extends Factory
 	void setDataSourceManager(DataSourceManager dsm) throws EternaException;
 
 
-	//----------------------------------  db --------------------------------------
+	//----------------------------------  dao --------------------------------------
 
 	/**
-	 * 获得日志记录器<code>SpecialLog</code>.
+	 * 可设置数据操作日志的最大数目.
 	 */
-	SpecialLog getSpecialLog() throws EternaException;
+	int MAX_DAO_LOGGER_COUNT = 10;
 
 	/**
-	 * 设置日志记录器<code>SpecialLog</code>.
+	 * 获得日志记录器<code>DaoLogger</code>.
+	 *
+	 * @param index  日志记录器对象所在的索引值
 	 */
-	void setSpecialLog(SpecialLog sl)throws EternaException;
+	DaoLogger getDaoLogger(int index) throws EternaException;
+
+	/**
+	 * 获得日志记录器对象所在的索引值.
+	 */
+	int getDaoLoggerIndex(String name) throws EternaException;
+
+	/**
+	 * 获得日志记录器对象的个数.
+	 */
+	int getDaoLoggerCount() throws EternaException;
 
 	/**
 	 * 获得一个常量的值.

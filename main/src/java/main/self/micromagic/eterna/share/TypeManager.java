@@ -221,7 +221,12 @@ public class TypeManager
 			catch (Exception ex){}
 		}
 		Integer i = (Integer) typeMap.get(name);
-		return i == null ? TYPE_NULL : i.intValue() | param;
+		if (i == null)
+		{
+			Tool.log.warn("Error type [" + name + "].");
+			return TYPE_NULL;
+		}
+		return i.intValue() | param;
 	}
 
 	/**

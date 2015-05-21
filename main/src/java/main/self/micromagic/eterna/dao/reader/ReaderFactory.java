@@ -17,48 +17,48 @@
 package self.micromagic.eterna.dao.reader;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
 
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Tool;
+import self.micromagic.eterna.share.TypeManager;
 
 /**
  * reader对象的创建工厂.
  */
 public class ReaderFactory
 {
-	private static Map typeClassMap = new HashMap();
+	private static Class[] readerTypes;
 	static
 	{
-		typeClassMap.put("Object", ObjectReader.class);
-		typeClassMap.put("String", StringReader.class);
-		typeClassMap.put("boolean", BooleanReader.class);
-		typeClassMap.put("byte", ByteReader.class);
-		typeClassMap.put("short", ShortReader.class);
-		typeClassMap.put("int", IntegerReader.class);
-		typeClassMap.put("long", LongReader.class);
-		typeClassMap.put("float", FloatReader.class);
-		typeClassMap.put("double", DoubleReader.class);
-		typeClassMap.put("Bytes", BytesReader.class);
-		typeClassMap.put("Date", DateReader.class);
-		typeClassMap.put("Time", TimeReader.class);
-		typeClassMap.put("Datetime", TimestampReader.class);
-		typeClassMap.put("Timestamp", TimestampReader.class);
-		typeClassMap.put("BigString", BigStringReader.class);
-		typeClassMap.put("Stream", StreamReader.class);
-		typeClassMap.put("Chars", CharsReader.class);
-		typeClassMap.put("Blob", BlobReader.class);
-		typeClassMap.put("Clob", ClobReader.class);
-		typeClassMap.put("null", NullReader.class);
+		readerTypes = new Class[TypeManager.TYPES_COUNT];
+		readerTypes[TypeManager.TYPE_OBJECT] = ObjectReader.class;
+		readerTypes[TypeManager.TYPE_STRING] = StringReader.class;
+		readerTypes[TypeManager.TYPE_BOOLEAN] = BooleanReader.class;
+		readerTypes[TypeManager.TYPE_BYTE] = ByteReader.class;
+		readerTypes[TypeManager.TYPE_SHORT] = ShortReader.class;
+		readerTypes[TypeManager.TYPE_INTEGER] = IntegerReader.class;
+		readerTypes[TypeManager.TYPE_LONG] = LongReader.class;
+		readerTypes[TypeManager.TYPE_FLOAT] = FloatReader.class;
+		readerTypes[TypeManager.TYPE_DOUBLE] = DoubleReader.class;
+		readerTypes[TypeManager.TYPE_BYTES] = BytesReader.class;
+		readerTypes[TypeManager.TYPE_DATE] = DateReader.class;
+		readerTypes[TypeManager.TYPE_TIME] = TimeReader.class;
+		readerTypes[TypeManager.TYPE_TIMPSTAMP] = TimestampReader.class;
+		readerTypes[TypeManager.TYPE_BIGSTRING] = BigStringReader.class;
+		readerTypes[TypeManager.TYPE_STREAM] = StreamReader.class;
+		readerTypes[TypeManager.TYPE_CHARS] = CharsReader.class;
+		readerTypes[TypeManager.TYPE_BLOB] = BlobReader.class;
+		readerTypes[TypeManager.TYPE_CLOB] = ClobReader.class;
+		readerTypes[TypeManager.TYPE_NULL] = NullReader.class;
 	}
 
 	public static ResultReader createReader(String type, String name)
 			throws EternaException
 	{
-		Class c = (Class) ReaderFactory.typeClassMap.get(type);
+		int pType = TypeManager.getPureType(TypeManager.getTypeId(type));
+		Class c = readerTypes[pType];
 		if (c == null)
 		{
 			throw new EternaException("Can't create ResultReader type [" + type + "].");

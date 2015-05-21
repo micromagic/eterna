@@ -69,9 +69,19 @@ method:{setAttribute,name,$body(attr=value,i=1)}
 ## objs
 objs
 sub:{
-	query,update,format,prepare,entity,constant,search,builderList,builder,
+	query,update,format,prepare,entity,constant,daoLogger,
+	search,builderList,builder,
 	model,export,dataPrinter,typicalComponent,view,function,resource
 }
+
+
+## daoLogger
+dao-logger
+same:{name}
+log:{name}
+create:{generator}
+attr:{name}
+stack:{registerObject,n:0,g:0}
 
 
 ## constant
@@ -133,7 +143,10 @@ query
 same:{name}
 log:{name}
 create:{generator,${query}}
-attr:{name,logType(m=0,i=0),forwardOnly(m=0,i=0),orderIndex(m=0,i=0),$body(body=prepared-sql,m=0):preparedSQL}
+attr:{
+	name,logType(m=0,i=0):logTypeName,forwardOnly(m=0,i=0),
+	orderIndex(m=0,i=0),$body(body=prepared-sql,m=0):preparedSQL
+}
 sub:{readers,parameters,attribute}
 stack:{registerObject,n:0,g:0}
 
@@ -143,7 +156,7 @@ update
 same:{name}
 log:{name}
 create:{generator,${update}}
-attr:{name,logType(m=0,i=0),$body(body=prepared-sql,m=0):preparedSQL}
+attr:{name,logType(m=0,i=0):logTypeName,$body(body=prepared-sql,m=0):preparedSQL}
 sub:{parameters,attribute}
 stack:{registerObject,n:0,g:0}
 

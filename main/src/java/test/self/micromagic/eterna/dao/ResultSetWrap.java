@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.sql;
+package self.micromagic.eterna.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -330,15 +330,6 @@ class ClassPathResource extends AbstractResource
 		this.container = container;
 		ClassLoader loader = (ClassLoader) container.getAttribute(
 				FactoryContainer.CLASSLOADER_FLAG);
-		return this.create0(config, container, loader);
-	}
-	public ConfigResource create(String config, ClassLoader loader)
-	{
-		return this.create0(config, ContainerManager.getGlobalContainer(), loader);
-	}
-	private ConfigResource create0(String config, FactoryContainer container,
-			ClassLoader loader)
-	{
 		int index = config.indexOf(':');
 		ClassPathResource res = new ClassPathResource();
 		res.prefix = config.substring(0, index + 1);
@@ -468,7 +459,7 @@ class ClassPathResource extends AbstractResource
 			for (int i = 0; i < count; i++)
 			{
 				String config = tmpPrefix.concat((String) itr.next());
-				arr[i] = this.create0(config, this.container, this.loader);
+				arr[i] = this.create(config, this.container);
 			}
 			return arr;
 		}
@@ -561,11 +552,11 @@ class ClassPathResource extends AbstractResource
 		String[] pArr = parsePath(path, pCount);
 		if (pCount.value == -1)
 		{
-			return this.create0(this.prefix.concat(path), this.container, this.loader);
+			return this.create(this.prefix.concat(path), this.container);
 		}
 		int upCount = pCount.value + (this.getType() == RES_TYPE_FILE ? 1 : 0);
 		String mPath = mergePath(parsePath(this.path, null), upCount, pArr);
-		return this.create0(this.prefix.concat(mPath), this.container, this.loader);
+		return this.create(this.prefix.concat(mPath), this.container);
 	}
 
 }

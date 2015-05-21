@@ -98,10 +98,10 @@ class CountQuery
 	public ResultIterator executeQuery(Connection conn)
 			throws EternaException, SQLException
 	{
-		long startTime = TimeLogger.getTime();
+		TimeLogger startTime = new TimeLogger();
 		Statement stmt = null;
 		ResultSet rs = null;
-		Throwable exception = null;
+		Throwable error = null;
 		ResultIterator result = null;
 		try
 		{
@@ -130,27 +130,27 @@ class CountQuery
 		}
 		catch (EternaException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (SQLException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (RuntimeException ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		catch (Error ex)
 		{
-			exception = ex;
+			error = ex;
 			throw ex;
 		}
 		finally
 		{
-			if (BaseDao.logSQL(this, TimeLogger.getTime() - startTime, exception, conn))
+			if (BaseDao.log(this, startTime, error, conn))
 			{
 				if (result != null)
 				{

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+	
+	<table name="TEST01" desc="测试表1">
+		<column name="key" type="string(50)" desc="主键" nullable="false"/>
+		<column name="strValue" type="string(500)" desc="字符值"/>
+		<column name="intValue" type="int" desc="整型值"/>
+		<column name="doubleValue" type="double" desc="浮点值"/>
+		<column name="dateValue" type="datetime" desc="日期值"/>
+	</table>
+
+</dbVersion>

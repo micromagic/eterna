@@ -32,10 +32,10 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 
 import self.micromagic.eterna.dao.Constant;
+import self.micromagic.eterna.dao.DaoLogger;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultFormat;
-import self.micromagic.eterna.dao.SpecialLog;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
@@ -290,13 +290,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.userManager.initUserManager(this);
 		}
 
-		// 初始化, special-sql-log
-		if (this.specialLog != null)
-		{
-			ParseException.setContextInfo("specialLog");
-			this.specialLog.initSpecialLog(this);
-		}
-
 		// 初始化, model-caller
 		// model-caller不能使用共享工厂中的对象.
 		ParseException.setContextInfo("modelCaller");
@@ -313,6 +306,9 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.stringCoder = new StringCoderImpl();
 		}
 		this.stringCoder.initStringCoder(this);
+
+		// 初始化, dao-logger
+		this.initDaoLogger();
 
 		// 初始化注册的对象
 		int size = this.objectList.size();
@@ -337,6 +333,51 @@ public class EternaFactoryImpl extends AbstractFactory
 		List temp = new ArrayList(this.objectList.size() + leaveSize);
 		temp.addAll(this.objectList);
 		this.objectList = temp;
+	}
+
+	/**
+	 * 初始化日志记录器.
+	 */
+	private void initDaoLogger()
+	{
+		int pCount = 0;
+		String[] names = this.getObjectNames(DaoLogger.class);
+		if (this.shareEternaFactory != null)
+		{
+			pCount = this.shareEternaFactory.getDaoLoggerCount();
+		}
+		if (names.length > 0 || pCount > 0)
+		{
+			ArrayList tmpArr = new ArrayList();
+			this.daoLoggerIndexMap = new HashMap(2);
+			for (int i = 0; i < pCount; i++)
+			{
+				DaoLogger l = this.shareEternaFactory.getDaoLogger(i);
+				this.daoLoggerIndexMap.put(l.getName(), Utility.createInteger(i));
+				tmpArr.add(l);
+			}
+			for (int i = 0; i < names.length; i++)
+			{
+				Integer oldI = (Integer) this.daoLoggerIndexMap.get(names[i]);
+				if (oldI != null)
+				{
+					tmpArr.set(oldI.intValue(), this.createObject(names[i]));
+				}
+				else
+				{
+					int tmpI = tmpArr.size();
+					tmpArr.add(this.createObject(names[i]));
+					this.daoLoggerIndexMap.put(names[i], Utility.createInteger(tmpI));
+				}
+			}
+			int tmpCount = tmpArr.size();
+			if (tmpCount > MAX_DAO_LOGGER_COUNT)
+			{
+				throw new EternaException("Too many dao logger [" + tmpCount + "].");
+			}
+			this.daoLoggers = new DaoLogger[tmpCount];
+			tmpArr.toArray(this.daoLoggers);
+		}
 	}
 
 	public DataSourceManager getDataSourceFromCache()
@@ -380,43 +421,41 @@ public class EternaFactoryImpl extends AbstractFactory
 
 	//----------------------------------  dao  --------------------------------------
 
-	private SpecialLog specialLog = null;
+	private Map daoLoggerIndexMap;
+	private DaoLogger[] daoLoggers;
+
+	public DaoLogger getDaoLogger(int index)
+			throws EternaException
+	{
+		if (index < 0 || index >= this.getDaoLoggerCount())
+		{
+			String msg = "Error dao logger index [" + index
+					+ "], logger count is [" + this.getDaoLoggerCount() + "].";
+			throw new EternaException(msg);
+		}
+		return this.daoLoggers[index];
+	}
+
+	public int getDaoLoggerIndex(String name)
+	{
+		if (this.daoLoggerIndexMap == null)
+		{
+			return -1;
+		}
+		Integer i = (Integer) this.daoLoggerIndexMap.get(name);
+		return i == null ? -1 : i.intValue();
+	}
+
+	public int getDaoLoggerCount()
+	{
+		return this.daoLoggers == null ? 0 : this.daoLoggers.length;
+	}
 
 	public String getConstantValue(String name)
 			throws EternaException
 	{
 		Constant constant = (Constant) this.createObject(name);
 		return constant.getValue();
-	}
-
-	public SpecialLog getSpecialLog()
-			throws EternaException
-	{
-		if (this.specialLog == null && this.shareEternaFactory != null)
-		{
-			return this.shareEternaFactory.getSpecialLog();
-		}
-		return this.specialLog;
-	}
-
-	public void setSpecialLog(SpecialLog sl)
-			throws EternaException
-	{
-		if (this.specialLog != null)
-		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate SpecialLog.");
-			}
-		}
-		else if (sl != null)
-		{
-			if (this.initialized)
-			{
-				sl.initSpecialLog(this);
-			}
-			this.specialLog = sl;
-		}
 	}
 
 	public Entity getEntity(String name)
@@ -717,7 +756,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		ObjectContainer container;
 		if (obj instanceof EternaCreater)
 		{
-			container = new ObjectCreaterCon(id, (EternaCreater) obj);
+			container = new EternaCreaterCon(id, (EternaCreater) obj);
 		}
 		else if (obj instanceof EternaObject)
 		{
@@ -964,6 +1003,7 @@ abstract class ObjectContainer
 	{
 		this.id = id;
 	}
+	protected boolean initialized;
 
 	/**
 	 * 获取对象的编号.
@@ -1041,15 +1081,16 @@ class NormalObjectCon extends ObjectContainer
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.initialized)
+		{
+			return true;
+		}
+		this.initialized = true;
 		return false;
 	}
 
 	public Object create(boolean needInit, EternaFactory factory)
 	{
-		if (needInit)
-		{
-			this.initialize(factory);
-		}
 		return this.obj;
 	}
 
@@ -1089,12 +1130,17 @@ class EternaObjectCon extends ObjectContainer
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.initialized)
+		{
+			return true;
+		}
+		this.initialized = true;
 		return this.obj.initialize(factory);
 	}
 
 	public Object create(boolean needInit, EternaFactory factory)
 	{
-		if (needInit)
+		if (needInit && !this.initialized)
 		{
 			this.initialize(factory);
 		}
@@ -1110,9 +1156,9 @@ class EternaObjectCon extends ObjectContainer
 /**
  * ObjectCreater的容器.
  */
-class ObjectCreaterCon extends ObjectContainer
+class EternaCreaterCon extends ObjectContainer
 {
-	ObjectCreaterCon(int id, EternaCreater obj)
+	EternaCreaterCon(int id, EternaCreater obj)
 	{
 		super(id);
 		this.obj = obj;
@@ -1140,6 +1186,11 @@ class ObjectCreaterCon extends ObjectContainer
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.initialized)
+		{
+			return true;
+		}
+		this.initialized = true;
 		return this.obj.initialize(factory);
 	}
 
@@ -1149,7 +1200,7 @@ class ObjectCreaterCon extends ObjectContainer
 		{
 			return this.instance;
 		}
-		if (needInit)
+		if (needInit && !this.initialized)
 		{
 			this.initialize(factory);
 		}

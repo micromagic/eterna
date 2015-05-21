@@ -48,9 +48,9 @@ public interface Dao
 	 */
 	int DAO_LOG_TYPE_PRINT = 0x1;
 	/**
-	 * 日志等级, 调用指定的日志记录对象.
+	 * 判断是否有特殊日志类型的过滤符.
 	 */
-	int DAO_LOG_TYPE_SPECIAL = 0x4;
+	int SPECIAL_MASK = ~(DAO_LOG_TYPE_SAVE | DAO_LOG_TYPE_PRINT);
 
 
 	String DAO_TYPE_UPDATE = "update";
