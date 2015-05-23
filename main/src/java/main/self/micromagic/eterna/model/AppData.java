@@ -58,8 +58,8 @@ import self.micromagic.util.logging.TimeLogger;
  */
 public class AppData
 {
-	public static final String APP_LOG_PROPERTY = "self.micromagic.eterna.app.logType";
-	public static final String CACHE_NAME = "self.micromagic.eterna.model.APP_DATA";
+	public static final String APP_LOG_PROPERTY = "eterna.app.logType";
+	public static final String CACHE_NAME = "eterna.model.APP_DATA";
 	public static final Log log = Tool.log;
 
 	public static final int POSITION_NONE = 0;

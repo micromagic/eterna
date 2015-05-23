@@ -58,6 +58,11 @@ public final class SearchAttributes
 	public final String queryTypeTag;
 
 	/**
+	 * 默认的查询方式.
+	 */
+	public final String defaultQueryType;
+
+	/**
 	 * 清除条件的查询方式.
 	 */
 	public final String queryTypeClear;
@@ -66,6 +71,11 @@ public final class SearchAttributes
 	 * 设置条件的查询方式.
 	 */
 	public final String queryTypeReset;
+
+	/**
+	 * 保持原有条件的查询方式.
+	 */
+	public final String queryTypeKeep;
 
 	/**
 	 * 设置排序配置的参数名称.
@@ -103,12 +113,16 @@ public final class SearchAttributes
 		this.pageSizeTag = tmp == null ? "pageSize" : tmp;
 		tmp = (String) attrs.get("querySettingTag");
 		this.querySettingTag = tmp == null ? "querySetting" : tmp;
+		tmp = (String) attrs.get("defaultQueryType");
+		this.defaultQueryType = tmp == null ? "keep" : tmp;
 		tmp = (String) attrs.get("queryTypeTag");
 		this.queryTypeTag = tmp == null ? "queryType" : tmp;
 		tmp = (String) attrs.get("queryTypeClear");
 		this.queryTypeClear = tmp == null ? "clear" : tmp;
 		tmp = (String) attrs.get("queryTypeReset");
 		this.queryTypeReset = tmp == null ? "set" : tmp;
+		tmp = (String) attrs.get("queryTypeKeep");
+		this.queryTypeKeep = tmp == null ? "keep" : tmp;
 		tmp = (String) attrs.get("orderTag");
 		this.orderConfigTag = tmp == null ? "$order" : tmp;
 		tmp = (String) attrs.get("totalCountTag");
@@ -128,6 +142,7 @@ public final class SearchAttributes
 		p.printPairWithoutCheck(out, "querySettingTag", this.querySettingTag, false);
 		p.printPairWithoutCheck(out, "queryTypeClear", this.queryTypeClear, false);
 		p.printPairWithoutCheck(out, "queryTypeReset", this.queryTypeReset, false);
+		p.printPairWithoutCheck(out, "queryTypeKeep", this.queryTypeKeep, false);
 		p.printPairWithoutCheck(out, "queryTypeTag", this.queryTypeTag, false);
 		p.printPairWithoutCheck(out, "orderConfigTag", this.orderConfigTag, false);
 		p.printPairWithoutCheck(out, "totalCountTag", this.totalCountTag, false);

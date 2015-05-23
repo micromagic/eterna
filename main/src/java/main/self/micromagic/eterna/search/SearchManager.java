@@ -25,14 +25,16 @@ import self.micromagic.eterna.share.EternaException;
 public interface SearchManager
 {
 	/**
-	 * 用于标志是否要强制清空所有的条件. <p>
-	 * 由于是否要清空或重置条件是根据request中的[queryTypeTag]的
-	 * 值来确定的, 如果需要强制清空, 则可在调用前按如下方法设置:
-	 * request.setAttribute(SearchManager.FORCE_CLEAR_CONDITION, "1");
-	 * 此外, 如果需要把已设置的标志去除, 可以使用如下方法:
-	 * request.removeAttribute(SearchManager.FORCE_CLEAR_CONDITION);
+	 * 用于设置需要强制执行的查询方式. <p>
+	 * 设置方法如下:
+	 * request.setAttribute(SearchManager.FORCE_QUERY_TYPE, "set");
+	 * 上面方法表示强制以设置条件的查询方式执行.
+	 * @see SearchAttributes#queryTypeReset
+	 *
+	 * 此外, 如果需要把已设置的值去除, 可以使用如下方法:
+	 * request.removeAttribute(SearchManager.FORCE_QUERY_TYPE);
 	 */
-	static final String FORCE_CLEAR_CONDITION = "ETERNA_FORCE_CLEAR_CONDITION";
+	static final String FORCE_QUERY_TYPE = "ETERNA_FORCE_QUERY_TYPE";
 
 	/**
 	 * 用于标志是否要强制处理request中的条件. <p>
@@ -86,7 +88,7 @@ public interface SearchManager
 	String getOrderConfig(AppData data);
 
 	/**
-	 * 是否存在查询标志.
+	 * 是否存在查询标志且不是保持条件.
 	 */
 	boolean hasQueryType(AppData data) throws EternaException;
 

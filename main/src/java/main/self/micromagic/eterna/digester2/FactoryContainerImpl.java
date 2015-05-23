@@ -72,6 +72,7 @@ public class FactoryContainerImpl
 	public synchronized void reInit(StringRef msg)
 	{
 		this.initialized = false;
+		this.initErrMsg = null;
 		FactoryContainer oldC = ContainerManager.getCurrentContainer();
 		Factory oldF = ContainerManager.getCurrentFactory();
 		ConfigResource oldR = ContainerManager.getCurrentResource();
@@ -109,9 +110,10 @@ public class FactoryContainerImpl
 				this.factory = null;
 			}
 			Digester.log.error("Error in initialize [" + this.id + "].", ex);
+			String tmpMsg = ParseException.getMessage(ex);
+			this.initErrMsg = tmpMsg;
 			if (msg != null)
 			{
-				String tmpMsg = ParseException.getMessage(ex);
 				if (msg.getString() != null)
 				{
 					StringAppender tmpBuf = StringTool.createStringAppender();
@@ -397,8 +399,13 @@ public class FactoryContainerImpl
 				if (!this.initialized)
 				{
 					// 同步状态下再次检查是否已初始化
-					throw new EternaException("The factory container ["
-							+ this.id + "] hasn't initialized.");
+					String msg = "The factory container [" + this.id
+							+ "] hasn't initialized.";
+					if (!StringTool.isEmpty(this.initErrMsg))
+					{
+						msg += " Error message:" + this.initErrMsg + ".";
+					}
+					throw new EternaException(msg);
 				}
 				f = this.factory;
 			}
@@ -406,7 +413,7 @@ public class FactoryContainerImpl
 		return f;
 	}
 	private Factory factory;
-
+	private String initErrMsg;
 
 	private void checkReload()
 	{

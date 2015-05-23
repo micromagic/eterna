@@ -99,16 +99,20 @@ public class SearchManagerImpl extends AbstractGenerator
 		{
 			temp = this.attributes.queryTypeReset;
 		}
-		else if (raMap.get(FORCE_CLEAR_CONDITION) != null)
-		{
-			temp = this.attributes.queryTypeClear;
-		}
 		else
 		{
-			temp = data.getRequestParameter(this.attributes.queryTypeTag);
+			temp = (String) raMap.get(FORCE_QUERY_TYPE);
+			if (temp == null)
+			{
+				temp = data.getRequestParameter(this.attributes.queryTypeTag);
+			}
+			if (temp == null)
+			{
+				temp = this.attributes.defaultQueryType;
+			}
 		}
-		return temp != null
-				&& (this.attributes.queryTypeReset.equals(temp) || this.attributes.queryTypeClear.equals(temp));
+		return this.attributes.queryTypeReset.equals(temp)
+				|| this.attributes.queryTypeClear.equals(temp);
 	}
 
 	public int getConditionVersion()
@@ -131,7 +135,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			String checkName = SEARCHMANAGER_DEALED_PREFIX + search.getSearchManagerName();
 			if (raMap.get(checkName) != null)
 			{
-				if (raMap.get(FORCE_DEAL_CONDITION) == null && raMap.get(FORCE_CLEAR_CONDITION) == null)
+				if (raMap.get(FORCE_DEAL_CONDITION) == null && raMap.get(FORCE_QUERY_TYPE) == null)
 				{
 					return;
 				}
@@ -186,13 +190,17 @@ public class SearchManagerImpl extends AbstractGenerator
 			{
 				temp = this.attributes.queryTypeReset;
 			}
-			else if (raMap.get(FORCE_CLEAR_CONDITION) != null)
-			{
-				temp = this.attributes.queryTypeClear;
-			}
 			else
 			{
-				temp = data.getRequestParameter(this.attributes.queryTypeTag);
+				temp = (String) raMap.get(FORCE_QUERY_TYPE);
+				if (temp == null)
+				{
+					temp = data.getRequestParameter(this.attributes.queryTypeTag);
+				}
+				if (temp == null)
+				{
+					temp = this.attributes.defaultQueryType;
+				}
 			}
 			if (this.attributes.queryTypeReset.equals(temp))
 			{

@@ -567,6 +567,7 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("querySettingTag", sma.querySettingTag);
 				parent.addAttribute("queryTypeClear", sma.queryTypeClear);
 				parent.addAttribute("queryTypeReset", sma.queryTypeReset);
+				parent.addAttribute("queryTypeKeep", sma.queryTypeKeep);
 				parent.addAttribute("queryTypeTag", sma.queryTypeTag);
 			}
 			else if (value instanceof String)
