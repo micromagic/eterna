@@ -217,8 +217,7 @@ public class PropertiesManager
 			String sd = (String) temp.remove(SYSTEM_DEFAULT);
 			if (sd != null)
 			{
-				BooleanConverter converter = new BooleanConverter();
-				this.systemDefault = converter.convertToBoolean(sd);
+				this.systemDefault = BooleanConverter.toBoolean(sd);
 			}
 			else
 			{
