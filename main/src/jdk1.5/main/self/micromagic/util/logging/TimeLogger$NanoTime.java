@@ -33,7 +33,7 @@ class TimeLogger$NanoTime
 	{
 		return time / 1000000L;
 	}
-	
+
 	public String formatMillionSecond(long time, int precision)
 	{
 		String result;
@@ -44,7 +44,7 @@ class TimeLogger$NanoTime
 		else
 		{
 			time = -time;
-			result = "-" + Long.toString(time / 1000000L);
+			result = "-".concat(Long.toString(time / 1000000L));
 		}
 		long nano = time % 1000000L;
 		if (nano == 0L)
@@ -52,7 +52,7 @@ class TimeLogger$NanoTime
 			return result;
 		}
 		String nanoStr = Long.toString(nano);
-		nanoStr = ZERO_NANO.substring(nanoStr.length()) + nanoStr;
+		nanoStr = ZERO_NANO.substring(nanoStr.length()).concat(nanoStr);
 		int lastPos = 0;
 		precision = Math.min(precision, ZERO_NANO.length());
 		for (int i = 0; i < precision; i++)
@@ -62,7 +62,8 @@ class TimeLogger$NanoTime
 				lastPos = i + 1;
 			}
 		}
-		return lastPos > 0 ? result + "." + nanoStr.substring(0, lastPos) : result;
+		return lastPos > 0 ? result.concat(".".concat(nanoStr.substring(0, lastPos)))
+				: result;
 	}
 	private static final String ZERO_NANO = "000000";
 
