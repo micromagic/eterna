@@ -40,10 +40,11 @@ public class SearchParam
 	public boolean skipEmpty;
 
 	/**
-	 * 是否清除条件.
-	 * 当设置为true时将忽略condition属性.
+	 * 查询的方式.
+	 *
+	 * @see SearchAttributes#queryTypeTag
 	 */
-	public boolean clearCondition;
+	public String queryType;
 
 	/**
 	 * 当前的页数.

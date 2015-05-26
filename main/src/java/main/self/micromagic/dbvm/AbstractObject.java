@@ -43,7 +43,7 @@ public abstract class AbstractObject
 			this.indexDefiner = (IndexDefiner) factory.createObject(INDEX_DEF_NAME);
 			this.preparerCreater = CreaterManager.createPreparerCreater(
 					TypeManager.TYPE_STRING, null, factory);
-			this.mutipleLine = boolConverter.convertToBoolean(
+			this.mutipleLine = BooleanConverter.toBoolean(
 					factory.getAttribute(MUTIPLE_LINE_FLAG));
 			return false;
 		}
@@ -66,8 +66,6 @@ public abstract class AbstractObject
 	this.name = name;
 	}
 	protected String name;
-
-	private static BooleanConverter boolConverter = new BooleanConverter();
 
 	/**
 	 * 生成默认值的表达式.

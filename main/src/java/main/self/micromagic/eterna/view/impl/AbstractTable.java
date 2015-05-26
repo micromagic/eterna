@@ -50,9 +50,8 @@ public abstract class AbstractTable extends ComponentImpl
 	static boolean checkVisible(EntityItem item)
 	{
 		String v = (String) item.getAttribute(VISIBLE_FLAG);
-		return v == null ? true : booleanConverter.convertToBoolean(v);
+		return v == null ? true : BooleanConverter.toBoolean(v);
 	}
-	private static BooleanConverter booleanConverter = new BooleanConverter();
 
 	protected boolean autoArrange = true;
 	protected boolean percentWidth = true;

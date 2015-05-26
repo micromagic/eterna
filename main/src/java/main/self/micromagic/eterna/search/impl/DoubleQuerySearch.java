@@ -186,7 +186,7 @@ public class DoubleQuerySearch extends SearchImpl
 					: this.getFactory().createSearch(this.assistSearchIndex);
 			BooleanRef first = new BooleanRef();
 			SearchManager manager = assistSearch.getSearchManager(data);
-			nextQuery = getQueryAdapter(data, conn, assistSearch, first, this.sessionNextQueryTag, manager,
+			nextQuery = getQuery(data, conn, assistSearch, first, this.sessionNextQueryTag, manager,
 					this.nextQueryIndex, assistSearch.getColumnSetting(), assistSearch.getColumnSettingType());
 			if (this.needAssistCondition)
 			{

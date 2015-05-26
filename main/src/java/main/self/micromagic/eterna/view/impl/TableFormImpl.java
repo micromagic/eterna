@@ -152,13 +152,13 @@ public class TableFormImpl extends AbstractTable
 		if (tmpStr != null)
 		{
 			cell.removeAttribute("newRow");
-			cell.setNewRow(booleanConverter.convertToBoolean(tmpStr));
+			cell.setNewRow(BooleanConverter.toBoolean(tmpStr));
 		}
 		tmpStr = (String) cell.getAttribute("required");
 		if (tmpStr != null)
 		{
 			cell.removeAttribute("required");
-			cell.setRequired(booleanConverter.convertToBoolean(tmpStr));
+			cell.setRequired(BooleanConverter.toBoolean(tmpStr));
 		}
 
 		Cell tempCell = (Cell) this.cellMap.get(item.getName());
@@ -175,7 +175,6 @@ public class TableFormImpl extends AbstractTable
 
 		return cell;
 	}
-	private static BooleanConverter booleanConverter = new BooleanConverter();
 
 	private void fillEmptyAttr(CellImpl nowCell, Cell typical, Component typicalComponent)
 			throws EternaException

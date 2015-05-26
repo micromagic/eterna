@@ -1350,7 +1350,6 @@ class CheckPart extends PartSQL
 				buf.append(ps.getSQL());
 			}
 
-			BooleanConverter booleanConverter = new BooleanConverter();
 			Map map = StringTool.string2Map(buf.toString(), ";", '=', true, false, null, null);
 			String tmp;
 			if ((tmp = (String) map.get("hasSub")) != null)
@@ -1363,11 +1362,11 @@ class CheckPart extends PartSQL
 			}
 			if ((tmp = (String) map.get("checkNormal")) != null)
 			{
-				this.checkNormal = booleanConverter.convertToBoolean(tmp);
+				this.checkNormal = BooleanConverter.toBoolean(tmp);
 			}
 			if ((tmp = (String) map.get("end")) != null)
 			{
-				this.end = booleanConverter.convertToBoolean(tmp);
+				this.end = BooleanConverter.toBoolean(tmp);
 			}
 		}
 	}

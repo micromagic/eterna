@@ -28,6 +28,15 @@ import self.micromagic.util.ref.StringRef;
 
 public class IntegerConverter extends ObjectConverter
 {
+	/**
+	 * 将一个对象转换成int.
+	 */
+	public static int toInt(Object obj)
+	{
+		return instance.convertToInt(obj);
+	}
+	private static final IntegerConverter instance = new IntegerConverter();
+
 	private static Integer DEFAULT_VALUE = Utility.INTEGER_0;
 
 	private NumberFormat numberFormat;

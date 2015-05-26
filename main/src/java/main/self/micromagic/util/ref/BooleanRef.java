@@ -65,7 +65,7 @@ public class BooleanRef extends ObjectRef
 		}
 		if (obj instanceof String)
 		{
-			return (new BooleanConverter()).convertToBoolean((String) obj);
+			return BooleanConverter.toBoolean(obj);
 		}
 		return false;
 	}

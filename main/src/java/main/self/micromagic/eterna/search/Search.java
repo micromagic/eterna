@@ -49,6 +49,11 @@ public interface Search
 	public static final String BUILDER_LIST_FLAG = "defaultBuilder";
 
 	/**
+	 * 在factory或search的属性中设置是否要将query对象保存在会话中.
+	 */
+	String SESSION_QUERY_ATTRIBUTE = "search.session.query";
+
+	/**
 	 * 在factory的属性中设置默认每页行数的属性名称. <p>
 	 * 可在配置中按如下方法设置:
 	 * <factory>

@@ -54,6 +54,7 @@ import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.SessionCache;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.BooleanRef;
 
 /**
@@ -105,6 +106,10 @@ public class SearchImpl extends AbstractGenerator
 		}
 		this.initialized = true;
 		this.sessionQueryTag = "s:" + factory.getFactoryContainer().getId() + ":" + this.getName();
+		if (this.searchManagerName == null)
+		{
+			this.searchManagerName = this.sessionQueryTag;
+		}
 
 		if (this.otherName != null)
 		{
@@ -136,16 +141,25 @@ public class SearchImpl extends AbstractGenerator
 		if (this.queryName != null && !NONE_QUERY_NAME.equals(this.queryName))
 		{
 			this.queryId = this.getFactory().findObjectId(this.queryName);
+			// 如果不需要将query放入会话中, 将sessionQueryTag设为null.
+			Object tmpObj = factory.getAttribute(SESSION_QUERY_ATTRIBUTE);
+			if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
+			{
+				this.sessionQueryTag = null;
+			}
+			else
+			{
+				tmpObj = this.getAttribute(SESSION_QUERY_ATTRIBUTE);
+				if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
+				{
+					this.sessionQueryTag = null;
+				}
+			}
 		}
 		else
 		{
 			this.queryName = NONE_QUERY_NAME;
 			this.queryId = -1;
-		}
-
-		if (this.searchManagerName == null)
-		{
-			this.searchManagerName = this.sessionQueryTag;
 		}
 		if (this.countSearchName != null)
 		{
@@ -495,7 +509,7 @@ public class SearchImpl extends AbstractGenerator
 		Map raMap = data.getRequestAttributeMap();
 		BooleanRef isFirst = new BooleanRef();
 		SearchManager manager = this.getSearchManager0(data.getSessionAttributeMap());
-		Query query = getQueryAdapter(data, conn, this, isFirst, this.sessionQueryTag, manager,
+		Query query = getQuery(data, conn, this, isFirst, this.sessionQueryTag, manager,
 				this.queryId, onlySearch ? null : this.columnSetting, onlySearch ? null : this.columnType);
 		manager.setPageNumAndCondition(data, this);
 
@@ -670,8 +684,8 @@ public class SearchImpl extends AbstractGenerator
 	 * @param columnSetting     用于进行列设置的对象
 	 * @param columnType        列设置的类型, 用于区分读取哪个列设置
 	 */
-	protected static Query getQueryAdapter(AppData data, Connection conn, Search search,
-			BooleanRef first, String sessionQueryTag, SearchManager searchManager, int queryIndex,
+	protected static Query getQuery(AppData data, Connection conn, Search search, BooleanRef first,
+			String sessionQueryTag, SearchManager searchManager, int queryIndex,
 			ColumnSetting columnSetting, String columnType)
 			throws EternaException
 	{
@@ -681,85 +695,77 @@ public class SearchImpl extends AbstractGenerator
 		}
 		Query query = null;
 		Map raMap = data.getRequestAttributeMap();
+		boolean isFirst;
+		if (sessionQueryTag != null)
+		{
+			Map saMap = data.getSessionAttributeMap();
+			Map queryMap = (Map) SessionCache.getInstance().getProperty(saMap, SESSION_SEARCH_QUERY);
+			if (queryMap == null)
+			{
+				queryMap = new HashMap();
+				SessionCache.getInstance().setProperty(saMap, SESSION_SEARCH_QUERY, queryMap);
+			}
+			QueryContainer qc = (QueryContainer) queryMap.get(sessionQueryTag);
+			int qcVersion;
+			if (qc == null)
+			{
+				qcVersion = 0;
+			}
+			else
+			{
+				qcVersion = qc.conditionVersion;
+			}
+			isFirst = searchManager.hasQueryType(data) || searchManager.getConditionVersion() > qcVersion;
+			qcVersion = searchManager.getConditionVersion();
+			if (isFirst || qc == null)
+			{
+				isFirst = true;
+				query = createQuery0(data, search, queryIndex);
+				queryMap.put(sessionQueryTag, new QueryContainer(query, qcVersion));
+			}
+			else
+			{
+				query = qc.query;
+			}
+		}
+		else
+		{
+			isFirst = true;
+			query = createQuery0(data, search, queryIndex);
+		}
+
 		String[] columns = (String[]) raMap.get(COLUMN_SETTING);
+		if (columns == null && columnSetting != null)
+		{
+			columns = columnSetting.getColumnSetting(columnType, query, search, isFirst, data, conn);
+		}
 		if (columns != null)
 		{
-			query = search.getFactory().createQuery(queryIndex);
 			ResultReaderManager readerManager = query.getReaderManager();
 			readerManager.setReaderList(columns);
 			query.setReaderManager(readerManager);
-			UserManager um = search.getFactory().getUserManager();
-			if (um != null)
-			{
-				User user = um.getUser(data);
-				if (user != null)
-				{
-					query.setPermission(user.getPermission());
-				}
-				else
-				{
-					query.setPermission(EmptyPermission.getInstance());
-				}
-			}
-			first.value = true;
-			return query;
-		}
-
-		Map saMap = data.getSessionAttributeMap();
-		Map queryMap = (Map) SessionCache.getInstance().getProperty(saMap, SESSION_SEARCH_QUERY);
-		if (queryMap == null)
-		{
-			queryMap = new HashMap();
-			SessionCache.getInstance().setProperty(saMap, SESSION_SEARCH_QUERY, queryMap);
-		}
-
-		QueryContainer qc = (QueryContainer) queryMap.get(sessionQueryTag);
-		int qcVersion;
-		if (qc == null)
-		{
-			qcVersion = 0;
-		}
-		else
-		{
-			qcVersion = qc.conditionVersion;
-		}
-		boolean isFirst = searchManager.hasQueryType(data) || searchManager.getConditionVersion() > qcVersion;
-		qcVersion = searchManager.getConditionVersion();
-		if (isFirst || qc == null)
-		{
-			isFirst = true;
-			query = search.getFactory().createQuery(queryIndex);
-			UserManager um = search.getFactory().getUserManager();
-			if (um != null)
-			{
-				User user = um.getUser(data);
-				if (user != null)
-				{
-					query.setPermission(user.getPermission());
-				}
-				else
-				{
-					query.setPermission(EmptyPermission.getInstance());
-				}
-			}
-			queryMap.put(sessionQueryTag, new QueryContainer(query, qcVersion));
-		}
-		else
-		{
-			query = qc.query;
-		}
-		if (columnSetting != null)
-		{
-			String[] colSetting = columnSetting.getColumnSetting(columnType, query, search, isFirst, data, conn);
-			if (colSetting != null)
-			{
-				ResultReaderManager readerManager = query.getReaderManager();
-				readerManager.setReaderList(colSetting);
-				query.setReaderManager(readerManager);
-			}
 		}
 		first.value = isFirst;
 		return query;
+	}
+	private static Query createQuery0(AppData data, Search search, int queryIndex)
+	{
+		EternaFactory f = search.getFactory();
+		Query r = f.createQuery(queryIndex);
+		UserManager um = f.getUserManager();
+		if (um != null)
+		{
+			User user = um.getUser(data);
+			if (user != null)
+			{
+				r.setPermission(user.getPermission());
+			}
+			else
+			{
+				r.setPermission(EmptyPermission.getInstance());
+			}
+		}
+		return r;
 	}
 
 	private SearchManager getSearchManager0(Map saMap)

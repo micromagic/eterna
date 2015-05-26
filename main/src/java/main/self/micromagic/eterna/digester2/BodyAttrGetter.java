@@ -23,6 +23,7 @@ import org.dom4j.Element;
 import self.micromagic.util.MultiLineText;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.IntegerRef;
 
 /**
@@ -60,27 +61,30 @@ public class BodyAttrGetter
 			String bStr;
 			if ((bStr = (String) params.get("t")) != null)
 			{
-				result.setTrimLines((String) params.get("tFlag"), ParseRule.booleanConverter.convertToBoolean(bStr));
+				result.setTrimLines((String) params.get("tFlag"),
+						BooleanConverter.toBoolean(bStr));
 			}
 			if ((bStr = (String) params.get("n")) != null)
 			{
-				result.setNoLine((String) params.get("nFlag"), ParseRule.booleanConverter.convertToBoolean(bStr));
+				result.setNoLine((String) params.get("nFlag"),
+						BooleanConverter.toBoolean(bStr));
 			}
 			if ((bStr = (String) params.get("r")) != null)
 			{
-				result.setResolve((String) params.get("rFlag"), ParseRule.booleanConverter.convertToBoolean(bStr));
+				result.setResolve((String) params.get("rFlag"),
+						BooleanConverter.toBoolean(bStr));
 			}
 			if ((bStr = (String) params.get("i")) != null)
 			{
-				result.setIntern(ParseRule.booleanConverter.convertToBoolean(bStr));
+				result.setIntern(BooleanConverter.toBoolean(bStr));
 			}
 			if ((bStr = (String) params.get("m")) != null)
 			{
-				result.setMustExists(ParseRule.booleanConverter.convertToBoolean(bStr));
+				result.setMustExists(BooleanConverter.toBoolean(bStr));
 			}
 			if ((bStr = (String) params.get("c")) != null)
 			{
-				result.setCheckEmpty(ParseRule.booleanConverter.convertToBoolean(bStr));
+				result.setCheckEmpty(BooleanConverter.toBoolean(bStr));
 			}
 		}
 		else

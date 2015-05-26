@@ -25,7 +25,6 @@ import org.dom4j.Element;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.IntegerRef;
 
 /**
@@ -249,8 +248,6 @@ public class ParseRule
 	public static final char BLOCK_END = '}';
 
 	private static char[] endFlags = {',', BLOCK_END};
-
-	static BooleanConverter booleanConverter = new BooleanConverter();
 
 	/**
 	 * 注册一个元素节点的处理器.

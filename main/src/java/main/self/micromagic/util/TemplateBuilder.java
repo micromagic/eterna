@@ -296,12 +296,12 @@ public class TemplateBuilder extends AbstractGenerator
 			tmp = (String) this.getAttribute("array_param");
 			if (!StringTool.isEmpty(tmp))
 			{
-				this.arrayParam = (new BooleanConverter()).convertToBoolean(tmp);
+				this.arrayParam = BooleanConverter.toBoolean(tmp);
 			}
 			tmp = (String) this.getAttribute("name_sub");
 			if (!StringTool.isEmpty(tmp))
 			{
-				this.nameSub = (new BooleanConverter()).convertToBoolean(tmp);
+				this.nameSub = BooleanConverter.toBoolean(tmp);
 			}
 		}
 	}

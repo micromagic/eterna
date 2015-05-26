@@ -278,6 +278,30 @@ public class SearchManagerImpl extends AbstractGenerator
 	}
 
 	/**
+	 * 构造查询的条件管理者.
+	 */
+	private void makePreparerManager(List preparerList)
+	{
+		int pSize = preparerList.size();
+		if (pSize > 0)
+		{
+			PreparerManager tmpPM = new PreparerManager(pSize);
+			Iterator itr = preparerList.iterator();
+			for (int i = 0; i < pSize; i++)
+			{
+				ValuePreparer preparer = (ValuePreparer) itr.next();
+				preparer.setRelativeIndex(i + 1);
+				tmpPM.setValuePreparer(preparer);
+			}
+			this.generatedPM = tmpPM;
+		}
+		else
+		{
+			this.generatedPM = null;
+		}
+	}
+
+	/**
 	 * 根据特殊的条件格式设置查询条件。
 	 */
 	private void setConditionValues(Object[] conditionStruct, Search search, boolean saveCondition)
@@ -302,23 +326,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		{
 			log.debug("Condition:" + tmpScript);
 		}
-		int pSize = preparerList.size();
-		if (pSize > 0)
-		{
-			PreparerManager tmpPM = new PreparerManager(pSize);
-			Iterator itr = preparerList.iterator();
-			for (int i = 0; i < pSize; i++)
-			{
-				ValuePreparer preparer = (ValuePreparer) itr.next();
-				preparer.setRelativeIndex(i + 1);
-				tmpPM.setValuePreparer(preparer);
-			}
-			this.generatedPM = tmpPM;
-		}
-		else
-		{
-			this.generatedPM = null;
-		}
+		this.makePreparerManager(preparerList);
 	}
 	private String makeConditionScript(Object[] conditionStruct, boolean saveCondition,
 			Search search, List preparerList, StringRef firstLink)
@@ -436,23 +444,38 @@ public class SearchManagerImpl extends AbstractGenerator
 	private void setConditionValues(SearchParam param, Search search, boolean saveCondition)
 			throws EternaException
 	{
-		if (param.clearCondition)
+		if (param.queryType == null)
 		{
-			// 需要清除查询条件
+			param.queryType = this.attributes.defaultQueryType;
+		}
+		if (this.attributes.queryTypeReset.equals(param.queryType))
+		{
+			this.conditionVersion++;
+			this.resetConditionSearch = search;
+			this.setConditionValues0(param, search, saveCondition);
+		}
+		else if (this.attributes.queryTypeClear.equals(param.queryType))
+		{
+			this.conditionVersion++;
 			this.preparedCondition = null;
 			this.generatedPM = null;
 			this.clearCondition();
-			this.conditionVersion++;
-			return;
 		}
+		else if (this.conditionVersion == 1)
+		{
+			// version为1, 表示是第一次进入且未标记要设置条件
+			this.conditionVersion++;
+			this.setConditionValues0(param, search, saveCondition);
+		}
+	}
+	private void setConditionValues0(SearchParam param, Search search, boolean saveCondition)
+			throws EternaException
+	{
 		if (param.condition == null && param.conditionStruct == null)
 		{
-			// 没有条件则直接返回, 注: condition为空map不表示没有条件
-			return;
+			// 如果条件都为null, 需要构造一个空的map
+			param.condition = Collections.EMPTY_MAP;
 		}
-		this.clearCondition();
-		this.conditionVersion++;
-		this.resetConditionSearch = search;
 		if (param.conditionStruct != null)
 		{
 			this.setConditionValues(param.conditionStruct, search, saveCondition);
@@ -522,23 +545,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		{
 			log.debug("Condition:" + buf.toString());
 		}
-		int pSize = preparerList.size();
-		if (pSize > 0)
-		{
-			PreparerManager tmpPM = new PreparerManager(pSize);
-			Iterator itr = preparerList.iterator();
-			for (int i = 0; i < pSize; i++)
-			{
-				ValuePreparer preparer = (ValuePreparer) itr.next();
-				preparer.setRelativeIndex(i + 1);
-				tmpPM.setValuePreparer(preparer);
-			}
-			this.generatedPM = tmpPM;
-		}
-		else
-		{
-			this.generatedPM = null;
-		}
+		this.makePreparerManager(preparerList);
 	}
 
 	/**
@@ -626,23 +633,7 @@ public class SearchManagerImpl extends AbstractGenerator
 		{
 			log.debug("Condition:" + buf.toString());
 		}
-		int pSize = preparerList.size();
-		if (pSize > 0)
-		{
-			PreparerManager tmpPM = new PreparerManager(pSize);
-			Iterator itr = preparerList.iterator();
-			for (int i = 0; i < pSize; i++)
-			{
-				ValuePreparer preparer = (ValuePreparer) itr.next();
-				preparer.setRelativeIndex(i + 1);
-				tmpPM.setValuePreparer(preparer);
-			}
-			this.generatedPM = tmpPM;
-		}
-		else
-		{
-			this.generatedPM = null;
-		}
+		this.makePreparerManager(preparerList);
 	}
 
 	public PreparerManager getPreparerManager()

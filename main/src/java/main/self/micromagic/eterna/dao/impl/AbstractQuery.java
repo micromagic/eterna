@@ -134,7 +134,7 @@ public abstract class AbstractQuery extends BaseDao
 			boolean checkReader = false;
 			if (checkStr != null)
 			{
-				checkReader = (new BooleanConverter()).convertToBoolean(checkStr);
+				checkReader = BooleanConverter.toBoolean(checkStr);
 			}
 			if (!checkReader)
 			{

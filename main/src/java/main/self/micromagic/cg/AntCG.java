@@ -433,7 +433,7 @@ public class AntCG
 	public static boolean isOnlyResourceClassPath()
 	{
 		String b = Utility.getProperty(ANT_CONFIG_PREFIX + "resClassPath");
-		return (new BooleanConverter()).convertToBoolean(b);
+		return BooleanConverter.toBoolean(b);
 	}
 
 	/**

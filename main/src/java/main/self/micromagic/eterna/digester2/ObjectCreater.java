@@ -21,6 +21,7 @@ import org.dom4j.Element;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.IntegerRef;
 
 /**
@@ -61,7 +62,7 @@ public class ObjectCreater
 			}
 			else if (paramIndex == 1)
 			{
-				registerFactory = ParseRule.booleanConverter.convertToBoolean(tmpStr);
+				registerFactory = BooleanConverter.toBoolean(tmpStr);
 			}
 			paramIndex++;
 			position.value = tmpEnd + 1;

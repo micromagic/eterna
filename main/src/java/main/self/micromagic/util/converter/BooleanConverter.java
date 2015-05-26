@@ -16,14 +16,23 @@
 
 package self.micromagic.util.converter;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
 public class BooleanConverter extends ObjectConverter
 {
+	/**
+	 * 将一个对象转换成boolean.
+	 */
+	public static boolean toBoolean(Object obj)
+	{
+		return instance.convertToBoolean(obj);
+	}
+	private static final BooleanConverter instance = new BooleanConverter();
+
 	private String[] trueValues;
 
 	public void setTrueValues(String[] trueValues)

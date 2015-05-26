@@ -69,7 +69,7 @@ class StringCreater extends AbstractPreparerCreater
 		String tStr = (String) attributes.getAttribute(EMPTY_TO_NULL);
 		if (tStr != null)
 		{
-			this.emptyToNull = (new BooleanConverter()).convertToBoolean(tStr);
+			this.emptyToNull = BooleanConverter.toBoolean(tStr);
 		}
 	}
 

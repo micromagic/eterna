@@ -84,6 +84,7 @@ public class EntityImpl extends AbstractGenerator
 				this.nameCache.put(item.getName(), Utility.createInteger(i));
 			}
 		}
+		this.beforeItemInit(tmp);
 		// 重新构造items并初始化实体元素
 		this.items = new ArrayList(tmp.size());
 		this.items.addAll(tmp);
@@ -95,6 +96,15 @@ public class EntityImpl extends AbstractGenerator
 		return false;
 	}
 	private EternaFactory eternaFactory;
+
+	/**
+	 * 在初始化所有的元素前会调用此方法.
+	 *
+	 * @param items  待初始化的所有元素
+	 */
+	protected void beforeItemInit(List items)
+	{
+	}
 
 	public EternaFactory getFactory()
 	{

@@ -688,8 +688,8 @@ public class StringTool
 		{
 			if (stringAppendCreater == null)
 			{
-				BooleanConverter bc = new BooleanConverter();
-				if (bc.convertToBoolean(Utility.getProperty(USE_QUICK_APPEND_FLAG, "true")))
+				String useQuick = Utility.getProperty(USE_QUICK_APPEND_FLAG, "true");
+				if (BooleanConverter.toBoolean(useQuick))
 				{
 					stringAppendCreater = new QuickStringAppender();
 				}

@@ -30,6 +30,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.IntegerRef;
 import self.micromagic.util.ref.StringRef;
 
@@ -183,15 +184,15 @@ public class AttrBinder
 				String bStr;
 				if ((bStr = (String) params.get("i")) != null)
 				{
-					sag.setIntern(ParseRule.booleanConverter.convertToBoolean(bStr));
+					sag.setIntern(BooleanConverter.toBoolean(bStr));
 				}
 				if ((bStr = (String) params.get("r")) != null)
 				{
-					sag.setResolve(ParseRule.booleanConverter.convertToBoolean(bStr));
+					sag.setResolve(BooleanConverter.toBoolean(bStr));
 				}
 				if ((bStr = (String) params.get("m")) != null)
 				{
-					sag.setMustExists(ParseRule.booleanConverter.convertToBoolean(bStr));
+					sag.setMustExists(BooleanConverter.toBoolean(bStr));
 				}
 				if ((bStr = (String) params.get("d")) != null)
 				{
@@ -199,7 +200,7 @@ public class AttrBinder
 				}
 				if ((bStr = (String) params.get("c")) != null)
 				{
-					sag.setCheckEmpty(ParseRule.booleanConverter.convertToBoolean(bStr));
+					sag.setCheckEmpty(BooleanConverter.toBoolean(bStr));
 				}
 				endPos = ParseRule.findItemEnd(config, position);
 			}

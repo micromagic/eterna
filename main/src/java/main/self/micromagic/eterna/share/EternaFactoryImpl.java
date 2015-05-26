@@ -328,7 +328,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		int leaveSize = 2;
 		if (leaveSizeObj != null)
 		{
-			leaveSize = (new IntegerConverter()).convertToInt(leaveSizeObj);
+			leaveSize = IntegerConverter.toInt(leaveSizeObj);
 		}
 		List temp = new ArrayList(this.objectList.size() + leaveSize);
 		temp.addAll(this.objectList);

@@ -21,6 +21,7 @@ import org.dom4j.Element;
 import self.micromagic.cg.BeanMap;
 import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.IntegerRef;
 
 /**
@@ -89,13 +90,11 @@ public class StackBinder
 			}
 			else if (tmpStr.startsWith("n:"))
 			{
-				needName = ParseRule.booleanConverter.convertToBoolean(
-						tmpStr.substring(2).trim());
+				needName = BooleanConverter.toBoolean(tmpStr.substring(2).trim());
 			}
 			else if (tmpStr.startsWith("g:"))
 			{
-				needGenerate = ParseRule.booleanConverter.convertToBoolean(
-						tmpStr.substring(2).trim());
+				needGenerate = BooleanConverter.toBoolean(tmpStr.substring(2).trim());
 			}
 			else if (tmpStr.startsWith("attrName:"))
 			{

@@ -243,7 +243,10 @@ public class ValueContainerMap extends AbstractMap
 				((ModifiableResultRow) this.row).setValue(
 						key == null ? null : key.toString(), value);
 			}
-			throw new UnsupportedOperationException();
+			else
+			{
+				throw new UnsupportedOperationException();
+			}
 		}
 
 		public void removeValue(Object key)

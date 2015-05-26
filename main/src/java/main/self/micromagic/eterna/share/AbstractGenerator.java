@@ -31,10 +31,10 @@ public abstract class AbstractGenerator
 	 */
 	protected static final Log log = EternaFactoryImpl.log;
 
-	protected AttributeManager attributes = new AttributeManager();
+	protected transient AttributeManager attributes = new AttributeManager();
 
 	protected String name;
-	protected Factory factory;
+	protected transient Factory factory;
 
 	/**
 	 * 根据名称获取一个属性.
