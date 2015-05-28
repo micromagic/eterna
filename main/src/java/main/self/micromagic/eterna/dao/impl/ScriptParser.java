@@ -1,0 +1,496 @@
+/*
+ * Copyright 2015 xinjunli (micromagic@sina.com).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package self.micromagic.eterna.dao.impl;
+
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.IntegerRef;
+import self.micromagic.util.ref.ObjectRef;
+
+/**
+ * 数据操作脚本的解析器.
+ */
+public class ScriptParser
+{
+	/**
+	 * 节点类型为一个操作符.
+	 */
+	public static final int ELEMENT_GROUP = 1000;
+
+	/**
+	 * 节点类型为一个操作符.
+	 */
+	public static final int BASE_TYPE_OPERATOR = 1;
+	/**
+	 * 节点类型为一个控制标识符.
+	 */
+	public static final int BASE_TYPE_FLAG = 2;
+	/**
+	 * 节点类型为一个转义操作符.
+	 */
+	public static final int BASE_TYPE_ESCAPE = 3;
+	/**
+	 * 节点类型为一个参数符.
+	 */
+	public static final int BASE_TYPE_PARAM = 5;
+	/**
+	 * 节点类型为一个关键字.
+	 */
+	public static final int BASE_TYPE_KEY = 31;
+	/**
+	 * 节点类型为一个次要关键字.
+	 */
+	public static final int BASE_TYPE_KEY_MINOR = 32;
+	/**
+	 * 节点类型为一个字符串.
+	 */
+	public static final int BASE_TYPE_STRING = 21;
+	/**
+	 * 节点类型为一个数字.
+	 */
+	public static final int BASE_TYPE_NUMBER = 22;
+	/**
+	 * 节点类型为一个名称.
+	 */
+	public static final int BASE_TYPE_NAME = 10;
+	/**
+	 * 节点类型为一个带有引号的名称.
+	 */
+	public static final int BASE_TYPE_NAME_QUOT = 11;
+
+	/**
+	 * 解析一个脚本并返回词法节点列表.
+	 */
+	static List parseScript(String script)
+	{
+		List r = new ArrayList();
+		int count = script.length();
+		boolean notMatch = false;
+		int begin = 0;
+		int i = 0;
+		while (i < count)
+		{
+			char c = script.charAt(i);
+			if (c <= ' ' || operators.get(c))
+			{
+				if (notMatch)
+				{
+					r.add(new ParserBaseElement(begin, script.substring(begin, i)));
+					notMatch = false;
+				}
+				r.add(new ParserBaseElement(i, script.substring(i, i + 1)));
+				begin = ++i;
+				continue;
+			}
+			notMatch = true;
+			i++;
+		}
+		if (notMatch)
+		{
+			r.add(new ParserBaseElement(begin, script.substring(begin)));
+		}
+		return r;
+	}
+
+	/**
+	 * 对每个词法节点进行第二轮解析.
+	 * 处理操作符, 分组等.
+	 */
+	static List parseElement2(List elements)
+	{
+		return null;
+	}
+
+	private static final int P1_NORMAL_MODE = 0;
+	private static final int P1_STRING_MODE = 1;
+	private static final int P1_NAME_MODE = 2;
+
+	/**
+	 * 对每个词法节点进行第一轮解析.
+	 * 去除空白字符, 合并字符串, 添加类型等.
+	 */
+	static List parseElement1(List elements)
+	{
+		List r = new ArrayList();
+		IntegerRef mode = new IntegerRef(P1_NORMAL_MODE);
+		IntegerRef begin = new IntegerRef();
+		Iterator itr = elements.iterator();
+		ObjectRef buf = new ObjectRef();
+		while (itr.hasNext())
+		{
+			ParserBaseElement e = (ParserBaseElement) itr.next();
+			parseElement1_0(e, itr, mode, begin, buf, r);
+		}
+		return r;
+	}
+
+	/**
+	 * 解析单个词法节点.
+	 * 第一轮.
+	 */
+	private static void parseElement1_0(ParserBaseElement element, Iterator elements,
+			IntegerRef mode, IntegerRef begin, ObjectRef buf, List result)
+	{
+		ParserBaseElement next = null;
+		if (mode.value == P1_STRING_MODE)
+		{
+			StringAppender tmpBuf = (StringAppender) buf.getObject();
+			tmpBuf.append(element.text);
+			if (isStringFlag(element))
+			{
+				if (elements.hasNext())
+				{
+					next = (ParserBaseElement) elements.next();
+					if (isStringFlag(next))
+					{
+						// 连续两个字符串标识, 作为转义符
+						tmpBuf.append(next.text);
+						return;
+					}
+				}
+				ParserBaseElement e = new ParserBaseElement(begin.value, tmpBuf.toString());
+				e.type = BASE_TYPE_STRING;
+				result.add(e);
+				buf.setObject(null);
+				mode.value = P1_NORMAL_MODE;
+			}
+		}
+		else if (mode.value == P1_NAME_MODE)
+		{
+			StringAppender tmpBuf = (StringAppender) buf.getObject();
+			tmpBuf.append(element.text);
+			if (isNameFlag(element))
+			{
+				ParserBaseElement e = new ParserBaseElement(begin.value, tmpBuf.toString());
+				e.type = BASE_TYPE_NAME_QUOT;
+				result.add(e);
+				buf.setObject(null);
+				mode.value = P1_NORMAL_MODE;
+			}
+		}
+		else if (!emptyElement(element))
+		{
+			int c = checkOperatorFlag(element);
+			if (c != -1)
+			{
+				begin.value = element.begin;
+				if (c == '\'')
+				{
+					mode.value = P1_STRING_MODE;
+					StringAppender tmpBuf = StringTool.createStringAppender(32);
+					tmpBuf.append(element.text);
+					buf.setObject(tmpBuf);
+				}
+				else if (c == '\"')
+				{
+					mode.value = P1_NAME_MODE;
+					StringAppender tmpBuf = StringTool.createStringAppender(32);
+					tmpBuf.append(element.text);
+					buf.setObject(tmpBuf);
+				}
+				else
+				{
+					if (c == '?')
+					{
+						element.type = BASE_TYPE_PARAM;
+					}
+					else if (c == '#')
+					{
+						element.type = BASE_TYPE_OPERATOR;
+						if (elements.hasNext())
+						{
+							next = (ParserBaseElement) elements.next();
+							int tmpChar = checkOperatorFlag(next);
+							if (tmpChar != -1)
+							{
+								if (tmpChar != '\'' && tmpChar != '\"')
+								{
+									// 可作为转义符
+									element.type = BASE_TYPE_ESCAPE;
+									element.text = element.text.concat(next.text);
+									next = null;
+								}
+							}
+							else if (!emptyElement(next))
+							{
+								String tmpTxt = next.text.toUpperCase();
+								if (!isNumber(tmpTxt))
+								{
+									element.type = BASE_TYPE_FLAG;
+									// 控制标识不转大写
+									element.text = element.text.concat(next.text);
+									next = null;
+								}
+							}
+						}
+					}
+					else if (c == '.')
+					{
+						element.type = BASE_TYPE_OPERATOR;
+						if (elements.hasNext())
+						{
+							next = (ParserBaseElement) elements.next();
+							String tmpTxt = next.text.toUpperCase();
+							if (isNumber(tmpTxt))
+							{
+								element.type = BASE_TYPE_NUMBER;
+								element.text = element.text.concat(tmpTxt);
+								next = null;
+							}
+						}
+					}
+					else
+					{
+						element.type = BASE_TYPE_OPERATOR;
+					}
+					result.add(element);
+				}
+			}
+			else
+			{
+				String tmp = element.text.toUpperCase();
+				Boolean flag = (Boolean) keys.get(tmp);
+				if (flag == null)
+				{
+					if (isNumber(tmp))
+					{
+						if (elements.hasNext())
+						{
+							next = (ParserBaseElement) elements.next();
+							if (checkOperatorFlag(next) == '.')
+							{
+								tmp = tmp.concat(next.text);
+								if (elements.hasNext())
+								{
+									next = (ParserBaseElement) elements.next();
+									String tmpTxt = next.text.toUpperCase();
+									if (isNumber(tmpTxt))
+									{
+										tmp = tmp.concat(tmpTxt);
+										next = null;
+									}
+								}
+								else
+								{
+									next = null;
+								}
+							}
+						}
+						element.type = BASE_TYPE_NUMBER;
+					}
+					else
+					{
+						element.type = BASE_TYPE_NAME;
+					}
+				}
+				else
+				{
+					element.type = flag.booleanValue() ?
+							BASE_TYPE_KEY : BASE_TYPE_KEY_MINOR;
+				}
+				element.text = tmp;
+				result.add(element);
+			}
+		}
+		if (next != null)
+		{
+			// 有预读的节点, 需要对其进行处理
+			parseElement1_0(next, elements, mode, begin, buf, result);
+		}
+	}
+
+	/**
+	 * 检查给出的文本是否可作为一个数字.
+	 * 文本必须都转为大写.
+	 */
+	private static boolean isNumber(String text)
+	{
+		int count = text.length();
+		boolean hasX = false;
+		for (int i = 0; i < count; i++)
+		{
+			char c = text.charAt(i);
+			if (c < '0' || c > '9')
+			{
+				if (c == 'E')
+				{
+					continue;
+				}
+				if ((c == 'X' && i == 1))
+				{
+					hasX = true;
+					continue;
+				}
+				if (hasX && c >= 'A' && c <= 'F')
+				{
+					continue;
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * 检测是否为操作标识节点.
+	 * 如果是则返回操作字符, 否则返回-1.
+	 */
+	private static int checkOperatorFlag(ParserBaseElement e)
+	{
+		if (e.text.length() == 1)
+		{
+			char c = e.text.charAt(0);
+			if (operators.get(c))
+			{
+				return c;
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * 检测是否为字符串标识节点.
+	 */
+	private static boolean isStringFlag(ParserBaseElement e)
+	{
+		return e.text.length() == 1 && e.text.charAt(0) == '\'';
+	}
+
+	/**
+	 * 检测是否为名称标识节点.
+	 */
+	private static boolean isNameFlag(ParserBaseElement e)
+	{
+		return e.text.length() == 1 && e.text.charAt(0) == '\"';
+	}
+
+	/**
+	 * 检测是否为空白字符节点.
+	 */
+	private static boolean emptyElement(ParserBaseElement e)
+	{
+		return e.text.length() == 1 && e.text.charAt(0) <= ' ';
+	}
+
+	/**
+	 * 操作字符集合.
+	 */
+	private static BitSet operators = new BitSet();
+
+	/**
+	 * 关键字集合.
+	 */
+	private static Map keys = new HashMap();
+
+	static
+	{
+		operators.set('?');
+		operators.set(',');
+		operators.set('(');
+		operators.set(')');
+		operators.set('[');
+		operators.set(']');
+		operators.set('\'');
+		operators.set('\"');
+		operators.set('.');
+		operators.set('=');
+		operators.set('<');
+		operators.set('>');
+		operators.set('!');
+		operators.set('*');
+		operators.set('/');
+		operators.set('|');
+		operators.set('+');
+		operators.set('-');
+		operators.set('#');
+
+		try
+		{
+			String tmpStr = StringTool.toString(
+					ScriptParser.class.getResourceAsStream("../script_key.res"), "UTF-8");
+			String[] arr = StringTool.separateString(tmpStr, "\n", true);
+			for (int i = 0; i < arr.length; i++)
+			{
+				if (!StringTool.isEmpty(arr[i]))
+				{
+					if (arr[i].charAt(0) == '*')
+					{
+						keys.put(arr[i].substring(1), Boolean.TRUE);
+					}
+					else
+					{
+						keys.put(arr[i], Boolean.FALSE);
+					}
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			DaoManager.log.error("Error in init script key.", ex);
+		}
+	}
+
+}
+
+/**
+ * 解析后的基本词法节点.
+ */
+class ParserBaseElement
+{
+	ParserBaseElement(int begin, String text)
+	{
+		this.begin = begin;
+		this.text = text;
+	}
+	/**
+	 * 词法节点的起始位置.
+	 */
+	int begin;
+	/**
+	 * 词法节点的类型.
+	 */
+	int type;
+	/**
+	 * 词法节点的文本.
+	 */
+	String text;
+	/**
+	 * 是否为解析完成的词法节点.
+	 */
+	boolean finish;
+
+	public String toString()
+	{
+		return this.finish ? this.text : this.begin + ":" + this.type + ":" + this.text;
+	}
+
+}
+
+/**
+ * 解析后的聚合节点.
+ */
+class ParserGroupElement
+{
+
+}

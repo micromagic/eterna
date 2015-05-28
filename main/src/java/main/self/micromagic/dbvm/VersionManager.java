@@ -49,11 +49,11 @@ public class VersionManager
 	/**
 	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
 	 *
-	 * @param conn         数据库连接
+	 * @param conn         数据库连接, 注: 执行完毕后此连接会被关闭
 	 * @param packagePath  版本信息所在的包路径
 	 * @param loader       版本信息所属的classloader
 	 */
-	public static void checkVersion(Connection conn, String packagePath, ClassLoader loader)
+	public static boolean checkVersion(Connection conn, String packagePath, ClassLoader loader)
 	{
 		if (loader == null)
 		{
@@ -64,13 +64,14 @@ public class VersionManager
 			loader = VersionManager.class.getClassLoader();
 		}
 		boolean success = false;
+		boolean result = false;
 		try
 		{
 			conn.setAutoCommit(false);
 			DataBaseLock.lock(conn, VERSION_LOCK_NAME, null, true);
 			synchronized (VersionManager.class)
 			{
-				checkVersion0(conn, packagePath, loader);
+				result = checkVersion0(conn, packagePath, loader);
 			}
 			success = true;
 		}
@@ -95,8 +96,9 @@ public class VersionManager
 			}
 			catch (Exception ex) {}
 		}
+		return result;
 	}
-	private static void checkVersion0(Connection conn, String packagePath, ClassLoader loader)
+	private static boolean checkVersion0(Connection conn, String packagePath, ClassLoader loader)
 			throws Exception
 	{
 		ConfigResource res = ContainerManager.createClassPathResource(packagePath, loader);
@@ -107,7 +109,7 @@ public class VersionManager
 		if (version == -2)
 		{
 			// 版本有错误直接退出
-			return;
+			return false;
 		}
 		if (version == -1)
 		{
@@ -119,12 +121,12 @@ public class VersionManager
 		int tVersion = getVersionValue(conn, ETERNA_VERSION_TABLE, f);
 		if (tVersion < eternaMaxVersion)
 		{
-			// 版本表的版本小于目前系统定义的最大版本, 需要升级
 			if (tVersion == -2)
 			{
 				log.error("Version tables has error.");
-				return;
+				return false;
 			}
+			// 版本表的版本小于目前系统定义的最大版本, 需要升级
 			ClassLoader tmpLoader = VersionManager.class.getClassLoader();
 			ConfigResource tmp = ContainerManager.createClassPathResource(
 					DataBaseLock.CONFIG_PREFIX + "impl/", tmpLoader);
@@ -132,6 +134,7 @@ public class VersionManager
 		}
 		version++;
 		checkVersion0(conn, version, vName, res, loader);
+		return true;
 	}
 	private static void checkVersion0(Connection conn, int version, String vName,
 			ConfigResource packagePath, ClassLoader loader)
@@ -340,31 +343,6 @@ public class VersionManager
 	 */
 	private static final String ETERNA_VERSION_TABLE = "__eterna_version_table";
 
-	/**
-	 * 获取配置文件的解析对象.
-	 */
-	public static Digester getDigester()
-	{
-		return digester;
-	}
-	private static Digester digester;
-	static
-	{
-		try
-		{
-			ResManager rm1 = new ResManager();
-			rm1.load(Digester.class.getResourceAsStream(Digester.DEFAULT_RULES));
-			Properties rConfig = new Properties();
-			rConfig.load(Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
-			ResManager rm2 = new ResManager();
-			rm2.load(DataBaseLock.class.getResourceAsStream("dbvm_rules.res"));
-			digester = new Digester(new ResManager[]{rm1, rm2}, rConfig);
-		}
-		catch (Exception ex)
-		{
-			Utility.createLog("eterna.dbvm").error("Error in init dbvm rules", ex);
-		}
-	}
 
 	/**
 	 * 记录版本更新时的日志.
@@ -389,5 +367,31 @@ public class VersionManager
 		VersionManager.log = log;
 	}
 	private static Log log = Utility.createLog("eterna.dbvm");
+
+	/**
+	 * 获取配置文件的解析对象.
+	 */
+	public static Digester getDigester()
+	{
+		return digester;
+	}
+	private static Digester digester;
+	static
+	{
+		try
+		{
+			ResManager rm1 = new ResManager();
+			rm1.load(Digester.class.getResourceAsStream(Digester.DEFAULT_RULES));
+			Properties rConfig = new Properties();
+			rConfig.load(Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
+			ResManager rm2 = new ResManager();
+			rm2.load(DataBaseLock.class.getResourceAsStream("dbvm_rules.res"));
+			digester = new Digester(new ResManager[]{rm1, rm2}, rConfig);
+		}
+		catch (Exception ex)
+		{
+			log.error("Error in init dbvm rules", ex);
+		}
+	}
 
 }

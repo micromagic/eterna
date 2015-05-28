@@ -116,7 +116,7 @@ public abstract class AbstractDao extends AbstractGenerator
 						+ " parameter(s).";
 				throw new EternaException(msg);
 			}
-			this.checkParamPermission();
+			this.checkParamPermission(tmpScript);
 			return false;
 		}
 		return true;
@@ -133,7 +133,7 @@ public abstract class AbstractDao extends AbstractGenerator
 	/**
 	 * 检查设置了权限的参数是否为动态参数.
 	 */
-	protected void checkParamPermission()
+	protected void checkParamPermission(String script)
 	{
 		for (int i = 0; i < this.parameterArray.length; i++)
 		{

@@ -91,14 +91,14 @@ public class RequestParameterMap extends AbstractContainerSetting
 		{
 			return null;
 		}
+		if (obj instanceof String)
+		{
+			return (String) obj;
+		}
 		if (obj instanceof String[])
 		{
 			String[] arr = (String[]) obj;
 			return arr.length > 0 ? arr[0] : null;
-		}
-		if (obj instanceof String)
-		{
-			return (String) obj;
 		}
 		if (obj instanceof Object[])
 		{
