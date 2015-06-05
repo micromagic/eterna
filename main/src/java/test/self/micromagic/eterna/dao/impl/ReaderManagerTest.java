@@ -57,7 +57,9 @@ public class ReaderManagerTest extends TestCase
 	{
 		for (int i = 0; i < names.length; i++)
 		{
-			assertEquals("Check reader " + i, names[i], manager.getReader(i).getName());
+			String name = manager.getReader(i).getName();
+			assertEquals("Check reader name " + i, names[i], name);
+			assertEquals("Check reader index " + i, i, manager.getReaderIndex(name));
 		}
 	}
 

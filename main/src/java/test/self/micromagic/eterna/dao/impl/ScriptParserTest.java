@@ -51,15 +51,29 @@ public class ScriptParserTest extends TestCase
 
 	public void testParseScript()
 	{
-		List r = ScriptParser.parseScript("delete from a where 1 = 2");
-		printElement(r);
+		ScriptParser p = new ScriptParser();
+		String text = "delete from a where 1 = 2";
+		ScriptParser.Element[] r1 = p.parseScript(text, 0);
+		assertEquals("delete", r1[0].getText());
+		assertEquals(" ", r1[1].getText());
+		assertEquals("=", r1[r1.length - 3].getText());
+		r1 = p.parseScript(text, 1);
+		assertEquals("DELETE", r1[0].getText());
+		assertEquals("FROM", r1[1].getText());
+		assertEquals("=", r1[r1.length - 2].getText());
+
 		String script = " update TABLE t set t.a = ' 1\ns s'.75, t.b=0x3.14e12.a,"
 				+ "t.c=t.d,\"x.d\"='d''d',#sub,#123?##?#?#param(a)[or x=?]#"
 				+ " where t.b between 1.p? and 5 or a like '%a\\_b%' escape '\\'";
-		r = ScriptParser.parseScript(script);
+		List r = p.parseScript0(script);
 		printElement(r);
-		r = ScriptParser.parseElement1(r);
+		r = p.parseElement1(r);
 		printElement(r);
+		assertEquals(".75", ((ScriptParser.Element) r.get(9)).getText());
+		assertEquals("0X3.14E12", ((ScriptParser.Element) r.get(15)).getText());
+		assertEquals("'d''d'", ((ScriptParser.Element) r.get(29)).getText());
+		assertEquals("#sub", ((ScriptParser.Element) r.get(31)).getText());
+
 	}
 
 	private static void printElement(List elements)

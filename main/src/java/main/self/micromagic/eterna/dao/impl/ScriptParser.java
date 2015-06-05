@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.eterna.dao.Dao;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.IntegerRef;
@@ -80,9 +81,31 @@ public class ScriptParser
 	public static final int BASE_TYPE_NAME_QUOT = 11;
 
 	/**
-	 * 解析一个脚本并返回词法节点列表.
+	 * 对一个脚本进行解析并返回词法节点列表.
+	 *
+	 * @param script  需要解析的脚本
+	 * @param level   需要解析的等级
 	 */
-	static List parseScript(String script)
+	public Element[] parseScript(String script, int level)
+	{
+		List r = this.parseScript0(script);
+		if (level > 0)
+		{
+			r = this.parseElement1(r);
+		}
+		if (level > 1)
+		{
+			r = this.parseElement2(r);
+		}
+		int count = r.size();
+		return (Element[]) r.toArray(new Element[count]);
+	}
+
+	/**
+	 * 解析一个脚本并返回词法节点列表.
+	 * 即前置解析.
+	 */
+	List parseScript0(String script)
 	{
 		List r = new ArrayList();
 		int count = script.length();
@@ -117,9 +140,9 @@ public class ScriptParser
 	 * 对每个词法节点进行第二轮解析.
 	 * 处理操作符, 分组等.
 	 */
-	static List parseElement2(List elements)
+	List parseElement2(List elements)
 	{
-		return null;
+		return elements;
 	}
 
 	private static final int P1_NORMAL_MODE = 0;
@@ -130,7 +153,7 @@ public class ScriptParser
 	 * 对每个词法节点进行第一轮解析.
 	 * 去除空白字符, 合并字符串, 添加类型等.
 	 */
-	static List parseElement1(List elements)
+	List parseElement1(List elements)
 	{
 		List r = new ArrayList();
 		IntegerRef mode = new IntegerRef(P1_NORMAL_MODE);
@@ -140,7 +163,7 @@ public class ScriptParser
 		while (itr.hasNext())
 		{
 			ParserBaseElement e = (ParserBaseElement) itr.next();
-			parseElement1_0(e, itr, mode, begin, buf, r);
+			this.parseElement1_0(e, itr, mode, begin, buf, r);
 		}
 		return r;
 	}
@@ -149,7 +172,7 @@ public class ScriptParser
 	 * 解析单个词法节点.
 	 * 第一轮.
 	 */
-	private static void parseElement1_0(ParserBaseElement element, Iterator elements,
+	private void parseElement1_0(ParserBaseElement element, Iterator elements,
 			IntegerRef mode, IntegerRef begin, ObjectRef buf, List result)
 	{
 		ParserBaseElement next = null;
@@ -316,7 +339,7 @@ public class ScriptParser
 		if (next != null)
 		{
 			// 有预读的节点, 需要对其进行处理
-			parseElement1_0(next, elements, mode, begin, buf, result);
+			this.parseElement1_0(next, elements, mode, begin, buf, result);
 		}
 	}
 
@@ -428,7 +451,7 @@ public class ScriptParser
 		try
 		{
 			String tmpStr = StringTool.toString(
-					ScriptParser.class.getResourceAsStream("../script_key.res"), "UTF-8");
+					Dao.class.getResourceAsStream("script_key.res"), "UTF-8");
 			String[] arr = StringTool.separateString(tmpStr, "\n", true);
 			for (int i = 0; i < arr.length; i++)
 			{
@@ -451,12 +474,30 @@ public class ScriptParser
 		}
 	}
 
+	/**
+	 * 解析后的节点.
+	 */
+	public interface Element
+	{
+		/**
+		 * 获取节点的类型.
+		 */
+		public int getType();
+
+		/**
+		 * 获取节点的文本.
+		 */
+		public String getText();
+
+	}
+
 }
 
 /**
  * 解析后的基本词法节点.
  */
 class ParserBaseElement
+		implements ScriptParser.Element
 {
 	ParserBaseElement(int begin, String text)
 	{
@@ -479,6 +520,16 @@ class ParserBaseElement
 	 * 是否为解析完成的词法节点.
 	 */
 	boolean finish;
+
+	public int getType()
+	{
+		return this.type;
+	}
+
+	public String getText()
+	{
+		return this.text;
+	}
 
 	public String toString()
 	{

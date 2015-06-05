@@ -473,7 +473,7 @@ public class SearchImpl extends AbstractGenerator
 	public SearchManager getSearchManager(AppData data)
 			throws EternaException
 	{
-		SearchManager manager = this.getSearchManager0(data.getSessionAttributeMap());
+		SearchManager manager = this.getSearchManager0(data);
 		manager.setPageNumAndCondition(data, this);
 		return manager;
 	}
@@ -508,7 +508,7 @@ public class SearchImpl extends AbstractGenerator
 
 		Map raMap = data.getRequestAttributeMap();
 		BooleanRef isFirst = new BooleanRef();
-		SearchManager manager = this.getSearchManager0(data.getSessionAttributeMap());
+		SearchManager manager = this.getSearchManager0(data);
 		Query query = getQuery(data, conn, this, isFirst, this.sessionQueryTag, manager,
 				this.queryId, onlySearch ? null : this.columnSetting, onlySearch ? null : this.columnType);
 		manager.setPageNumAndCondition(data, this);
@@ -768,9 +768,14 @@ public class SearchImpl extends AbstractGenerator
 		return r;
 	}
 
-	private SearchManager getSearchManager0(Map saMap)
+	private SearchManager getSearchManager0(AppData data)
 			throws EternaException
 	{
+		if ("1".equals(data.getRequestAttributeMap().get(SearchManager.NEW_SEARCH_MANAGER)))
+		{
+			return this.getFactory().createSearchManager();
+		}
+		Map saMap = data.getSessionAttributeMap();
 		Map managerMap = (Map) SessionCache.getInstance().getProperty(saMap, SESSION_SEARCH_MANAGER);
 		if (managerMap == null)
 		{

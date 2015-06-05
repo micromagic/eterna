@@ -347,7 +347,6 @@ public class ReaderManagerImpl
 			{
 				this.orderList.add(reader.getColumnName() + (orderFlag < 0 ? " DESC" : "" ));
 			}
-			tmpReaderList.add(reader);
 			if (this.colNameSensitive)
 			{
 				tmpNameToIndexMap.put(reader.getName(),
@@ -358,6 +357,7 @@ public class ReaderManagerImpl
 				tmpNameToIndexMap.put(reader.getName().toUpperCase(),
 						Utility.createInteger(tmpReaderList.size()));
 			}
+			tmpReaderList.add(reader);
 		}
 		// 这两个变量需要最后改变, 因为执行的中间会需要使用
 		this.nameToIndexMap = tmpNameToIndexMap;

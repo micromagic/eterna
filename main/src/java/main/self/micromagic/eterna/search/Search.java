@@ -35,18 +35,21 @@ public interface Search
 	/**
 	 * 在item的arrtibute中设置输入类型的名称.
 	 */
-	public static final String INPUT_TYPE_FLAG = "inputType";
+	String INPUT_TYPE_FLAG = "inputType";
 
 	/**
 	 * 在item的arrtibute中设置默认条件构造器的名称.
 	 */
-	public static final String BUILDER_FLAG = "builder";
-	public static final String DEFAULT_BUILDER_FLAG = "defaultBuilder";
+	String BUILDER_FLAG = "builder";
+	/**
+	 * 在item的arrtibute中设置默认条件构造器的名称.
+	 */
+	String DEFAULT_BUILDER_FLAG = "defaultBuilder";
 
 	/**
 	 * 在item的arrtibute中设置条件构造列表的名称.
 	 */
-	public static final String BUILDER_LIST_FLAG = "defaultBuilder";
+	String BUILDER_LIST_FLAG = "defaultBuilder";
 
 	/**
 	 * 在factory或search的属性中设置是否要将query对象保存在会话中.

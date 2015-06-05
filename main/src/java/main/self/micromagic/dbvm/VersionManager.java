@@ -343,7 +343,6 @@ public class VersionManager
 	 */
 	private static final String ETERNA_VERSION_TABLE = "__eterna_version_table";
 
-
 	/**
 	 * 记录版本更新时的日志.
 	 */
