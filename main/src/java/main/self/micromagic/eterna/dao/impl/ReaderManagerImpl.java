@@ -181,10 +181,10 @@ public class ReaderManagerImpl
 					}
 					else
 					{
-						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName());
+						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName(), false);
 						tmp.setNeedFormat(false);
 						this.allReaderList.set(i, tmp);
-						tmp = new ReaderWrapper(reader, showName);
+						tmp = new ReaderWrapper(reader, showName, true);
 						tmp.setNeedFormat(true);
 						this.nameToIndexMap.put(showName,
 								Utility.createInteger(this.allReaderList.size()));
@@ -333,6 +333,8 @@ public class ReaderManagerImpl
 		List tmpReaderList = new ArrayList(names.length);
 		this.orderList = new ArrayList(5);
 		this.orderStr = null;
+		List showNames = null;
+		int showNameCount = 0;
 		for (int i = 0; i < names.length; i++)
 		{
 			StringRef name = new StringRef(names[i]);
@@ -343,21 +345,44 @@ public class ReaderManagerImpl
 				throw new EternaException("Invalid ResultReader name [" + name
 						+ "] at ReaderManager [" + this.getName() + "].");
 			}
+			String rName = this.colNameSensitive ? reader.getName() : reader.getName().toUpperCase();
+			if (tmpNameToIndexMap.containsKey(rName))
+			{
+				throw new EternaException("Duplicated ResultReader name [" + name
+						+ "] in parameter [" + StringTool.linkStringArr(names, ", ") + "].");
+			}
+			String showName = (String) reader.getAttribute(SHOW_NAME_FLAG);
+			if (showName != null && !showName.equalsIgnoreCase(rName))
+			{
+				// 存在绑定的显示列, 需要添加到列表中
+				ResultReader tmp = this.getReader0(showName);
+				if (tmp != null)
+				{
+					if (showNames == null)
+					{
+						showNames = new ArrayList();
+					}
+					showNames.add(tmp);
+					showNameCount++;
+				}
+			}
 			if (orderFlag != 0)
 			{
 				this.orderList.add(reader.getColumnName() + (orderFlag < 0 ? " DESC" : "" ));
 			}
-			if (this.colNameSensitive)
-			{
-				tmpNameToIndexMap.put(reader.getName(),
-						Utility.createInteger(tmpReaderList.size()));
-			}
-			else
-			{
-				tmpNameToIndexMap.put(reader.getName().toUpperCase(),
-						Utility.createInteger(tmpReaderList.size()));
-			}
+			tmpNameToIndexMap.put(rName, Utility.createInteger(tmpReaderList.size()));
 			tmpReaderList.add(reader);
+		}
+		// 添加绑定的显示列
+		for (int i = 0; i < showNameCount; i++)
+		{
+			ResultReader reader = (ResultReader) showNames.get(i);
+			String name = this.colNameSensitive ? reader.getName() : reader.getName().toUpperCase();
+			if (!tmpNameToIndexMap.containsKey(name))
+			{
+				tmpNameToIndexMap.put(name, Utility.createInteger(tmpReaderList.size()));
+				tmpReaderList.add(reader);
+			}
 		}
 		// 这两个变量需要最后改变, 因为执行的中间会需要使用
 		this.nameToIndexMap = tmpNameToIndexMap;

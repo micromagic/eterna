@@ -196,7 +196,14 @@ public abstract class AbstractQuery extends BaseDao
 			String orderStr = this.readerManager.getOrderByString();
 			if (this.orderStrs != null)
 			{
-				orderStr = StringTool.linkStringArr(this.orderStrs, ", ") + ", " + orderStr;
+				if (StringTool.isEmpty(orderStr))
+				{
+					orderStr = StringTool.linkStringArr(this.orderStrs, ", ");
+				}
+				else
+				{
+					orderStr = StringTool.linkStringArr(this.orderStrs, ", ").concat(", ".concat(orderStr));
+				}
 			}
 			if (log.isDebugEnabled())
 			{
@@ -326,6 +333,38 @@ public abstract class AbstractQuery extends BaseDao
 		return super.getPreparedScript();
 	}
 
+	private ResultReader getReader0(String name)
+	{
+		if (name == null)
+		{
+			return null;
+		}
+		ResultReader reader = this.readerManager.getReader(name);
+		if (reader == null && this.readerManagerSetted)
+		{
+			ResultReaderManager tmp = (ResultReaderManager) this.globalReaderManager.getObject();
+			if (tmp != null)
+			{
+				return tmp.getReader(name);
+			}
+			// 如果没有找到reader且readerManager被设置过, 则从所有的reader中查找
+			Iterator itr = this.readerManager.getReaderList().iterator();
+			if (!this.readerManager.isColNameSensitive())
+			{
+				name = name.toUpperCase();
+			}
+			while (itr.hasNext())
+			{
+				ResultReader r = (ResultReader) itr.next();
+				if (name.equals(r.getName()))
+				{
+					return r;
+				}
+			}
+		}
+		return reader;
+	}
+
 	public void setSingleOrder(String readerName)
 			throws EternaException
 	{
@@ -340,7 +379,7 @@ public abstract class AbstractQuery extends BaseDao
 	{
 		if (this.orderIndex != -1)
 		{
-			ResultReader reader = this.readerManager.getReader(readerName);
+			ResultReader reader = this.getReader0(readerName);
 			if (reader == null)
 			{
 				log.error("Single order, not found the reader: [" + readerName
@@ -404,7 +443,7 @@ public abstract class AbstractQuery extends BaseDao
 			{
 				StringRef name = new StringRef(orderNames[i]);
 				int orderFlag = ReaderManagerImpl.checkOrderFlag(name);
-				ResultReader reader = this.readerManager.getReader(name.getString());
+				ResultReader reader = this.getReader0(name.getString());
 				if (reader == null || orderFlag == 0)
 				{
 					log.error("Multiple order, not found the reader [" + name

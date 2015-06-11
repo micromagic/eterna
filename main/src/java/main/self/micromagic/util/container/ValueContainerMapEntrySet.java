@@ -23,15 +23,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.util.Utility;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 class ValueContainerMapEntrySet extends AbstractSet
 		implements Set
 {
-	private ValueContainerMap vcm;
-	private ValueContainer vContainer;
+	private final ValueContainerMap vcm;
+	private final ValueContainer vContainer;
 	private Map entryMap = null;
 	private boolean keepEntry = true;
 
@@ -100,7 +100,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 		Map tmpMap = null;
 		if ((tmpMap = this.entryMap) == null)
 		{
-			return this.vcm.containsKey(key);
+			return this.vContainer.containsKey(key);
 		}
 		else
 		{
@@ -237,7 +237,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 	private class MapEntrySetIterator
 			implements Iterator
 	{
-		private Iterator itr;
+		private final Iterator itr;
 		private MapEntry current = null;
 
 		public MapEntrySetIterator(Iterator itr)
@@ -272,7 +272,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 	private class MapEntry
 			implements Map.Entry
 	{
-		private Object key;
+		private final Object key;
 		private Object value = null;
 
 		private String toStringValue = null;

@@ -18,13 +18,20 @@ package self.micromagic.eterna.dao.impl;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.TestCase;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultReaderManager;
+import self.micromagic.eterna.dao.reader.ObjectReader;
+import self.micromagic.eterna.dao.reader.ReaderFactory;
+import self.micromagic.eterna.dao.reader.ReaderWrapper;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.container.PreFetchIterator;
 
 public class DaoManagerTest extends TestCase
@@ -42,10 +49,11 @@ public class DaoManagerTest extends TestCase
 			paramArray[i] = new ParameterImpl( "name_" + i, "col_" + i, "String", i + 1,
 					null, null, new AttributeManager());
 		}
-		query = new TestQuery(paramArray);
+		TestQuery tmpQuery = new TestQuery(paramArray);
+		tmpQuery.setReaderManager(createReaderManager());
+		query  = tmpQuery;
 		//this.factory = EternaFactoryCreater.getEternaFactory(this.getClass());
 	}
-
 
 	public void testFrontParse1()
 	{
@@ -108,6 +116,21 @@ public class DaoManagerTest extends TestCase
 		}
 	}
 
+	public void testFrontParse3()
+	{
+		List list = query.getReaderManager().getReaderList();
+		assertEquals(6, list.size());
+		assertEquals("a", ((ResultReader) list.get(0)).getName());
+		assertEquals("b", ((ResultReader) list.get(1)).getName());
+		assertEquals("y", ((ResultReader) list.get(2)).getName());
+		assertEquals("c", ((ResultReader) list.get(3)).getName());
+		assertEquals("z", ((ResultReader) list.get(4)).getName());
+		assertEquals("x", ((ResultReader) list.get(5)).getName());
+		String str = daoManager.preParse("select #auto[select]", query);
+		String result = "select a as \"a\", b as \"b\", c as \"c\", b as \"b\"";
+		assertEquals(result, str);
+	}
+
 	public void testFrontParse_error()
 	{
 		try
@@ -142,6 +165,21 @@ public class DaoManagerTest extends TestCase
 		catch (EternaException ex) {}
 	}
 
+	static ResultReaderManager createReaderManager()
+	{
+		ReaderManagerImpl r = new ReaderManagerImpl();
+		ObjectReader reader = (ObjectReader) ReaderFactory.createReader("String", "a");
+		reader.setAttribute(ResultReaderManager.SHOW_NAME_FLAG, "x");
+		r.addReader(reader);
+		reader = (ObjectReader) ReaderFactory.createReader("String", "b");
+		r.addReader(reader);
+		r.addReader(new ReaderWrapper(reader, "y", true));
+		r.addReader(ReaderFactory.createReader("String", "c"));
+		r.addReader(new ReaderWrapper(reader, "z", false));
+		r.initialize((EternaFactory) ContainerManager.getGlobalContainer().getFactory());
+		return r;
+	}
+
 }
 
 class TestQuery extends QueryImpl
@@ -152,10 +190,20 @@ class TestQuery extends QueryImpl
 	}
 	private final Parameter[] parameters;
 
+	public void setReaderManager(ResultReaderManager manager)
+	{
+		this.readerManager = manager;
+	}
+
 	public ResultReaderManager getReaderManager()
 	{
+		if (this.readerManager != null)
+		{
+			return this.readerManager;
+		}
 		return super.getReaderManager();
 	}
+	private ResultReaderManager readerManager;
 
 	public Iterator getParameterIterator()
 	{

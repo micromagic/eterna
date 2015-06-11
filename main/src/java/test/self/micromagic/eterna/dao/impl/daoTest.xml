@@ -35,6 +35,23 @@
 				</parameters>
 			</query>
 
+			<query name="t3" orderIndex="1">
+				<prepared-sql>
+					|#sub|
+				</prepared-sql>
+				<readers>
+					<reader name="a" type="string"/>
+					<reader name="b" type="string">
+						<attribute name="showName" value="x"/>
+					</reader>
+					<reader name="c" type="string"/>
+					<reader name="d" type="string">
+						<attribute name="showName" value="y"/>
+					</reader>
+					<reader name="e" type="string"/>
+				</readers>
+			</query>
+
 			<dao-logger name="log1" generator="self.micromagic.eterna.dao.impl.TestDaoLogger"/>
 			<dao-logger name="log2" generator="self.micromagic.eterna.dao.impl.TestDaoLogger"/>
 

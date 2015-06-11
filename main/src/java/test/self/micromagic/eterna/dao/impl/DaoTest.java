@@ -21,6 +21,7 @@ import java.sql.Connection;
 import junit.framework.TestCase;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Query;
+import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.db.ConnectionTool;
 import self.micromagic.eterna.digester2.ContainerManager;
@@ -49,6 +50,40 @@ public class DaoTest extends TestCase
 		}
 		catch (Exception ex) {}
 		conn.close();
+	}
+
+	public void test02()
+			throws Exception
+	{
+		Query q = f.createQuery("t3");
+		q.setMultipleOrder(new String[]{"+b","-c"});
+		assertEquals("|b, c DESC|", q.getPreparedScript().trim());
+
+		q = f.createQuery("t3");
+		ResultReaderManager m = q.getReaderManager();
+		assertEquals(7, m.getReaderCount());
+		m.setReaderList(new String[]{"a","b"});
+		q.setReaderManager(m);
+		q.setMultipleOrder(new String[]{"+c"});
+		assertEquals("|c|", q.getPreparedScript().trim());
+		q.setMultipleOrder(new String[]{"+b"});
+		assertEquals("|b|", q.getPreparedScript().trim());
+		try
+		{
+			m.setReaderList(new String[]{"a","b", "c", "-a"});
+			fail();
+		}
+		catch (Exception ex) {}
+
+		q = f.createQuery("t3");
+		m = q.getReaderManager();
+		m.setReaderList(new String[]{"a","b"});
+		assertEquals(3, m.getReaderList(null).size());
+		assertEquals("x", m.getReader(2).getName());
+		m.setReaderList(new String[]{"a","-y","b","d"});
+		assertEquals(5, m.getReaderList(null).size());
+		assertEquals(4, m.getReaderIndex("x"));
+		assertEquals("y", m.getReader(1).getName());
 	}
 
 	private void setParams(Dao dao)

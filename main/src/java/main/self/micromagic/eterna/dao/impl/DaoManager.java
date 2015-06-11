@@ -19,6 +19,7 @@ package self.micromagic.eterna.dao.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReader;
+import self.micromagic.eterna.dao.reader.ReaderWrapper;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
@@ -288,7 +290,26 @@ public class DaoManager
 						{
 							// 生成reader列表
 							List tmp = ((Query) dao).getReaderManager().getReaderList();
-							paramCount = tmp.size();
+							LinkedList backList = null;
+							int readerCount = paramCount = tmp.size();
+							Iterator itr = tmp.iterator();
+							for (int i = 0; i < readerCount; i++)
+							{
+								Object obj = itr.next();
+								if (obj instanceof ReaderWrapper && ((ReaderWrapper) obj).isHidden())
+								{
+									// 需要去除外敷的需要隐藏的Reader
+									if (backList == null)
+									{
+										backList = new LinkedList(tmp);
+										itr = backList.listIterator(i);
+										itr.next();
+										tmp = backList;
+									}
+									itr.remove();
+									paramCount--;
+								}
+							}
 							readerArray = new ResultReader[paramCount];
 							tmp.toArray(readerArray);
 						}
