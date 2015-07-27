@@ -52,7 +52,7 @@ public class OracleColumn extends AbstractObject
 				{
 					buf.append(' ').append(defExp);
 				}
-				if (!colDesc.nullable)
+				if (colDesc.nullable != null && !colDesc.nullable.booleanValue())
 				{
 					buf.append(" not null");
 				}
@@ -66,9 +66,9 @@ public class OracleColumn extends AbstractObject
 				{
 					buf.append(' ').append(defExp);
 				}
-				if (!colDesc.nullable)
+				if (colDesc.nullable != null)
 				{
-					buf.append(" not null");
+					buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
 				}
 			}
 		}
@@ -81,9 +81,9 @@ public class OracleColumn extends AbstractObject
 			{
 				buf.append(' ').append(defExp);
 			}
-			if (!colDesc.nullable)
+			if (colDesc.nullable != null)
 			{
-				buf.append(" not null");
+				buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
 			}
 			if (!StringTool.isEmpty(colDesc.newName))
 			{

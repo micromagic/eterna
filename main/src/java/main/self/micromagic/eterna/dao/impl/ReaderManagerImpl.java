@@ -368,7 +368,7 @@ public class ReaderManagerImpl
 			}
 			if (orderFlag != 0)
 			{
-				this.orderList.add(reader.getColumnName() + (orderFlag < 0 ? " DESC" : "" ));
+				this.orderList.add(reader.getOrderCol() + (orderFlag < 0 ? " DESC" : "" ));
 			}
 			tmpNameToIndexMap.put(rName, Utility.createInteger(tmpReaderList.size()));
 			tmpReaderList.add(reader);
@@ -661,6 +661,10 @@ public class ReaderManagerImpl
 		itemG.setColumnName(reader.getColumnName());
 		itemG.setType(TypeManager.getTypeName(reader.getType()));
 		String alias = reader.getAlias();
+		if (reader.getColumnName() != reader.getOrderCol())
+		{
+			itemG.setAttribute(ORDER_COL, reader.getOrderCol());
+		}
 		if (!StringTool.isEmpty(alias) && !alias.equals(reader.getName()))
 		{
 			itemG.setAttribute(ALIAS_FLAG, alias);
@@ -715,6 +719,10 @@ public class ReaderManagerImpl
 			{
 				hasFormat = true;
 				reader.setFormatName((String) item.getAttribute(n));
+			}
+			else if (ORDER_COL.equals(n))
+			{
+				reader.setOrderCol((String) item.getAttribute(n));
 			}
 			else if (ALIAS_FLAG.equals(n))
 			{

@@ -179,7 +179,7 @@ log:{$}
 create:{generator,${reader}}
 attr:{
 	name,alias(m=0),colIndex(m=0,i=0):columnIndex,format(m=0):formatName,
-	colName(m=0):columnName,caption(m=0),permission(m=0),type(m=0,i=0)
+	colName(m=0):columnName,orderCol(m=0),caption(m=0),permission(m=0),type(m=0,i=0)
 }
 sub:{attribute}
 stack:{addResultReader,n:0,g:1}

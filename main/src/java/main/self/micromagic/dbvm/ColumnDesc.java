@@ -48,7 +48,7 @@ public class ColumnDesc
 	/**
 	 * 是否可空.
 	 */
-	public boolean nullable = true;
+	public Boolean nullable;
 
 	/**
 	 * 类型id.

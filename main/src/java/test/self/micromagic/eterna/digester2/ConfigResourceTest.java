@@ -97,13 +97,13 @@ public class ConfigResourceTest extends TestCase
 		String[] pArr;
 		pArr = AbstractResource.parsePath("d:\\p\\x\\f.xml".replace('\\', '/'), pCount);
 		assertEquals(0, pCount.value);
-		assertEquals("/d:/p/x/f.xml", AbstractResource.mergePath(null, 0, pArr));
+		assertEquals("/d:/p/x/f.xml", AbstractResource.mergePath(null, 0, pArr, false));
 		pArr = AbstractResource.parsePath("d:\\p\\..\\f.xml".replace('\\', '/'), pCount);
 		assertEquals(0, pCount.value);
-		assertEquals("/d:/f.xml", AbstractResource.mergePath(null, 0, pArr));
+		assertEquals("/d:/f.xml", AbstractResource.mergePath(null, 0, pArr, false));
 		pArr = AbstractResource.parsePath("/n/p/../f.xml".replace('\\', '/'), pCount);
 		assertEquals(-1, pCount.value);
-		assertEquals("/n/f.xml", AbstractResource.mergePath(null, 0, pArr));
+		assertEquals("/n/f.xml", AbstractResource.mergePath(null, 0, pArr, false));
 	}
 
 	public void testMergePath()
@@ -113,11 +113,13 @@ public class ConfigResourceTest extends TestCase
 		String[] pArr;
 		String path;
 		pArr = AbstractResource.parsePath("d/x", pCount);
-		path = AbstractResource.mergePath(rootArr, pCount.value, pArr);
+		path = AbstractResource.mergePath(rootArr, pCount.value, pArr, false);
 		assertEquals("/a/b/c/d/x", path);
 		pArr = AbstractResource.parsePath("d/../../x", pCount);
-		path = AbstractResource.mergePath(rootArr, pCount.value, pArr);
+		path = AbstractResource.mergePath(rootArr, pCount.value, pArr, false);
 		assertEquals("/a/b/x", path);
+		path = AbstractResource.mergePath(rootArr, pCount.value, pArr, true);
+		assertEquals("/a/b/x/", path);
 	}
 
 	public void testTrimBeginSplit()
@@ -135,6 +137,8 @@ public class ConfigResourceTest extends TestCase
 		System.out.println("--testCreateResource1----------------------------------");
 		ConfigResource cr;
 		cr = ContainerManager.createResource("../../src/java/.project");
+		assertEquals(ConfigResource.RES_TYPE_DIR, cr.getResource("../").getType());
+		assertEquals(ConfigResource.RES_TYPE_DIR, cr.getResource("./").getType());
 		assertEquals("../../src/java/.project", cr.getConfig());
 		assertEquals(".project", cr.getName());
 		System.out.println(cr.getURI());
@@ -171,6 +175,12 @@ public class ConfigResourceTest extends TestCase
 		assertEquals("classpath:/", cr.getResource("../").getConfig());
 		assertEquals(ConfigResource.RES_TYPE_DIR, cr.getResource("../").getType());
 		assertEquals("classpath:/eterna.config", cr.getResource("../eterna.config").getConfig());
+		cr = cr.getResource("tool/test/tmp.txt");
+		assertEquals("classpath:/tool/tool/test/tmp.txt", cr.getConfig());
+		assertEquals(ConfigResource.RES_TYPE_DIR, cr.getResource("../").getType());
+		assertEquals("classpath:/tool/tool/", cr.getResource("../").getConfig());
+		assertEquals(ConfigResource.RES_TYPE_DIR, cr.getResource("./").getType());
+		assertEquals("classpath:/tool/tool/test/", cr.getResource("./").getConfig());
 	}
 
 	public void testCreateResource5()

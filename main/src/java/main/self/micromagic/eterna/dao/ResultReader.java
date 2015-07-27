@@ -66,10 +66,15 @@ public interface ResultReader
 	String getName() throws EternaException;
 
 	/**
-	 * 获得数据库的列列名, 用于生成在"ORDER BY"之后出现的列名.
+	 * 获得数据库的列名, 用于自动生成select部分的列名.
 	 * 在多个表时, 也可以是"[表名].[列名]"的形式.
 	 */
 	String getColumnName() throws EternaException;
+
+	/**
+	 * 获取用于生成ORDER BY之后的列名.
+	 */
+	String getOrderCol() throws EternaException;
 
 	/**
 	 * 读取数据时, 读取的列别名. <p>

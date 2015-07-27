@@ -105,6 +105,12 @@ public class ReaderWrapper
 		return this.base.getColumnName();
 	}
 
+	public String getOrderCol()
+			throws EternaException
+	{
+		return this.base.getOrderCol();
+	}
+
 	public String getAlias()
 			throws EternaException
 	{

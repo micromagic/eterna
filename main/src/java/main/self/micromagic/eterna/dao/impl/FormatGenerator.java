@@ -124,7 +124,7 @@ public class FormatGenerator extends AbstractGenerator
 	 * @param type  类型的id
 	 * @see TypeManager
 	 */
-	public static ResultFormat createFormat(int type, String pattern)
+	public static ResultFormat createFormat(int type, String pattern, ResultReader reader, EternaFactory factory)
 	{
 		synchronized (formatCache)
 		{
@@ -151,8 +151,10 @@ public class FormatGenerator extends AbstractGenerator
 			else
 			{
 				// 类型错误, 无法生成需要的格式化对象
-				throw new EternaException(
-						"Error format type [" + TypeManager.getPureTypeName(type) + "].");
+				log.error("Error format type [" + TypeManager.getPureTypeName(type) + "] for pattern ["
+						+ pattern + "] in factory [" + factory.getFactoryContainer().getId()
+						+ "]'s reader [" + reader.getName() + "]");
+				return null;
 			}
 			format = (ResultFormat) fg.create();
 			formatCache.put(pattern, format);

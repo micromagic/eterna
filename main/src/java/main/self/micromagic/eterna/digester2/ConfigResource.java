@@ -265,10 +265,11 @@ class AbstractResource
 	 * @param rootArr  根路径单元
 	 * @param pCount   路径需要向上递归的层数
 	 * @param unitArr  需要合并成路径的路径单元
+	 * @param isDir    合并后的路径是否为目录
 	 * @return  合并后的路径
 	 */
 	protected static String mergePath(String[] rootArr, int pCount,
-			String[] unitArr)
+			String[] unitArr, boolean isDir)
 	{
 		StringAppender buf = StringTool.createStringAppender(32);
 		if (pCount >= 0 && rootArr != null && rootArr.length > 0)
@@ -282,6 +283,10 @@ class AbstractResource
 		for (int i = 0; i < unitArr.length; i++)
 		{
 			buf.append('/').append(unitArr[i]);
+		}
+		if (isDir)
+		{
+			buf.append('/');
 		}
 		return buf.length() > 0 ? buf.toString() : "/";
 	}
@@ -334,7 +339,7 @@ class ClassPathResource extends AbstractResource
 		ClassPathResource res = new ClassPathResource();
 		res.prefix = config.substring(0, index + 1);
 		IntegerRef pCount = new IntegerRef();
-		String tmpPath = mergePath(null, 0, parsePath(config.substring(index + 1), pCount));
+		String tmpPath = mergePath(null, 0, parsePath(config.substring(index + 1), pCount), false);
 		if (pCount.value > 0)
 		{
 			throw new EternaException("Error classpath [" + config + "].");
@@ -372,6 +377,7 @@ class ClassPathResource extends AbstractResource
 		}
 		if (this.resFile != null)
 		{
+			// 如果存在文件, 直接通过文件读取, 可以不会受JVM缓存影响
 			try
 			{
 				return new FileInputStream(this.resFile);
@@ -555,7 +561,7 @@ class ClassPathResource extends AbstractResource
 			return this.create(this.prefix.concat(path), this.container);
 		}
 		int upCount = pCount.value + (this.getType() == RES_TYPE_FILE ? 1 : 0);
-		String mPath = mergePath(parsePath(this.path, null), upCount, pArr);
+		String mPath = mergePath(parsePath(this.path, null), upCount, pArr, path.endsWith("/"));
 		return this.create(this.prefix.concat(mPath), this.container);
 	}
 
@@ -586,7 +592,7 @@ class FileResource extends AbstractResource
 					config = config.replace(File.separatorChar, '/');
 				}
 				IntegerRef pCount = new IntegerRef();
-				String tmpPath = mergePath(null, 0, parsePath(config, pCount));
+				String tmpPath = mergePath(null, 0, parsePath(config, pCount), false);
 				if (pCount.value != -1 || index != -1)
 				{
 					// 不是根路径或带有盘符去除起始部分的"/"
@@ -718,7 +724,7 @@ class FileResource extends AbstractResource
 
 	private File makeFileByUnit(File rootPath, String[] units)
 	{
-		String tmpPath = trimBeginSplit(mergePath(null, 0, units));
+		String tmpPath = trimBeginSplit(mergePath(null, 0, units, false));
 		if (File.separatorChar != '/')
 		{
 			tmpPath = tmpPath.replace('/', File.separatorChar);
@@ -860,7 +866,7 @@ class WebResource extends AbstractResource
 			return this.create(this.prefix.concat(path), this.container);
 		}
 		int upCount = pCount.value + (this.getType() == RES_TYPE_FILE ? 1 : 0);
-		String mPath = mergePath(parsePath(this.path, null), upCount, pArr);
+		String mPath = mergePath(parsePath(this.path, null), upCount, pArr, path.endsWith("/"));
 		return this.create(this.prefix.concat(mPath), this.container);
 	}
 

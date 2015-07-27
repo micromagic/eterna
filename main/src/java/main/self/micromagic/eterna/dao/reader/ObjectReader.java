@@ -49,6 +49,7 @@ public class ObjectReader
 
 	protected String name;
 	protected String columnName;
+	protected String orderCol;
 	protected String formatName;
 	protected ResultFormat format;
 	private String caption;
@@ -92,8 +93,8 @@ public class ObjectReader
 			String checkStr = Tool.PATTERN_PREFIX;
 			if (this.formatName.startsWith(checkStr))
 			{
-				this.format = FormatGenerator.createFormat(
-						this.getType(), this.formatName.substring(checkStr.length()));
+				this.format = FormatGenerator.createFormat(this.getType(),
+						this.formatName.substring(checkStr.length()), this, factory);
 			}
 			else
 			{
@@ -162,6 +163,16 @@ public class ObjectReader
 	public void setColumnName(String name)
 	{
 		this.columnName = name;
+	}
+
+	public String getOrderCol()
+	{
+		return this.orderCol == null ? this.getColumnName() : this.orderCol;
+	}
+
+	public void setOrderCol(String name)
+	{
+		this.orderCol = name;
 	}
 
 	public String getAlias()

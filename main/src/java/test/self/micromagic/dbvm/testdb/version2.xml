@@ -11,6 +11,7 @@
 		<column name="versionName" type="String(320)" desc="版本名称2" opt="modify" />
 		<column name="test" type="String(20)" desc="错误
 		信息"/>
+<!-- 		<column name="versionValue" type="int" /> -->
 	</table>
 	
 	<table name="T02" desc="表2">

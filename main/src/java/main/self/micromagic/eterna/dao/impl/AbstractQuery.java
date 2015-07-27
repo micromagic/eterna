@@ -386,7 +386,7 @@ public abstract class AbstractQuery extends BaseDao
 						+ "] in query[" + this.getName() + "].");
 				return;
 			}
-			String orderStr = reader.getColumnName();
+			String orderStr = reader.getOrderCol();
 			if (orderFlag == 0)
 			{
 				String flag;
@@ -450,7 +450,7 @@ public abstract class AbstractQuery extends BaseDao
 							+ "] or order flag in query [" + this.getName() + "].");
 					continue;
 				}
-				String orderStr = reader.getColumnName();
+				String orderStr = reader.getOrderCol();
 				orderStr = orderFlag < 0 ? orderStr + " DESC" : orderStr;
 				tmpOrderNames.add(orderNames[i]);
 				tmpOrderStrs.add(orderStr);

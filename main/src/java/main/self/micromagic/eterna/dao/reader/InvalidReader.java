@@ -67,6 +67,11 @@ public class InvalidReader
 		return this.name;
 	}
 
+	public String getOrderCol()
+	{
+		return this.name;
+	}
+
 	public String getAlias()
 	{
 		return this.name;

@@ -50,7 +50,7 @@ public class MySqlColumn extends AbstractObject
 			{
 				buf.append(colDesc.colName).append(' ')
 						.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
-				if (!colDesc.nullable)
+				if (colDesc.nullable != null && !colDesc.nullable.booleanValue())
 				{
 					buf.append(" not null");
 				}
@@ -64,9 +64,9 @@ public class MySqlColumn extends AbstractObject
 				buf.append("alter table ").append(tableName).append(" add column ")
 						.append(colDesc.colName).append(' ')
 						.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
-				if (!colDesc.nullable)
+				if (colDesc.nullable != null)
 				{
-					buf.append(" not null");
+					buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
 				}
 				if (defExp != null)
 				{
@@ -95,9 +95,9 @@ public class MySqlColumn extends AbstractObject
 				buf.append(colDesc.colName);
 			}
 			buf.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
-			if (!colDesc.nullable)
+			if (colDesc.nullable != null)
 			{
-				buf.append(" not null");
+				buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
 			}
 			if (defExp != null)
 			{

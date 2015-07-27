@@ -43,6 +43,11 @@ public interface ResultReaderManager
 	String ALIAS_FLAG = "alias";
 
 	/**
+	 * 在item的arrtibute中设置排序中的列的名称.
+	 */
+	String ORDER_COL = "orderCol";
+
+	/**
 	 * 在reader的名称前设置降序排序的标记.
 	 */
 	char ORDER_FLAG_DESC = '-';
