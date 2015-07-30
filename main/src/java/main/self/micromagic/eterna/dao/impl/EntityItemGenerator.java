@@ -23,6 +23,7 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.converter.BooleanConverter;
 
 public class EntityItemGenerator extends AbstractGenerator
 {
@@ -80,8 +81,7 @@ class EntityItemImpl
 		this.attrs.convertType(entity.getFactory(), "item");
 		if (this.permissionConfig != null)
 		{
-			this.permissionSet = entity.getFactory().createPermissionSet(
-					this.permissionConfig);
+			this.permissionSet = entity.getFactory().createPermissionSet(this.permissionConfig);
 		}
 		this.entity = entity;
 	}
@@ -112,19 +112,19 @@ class EntityItemImpl
 	{
 		return this.colName;
 	}
-	private final String colName;
+	private String colName;
 
 	public int getType()
 	{
 		return this.type;
 	}
-	private final int type;
+	private int type;
 
 	public String getCaption()
 	{
 		return this.caption;
 	}
-	private final String caption;
+	private String caption;
 
 	public PermissionSet getPermissionSet()
 			throws EternaException
@@ -133,5 +133,38 @@ class EntityItemImpl
 	}
 	private PermissionSet permissionSet;
 	private final String permissionConfig;
+
+	public void merge(EntityItem other)
+			throws EternaException
+	{
+		if (other == null || BooleanConverter.toBoolean(this.getAttribute(IGNORE_PARENT)))
+		{
+			return;
+		}
+		if (this.caption == null)
+		{
+			this.caption = other.getCaption();
+		}
+		if (this.type == TypeManager.TYPE_OBJECT)
+		{
+			this.type = other.getType();
+		}
+		if (this.colName == this.name)
+		{
+			this.colName = other.getColumnName();
+		}
+		if (this.permissionConfig == null)
+		{
+			this.permissionSet = other.getPermissionSet();
+		}
+		String[] names = other.getAttributeNames();
+		for (int i = 0; i < names.length; i++)
+		{
+			if (!this.attrs.hasAttribute(names[i]))
+			{
+				this.attrs.setAttribute(names[i], other.getAttribute(names[i]));
+			}
+		}
+	}
 
 }

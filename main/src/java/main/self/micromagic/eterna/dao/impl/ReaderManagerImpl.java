@@ -774,8 +774,9 @@ class ReaderManagerContainer
 		return "ReaderManager";
 	}
 
-	public boolean contains(String name)
+	public boolean contains(EntityItem item)
 	{
+		String name = item.getName();
 		name = this.colNameSensitive || name == null ? name : name.toUpperCase();
 		return this.nameCache.containsKey(name);
 	}

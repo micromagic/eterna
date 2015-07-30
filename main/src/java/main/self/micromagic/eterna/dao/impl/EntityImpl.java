@@ -69,7 +69,7 @@ public class EntityImpl extends AbstractGenerator
 			else
 			{
 				EntityRef ref = (EntityRef) tmpObj;
-				addItems(factory, ref, new EntityContainer(this.getName(), this.nameCache, tmp));
+				addItems(factory, ref, new EntityContainer(this.getName(), this.nameCache, tmp, this.items));
 				resetNameCache = true;
 			}
 		}
@@ -155,6 +155,10 @@ public class EntityImpl extends AbstractGenerator
 		this.nameCache.put(item.getName(), Utility.createInteger(this.items.size()));
 		this.items.add(item);
 	}
+
+	/**
+	 * 所有的元素列表.
+	 */
 	private List items = new ArrayList();
 	/**
 	 * 存放元素名称与位置的对应关系.
@@ -232,7 +236,7 @@ public class EntityImpl extends AbstractGenerator
 					continue;
 				}
 			}
-			if (handler.contains(item.getName()))
+			if (handler.contains(item))
 			{
 				if (ref.isIgnoreSame())
 				{
@@ -263,9 +267,11 @@ public class EntityImpl extends AbstractGenerator
 		String getType();
 
 		/**
-		 * 容器中是否有指定名称的对象.
+		 * 容器中是否有与将要添加的元素同名的对象.
+		 *
+		 * @param item  将要添加元素对象
 		 */
-		boolean contains(String name);
+		boolean contains(EntityItem item);
 
 		/**
 		 * 将一个实体元素添加到容器中.
@@ -283,12 +289,23 @@ public class EntityImpl extends AbstractGenerator
 class EntityContainer
 		implements EntityImpl.Container
 {
-	public EntityContainer(String name, Map nameCache, List itemList)
+	public EntityContainer(String name, Map nameCache, List itemList, List originItems)
 	{
 		this.name = name;
 		this.nameCache = nameCache;
 		this.itemList = itemList;
+		Iterator itr = originItems.iterator();
+		this.originItems = new HashMap();
+		while (itr.hasNext())
+		{
+			Object item = itr.next();
+			if (item instanceof EntityItem)
+			{
+				this.originItems.put(((EntityItem) item).getName(), item);
+			}
+		}
 	}
+	private final Map originItems;
 	private final Map nameCache;
 	private final List itemList;
 	private final String name;
@@ -303,9 +320,18 @@ class EntityContainer
 		return "Entity";
 	}
 
-	public boolean contains(String name)
+	public boolean contains(EntityItem item)
 	{
-		return this.nameCache.containsKey(name);
+		boolean result = this.nameCache.containsKey(item.getName());
+		if (result)
+		{
+			EntityItem oldItem = (EntityItem) this.originItems.remove(item.getName());
+			if (oldItem != null)
+			{
+				oldItem.merge(item);
+			}
+		}
+		return result;
 	}
 
 	public void add(EntityItem item, String tableAlias)
@@ -382,6 +408,10 @@ class EntityItemWrapper
 	public PermissionSet getPermissionSet()
 	{
 		return this.base.getPermissionSet();
+	}
+
+	public void merge(EntityItem other)
+	{
 	}
 
 }

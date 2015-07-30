@@ -112,6 +112,10 @@ public class TestItemImpl extends AbstractGenerator
 	{
 	}
 
+	public void merge(EntityItem other)
+	{
+	}
+
 	static
 	{
 		BeanDescriptor bd = BeanTool.getBeanDescriptor(TestItemImpl.class);

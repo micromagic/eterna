@@ -509,9 +509,9 @@ class CellContainer
 		return "TableForm";
 	}
 
-	public boolean contains(String name)
+	public boolean contains(EntityItem item)
 	{
-		return this.nameCache.containsKey(name);
+		return this.nameCache.containsKey(item.getName());
 	}
 
 	public void add(EntityItem item, String tableAlias)

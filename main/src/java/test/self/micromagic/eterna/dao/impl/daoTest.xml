@@ -4,6 +4,32 @@
 	<factory>
 		<objs>
 
+			<entity name="e1">
+				<item name="c1" type="String" caption="title1">
+					<attribute name="a1" value="1"/>
+				</item>
+				<item name="c2" type="int" caption="title2">
+					<attribute name="a2" value="2"/>
+				</item>
+				<item name="c3" type="double" caption="title3">
+					<attribute name="a3" value="3"/>
+				</item>
+			</entity>
+			<entity name="e2">
+				<item name="c1" type="Object">
+					<attribute name="a1" value="xxxxxxx"/>
+				</item>
+				<item name="c2" type="long" caption="my_c2"/>
+				<entity-ref entityName="e1" include="c1,c2"/>
+			</entity>
+			<entity name="e3">
+				<entity-ref entityName="e1" exclude="c1"/>
+				<item name="c2" colName="test" type="Object">
+					<attribute name="x" value="?"/>
+					<attribute name="ignoreParent" value="1"/>
+				</item>
+			</entity>
+
 			<update name="t1" logType="log1">
 				<prepared-sql>
 					update TEST01 set strValue = ?, intValue = ?, doubleValue = ?

@@ -90,11 +90,14 @@ public class SameCheck
 				Digester.log.error("The object [" + objFlag + "] is "
 						+ objType + ", but supper is " + oldType + ".");
 			}
-			else if (Digester.log.isDebugEnabled())
+			else
 			{
-				String tmpName = this.attrName == null ? objType
-						: objType + ":" + objFlag;
-				Digester.log.debug(tmpName + " has bean overwrited.");
+				if (Digester.log.isDebugEnabled())
+				{
+					String tmpName = this.attrName == null ? objType
+							: objType + ":" + objFlag;
+					Digester.log.debug(tmpName + " has bean overwrited.");
+				}
 			}
 			return false;
 		}

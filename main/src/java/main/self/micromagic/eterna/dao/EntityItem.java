@@ -25,6 +25,11 @@ import self.micromagic.eterna.share.EternaException;
 public interface EntityItem
 {
 	/**
+	 * 在属性中设置是否忽略父元素中的属性.
+	 */
+	String IGNORE_PARENT = "ignoreParent";
+
+	/**
 	 * 初始化本元素对象, 系统会在初始化时调用此方法.
 	 */
 	void initialize(Entity entity) throws EternaException;
@@ -70,5 +75,10 @@ public interface EntityItem
 	 * 如果没有设置权限集合, 则返回null, 表示访问该元素不需要权限.
 	 */
 	PermissionSet getPermissionSet() throws EternaException;
+
+	/**
+	 * 将另一个元素的属性合并到当前元素中.
+	 */
+	void merge(EntityItem other) throws EternaException;
 
 }
