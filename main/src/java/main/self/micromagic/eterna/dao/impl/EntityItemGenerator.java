@@ -20,119 +20,52 @@ import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AbstractGenerator;
-import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.converter.BooleanConverter;
 
 public class EntityItemGenerator extends AbstractGenerator
-{
-	public Object create()
-	{
-		return new EntityItemImpl(this.attributes, this.getName(),
-				this.columnName == null ? this.getName() : this.columnName,
-				this.type, this.caption, this.permission);
-	}
-
-	public void setColumnName(String colName)
-	{
-		this.columnName = colName;
-	}
-	private String columnName;
-
-	public void setType(String type)
-	{
-		this.type = type;
-	}
-	private String type;
-
-	public void setCaption(String caption)
-	{
-		this.caption = caption;
-	}
-	private String caption;
-
-	public void setPermission(String permission)
-	{
-		this.permission = permission;
-	}
-	private String permission;
-
-}
-
-class EntityItemImpl
 		implements EntityItem
 {
-	public EntityItemImpl(AttributeManager attrs, String name, String colName,
-			String type, String caption, String permission)
-	{
-		this.attrs = attrs;
-		this.name = name;
-		this.colName = colName;
-		this.caption = caption;
-		this.type = TypeManager.getTypeId(type);
-		this.permissionConfig = permission;
-	}
-	private final AttributeManager attrs;
-
 	public void initialize(Entity entity)
 			throws EternaException
 	{
-		this.attrs.convertType(entity.getFactory(), "item");
+		this.attributes.convertType(entity.getFactory(), "item");
 		if (this.permissionConfig != null)
 		{
 			this.permissionSet = entity.getFactory().createPermissionSet(this.permissionConfig);
 		}
 		this.entity = entity;
 	}
-	private Entity entity;
-
-	public Object getAttribute(String name)
-	{
-		return this.attrs.getAttribute(name);
-	}
-
-	public String[] getAttributeNames()
-	{
-		return this.attrs.getAttributeNames();
-	}
+	protected Entity entity;
 
 	public Entity getEntity()
 	{
 		return this.entity;
 	}
 
-	public String getName()
-	{
-		return this.name;
-	}
-	private final String name;
-
 	public String getColumnName()
 	{
-		return this.colName;
+		return this.columnName;
 	}
-	private String colName;
 
 	public int getType()
 	{
 		return this.type;
 	}
-	private int type;
+	protected int type;
 
 	public String getCaption()
 	{
 		return this.caption;
 	}
-	private String caption;
 
 	public PermissionSet getPermissionSet()
 			throws EternaException
 	{
 		return this.permissionSet;
 	}
-	private PermissionSet permissionSet;
-	private final String permissionConfig;
+	protected PermissionSet permissionSet;
 
 	public void merge(EntityItem other)
 			throws EternaException
@@ -149,9 +82,9 @@ class EntityItemImpl
 		{
 			this.type = other.getType();
 		}
-		if (this.colName == this.name)
+		if (this.columnName == this.getName())
 		{
-			this.colName = other.getColumnName();
+			this.columnName = other.getColumnName();
 		}
 		if (this.permissionConfig == null)
 		{
@@ -160,11 +93,45 @@ class EntityItemImpl
 		String[] names = other.getAttributeNames();
 		for (int i = 0; i < names.length; i++)
 		{
-			if (!this.attrs.hasAttribute(names[i]))
+			if (!this.attributes.hasAttribute(names[i]))
 			{
-				this.attrs.setAttribute(names[i], other.getAttribute(names[i]));
+				this.attributes.setAttribute(names[i], other.getAttribute(names[i]));
 			}
 		}
 	}
+
+	public Object create()
+	{
+		if (this.columnName == null)
+		{
+			this.columnName = this.getName();
+		}
+		this.type = TypeManager.getTypeId(this.typeName);
+		return this;
+	}
+
+	public void setColumnName(String colName)
+	{
+		this.columnName = colName;
+	}
+	protected String columnName;
+
+	public void setTypeName(String type)
+	{
+		this.typeName = type;
+	}
+	private String typeName;
+
+	public void setCaption(String caption)
+	{
+		this.caption = caption;
+	}
+	private String caption;
+
+	public void setPermission(String permission)
+	{
+		this.permissionConfig = permission;
+	}
+	protected String permissionConfig;
 
 }

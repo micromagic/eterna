@@ -127,7 +127,7 @@ stack:{registerObject,n:0,g:1}
 item
 log:{$}
 create:{generator,${entityItem}}
-attr:{name,colName(m=0):columnName,type(m=0,i=0),caption(m=0),permission(m=0)}
+attr:{name,colName(m=0):columnName,type(m=0,i=0):typeName,caption(m=0),permission(m=0)}
 sub:{attribute}
 stack:{addItem,n:0,g:1}
 

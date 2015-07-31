@@ -51,6 +51,10 @@ public interface Dao
 	 * 判断是否有特殊日志类型的过滤符.
 	 */
 	int SPECIAL_MASK = ~(DAO_LOG_TYPE_SAVE | DAO_LOG_TYPE_PRINT);
+	/**
+	 * 系统日志记录时是否仅仅输出语句.
+	 */
+	String SIMPLE_PRINT_FLAG = "eterna.dao.log.simplePrint";
 
 
 	String DAO_TYPE_UPDATE = "update";

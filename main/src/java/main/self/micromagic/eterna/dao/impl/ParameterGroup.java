@@ -232,7 +232,7 @@ public class ParameterGroup
 		EntityItemGenerator itemG = new EntityItemGenerator();
 		itemG.setName(param.getName());
 		itemG.setColumnName(param.getColumnName());
-		itemG.setType(TypeManager.getTypeName(param.getType()));
+		itemG.setTypeName(TypeManager.getTypeName(param.getType()));
 		if (param instanceof ParameterImpl)
 		{
 			String tmp = ((ParameterImpl) param).getPepareName();

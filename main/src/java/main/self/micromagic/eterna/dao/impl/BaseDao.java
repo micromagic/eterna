@@ -58,6 +58,10 @@ public abstract class BaseDao extends AbstractDao
 	 * 全局的日志的记录类型.
 	 */
 	protected static int LOG_TYPE = 0;
+	/**
+	 * 系统日志时是否仅仅输出语句.
+	 */
+	protected static boolean simplePrint;
 
 	/**
 	 * 当前对象的日志记录类型.
@@ -70,6 +74,8 @@ public abstract class BaseDao extends AbstractDao
 		{
 			Utility.addMethodPropertyManager(LOG_TYPE_FLAG,
 					BaseDao.class, "setGlobalLogType");
+			Utility.addFieldPropertyManager(SIMPLE_PRINT_FLAG,
+					BaseDao.class, "simplePrint");
 		}
 		catch (Throwable ex)
 		{
@@ -311,9 +317,20 @@ public abstract class BaseDao extends AbstractDao
 				flag <<= 1;
 			}
 		}
-		if ((logType & DAO_LOG_TYPE_PRINT) != 0)
+		if ((logType & DAO_LOG_TYPE_PRINT) != 0 && log.isInfoEnabled())
 		{
-			log.info("Dao log:\n" + theLog.asXML());
+			if (simplePrint)
+			{
+				try
+				{
+					log.info("Dao script:".concat(base.getPreparedScript()));
+				}
+				catch (Exception ex) {}
+			}
+			else
+			{
+				log.info("Dao log:\n".concat(theLog.asXML()));
+			}
 		}
 		return (logType & DAO_LOG_TYPE_SAVE) != 0;
 	}

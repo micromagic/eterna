@@ -659,7 +659,7 @@ public class ReaderManagerImpl
 		EntityItemGenerator itemG = new EntityItemGenerator();
 		itemG.setName(reader.getName());
 		itemG.setColumnName(reader.getColumnName());
-		itemG.setType(TypeManager.getTypeName(reader.getType()));
+		itemG.setTypeName(TypeManager.getTypeName(reader.getType()));
 		String alias = reader.getAlias();
 		if (reader.getColumnName() != reader.getOrderCol())
 		{
