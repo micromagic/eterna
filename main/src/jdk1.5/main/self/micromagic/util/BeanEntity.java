@@ -121,7 +121,7 @@ public class BeanEntity extends AbstractGenerator
 						itemG.setFactory(factory);
 						itemG.setColumnName(colName);
 						itemG.setName(tName);
-						itemG.setType(tName);
+						itemG.setTypeName(tName);
 						this.base.addItem((EntityItem) itemG.create());
 					}
 				}
