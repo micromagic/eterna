@@ -638,8 +638,12 @@ public class StringTool
 		}
 		char[] buf = new char[1024];
 		int count = r.read(buf);
+		if (count < 0)
+		{
+			return "";
+		}
 		StringAppender result = createStringAppender(count == 1024 ? 2048 : count);
-      while (count >= 0)
+		while (count >= 0)
 		{
 			result.append(buf, 0, count);
 			count = r.read(buf);

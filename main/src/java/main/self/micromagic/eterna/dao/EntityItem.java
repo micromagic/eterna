@@ -46,11 +46,6 @@ public interface EntityItem
 	String[] getAttributeNames() throws EternaException;
 
 	/**
-	 * 获取元素所属的实体.
-	 */
-	Entity getEntity() throws EternaException;
-
-	/**
 	 * 获取元素的名称.
 	 */
 	String getName() throws EternaException;

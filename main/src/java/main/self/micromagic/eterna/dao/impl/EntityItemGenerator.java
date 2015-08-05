@@ -21,6 +21,7 @@ import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.converter.BooleanConverter;
 
@@ -30,18 +31,12 @@ public class EntityItemGenerator extends AbstractGenerator
 	public void initialize(Entity entity)
 			throws EternaException
 	{
-		this.attributes.convertType(entity.getFactory(), "item");
+		EternaFactory factory = entity.getFactory();
+		this.attributes.convertType(factory, "item");
 		if (this.permissionConfig != null)
 		{
-			this.permissionSet = entity.getFactory().createPermissionSet(this.permissionConfig);
+			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
 		}
-		this.entity = entity;
-	}
-	protected Entity entity;
-
-	public Entity getEntity()
-	{
-		return this.entity;
 	}
 
 	public String getColumnName()

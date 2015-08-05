@@ -25,7 +25,6 @@ import java.util.Map;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.EntityRef;
-import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -69,7 +68,7 @@ public class EntityImpl extends AbstractGenerator
 			else
 			{
 				EntityRef ref = (EntityRef) tmpObj;
-				addItems(factory, ref, new EntityContainer(this.getName(), this.nameCache, tmp, this.items));
+				addItems(factory, ref, new EntityContainer(this, this.nameCache, tmp, this.items));
 				resetNameCache = true;
 			}
 		}
@@ -289,9 +288,9 @@ public class EntityImpl extends AbstractGenerator
 class EntityContainer
 		implements EntityImpl.Container
 {
-	public EntityContainer(String name, Map nameCache, List itemList, List originItems)
+	public EntityContainer(EntityImpl entity, Map nameCache, List itemList, List originItems)
 	{
-		this.name = name;
+		this.entity = entity;
 		this.nameCache = nameCache;
 		this.itemList = itemList;
 		Iterator itr = originItems.iterator();
@@ -308,11 +307,11 @@ class EntityContainer
 	private final Map originItems;
 	private final Map nameCache;
 	private final List itemList;
-	private final String name;
+	private final EntityImpl entity;
 
 	public String getName()
 	{
-		return this.name;
+		return this.entity.getName();
 	}
 
 	public String getType()
@@ -337,7 +336,7 @@ class EntityContainer
 	public void add(EntityItem item, String tableAlias)
 	{
 		this.nameCache.put(item.getName(), Utility.createInteger(this.itemList.size()));
-		this.itemList.add(new EntityItemWrapper(item));
+		this.itemList.add(item);
 	}
 
 }
@@ -348,70 +347,6 @@ class ItemNameHandler
 	public String getName(Object obj)
 	{
 		return ((EntityItem) obj).getName();
-	}
-
-}
-
-/**
- * 实体元素转换的外覆类.
- */
-class EntityItemWrapper
-		implements EntityItem
-{
-	public EntityItemWrapper(EntityItem base)
-	{
-		this.base = base;
-	}
-	private final EntityItem base;
-
-	public void initialize(Entity entity)
-	{
-		this.entity = entity;
-	}
-	private Entity entity;
-
-	public Object getAttribute(String name)
-	{
-		return this.base.getAttribute(name);
-	}
-
-	public String[] getAttributeNames()
-	{
-		return this.base.getAttributeNames();
-	}
-
-	public Entity getEntity()
-	{
-		return this.entity;
-	}
-
-	public String getName()
-	{
-		return this.base.getName();
-	}
-
-	public String getColumnName()
-	{
-		return this.base.getColumnName();
-	}
-
-	public int getType()
-	{
-		return this.base.getType();
-	}
-
-	public String getCaption()
-	{
-		return this.base.getCaption();
-	}
-
-	public PermissionSet getPermissionSet()
-	{
-		return this.base.getPermissionSet();
-	}
-
-	public void merge(EntityItem other)
-	{
 	}
 
 }
