@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;
@@ -41,6 +40,10 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 
 import self.micromagic.cg.ClassGenerator;
+import self.micromagic.eterna.digester2.ConfigResource;
+import self.micromagic.eterna.digester2.ContainerManager;
+import self.micromagic.eterna.digester2.FactoryContainerImpl;
+import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ConverterFinder;
 import self.micromagic.util.ref.StringRef;
@@ -56,7 +59,7 @@ public class PropertiesManager
 	 * 默认的配置文件名.
 	 * 注: 配置文件都必须在classpath下.
 	 */
-	public static final String PROPERTIES_NAME = "eterna.config";
+	public static final String PROPERTIES_NAME = "cp:/eterna.config";
 
 	/**
 	 * 存放父配置文件名的属性.
@@ -90,9 +93,9 @@ public class PropertiesManager
 	private final String propName;
 
 	/**
-	 * 读取配置文件所使用的<code>ClassLoader</code>.
+	 * 读取配置文件资源所需要的环境信息.
 	 */
-	private final ClassLoader classLoader;
+	private final FactoryContainer container;
 
 	/**
 	 * 当前所读取的配置属性.
@@ -122,10 +125,12 @@ public class PropertiesManager
 	/**
 	 * 默认的构造函数.
 	 * 默认的配置文件名及本类的<code>ClassLoader</code>.
+	 *
+	 * @param needLoad  是否需要在初始化完成之后立刻执行配置加载
 	 */
-	public PropertiesManager()
+	PropertiesManager(boolean needLoad)
 	{
-		this(null, null);
+		this(null, null, null, needLoad);
 	}
 
 	/**
@@ -150,16 +155,81 @@ public class PropertiesManager
 	 */
 	public PropertiesManager(String propName, ClassLoader classLoader, PropertiesManager parent)
 	{
-		this.propName = propName == null ? PROPERTIES_NAME : propName;
-		this.classLoader = classLoader == null ? this.getClass().getClassLoader() : classLoader;
+		this(propName, classLoader == null ? null : createFactoryContainer(null, classLoader),
+				parent, true);
+	}
+
+	/**
+	 * 构造一个配置属性的管理器.
+	 *
+	 * @param propName    配置文件资源所在的位置
+	 * @param container   读取配置文件资源所需要的环境信息
+	 * @param parent      当前配置管理器所继承的父配置管理器
+	 */
+	public PropertiesManager(String propName, FactoryContainer container, PropertiesManager parent)
+	{
+		this(propName, container, parent, true);
+	}
+
+	/**
+	 * 构造一个配置属性的管理器.
+	 *
+	 * @param propName    配置文件资源所在的位置
+	 * @param container   读取配置文件资源所需要的环境信息
+	 * @param parent      当前配置管理器所继承的父配置管理器
+	 * @param needLoad    是否需要在初始化完成之后立刻执行配置加载
+	 */
+	protected PropertiesManager(String propName, FactoryContainer container, PropertiesManager parent,
+			boolean needLoad)
+	{
+		if (propName == null)
+		{
+			this.propName = PROPERTIES_NAME;
+		}
+		else
+		{
+			this.propName = checkPropName(propName);
+		}
+		this.container = container != null ? container
+				: createFactoryContainer(null, this.getClass().getClassLoader());
 		this.addPropertyListener(this.defaultPL);
-		this.reload();
-		// 初始化时不重载父配置管理器
+		if (needLoad)
+		{
+			this.reload();
+		}
+		// 初始化时不重载父配置管理器, 所以滞后设置parent
 		this.parent = parent;
 		if (this.parent != null)
 		{
 			this.parent.addPropertyListener(new ParentPropertyListener(this));
 		}
+	}
+
+	/**
+	 * 检查配置资源的定位名称.
+	 */
+	private String checkPropName(String propName)
+	{
+		propName = this.resolveDynamicPropnames(propName);
+		if (propName.indexOf(':') == -1)
+		{
+			// 没有设置资源的协议, 默认为classpath中的资源
+			propName = "cp:/".concat(propName);
+		}
+		return propName;
+	}
+
+	/**
+	 * 创建一个存放资源环境信息的FactoryContainer.
+	 */
+	private static FactoryContainer createFactoryContainer(Map<String, ?> attrs, ClassLoader def)
+	{
+		FactoryContainerImpl tmp = new FactoryContainerImpl("<properties.manager>");
+		if (!tmp.setAttrs(attrs))
+		{
+			tmp.setAttribute(FactoryContainer.CLASSLOADER_FLAG, def);
+		}
+		return tmp;
 	}
 
 	/**
@@ -176,15 +246,26 @@ public class PropertiesManager
 	 */
 	public void reload()
 	{
-		this.reload(null);
+		this.reload(null, null);
 	}
 
 	/**
 	 * (重新)载入配置.
 	 *
-	 * @param msg   出参, 载入配置时的出错信息
+	 * @param msg  出参, 载入配置时的出错信息
 	 */
 	public void reload(StringRef msg)
+	{
+		this.reload(msg, null);
+	}
+
+	/**
+	 * (重新)载入配置.
+	 *
+	 * @param msg           出参, 载入配置时的出错信息
+	 * @param preReadNames  需要预先读取的属性名列表
+	 */
+	void reload(StringRef msg, String[] preReadNames)
 	{
 		String preMsg = "";
 		if (this.parent != null)
@@ -197,7 +278,7 @@ public class PropertiesManager
 		}
 		try
 		{
-			Properties temp = this.loadProperties();
+			Properties temp = this.loadProperties(preReadNames);
 			if (temp == null)
 			{
 				if (msg != null)
@@ -223,26 +304,7 @@ public class PropertiesManager
 			{
 				this.systemDefault = true;
 			}
-			synchronized (this)
-			{
-				Iterator<Map.Entry<Object, Object>> itr = temp.entrySet().iterator();
-				while (itr.hasNext())
-				{
-					Map.Entry<Object, Object> entry = itr.next();
-					this.setProperty0((String) entry.getKey(), (String) entry.getValue());
-				}
-				// 设置被删除的属性
-				Enumeration<?> e = this.properties.propertyNames();
-				while (e.hasMoreElements())
-				{
-					String name = (String) e.nextElement();
-					if (temp.getProperty(name) == null)
-					{
-						this.setProperty0(name, this.defaultValues.get(name));
-					}
-				}
-			}
-			// 由于上面已经设置了属性 所以不用对properties赋值;
+			this.changeProperties(temp, null);
 		}
 		catch (Throwable ex)
 		{
@@ -257,6 +319,41 @@ public class PropertiesManager
 	}
 
 	/**
+	 * 修改载入的属性.
+	 */
+	private synchronized void changeProperties(Properties newProps, String[] preReadNames)
+	{
+		if (preReadNames != null)
+		{
+			for (int i = 0; i < preReadNames.length; i++)
+			{
+				String value = newProps.getProperty(preReadNames[i]);
+				if (value != null)
+				{
+					this.setProperty0(preReadNames[i], value);
+				}
+			}
+			return;
+		}
+		Iterator<Map.Entry<Object, Object>> itr = newProps.entrySet().iterator();
+		while (itr.hasNext())
+		{
+			Map.Entry<Object, Object> entry = itr.next();
+			this.setProperty0((String) entry.getKey(), (String) entry.getValue());
+		}
+		// 设置被删除的属性
+		Enumeration<?> e = this.properties.propertyNames();
+		while (e.hasMoreElements())
+		{
+			String name = (String) e.nextElement();
+			if (newProps.getProperty(name) == null)
+			{
+				this.setProperty0(name, this.defaultValues.get(name));
+			}
+		}
+	}
+
+	/**
 	 * 存放属性绑定时设置的默认值.
 	 */
 	protected Map<String, String> defaultValues = new HashMap<String, String>();
@@ -265,18 +362,22 @@ public class PropertiesManager
 	 * 载入配置信息并构造成Properties返回.
 	 * 如果所指定的配置资源不存在, 则返回null.
 	 */
-	protected Properties loadProperties()
+	protected Properties loadProperties(String[] preReadNames)
 			throws IOException
 	{
-		URL url = this.classLoader.getResource(this.propName);
-		if (url == null)
+		ConfigResource res = ContainerManager.createResource(this.propName, this.container);
+		InputStream inStream = res.getAsStream();
+		if (inStream == null)
 		{
 			return null;
 		}
 		Properties temp = new Properties();
-		InputStream inStream = url.openStream();
 		temp.load(inStream);
 		inStream.close();
+		if (preReadNames != null)
+		{
+			this.changeProperties(temp, preReadNames);
+		}
 		this.loadChildProperties(temp, this.properties.getProperty(CHILD_PROPERTIES));
 		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES));
 		return temp;
@@ -620,12 +721,8 @@ public class PropertiesManager
 		{
 			return;
 		}
-		URL url = this.classLoader.getResource(cName);
-		if (url == null)
-		{
-			return;
-		}
-		InputStream is = url.openStream();
+		ConfigResource res = ContainerManager.createResource(this.checkPropName(cName), this.container);
+		InputStream is = res.getAsStream();
 		if (is != null)
 		{
 			Properties tmpProps = new Properties();
@@ -652,12 +749,8 @@ public class PropertiesManager
 		{
 			return;
 		}
-		URL url = this.classLoader.getResource(pName);
-		if (url == null)
-		{
-			return;
-		}
-		InputStream is = url.openStream();
+		ConfigResource res = ContainerManager.createResource(this.checkPropName(pName), this.container);
+		InputStream is = res.getAsStream();
 		if (is != null)
 		{
 			Properties tmpProps = new Properties();
