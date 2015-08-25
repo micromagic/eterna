@@ -16,4 +16,4 @@ p6=f
 p5=none
 p7=g
 
-self.micromagic.parent.properties=conf/parent2.txt
+_parent.properties=conf/parent2.txt

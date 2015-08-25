@@ -37,6 +37,17 @@ public class PropertiesManagerTest extends TestCase
 		System.out.println(pm);
 	}
 
+	public void testPreRead()
+	{
+		PropertiesManager pm = new PropertiesManager("conf/preRead.txt", null, null, false);
+		pm.reload();
+		assertNull(pm.getProperty("p3"));
+		pm = new PropertiesManager("conf/preRead.txt", null, null, false);
+		pm.reload(null, new String[]{"baseName"});
+		assertNotNull(pm.getProperty("p3"));
+		System.out.println("StringAppender:" + StringTool.createStringAppender().getClass());
+	}
+
 	public void testBindDefaultValue()
 			throws Exception
 	{
@@ -126,6 +137,7 @@ public class PropertiesManagerTest extends TestCase
 		pm1.setProperty("p.test", "b");
 		assertEquals(1, plList.size());
 	}
+
 	public static String t_prop_parent;
 	public static boolean t_prop_parent_setted;
 	public static void setPropParent(String v)
