@@ -543,24 +543,10 @@ public class ContainerManager
 	 */
 	private static FactoryContainer createEmptyContainer(Map attrs)
 	{
-		FactoryContainerImpl tmp = new FactoryContainerImpl();
-		tmp.setId("<empty>");
-		boolean hasClassLoader = false;
-		if (attrs != null)
+		FactoryContainerImpl tmp = new FactoryContainerImpl("<empty>");
+		if (!tmp.setAttrs(attrs))
 		{
-			int count = attrs.size();
-			Iterator itr = attrs.entrySet().iterator();
-			for (int i = 0; i < count; i++)
-			{
-				Map.Entry e = (Map.Entry) itr.next();
-				tmp.setAttribute((String) e.getKey(), e.getValue());
-			}
-			hasClassLoader = attrs.containsKey(FactoryContainer.CLASSLOADER_FLAG);
-		}
-		if (!hasClassLoader)
-		{
-			tmp.setAttribute(FactoryContainer.CLASSLOADER_FLAG,
-					Utility.getContextClassLoader());
+			tmp.setAttribute(FactoryContainer.CLASSLOADER_FLAG, Utility.getContextClassLoader());
 		}
 		return tmp;
 	}

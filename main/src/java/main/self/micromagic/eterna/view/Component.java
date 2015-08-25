@@ -39,7 +39,7 @@ public interface Component
 	/**
 	 * 在item的arrtibute中设置使用控件名称的标识.
 	 */
-	String TYPICAL_COMPONENT_FLAG = "pattern";
+	String TYPICAL_COMPONENT_FLAG = "typical";
 
 	/**
 	 * 不用处理子节点标识的标签.

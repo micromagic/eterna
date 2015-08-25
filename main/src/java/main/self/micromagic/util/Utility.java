@@ -95,7 +95,8 @@ public class Utility
 	{
 		try
 		{
-			propertiesManager = new PropertiesManager();
+			propertiesManager = new PropertiesManager(false);
+			propertiesManager.reload(null, new String[]{StringTool.USE_QUICK_APPEND_FLAG});
 		}
 		catch (Throwable ex)
 		{

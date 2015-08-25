@@ -271,6 +271,12 @@ class AbstractResource
 	protected static String mergePath(String[] rootArr, int pCount,
 			String[] unitArr, boolean isDir)
 	{
+		if (rootArr == null && unitArr.length == 1)
+		{
+			// 只有一个unit单元, 不通过StringAppender构造
+			String result = "/".concat(unitArr[0]);
+			return isDir ? result.concat("/") : result;
+		}
 		StringAppender buf = StringTool.createStringAppender(32);
 		if (pCount >= 0 && rootArr != null && rootArr.length > 0)
 		{

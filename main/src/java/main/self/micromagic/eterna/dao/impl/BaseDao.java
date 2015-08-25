@@ -237,6 +237,7 @@ public abstract class BaseDao extends AbstractDao
 						}
 						else
 						{
+							// 最低3位作为默认的类型
 							tmpType |= (1 << (index + 3));
 						}
 					}

@@ -840,6 +840,7 @@ public class SearchImpl extends AbstractGenerator
 			}
 			else if (Tool.PATTERN_FLAG.equals(n))
 			{
+				condition.attributes.setAttribute(n, item.getAttribute(n));
 				if (!hasPrepare)
 				{
 					condition.prepareName = Tool.PATTERN_PREFIX.concat((String) item.getAttribute(n));

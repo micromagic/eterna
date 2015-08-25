@@ -730,6 +730,7 @@ public class ReaderManagerImpl
 			}
 			else if (Tool.PATTERN_FLAG.equals(n))
 			{
+				reader.setAttribute(n, item.getAttribute(n));
 				if (!hasFormat)
 				{
 					reader.setFormatName(Tool.PATTERN_PREFIX.concat((String) item.getAttribute(n)));

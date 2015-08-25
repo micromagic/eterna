@@ -26,6 +26,7 @@ import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.model.Execute;
 import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelExport;
@@ -35,6 +36,7 @@ import self.micromagic.eterna.security.EmptyPermission;
 import self.micromagic.eterna.security.User;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.util.StringTool;
 
 public class QueryExecute extends DaoExecute
 		implements Execute, QueryExecuteGenerator
@@ -43,6 +45,7 @@ public class QueryExecute extends DaoExecute
 	private int count = -1;
 	private int countType = Query.TOTAL_COUNT_NONE;
 	protected int queryAdapterIndex = -1;
+	private DataHandler resultTo;
 
 	public void initialize(Model model)
 			throws EternaException
@@ -96,6 +99,18 @@ public class QueryExecute extends DaoExecute
 		{
 			throw new EternaException("Error count type:[" + countType + "].");
 		}
+	}
+
+	public void setResultTo(String config)
+			throws EternaException
+	{
+		if (StringTool.isEmpty(config))
+		{
+			this.resultTo = null;
+			return;
+		}
+		this.resultTo = new DataHandler("resultTo", true, false);
+		this.resultTo.setConfig(config);
 	}
 
 	public ModelExport execute(AppData data, Connection conn)
@@ -198,32 +213,21 @@ public class QueryExecute extends DaoExecute
 			{
 				ResultIterator ritr = query.executeQuery(conn);
 				ResultIterator[] results = null;
-				if (this.pushResult)
+				if (count > 1)
 				{
-					if (count > 1)
+					results = new ResultIterator[count];
+					results[0] = ritr;
+					for (int i = 1; i < count; i++)
 					{
-						results = new ResultIterator[count];
-						results[0] = ritr;
-						data.push(results);
-					}
-					else
-					{
-						data.push(ritr);
-					}
-				}
-				for (int i = 1; i < count; i++)
-				{
-					this.setParams(data, psm, i);
-					ritr = query.executeQuery(conn);
-					if (this.pushResult)
-					{
+						this.setParams(data, psm, i);
+						ritr = query.executeQuery(conn);
 						results[i] = ritr;
 					}
 				}
-			}
-			else if (this.pushResult)
-			{
-				data.push(new ResultIterator[0]);
+				if (this.resultTo != null)
+				{
+					this.resultTo.setData(data, results == null ? (Object) ritr : results);
+				}
 			}
 		}
 		return null;

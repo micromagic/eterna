@@ -128,7 +128,8 @@ public class FormatGenerator extends AbstractGenerator
 	{
 		synchronized (formatCache)
 		{
-			ResultFormat format = (ResultFormat) formatCache.get(pattern);
+			String key = pattern.concat("/".concat(Integer.toString(TypeManager.getPureType(type))));
+			ResultFormat format = (ResultFormat) formatCache.get(key);
 			if (format != null)
 			{
 				return format;
@@ -157,7 +158,7 @@ public class FormatGenerator extends AbstractGenerator
 				return null;
 			}
 			format = (ResultFormat) fg.create();
-			formatCache.put(pattern, format);
+			formatCache.put(key, format);
 			return format;
 		}
 	}

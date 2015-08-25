@@ -46,6 +46,21 @@ import self.micromagic.util.ref.StringRef;
 public class FactoryContainerImpl
 		implements FactoryContainer
 {
+	/**
+	 * 构造一个工厂容器.
+	 */
+	public FactoryContainerImpl()
+	{
+	}
+
+	/**
+	 * 构造一个工厂容器, 并指定其编号.
+	 */
+	public FactoryContainerImpl(String id)
+	{
+		this.id = id;
+	}
+
 	public String getId()
 	{
 		return this.id;
@@ -319,6 +334,31 @@ public class FactoryContainerImpl
 		this.shareContainer = shareContainer;
 	}
 	protected FactoryContainer shareContainer;
+
+	/**
+	 * 批量设置属性.
+	 */
+	public boolean setAttrs(Map attrs)
+	{
+		if (attrs != null)
+		{
+			boolean hasClassLoader = false;
+			int count = attrs.size();
+			Iterator itr = attrs.entrySet().iterator();
+			for (int i = 0; i < count; i++)
+			{
+				Map.Entry e = (Map.Entry) itr.next();
+				String name = (String) e.getKey();
+				if (!hasClassLoader && CLASSLOADER_FLAG.equals(name))
+				{
+					hasClassLoader = true;
+				}
+				this.setAttribute(name, e.getValue());
+			}
+			return hasClassLoader;
+		}
+		return false;
+	}
 
 	public void setAttribute(String name, Object attr)
 	{

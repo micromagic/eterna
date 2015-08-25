@@ -350,12 +350,12 @@ public class DataPrinterImpl extends AbstractGenerator
 				}
 				this.stringCoder.toJsonString(out, rmd.getColumnName(i));
 				out.write("\":");
-				out.write(Integer.toString(i - 1));
+				out.write(Integer.toString(i));
 			}
 		}
-		out.write("},count:");
+		out.write("},rowCount:");
 		out.write(Integer.toString(ritr.getCount()));
-		out.write(",data:[");
+		out.write(",rows:[");
 		boolean nextRow = false;
 		while (ritr.hasNext())
 		{

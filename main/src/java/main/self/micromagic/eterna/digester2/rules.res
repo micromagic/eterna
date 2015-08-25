@@ -272,7 +272,7 @@ attr:{
 	errorExportName(m=0),transactionType(m=0,i=0),dataSourceName(m=0),
 	position(m=0):allowPosition
 }
-sub:{searchExecute,attribute}
+sub:{queryExecute,updateExecute,searchExecute,attribute}
 stack:{registerObject,n:0,g:0}
 
 
@@ -303,7 +303,7 @@ query-execute
 log:{$}
 create:{generator,${queryExecute}}
 attr:{
-	queryName,resultTo(m=0),start(m=0,i=0),count(m=0,i=0),countType(m=0,i=0)
+	queryName:name,resultTo(m=0),start(m=0,i=0),count(m=0,i=0),countType(m=0,i=0)
 }
 sub:{paramBind}
 stack:{addExecute,n:0,g:1}
@@ -314,7 +314,7 @@ update-execute
 log:{$}
 create:{generator,${updateExecute}}
 attr:{
-	updateName,resultTo(m=0),multiType(m=0,i=0)
+	updateName:name,resultTo(m=0),multiType(m=0,i=0)
 }
 sub:{paramBind}
 stack:{addExecute,n:0,g:1}
@@ -365,7 +365,7 @@ same:{name}
 log:{name}
 create:{generator,${view}}
 attr:{
-	name,dataPrinterName(m=0,i=0),defaultDataType(m=0,i=0)
+	name,debug(m=0,i=0),dataPrinterName(m=0,i=0),defaultDataType(m=0,i=0)
 }
 sub:{${comSub}}
 stack:{registerObject,n:0,g:0}
@@ -464,7 +464,7 @@ column
 create:{generator,${column}}
 attr:{
 	name(d=),width(m=0),ignoreGlobal(m=0,i=0):ignoreGlobalParam,
-	ignoreGlobalTitle(m=0,i=0):ignoreGlobalTitleParam
+	ignoreGlobalTitle(m=0,i=0):ignoreGlobalTitleParam,
 	caption(m=0),typicalComponentName(m=0),cloneInitParam(m=0,i=0),
 	defaultValue(m=0,i=0),srcName(m=0),
 	$body(attr=beforeInit,body=before-init,m=0):beforeInit,

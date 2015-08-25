@@ -17,9 +17,10 @@
 package self.micromagic.eterna.view.impl;
 
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaCreater;
+import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.view.Component;
 
 /**
@@ -75,6 +76,10 @@ public class TypicalComponent extends AbstractGenerator
 	public Object create()
 			throws EternaException
 	{
+		if (this.component instanceof Generator)
+		{
+			((Generator) this.component).setName(this.getName());
+		}
 		return this.component;
 	}
 

@@ -176,6 +176,7 @@ public class ParameterGroup
 			}
 			else if (Tool.PATTERN_FLAG.equals(n))
 			{
+				pg.setAttribute(n, item.getAttribute(n));
 				if (!hasPrepare)
 				{
 					pg.setPrepareName(Tool.PATTERN_PREFIX.concat((String) item.getAttribute(n)));
