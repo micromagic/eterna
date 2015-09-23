@@ -62,8 +62,7 @@ class TimeLogger$NanoTime
 				lastPos = i + 1;
 			}
 		}
-		return lastPos > 0 ? result.concat(".".concat(nanoStr.substring(0, lastPos)))
-				: result;
+		return lastPos > 0 ? result.concat(".".concat(nanoStr.substring(0, lastPos))) : result;
 	}
 	private static final String ZERO_NANO = "000000";
 
