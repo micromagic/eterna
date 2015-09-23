@@ -43,7 +43,7 @@ public class QueryExecute extends DaoExecute
 {
 	private int start = 1;
 	private int count = -1;
-	private int countType = Query.TOTAL_COUNT_NONE;
+	private int countType = Query.TOTAL_COUNT_MODEL_NONE;
 	protected int queryAdapterIndex = -1;
 	private DataHandler resultTo;
 
@@ -85,15 +85,15 @@ public class QueryExecute extends DaoExecute
 	{
 		if ("auto".equals(countType))
 		{
-			this.countType = Query.TOTAL_COUNT_AUTO;
+			this.countType = Query.TOTAL_COUNT_MODEL_AUTO;
 		}
 		else if ("count".equals(countType))
 		{
-			this.countType = Query.TOTAL_COUNT_COUNT;
+			this.countType = Query.TOTAL_COUNT_MODEL_COUNT;
 		}
 		else if ("none".equals(countType))
 		{
-			this.countType = Query.TOTAL_COUNT_NONE;
+			this.countType = Query.TOTAL_COUNT_MODEL_NONE;
 		}
 		else
 		{
@@ -151,7 +151,7 @@ public class QueryExecute extends DaoExecute
 		{
 			query.setMaxCount(this.count);
 		}
-		query.setTotalCount(this.countType);
+		query.setTotalCountModel(this.countType);
 		UserManager um = this.factory.getUserManager();
 		if (um != null)
 		{
@@ -171,15 +171,15 @@ public class QueryExecute extends DaoExecute
 			Element nowNode = data.getCurrentNode();
 			nowNode.addAttribute("queryName", query.getName());
 			String countTypeStr = "err";
-			if (this.countType == Query.TOTAL_COUNT_AUTO)
+			if (this.countType == Query.TOTAL_COUNT_MODEL_AUTO)
 			{
 				countTypeStr = "auto";
 			}
-			else if (this.countType == Query.TOTAL_COUNT_COUNT)
+			else if (this.countType == Query.TOTAL_COUNT_MODEL_COUNT)
 			{
 				countTypeStr = "count";
 			}
-			else if (this.countType == Query.TOTAL_COUNT_NONE)
+			else if (this.countType == Query.TOTAL_COUNT_MODEL_NONE)
 			{
 				countTypeStr = "none";
 			}

@@ -44,17 +44,17 @@ public interface Query extends Dao
 	/**
 	 * 自动计算总记录数, 通过循环ResultSet的next方法来计算.
 	 */
-	int TOTAL_COUNT_AUTO = -1;
+	int TOTAL_COUNT_MODEL_AUTO = -1;
 
 	/**
 	 * 不计算总记录数.
 	 */
-	int TOTAL_COUNT_NONE = -2;
+	int TOTAL_COUNT_MODEL_NONE = -2;
 
 	/**
 	 * 通过自动生成的count语句, 获取总记录数.
 	 */
-	int TOTAL_COUNT_COUNT = -3;
+	int TOTAL_COUNT_MODEL_COUNT = -3;
 
 	/**
 	 * 如果查询时要根据权限来控制列的显示, 请在执行前设置权限类.
@@ -161,40 +161,40 @@ public interface Query extends Dao
 	void setMaxCount(int maxCount) throws EternaException, SQLException;
 
 	/**
-	 * 获取该查询对象设置的总记录数.
+	 * 获取该查询对象计算总记录数的方式.
 	 */
-	int getTotalCount() throws EternaException;
+	int getTotalCountModel() throws EternaException;
 
 	/**
-	 * 设置该查询对象的总记录数. <p>
-	 * 默认值为{@link #TOTAL_COUNT_NONE}(-2)</code>.
+	 * 设置该查询对象计算总记录数的方式. <p>
+	 * 默认值为{@link #TOTAL_COUNT_MODEL_NONE}(-2)</code>.
 	 *
 	 * @param totalCount   总记录数.
-	 *                     {@link #TOTAL_COUNT_AUTO}(-1)将游标滚到最后获取总记录数
-	 *                     {@link #TOTAL_COUNT_NONE}(-2)不获取总记录数
-	 *                     {@link #TOTAL_COUNT_COUNT}(-3)通过执行一个统计查询获取总记录数
+	 *                     {@link #TOTAL_COUNT_MODEL_AUTO}(-1)将游标滚到最后获取总记录数
+	 *                     {@link #TOTAL_COUNT_MODEL_NONE}(-2)不获取总记录数
+	 *                     {@link #TOTAL_COUNT_MODEL_COUNT}(-3)通过执行一个统计查询获取总记录数
 	 *                     0-N为直接设置总记录数
 	 */
-	void setTotalCount(int totalCount) throws EternaException;
+	void setTotalCountModel(int totalCount) throws EternaException;
 
 	/**
-	 * 设置该查询对象的总记录数. <p>
+	 * 设置该查询对象计算总记录数的方式. <p>
 	 *
 	 * @param totalCount  总记录数.
 	 * @param info        相关信息, 只有在totalCount的值设为0-N时才有效.
 	 *
-	 * @see #setTotalCount(int)
-	 * @see #TOTAL_COUNT_AUTO
-	 * @see #TOTAL_COUNT_NONE
-	 * @see #TOTAL_COUNT_COUNT
+	 * @see #setTotalCountModel(int)
+	 * @see #TOTAL_COUNT_MODEL_AUTO
+	 * @see #TOTAL_COUNT_MODEL_NONE
+	 * @see #TOTAL_COUNT_MODEL_COUNT
 	 */
-	void setTotalCount(int totalCount, TotalCountInfo info) throws EternaException;
+	void setTotalCountModel(int totalCount, TotalCountInfo info) throws EternaException;
 
 	/**
-	 * 获取该查询对象设置的总记录数的相关信息. <p>
+	 * 获取该查询对象计算总记录数的相关信息. <p>
 	 * 只有在totalCount的值设为0-N时, 该值才有效.
 	 *
-	 * @see #setTotalCount(int, TotalCountInfo)
+	 * @see #setTotalCountModel(int, TotalCountInfo)
 	 */
 	TotalCountInfo getTotalCountInfo() throws EternaException;
 

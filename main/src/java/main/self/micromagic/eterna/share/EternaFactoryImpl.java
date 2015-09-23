@@ -244,6 +244,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	private void init0(FactoryContainer factoryContainer, Factory shareFactory)
 	{
 		super.initialize(factoryContainer, shareFactory);
+		ParseException.setContextInfo(this.getFactoryContainer().getId(), "", "");
 		if (shareFactory instanceof EternaFactory)
 		{
 			this.shareEternaFactory = (EternaFactory) shareFactory;
@@ -260,7 +261,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 
 		// 初始化, PermissionSetCreater
-		ParseException.setContextInfo("permissionSetCreater");
+		ParseException.setContextInfo(null, "permissionSetCreater", "");
 		if (this.permissionSetCreater == null)
 		{
 			this.permissionSetCreater = new PermissionSetCreaterImpl();
@@ -270,7 +271,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		// 初始化, dataSourceManager
 		if (this.dataSourceManager != null)
 		{
-			ParseException.setContextInfo("dataSourceManager");
+			ParseException.setContextInfo(null, "dataSourceManager", "");
 			this.dataSourceManager.initialize(this);
 		}
 		else
@@ -278,7 +279,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.dataSourceManager = getDataSourceFromCache();
 			if (this.dataSourceManager != null)
 			{
-				ParseException.setContextInfo("dataSourceManager");
+				ParseException.setContextInfo(null, "dataSourceManager", "");
 				this.dataSourceManager.initialize(this);
 			}
 		}
@@ -286,13 +287,13 @@ public class EternaFactoryImpl extends AbstractFactory
 		// 初始化, userManager
 		if (this.userManager != null)
 		{
-			ParseException.setContextInfo("userManager");
+			ParseException.setContextInfo(null, "userManager", "");
 			this.userManager.initUserManager(this);
 		}
 
 		// 初始化, model-caller
 		// model-caller不能使用共享工厂中的对象.
-		ParseException.setContextInfo("modelCaller");
+		ParseException.setContextInfo(null, "modelCaller", "");
 		if (this.modelCaller == null)
 		{
 			this.modelCaller = new ModelCallerImpl();
@@ -300,7 +301,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		this.modelCaller.initModelCaller(this);
 
 		// 初始化, string-coder
-		ParseException.setContextInfo("stringCoder");
+		ParseException.setContextInfo(null, "stringCoder", "");
 		if (this.stringCoder == null)
 		{
 			this.stringCoder = new StringCoderImpl();
@@ -318,7 +319,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		{
 			container = (ObjectContainer) this.objectList.get(i);
 			String objName = container.getName() + "(" + container.getType().getName() + ")";
-			ParseException.setContextInfo(objName);
+			ParseException.setContextInfo(null, objName, "");
 			container.initialize(this);
 		}
 		// 新添加的对象不需要再初始化, 因为在添加时已经初始化了
@@ -769,6 +770,27 @@ public class EternaFactoryImpl extends AbstractFactory
 					+ obj.getClass().getName() + "].";
 			throw new ParseException(msg);
 		}
+		this.registerObject0(id, container);
+	}
+	public void registerObject(String name, Object obj)
+			throws EternaException
+	{
+		if (obj == null)
+		{
+			throw new NullPointerException("Param obj is null.");
+		}
+		int id = this.findEmptyPosition();
+		if (id >= Factory.MAX_OBJECT_COUNT)
+		{
+			String msg = "Max object count:" + id
+					+ "," + Factory.MAX_OBJECT_COUNT + ".";
+			throw new ParseException(msg);
+		}
+		ObjectContainer container = new NormalObjectCon(id, name, obj);
+		this.registerObject0(id, container);
+	}
+	private void registerObject0(int id, ObjectContainer container)
+	{
 		String name = container.getName();
 		if (this.objectMap.containsKey(name))
 		{
@@ -785,40 +807,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		this.objectMap.put(name, container);
 		if (this.initialized)
 		{
-			container.initialize(this);
-		}
-	}
-	public void registerObject(String name, Object obj)
-			throws EternaException
-	{
-		if (obj == null)
-		{
-			throw new NullPointerException("Param obj is null.");
-		}
-		int id = this.findEmptyPosition();
-		if (id >= Factory.MAX_OBJECT_COUNT)
-		{
-			String msg = "Max object count:" + id
-					+ "," + Factory.MAX_OBJECT_COUNT + ".";
-			throw new ParseException(msg);
-		}
-		if (this.objectMap.containsKey(name))
-		{
-			throw new ParseException("Duplicate object name [" + name + "].");
-		}
-		ObjectContainer container = new NormalObjectCon(id, name, obj);
-		if (id == this.objectList.size())
-		{
-			this.objectList.add(container);
-		}
-		else
-		{
-			this.objectList.set(id, container);
-		}
-		this.objectMap.put(name, container);
-		if (this.initialized)
-		{
-			container.initialize(this);
+			initObject(true, this, container);
 		}
 	}
 	private int findEmptyPosition()
@@ -837,6 +826,35 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		this.hasEmptyPosition = false;
 		return this.objectList.size();
+	}
+
+	/**
+	 * 初始化一个对象.
+	 *
+	 * @param newEnv     是否需要构造新的环境信息
+	 * @param factory    对象所属的工厂
+	 * @param container  对象所在的容器
+	 */
+	static void initObject(boolean newEnv, EternaFactory factory, ObjectContainer container)
+	{
+		if (newEnv)
+		{
+			String tmpName = factory.getFactoryContainer().getId() + "," + container.getName()
+					+ "(" + container.getType().getName() + ")";
+			Object old = ParseException.changeContextInfo(tmpName);
+			try
+			{
+				container.initialize(factory);
+			}
+			finally
+			{
+				ParseException.changeContextInfo(old);
+			}
+		}
+		else
+		{
+			container.initialize(factory);
+		}
 	}
 
 	/**
@@ -1142,7 +1160,7 @@ class EternaObjectCon extends ObjectContainer
 	{
 		if (needInit && !this.initialized)
 		{
-			this.initialize(factory);
+			EternaFactoryImpl.initObject(true, factory, this);
 		}
 		return this.obj;
 	}
@@ -1202,7 +1220,7 @@ class EternaCreaterCon extends ObjectContainer
 		}
 		if (needInit && !this.initialized)
 		{
-			this.initialize(factory);
+			EternaFactoryImpl.initObject(true, factory, this);
 		}
 		return this.singleton ? this.instance = this.obj.create() : this.obj.create();
 	}

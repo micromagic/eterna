@@ -212,7 +212,7 @@ public class DataBaseLock
 					preLockValue = lockValue;
 					beginTime = System.currentTimeMillis();
 				}
-				if (System.currentTimeMillis() - beginTime > MAX_WAIT_TIME)
+				if (System.currentTimeMillis() - beginTime > maxWaitTime)
 				{
 					// 如果超过了最长等待时间, 则强制获取锁
 					if (tryGetLock(conn, modify, lockValue))
@@ -321,7 +321,19 @@ public class DataBaseLock
 	/**
 	 * 最大等待时间, 15min.
 	 */
-	private static final long MAX_WAIT_TIME =  15 * 60 * 1000L;
+	private static long maxWaitTime =  15 * 60 * 1000L;
+
+	/**
+	 * 设置获取锁的最大等待时间.
+	 */
+	public static void setMaxWaitTime(long time)
+	{
+		if (time < 1000L)
+		{
+			return;
+		}
+		maxWaitTime = time;
+	}
 
 	/**
 	 * 获取当前运行环境的名称.

@@ -19,4 +19,18 @@
 		<column name="value" type="double(3,3)" desc="信息2"/>
 	</table>
 
+	<table name="TEST_QUERY" desc="查询测试">
+		<column name="name" type="String(20)"/>
+		<column name="value" type="int"/>
+	</table>
+	
+	<data>insert into TEST_QUERY values ('a', 1)</data>
+	<data>insert into TEST_QUERY values ('b', 2)</data>
+	<data>insert into TEST_QUERY values ('c', 3)</data>
+	<data>insert into TEST_QUERY values ('d', 4)</data>
+	<data>insert into TEST_QUERY values ('e', 5)</data>
+	<data>insert into TEST_QUERY values ('f', 6)</data>
+	<data>insert into TEST_QUERY values ('g', 7)</data>
+	<data>insert into TEST_QUERY values ('h', 8)</data>
+
 </dbVersion>

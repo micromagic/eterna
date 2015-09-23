@@ -16,15 +16,10 @@
 
 package self.micromagic.eterna.dao.impl;
 
-import junit.framework.TestCase;
 import self.micromagic.eterna.dao.Entity;
-import self.micromagic.eterna.digester2.ContainerManager;
-import self.micromagic.eterna.digester2.ParseException;
-import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.share.TypeManager;
 
-public class EntityTest extends TestCase
+public class EntityTest extends TestBase
 {
 	public void testRef()
 	{
@@ -50,34 +45,12 @@ public class EntityTest extends TestCase
 		assertEquals(TypeManager.TYPE_DOUBLE, e3.getItem("c3").getType());
 		assertEquals("title3", e3.getItem("c3").getCaption());
 		assertEquals("3", e3.getItem("c3").getAttribute("a3"));
-	}
 
-	static void init()
-	{
-		try
-		{
-			container = ContainerManager.createFactoryContainer("daoTest",
-					"cp:self/micromagic/eterna/dao/impl/daoTest.xml", null);
-			f = (EternaFactory) container.getFactory();
-		}
-		catch (Throwable ex)
-		{
-			if (ex instanceof ParseException)
-			{
-				ex.printStackTrace();
-			}
-			else
-			{
-				(new ParseException(ex.getMessage())).printStackTrace();
-			}
-		}
-	}
-	static FactoryContainer container;
-	static EternaFactory f;
-
-	static
-	{
-		init();
+		Entity e4 = f.getEntity("e4");
+		assertEquals("c1", e4.getItem(0).getName());
+		assertEquals("c2", e4.getItem(1).getName());
+		assertEquals("x", e4.getItem(2).getName());
+		assertEquals(TypeManager.TYPE_STRING, e4.getItem(2).getType());
 	}
 
 }

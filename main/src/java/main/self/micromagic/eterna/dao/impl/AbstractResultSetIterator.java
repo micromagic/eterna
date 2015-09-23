@@ -20,34 +20,36 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.util.converter.BooleanConverter;
 
 public abstract class AbstractResultSetIterator
-		implements ResultIterator, Runnable
+		implements ResultIterator
 {
 	protected static final Log log = DaoManager.log;
 
-	private int idleTime;
-	private Connection conn;
-	private Statement stmt;
-	private ResultSet resultSet;
+	int idleTime;
+	private final Connection conn;
+	private final Statement stmt;
+	private final ResultSet resultSet;
 	protected List preFetchList;
 	protected ResultRow currentRow;
 	protected int rowNum;
 
-	private boolean hasNext;
+	private boolean hasNext = true;
 	private boolean isMovedNext;
-	private boolean closed;
-	private boolean dontClose;
+	boolean closed;
+	private final boolean dontClose;
 
 	public AbstractResultSetIterator(Connection conn, Statement stmt, ResultSet rs)
 	{
@@ -55,11 +57,10 @@ public abstract class AbstractResultSetIterator
 		this.stmt = stmt;
 		this.resultSet = rs;
 		Map attrMap = AppData.getCurrentData().getRequestAttributeMap();
-		this.dontClose = attrMap != null && "1".equals(attrMap.get(DONT_CLOSE_CONNECTION));
+		this.dontClose = attrMap != null && BooleanConverter.toBoolean(attrMap.get(DONT_CLOSE_CONNECTION));
 		if (!this.dontClose)
 		{
-			Thread t = new Thread(this);
-			t.start();
+			CheckRunner.addResult(this);
 		}
 	}
 
@@ -71,7 +72,15 @@ public abstract class AbstractResultSetIterator
 			return;
 		}
 		this.isMovedNext = true;
-		this.hasNext = this.resultSet.next();
+		if (this.hasNext)
+		{
+			this.hasNext = this.resultSet.next();
+			if (!this.hasNext)
+			{
+				// 当没有下一条记录时可以关闭连接
+				this.close();
+			}
+		}
 	}
 
 	public int getTotalCount() throws SQLException
@@ -162,7 +171,7 @@ public abstract class AbstractResultSetIterator
 			this.currentRow  = (ResultRow) this.preFetchList.remove(0);
 			return this.currentRow;
 		}
-		if (this.hasNextRow())
+		if (this.hasMoreRow0())
 		{
 			this.isMovedNext = false;
 			this.rowNum++;
@@ -197,13 +206,13 @@ public abstract class AbstractResultSetIterator
 		{
 			return;
 		}
+		this.resultSet.close();
+		this.stmt.close();
 		if (this.dontClose)
 		{
 			this.closed = true;
 			return;
 		}
-		this.resultSet.close();
-		this.stmt.close();
 		this.conn.close();
 		if (log.isDebugEnabled())
 		{
@@ -246,27 +255,67 @@ public abstract class AbstractResultSetIterator
 		throw new UnsupportedOperationException();
 	}
 
+}
+
+class CheckRunner
+		implements Runnable
+{
+	// 30 second
+	private static final int MAX_IDLE_TIME = 30000;
+
+	private static List results = new LinkedList();
+	private static Thread checkThread;
+
+	public static void addResult(AbstractResultSetIterator result)
+	{
+		synchronized (results)
+		{
+			results.add(result);
+			if (checkThread == null)
+			{
+				checkThread = new Thread(new CheckRunner());
+				checkThread.start();
+			}
+		}
+	}
+
 	public void run()
 	{
-		while (!this.closed)
+		while (true)
 		{
 			try
 			{
-				Thread.sleep(100);
+				Thread.sleep(500);
 			}
 			catch (InterruptedException ex) {}
-			this.idleTime += 100;
-			if (this.idleTime > 30000)
+			synchronized (results)
 			{
-				// 如果30妙后仍未有操作, 则退出循环, 关闭数据库链接
-				break;
+				Iterator itr = results.iterator();
+				while (itr.hasNext())
+				{
+					AbstractResultSetIterator r = (AbstractResultSetIterator) itr.next();
+					r.idleTime += 500;
+					if (r.idleTime > MAX_IDLE_TIME || r.closed)
+					{
+						// 如果超过闲置时间或已被关闭, 则从列表中移除, 未关闭的需要关闭数据库链接
+						if (!r.closed)
+						{
+							try
+							{
+								r.close();
+							}
+							catch (SQLException e) {}
+						}
+						itr.remove();
+					}
+				}
+				if (results.isEmpty())
+				{
+					checkThread = null;
+					break;
+				}
 			}
 		}
-		try
-		{
-			this.close();
-		}
-		catch (SQLException e) {}
 	}
 
 }

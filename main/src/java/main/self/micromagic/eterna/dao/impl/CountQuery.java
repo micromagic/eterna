@@ -361,7 +361,7 @@ class CountQuery
 		return -1;
 	}
 
-	public int getTotalCount()
+	public int getTotalCountModel()
 	{
 		return 1;
 	}
@@ -381,12 +381,12 @@ class CountQuery
 		throw new UnsupportedOperationException();
 	}
 
-	public void setTotalCount(int totalCount)
+	public void setTotalCountModel(int totalCount)
 	{
 		throw new UnsupportedOperationException();
 	}
 
-	public void setTotalCount(int totalCount, TotalCountInfo ext)
+	public void setTotalCountModel(int totalCount, TotalCountInfo ext)
 	{
 		throw new UnsupportedOperationException();
 	}

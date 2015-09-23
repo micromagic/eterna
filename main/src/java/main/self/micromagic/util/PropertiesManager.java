@@ -56,10 +56,9 @@ import self.micromagic.util.ref.StringRef;
 public class PropertiesManager
 {
 	/**
-	 * 默认的配置文件名.
-	 * 注: 配置文件都必须在classpath下.
+	 * 默认的配置文件所在位置.
 	 */
-	public static final String PROPERTIES_NAME = "cp:/eterna.config";
+	private static final String DEFAULT_PROP_LOCAL = "cp:/eterna.config";
 
 	/**
 	 * 存放父配置文件名的属性.
@@ -87,15 +86,9 @@ public class PropertiesManager
 	private static final String LOGGER_NAME = "eterna.util";
 
 	/**
-	 * 配置文件名.
-	 * 注: 配置文件都必须在classpath下.
+	 * 配置文件资源对象.
 	 */
-	private final String propName;
-
-	/**
-	 * 读取配置文件资源所需要的环境信息.
-	 */
-	private final FactoryContainer container;
+	private final ConfigResource propResource;
 
 	/**
 	 * 当前所读取的配置属性.
@@ -130,68 +123,57 @@ public class PropertiesManager
 	 */
 	PropertiesManager(boolean needLoad)
 	{
-		this(null, null, null, needLoad);
+		this(createBaseResource(DEFAULT_PROP_LOCAL, null), null, needLoad);
 	}
 
 	/**
 	 * 构造一个配置属性的管理器.
 	 *
-	 * @param propName      配置文件名, 必须在classpath下, 需给出的是classpath路径
-	 *                      如: com/xxx.properties
+	 * @param propLocal     配置文件所在的位置
 	 * @param classLoader   读取配置文件所使用的<code>ClassLoader</code>
 	 */
-	public PropertiesManager(String propName, ClassLoader classLoader)
+	public PropertiesManager(String propLocal, ClassLoader classLoader)
 	{
-		this(propName, classLoader, null);
+		this(createBaseResource(propLocal, classLoader), null, true);
 	}
 
 	/**
 	 * 构造一个配置属性的管理器.
 	 *
-	 * @param propName      配置文件名, 必须在classpath下, 需给出的是classpath路径
-	 *                      如: com/xxx.properties
+	 * @param propLocal     配置文件所在的位置
 	 * @param classLoader   读取配置文件所使用的<code>ClassLoader</code>
 	 * @param parent        当前配置管理器所继承的父配置管理器
 	 */
-	public PropertiesManager(String propName, ClassLoader classLoader, PropertiesManager parent)
+	public PropertiesManager(String propLocal, ClassLoader classLoader, PropertiesManager parent)
 	{
-		this(propName, classLoader == null ? null : createFactoryContainer(null, classLoader),
-				parent, true);
+		this(createBaseResource(propLocal, classLoader), parent, true);
 	}
 
 	/**
 	 * 构造一个配置属性的管理器.
 	 *
-	 * @param propName    配置文件资源所在的位置
-	 * @param container   读取配置文件资源所需要的环境信息
+	 * @param resource    配置文件资源对象
 	 * @param parent      当前配置管理器所继承的父配置管理器
 	 */
-	public PropertiesManager(String propName, FactoryContainer container, PropertiesManager parent)
+	public PropertiesManager(ConfigResource resource, PropertiesManager parent)
 	{
-		this(propName, container, parent, true);
+		this(resource, parent, true);
 	}
 
 	/**
 	 * 构造一个配置属性的管理器.
 	 *
-	 * @param propName    配置文件资源所在的位置
-	 * @param container   读取配置文件资源所需要的环境信息
+	 * @param resource    配置文件资源对象
 	 * @param parent      当前配置管理器所继承的父配置管理器
 	 * @param needLoad    是否需要在初始化完成之后立刻执行配置加载
 	 */
-	protected PropertiesManager(String propName, FactoryContainer container, PropertiesManager parent,
-			boolean needLoad)
+	protected PropertiesManager(ConfigResource resource, PropertiesManager parent, boolean needLoad)
 	{
-		if (propName == null)
+		if (resource == null)
 		{
-			this.propName = PROPERTIES_NAME;
+			resource = createBaseResource(DEFAULT_PROP_LOCAL, null);
 		}
-		else
-		{
-			this.propName = checkPropName(propName);
-		}
-		this.container = container != null ? container
-				: createFactoryContainer(null, this.getClass().getClassLoader());
+		this.propResource = resource;
 		this.addPropertyListener(this.defaultPL);
 		if (needLoad)
 		{
@@ -206,30 +188,25 @@ public class PropertiesManager
 	}
 
 	/**
-	 * 检查配置资源的定位名称.
+	 * 创建一个基础配置资源对象.
 	 */
-	private String checkPropName(String propName)
+	private static ConfigResource createBaseResource(String propName, ClassLoader loader)
 	{
-		propName = this.resolveDynamicPropnames(propName);
+		if (propName == null)
+		{
+			propName = DEFAULT_PROP_LOCAL;
+		}
 		if (propName.indexOf(':') == -1)
 		{
 			// 没有设置资源的协议, 默认为classpath中的资源
 			propName = "cp:/".concat(propName);
 		}
-		return propName;
-	}
-
-	/**
-	 * 创建一个存放资源环境信息的FactoryContainer.
-	 */
-	private static FactoryContainer createFactoryContainer(Map attrs, ClassLoader defClassLoader)
-	{
 		FactoryContainerImpl tmp = new FactoryContainerImpl("<properties.manager>");
-		if (!tmp.setAttrs(attrs))
+		if (loader != null)
 		{
-			tmp.setAttribute(FactoryContainer.CLASSLOADER_FLAG, defClassLoader);
+			tmp.setAttribute(FactoryContainer.CLASSLOADER_FLAG, loader);
 		}
-		return tmp;
+		return ContainerManager.createResource(propName, tmp);
 	}
 
 	/**
@@ -246,7 +223,7 @@ public class PropertiesManager
 	 */
 	public void reload()
 	{
-		this.reload(null, null);
+		this.reload(true, null, null);
 	}
 
 	/**
@@ -256,19 +233,31 @@ public class PropertiesManager
 	 */
 	public void reload(StringRef msg)
 	{
-		this.reload(msg, null);
+		this.reload(true, msg, null);
 	}
 
 	/**
 	 * (重新)载入配置.
 	 *
+	 * @param reloadParent  是否需要重载父配置
+	 * @param msg           出参, 载入配置时的出错信息
+	 */
+	public void reload(boolean reloadParent, StringRef msg)
+	{
+		this.reload(reloadParent, msg, null);
+	}
+
+	/**
+	 * (重新)载入配置.
+	 *
+	 * @param reloadParent  是否需要重载父配置
 	 * @param msg           出参, 载入配置时的出错信息
 	 * @param preReadNames  需要预先读取的属性名列表
 	 */
-	void reload(StringRef msg, String[] preReadNames)
+	void reload(boolean reloadParent, StringRef msg, String[] preReadNames)
 	{
 		String preMsg = "";
-		if (this.parent != null)
+		if (this.parent != null && reloadParent)
 		{
 			this.parent.reload(msg);
 			if (msg != null && msg.getString() != null)
@@ -283,13 +272,13 @@ public class PropertiesManager
 			{
 				if (msg != null)
 				{
-					msg.setString(preMsg + "The properties name:[" + this.propName + "] not found in class loader.");
+					msg.setString(preMsg + "The properties local [" + this.propResource.getConfig() + "] not exists.");
 				}
-				else if (!PROPERTIES_NAME.equals(this.propName))
+				else if (!(DEFAULT_PROP_LOCAL.equals(this.propResource.getConfig())))
 				{
-					// 不是默认的名称才输出此信息
+					// 不是默认的配置才输出此信息
 					System.err.println(FormatTool.getCurrentDatetimeString()
-							+ ": The properties name:[" + this.propName + "] not found in class loader.");
+							+ ": The properties local [" + this.propResource.getConfig() + "] not exists.");
 				}
 				return;
 			}
@@ -365,8 +354,7 @@ public class PropertiesManager
 	protected Properties loadProperties(String[] preReadNames)
 			throws IOException
 	{
-		ConfigResource res = ContainerManager.createResource(this.propName, this.container);
-		InputStream inStream = res.getAsStream();
+		InputStream inStream = this.propResource.getAsStream();
 		if (inStream == null)
 		{
 			return null;
@@ -378,8 +366,8 @@ public class PropertiesManager
 		{
 			this.changeProperties(temp, preReadNames);
 		}
-		this.loadChildProperties(temp, this.properties.getProperty(CHILD_PROPERTIES));
-		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES));
+		this.loadChildProperties(temp, this.properties.getProperty(CHILD_PROPERTIES), this.propResource);
+		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES), this.propResource);
 		return temp;
 	}
 
@@ -711,9 +699,9 @@ public class PropertiesManager
 	}
 
 	/**
-	 * 载入父配置
+	 * 载入子配置
 	 */
-	private void loadChildProperties(Properties props, String nowName)
+	private void loadChildProperties(Properties props, String nowName, ConfigResource baseRes)
 			throws IOException
 	{
 		String cName = nowName != null ? nowName : props.getProperty(CHILD_PROPERTIES);
@@ -721,14 +709,14 @@ public class PropertiesManager
 		{
 			return;
 		}
-		ConfigResource res = ContainerManager.createResource(checkPropName(cName), this.container);
+		ConfigResource res = baseRes.getResource(this.resolveDynamicPropnames(cName));
 		InputStream is = res.getAsStream();
 		if (is != null)
 		{
 			Properties tmpProps = new Properties();
 			tmpProps.load(is);
 			is.close();
-			this.loadChildProperties(tmpProps, null);
+			this.loadChildProperties(tmpProps, null, res);
 			Iterator itr = tmpProps.entrySet().iterator();
 			while (itr.hasNext())
 			{
@@ -741,7 +729,7 @@ public class PropertiesManager
 	/**
 	 * 载入父配置
 	 */
-	private void loadParentProperties(Properties props, String nowName)
+	private void loadParentProperties(Properties props, String nowName, ConfigResource baseRes)
 			throws IOException
 	{
 		String pName = nowName != null ? nowName : props.getProperty(PARENT_PROPERTIES);
@@ -749,14 +737,14 @@ public class PropertiesManager
 		{
 			return;
 		}
-		ConfigResource res = ContainerManager.createResource(checkPropName(pName), this.container);
+		ConfigResource res = baseRes.getResource(this.resolveDynamicPropnames(pName));
 		InputStream is = res.getAsStream();
 		if (is != null)
 		{
 			Properties tmpProps = new Properties();
 			tmpProps.load(is);
 			is.close();
-			this.loadParentProperties(tmpProps, null);
+			this.loadParentProperties(tmpProps, null, res);
 			Iterator itr = tmpProps.entrySet().iterator();
 			while (itr.hasNext())
 			{

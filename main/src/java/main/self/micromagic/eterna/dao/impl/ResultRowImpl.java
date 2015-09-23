@@ -30,6 +30,7 @@ import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
@@ -103,6 +104,39 @@ public class ResultRowImpl implements ModifiableResultRow
 		this.wasNull = v == null;
 		this.values[columnIndex - 1] = v;
 		this.formateds[columnIndex - 1] = null;
+		if (v != null)
+		{
+			ResultReader reader = this.metaData.getColumnReader(columnIndex);
+			if (reader.getFormat() != null && !this.checkType(reader.getType(), v))
+			{
+				// 设置了format且数据类型与定义的类型不匹配, 直接设置掉format的结果
+				this.formateds[columnIndex - 1] = v;
+			}
+		}
+	}
+
+	/**
+	 * 检查给出的数据是否与定义的类型相符.
+	 */
+	private boolean checkType(int defineType, Object v)
+	{
+		if (TypeManager.isBoolean(defineType) && v instanceof Boolean)
+		{
+			return true;
+		}
+		if (TypeManager.isNumber(defineType) && v instanceof Number)
+		{
+			return true;
+		}
+		if (TypeManager.isDate(defineType) && v instanceof java.util.Date)
+		{
+			return true;
+		}
+		if (TypeManager.isString(defineType) && v instanceof CharSequence)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	public void setValue(String columnName, Object v)

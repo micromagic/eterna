@@ -16,4 +16,4 @@ p1=z
 p2=y
 p3=x
 
-_child.properties=conf/child2.txt
+_child.properties=child2.txt

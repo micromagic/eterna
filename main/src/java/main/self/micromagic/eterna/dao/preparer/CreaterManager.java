@@ -22,6 +22,7 @@ import java.util.Map;
 
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.reader.ObjectReader;
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -206,7 +207,7 @@ public class CreaterManager extends AbstractGenerator
 		Class c = (Class) CreaterManager.typeClassMap.get(type);
 		if (c == null)
 		{
-			throw new EternaException("Can't create [PreparerCreater] type:" + type + ".");
+			throw new ParseException("Can't create [PreparerCreater] type:" + type + ".");
 		}
 		return CreaterManager.createPreparerCreater(c, name);
 	}
@@ -220,7 +221,7 @@ public class CreaterManager extends AbstractGenerator
 		}
 		if (!PreparerCreater.class.isAssignableFrom(type))
 		{
-			throw new EternaException(ClassGenerator.getClassName(type)
+			throw new ParseException(ClassGenerator.getClassName(type)
 					+ " is not instance of " + ClassGenerator.getClassName(ObjectReader.class));
 		}
 		try
@@ -231,7 +232,7 @@ public class CreaterManager extends AbstractGenerator
 		catch (Exception ex)
 		{
 			Tool.log.warn("create PreparerCreater:" + name, ex);
-			throw new EternaException("Can't create [PreparerCreater] class:"
+			throw new ParseException("Can't create [PreparerCreater] class:"
 					+ ClassGenerator.getClassName(type) + ".");
 		}
 	}

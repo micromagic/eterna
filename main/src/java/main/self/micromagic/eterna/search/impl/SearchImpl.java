@@ -72,7 +72,7 @@ public class SearchImpl extends AbstractGenerator
 	private String columnType;
 	private ColumnSetting columnSetting = null;
 	private ParameterSetting parameterSetting = null;
-	private int countType = Query.TOTAL_COUNT_AUTO;
+	private int countType = Query.TOTAL_COUNT_MODEL_AUTO;
 	private String countReaderName = null;
 	private String countSearchName = null;
 	private int countSearchId = -1;
@@ -274,15 +274,15 @@ public class SearchImpl extends AbstractGenerator
 	{
 		if ("auto".equals(countType))
 		{
-			this.countType = Query.TOTAL_COUNT_AUTO;
+			this.countType = Query.TOTAL_COUNT_MODEL_AUTO;
 		}
 		else if ("count".equals(countType))
 		{
-			this.countType = Query.TOTAL_COUNT_COUNT;
+			this.countType = Query.TOTAL_COUNT_MODEL_COUNT;
 		}
 		else if ("none".equals(countType))
 		{
-			this.countType = Query.TOTAL_COUNT_NONE;
+			this.countType = Query.TOTAL_COUNT_MODEL_NONE;
 		}
 		else if (countType != null && countType.startsWith("search:"))
 		{
@@ -601,7 +601,7 @@ public class SearchImpl extends AbstractGenerator
 				raMap.put(READ_ROW_START_AND_COUNT, new StartAndCount(1, 1));
 				countRitr = tmpSearch.doSearch(data, conn).queryResult;
 				int count = countRitr.nextRow().getInt(this.countReaderName);
-				query.setTotalCount(count);
+				query.setTotalCountModel(count);
 				countRitr.beforeFirst();
 				if (oldObj == null)
 				{
@@ -614,7 +614,7 @@ public class SearchImpl extends AbstractGenerator
 			}
 			else if (this.countType != 0)
 			{
-				query.setTotalCount(this.countType);
+				query.setTotalCountModel(this.countType);
 			}
 			ritr = query.executeQuery(conn);
 		}
@@ -837,6 +837,10 @@ public class SearchImpl extends AbstractGenerator
 			{
 				hasPrepare = true;
 				condition.prepareName = (String) item.getAttribute(n);
+			}
+			else if (Tool.VISIBLE_FLAG.equals(n))
+			{
+				condition.visible = BooleanConverter.toBoolean(item.getAttribute(n));
 			}
 			else if (Tool.PATTERN_FLAG.equals(n))
 			{

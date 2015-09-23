@@ -66,7 +66,7 @@ public class ParameterGroup
 	private final String objType;
 
 	/**
-	 * 初始化相关Parameter对象.
+	 * 初始化Parameter对象列表.
 	 */
 	public void initialize(EternaFactory factory)
 			throws EternaException

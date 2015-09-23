@@ -102,7 +102,7 @@ public class ParseException extends EternaException
 		{
 			return ex.getMessage();
 		}
-		return makeMsg(getContextInfo(), ex.getMessage());
+		return makeMsg(getContextInfo(false), ex.getMessage());
 	}
 
 	/**
@@ -124,9 +124,17 @@ public class ParseException extends EternaException
 		{
 			temp.append("URI:[").append(ci.uri).append("]; ");
 		}
+		if (!StringTool.isEmpty(ci.containerName))
+		{
+			temp.append("Container:").append(ci.containerName).append("; ");
+		}
 		if (!StringTool.isEmpty(ci.objName))
 		{
 			temp.append("Object:").append(ci.objName).append("; ");
+		}
+		if (!StringTool.isEmpty(ci.memberName))
+		{
+			temp.append("Member:").append(ci.memberName).append("; ");
 		}
 		if (ci.element != null)
 		{
@@ -141,18 +149,18 @@ public class ParseException extends EternaException
 			}
 			temp.append("; ");
 		}
-		temp.append("Message:").append(msg);
+		temp.append("Message:[").append(msg).append(']');
 		return temp.toString();
 	}
 
 	/**
 	 * 获取上下文环境信息.
 	 */
-	static ContextInfo getContextInfo()
+	static ContextInfo getContextInfo(boolean create)
 	{
 		ThreadCache cache = ThreadCache.getInstance();
 		ContextInfo ci = (ContextInfo) cache.getProperty(CONTEXT_INFO_TAG);
-		if (ci == null)
+		if (ci == null && create)
 		{
 			ci = new ContextInfo();
 			cache.setProperty(CONTEXT_INFO_TAG, ci);
@@ -161,11 +169,53 @@ public class ParseException extends EternaException
 	}
 
 	/**
+	 * 交换当前的上下文环境信息, 并将原始的返回.
+	 */
+	public static Object changeContextInfo(Object info)
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		ContextInfo old = (ContextInfo) cache.getProperty(CONTEXT_INFO_TAG);
+		if (info == null)
+		{
+			cache.removeProperty(CONTEXT_INFO_TAG);
+		}
+		else
+		{
+			if (info instanceof ContextInfo)
+			{
+				cache.setProperty(CONTEXT_INFO_TAG, info);
+			}
+			else
+			{
+				ContextInfo tmp = new ContextInfo();
+				String[] arr = StringTool.separateString((String) info, ",", true);
+				if (arr.length == 1)
+				{
+					tmp.objName = arr[0];
+				}
+				else if (arr.length == 2)
+				{
+					tmp.containerName = arr[0];
+					tmp.objName = arr[1];
+				}
+				else if (arr.length == 3)
+				{
+					tmp.containerName = arr[0];
+					tmp.objName = arr[1];
+					tmp.memberName = arr[2];
+				}
+				cache.setProperty(CONTEXT_INFO_TAG, tmp);
+			}
+		}
+		return old;
+	}
+
+	/**
 	 * 设置上下文环境信息.
 	 */
 	static void setContextInfo(String uri, String config)
 	{
-		ContextInfo ci = getContextInfo();
+		ContextInfo ci = getContextInfo(true);
 		if (uri != null)
 		{
 			ci.uri = uri;
@@ -181,7 +231,7 @@ public class ParseException extends EternaException
 	 */
 	static void setContextInfo(String objName, Element element)
 	{
-		ContextInfo ci = getContextInfo();
+		ContextInfo ci = getContextInfo(true);
 		if (objName != null)
 		{
 			ci.objName = objName;
@@ -192,9 +242,21 @@ public class ParseException extends EternaException
 	/**
 	 * 设置上下文环境信息.
 	 */
-	public static void setContextInfo(String objName)
+	public static void setContextInfo(String containerName, String objName, String memberName)
 	{
-		setContextInfo(objName, (Element) null);
+		ContextInfo ci = getContextInfo(true);
+		if (containerName != null)
+		{
+			ci.containerName = containerName;
+		}
+		if (objName != null)
+		{
+			ci.objName = objName;
+		}
+		if (memberName != null)
+		{
+			ci.memberName = memberName;
+		}
 	}
 
 	/**
@@ -214,7 +276,9 @@ public class ParseException extends EternaException
 class ContextInfo
 {
 	public Element element;
+	public String containerName;
 	public String objName;
+	public String memberName;
 	public String uri;
 	public String config;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.db;
+package tool;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,7 +23,15 @@ import self.micromagic.dbvm.VersionManager;
 
 public class ConnectionTool
 {
-	public static synchronized Connection getConnection()
+	public static Connection getConnection()
+			throws Exception
+	{
+		Class.forName("org.h2.Driver");
+		Connection conn = DriverManager.getConnection("jdbc:h2:~/vTest", "sa", "sa");
+		return conn;
+	}
+
+	public static synchronized Connection getSingletonConnection()
 			throws Exception
 	{
 		Class.forName("org.h2.Driver");

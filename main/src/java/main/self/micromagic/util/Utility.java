@@ -42,11 +42,6 @@ public class Utility
 	public static final String CHARSET_TAG = "_charset";
 
 	/**
-	 * 配置文件名.
-	 */
-	public static final String PROPERTIES_NAME = PropertiesManager.PROPERTIES_NAME;
-
-	/**
 	 * 配置在处理文本的动态属性时, 是否要显示处理失败的信息
 	 */
 	public static final String SHOW_RDP_FAIL_PROPERTY = "show.rdp.fail";
@@ -96,7 +91,7 @@ public class Utility
 		try
 		{
 			propertiesManager = new PropertiesManager(false);
-			propertiesManager.reload(null, new String[]{StringTool.USE_QUICK_APPEND_FLAG});
+			propertiesManager.reload(true, null, new String[]{StringTool.USE_QUICK_APPEND_FLAG});
 		}
 		catch (Throwable ex)
 		{

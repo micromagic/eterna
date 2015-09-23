@@ -18,18 +18,13 @@ package self.micromagic.eterna.dao.impl;
 
 import java.sql.Connection;
 
-import junit.framework.TestCase;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.Update;
-import self.micromagic.eterna.db.ConnectionTool;
-import self.micromagic.eterna.digester2.ContainerManager;
-import self.micromagic.eterna.digester2.ParseException;
-import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.FactoryContainer;
+import tool.ConnectionTool;
 
-public class DaoTest extends TestCase
+public class DaoTest extends TestBase
 {
 	public void test01()
 			throws Exception
@@ -39,7 +34,7 @@ public class DaoTest extends TestCase
 		this.setParams(u);
 		this.setParams(q);
 		q.setIgnore("err");
-		Connection conn = ConnectionTool.getConnection();
+		Connection conn = ConnectionTool.getSingletonConnection();
 		u.execute(conn);
 		q.execute(conn);
 		try
@@ -92,34 +87,6 @@ public class DaoTest extends TestCase
 		dao.setObject("str", "str");
 		dao.setObject("int", new Integer(1));
 		dao.setObject("double", "3.14");
-	}
-
-	static void init()
-	{
-		try
-		{
-			container = ContainerManager.createFactoryContainer("daoTest",
-					"cp:self/micromagic/eterna/dao/impl/daoTest.xml", null);
-			f = (EternaFactory) container.getFactory();
-		}
-		catch (Throwable ex)
-		{
-			if (ex instanceof ParseException)
-			{
-				ex.printStackTrace();
-			}
-			else
-			{
-				(new ParseException(ex.getMessage())).printStackTrace();
-			}
-		}
-	}
-	static FactoryContainer container;
-	static EternaFactory f;
-
-	static
-	{
-		init();
 	}
 
 }

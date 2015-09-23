@@ -43,7 +43,7 @@ public class QueryImpl extends AbstractQuery
 {
 	public Class getObjectType()
 	{
-		return QueryImpl.class;
+		return this.getClass();
 	}
 
 	public Object create()
@@ -56,7 +56,7 @@ public class QueryImpl extends AbstractQuery
 
 	private int startRow = 1;
 	private int maxRows = -1;
-	private int totalCount = TOTAL_COUNT_NONE;
+	private int totalCount = TOTAL_COUNT_MODEL_NONE;
 	private TotalCountInfo totalCountExt;
 
 	protected void copy(Dao copyObj)
@@ -95,18 +95,18 @@ public class QueryImpl extends AbstractQuery
 		this.maxRows = maxRows < -1 ? -1 : maxRows;
 	}
 
-	public int getTotalCount()
+	public int getTotalCountModel()
 	{
 		return this.totalCount;
 	}
 
-	public void setTotalCount(int totalCount)
+	public void setTotalCountModel(int totalCount)
 			throws EternaException
 	{
-		this.setTotalCount(totalCount, null);
+		this.setTotalCountModel(totalCount, null);
 	}
 
-	public void setTotalCount(int totalCount, TotalCountInfo ext)
+	public void setTotalCountModel(int totalCount, TotalCountInfo ext)
 			throws EternaException
 	{
 		if (this.totalCount < -3)
@@ -179,6 +179,7 @@ public class QueryImpl extends AbstractQuery
 			List readerList = readerManager.getReaderList(this.getPermission0());
 			List tmpList = qh.readResults(rs, readerList);
 			ResultIteratorImpl ritr = new ResultIteratorImpl(readerManager, readerList, this);
+			result = ritr;
 			ListIterator litr = tmpList.listIterator();
 			int rowNum = 1;
 			while (litr.hasNext())
@@ -201,7 +202,6 @@ public class QueryImpl extends AbstractQuery
 				ritr.realRecordCount = count;
 				ritr.realRecordCountAvailable = true;
 			}
-			result = ritr;
 			return ritr;
 		}
 		catch (EternaException ex)
@@ -261,6 +261,12 @@ public class QueryImpl extends AbstractQuery
 		ResultIterator result = null;
 		try
 		{
+			int totalCount = -1;
+			// 保持链接的查询需要先计算总记录数, 因为链接在之后的查询中需要一直保持
+			if (this.getTotalCountModel() == TOTAL_COUNT_MODEL_COUNT)
+			{
+				totalCount = this.getCountQuery().executeQuery(conn).nextRow().getInt(1);
+			}
 			ResultSet rs;
 			if (this.hasActiveParam())
 			{
@@ -293,7 +299,13 @@ public class QueryImpl extends AbstractQuery
 			}
 			ResultReaderManager rm = this.getReaderManager0(rs);
 			List readerList = rm.getReaderList(this.getPermission0());
-			result = new ResultSetIteratorImpl(conn, stmt, rs, rm, readerList, this);
+			ResultSetIteratorImpl rsitr = new ResultSetIteratorImpl(
+					conn, stmt, rs, rm, readerList, this);
+			if (totalCount != -1)
+			{
+				rsitr.setTotalCount(totalCount);
+			}
+			result = rsitr;
 			// 查询执行完成, 表示已接管了数据库链接的控制, 可以设置链接接管标志
 			AppData.getCurrentData().addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "1");
 			return result;
@@ -420,6 +432,7 @@ class ResultSetIteratorImpl extends AbstractResultSetIterator
 	private final List readerList;
 	private ResultMetaData metaData = null;
 	private final QueryImpl query;
+	private int totalCount = -1;
 
 	public ResultSetIteratorImpl(Connection conn, Statement stmt, ResultSet rs,
 			ResultReaderManager readerManager, List readerList, QueryImpl query)
@@ -455,6 +468,21 @@ class ResultSetIteratorImpl extends AbstractResultSetIterator
 			log.error("Error in get results.", ex);
 			throw new SQLException(ex.getMessage());
 		}
+	}
+
+	void setTotalCount(int count)
+	{
+		this.totalCount = count >= 0 ? count : -1;
+	}
+
+	public int getTotalCount()
+	{
+		return this.totalCount;
+	}
+
+	public boolean isTotalCountAvailable()
+	{
+		return this.totalCount != -1;
 	}
 
 }

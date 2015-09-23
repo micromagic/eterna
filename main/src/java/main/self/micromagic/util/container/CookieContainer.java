@@ -16,21 +16,23 @@
 
 package self.micromagic.util.container;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.InflaterInputStream;
-import java.util.zip.DeflaterOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Cookie;
 
 import org.apache.commons.collections.iterators.IteratorEnumeration;
+
 import self.micromagic.coder.Base64;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.ref.BooleanRef;
 
@@ -51,7 +53,7 @@ public class CookieContainer extends AbstractContainerSetting
 	private static final Base64 ZIP_CODER = new Base64(
 			"0123456789abcedfghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ_+.".toCharArray());
 
-	private HttpServletRequest request;
+	private final HttpServletRequest request;
 	private HttpServletResponse response;
 
 	/**
@@ -257,9 +259,11 @@ public class CookieContainer extends AbstractContainerSetting
 			{
 				cookie = new Cookie(this.encodeStr(name), "");
 				cookie.setMaxAge(0);
-				if (oldCookie.getDomain() != null)
+				String oldDomain = oldCookie.getDomain();
+				if (!StringTool.isEmpty(oldDomain) && !(oldDomain.equals(this.request.getServerName())))
 				{
-					cookie.setDomain(oldCookie.getDomain());
+					// 存在原始的域, 且与当前服务器host不同, 才重新设置域
+					cookie.setDomain(oldDomain);
 				}
 				if (oldCookie.getPath() != null)
 				{

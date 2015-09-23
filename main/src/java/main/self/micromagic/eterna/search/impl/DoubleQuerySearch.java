@@ -236,7 +236,7 @@ public class DoubleQuerySearch extends SearchImpl
 						StringTool.separateString(result.orderConfig, ",", true));
 			}
 		}
-		nextQuery.setTotalCount(ritr.getTotalCount(),
+		nextQuery.setTotalCountModel(ritr.getTotalCount(),
 				new Query.TotalCountInfo(ritr.hasMoreRecord(), ritr.isTotalCountAvailable()));
 		this.setNextQueryCondition(ritr, nextQuery);
 		return new SearchResult(result, nextQuery.getName(), nextQuery.executeQuery(conn));

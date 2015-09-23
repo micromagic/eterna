@@ -16,9 +16,6 @@
 
 package self.micromagic.dbvm;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-
 import junit.framework.TestCase;
 
 import org.dom4j.Document;
@@ -30,6 +27,7 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.StringRef;
+import tool.ConnectionTool;
 
 public class InitTest extends TestCase
 		implements ConstantDef
@@ -72,8 +70,8 @@ public class InitTest extends TestCase
 	public void testTestdb()
 			throws Exception
 	{
-		VersionManager.checkVersion(
-				getConnection(), "cp:/self/micromagic/dbvm/testdb/", null);
+		VersionManager.checkVersion(ConnectionTool.getConnection(),
+				"cp:/self/micromagic/dbvm/testdb/", null);
 	}
 
 	static EternaFactory initTestFactory(String file)
@@ -90,14 +88,6 @@ public class InitTest extends TestCase
 			fail(msg.getString());
 		}
 		return (EternaFactory) c.getFactory();
-	}
-
-	static Connection getConnection()
-			throws Exception
-	{
-		Class.forName("org.h2.Driver");
-		Connection conn = DriverManager.getConnection("jdbc:h2:~/vTest", "sa", "sa");
-		return conn;
 	}
 
 }

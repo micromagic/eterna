@@ -29,6 +29,11 @@
 					<attribute name="ignoreParent" value="1"/>
 				</item>
 			</entity>
+			<entity name="e4">
+				<item name="c1" type="int"/>
+				<item name="c2" type="long" caption="my_c2"/>
+				<entity-ref entityName="e1" include="c1:x,c2"/>
+			</entity>
 
 			<update name="t1" logType="log1">
 				<prepared-sql>
@@ -75,6 +80,18 @@
 						<attribute name="showName" value="y"/>
 					</reader>
 					<reader name="e" type="string"/>
+				</readers>
+			</query>
+
+			<query name="testQuery" orderIndex="1">
+				<prepared-sql>
+					select #auto[select]
+					from TEST_QUERY
+					#sub[order by $]
+				</prepared-sql>
+				<readers>
+					<reader name="a" type="string" colName="name"/>
+					<reader name="b" type="int" colName="value"/>
 				</readers>
 			</query>
 

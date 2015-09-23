@@ -70,6 +70,11 @@ public class Tool
 	public static final String PATTERN_FLAG = "pattern";
 
 	/**
+	 * 在arrtibute中设置是否显示的名称.
+	 */
+	public static final String VISIBLE_FLAG = "visible";
+
+	/**
 	 * 根据标题翻译列表的配置进行翻译.
 	 */
 	public static String translateCaption(EternaFactory factory, String name)

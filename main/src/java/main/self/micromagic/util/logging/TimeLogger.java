@@ -140,7 +140,8 @@ public class TimeLogger
 		try
 		{
 			System.class.getMethod("nanoTime", new Class[0]);
-			instance = (TimeGetter) Class.forName("self.micromagic.util.logging.TimeLogger$NanoTime").newInstance();
+			String nanoClassName = "self.micromagic.util.logging.TimeLogger$NanoTime";
+			instance = (TimeGetter) Class.forName(nanoClassName).newInstance();
 		}
 		catch (Throwable ex)
 		{

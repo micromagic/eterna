@@ -43,6 +43,7 @@ public class StackBinder
 	private boolean needName;
 	private AttrGetter attrGetter;
 	private boolean needGenerate;
+	private boolean execInBegin;
 
 	public ElementProcessor parse(Digester digester, ParseRule rule,
 			String config, IntegerRef position)
@@ -74,6 +75,7 @@ public class StackBinder
 		boolean needName = false;
 		AttrGetter attrGetter = null;
 		boolean needGenerate = false;
+		boolean execInBegin = false;
 		position.value = mEnd + 1;
 		while (config.charAt(position.value - 1) != ParseRule.BLOCK_END)
 		{
@@ -96,6 +98,10 @@ public class StackBinder
 			{
 				needGenerate = BooleanConverter.toBoolean(tmpStr.substring(2).trim());
 			}
+			else if (tmpStr.startsWith("begin:"))
+			{
+				execInBegin = BooleanConverter.toBoolean(tmpStr.substring(6).trim());
+			}
 			else if (tmpStr.startsWith("attrName:"))
 			{
 				needName = true;
@@ -112,15 +118,28 @@ public class StackBinder
 		stackBind.needName = needName;
 		stackBind.attrGetter = attrGetter;
 		stackBind.needGenerate = needGenerate;
+		stackBind.execInBegin = execInBegin;
 		return stackBind;
 	}
 
 	public boolean begin(Digester digester, Element element)
 	{
+		if (this.execInBegin)
+		{
+			this.doBind(digester, element);
+		}
 		return true;
 	}
 
 	public void end(Digester digester, Element element)
+	{
+		if (!this.execInBegin)
+		{
+			this.doBind(digester, element);
+		}
+	}
+
+	private void doBind(Digester digester, Element element)
 	{
 		Object obj = digester.peek(this.objIndex);
 		if (obj instanceof BeanMap)

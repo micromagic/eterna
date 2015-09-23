@@ -17,4 +17,4 @@ p5=change
 _system.default=0
 
 
-_child.properties=conf/parent2.txt
+_child.properties=parent2.txt

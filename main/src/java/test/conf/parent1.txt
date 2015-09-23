@@ -16,4 +16,4 @@ p6=f
 p5=none
 p7=g
 
-_parent.properties=conf/parent2.txt
+_parent.properties=parent2.txt

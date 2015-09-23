@@ -18,5 +18,5 @@ p3=c
 p4=d
 p5=e
 
-_parent.properties=conf/parent1.txt
-_child.properties=conf/child1.txt
+_parent.properties=parent1.txt
+_child.properties=cp:/conf/child1.txt

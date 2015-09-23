@@ -106,8 +106,8 @@ public interface ResultIterator extends Iterator
 
 	/**
 	 * {@link #getTotalCount}中得到查询的结果集中的总记录数是否有效. <p>
-	 * 当查询的计数方式为{@link Query#TOTAL_COUNT_AUTO}或
-	 * {@link Query#TOTAL_COUNT_COUNT}时, 总记录数会是有效的.
+	 * 当查询的计数方式为{@link Query#TOTAL_COUNT_MODEL_AUTO}或
+	 * {@link Query#TOTAL_COUNT_MODEL_COUNT}时, 总记录数会是有效的.
 	 * 如果总记录数无效，则{@link #getTotalCount}返回的个数并
 	 * 不是实际的总记录数。
 	 */

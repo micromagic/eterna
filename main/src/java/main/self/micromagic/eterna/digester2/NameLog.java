@@ -71,7 +71,7 @@ public class NameLog
 		String objFlag = null;
 		if (this.onlyElement)
 		{
-			ContextInfo ci = ParseException.getContextInfo();
+			ContextInfo ci = ParseException.getContextInfo(true);
 			if (ci.element != null)
 			{
 				ThreadCache tc = ThreadCache.getInstance();

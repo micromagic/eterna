@@ -29,6 +29,7 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.UnmodifiableIterator;
@@ -198,14 +199,23 @@ public class EntityImpl extends AbstractGenerator
 	public static void addItems(EternaFactory factory, EntityRef ref, Container handler)
 	{
 		Entity entity = factory.getEntity(ref.getEntityName());
-		Map excludeSet = null, includeSet = null;
+		Map excludeSet = null, includeMap = null;
 		if (ref.getInclude() != null)
 		{
 			String[] arr = StringTool.separateString(ref.getInclude(), ",", true);
-			includeSet = new HashMap();
+			includeMap = new HashMap();
 			for (int i = 0; i < arr.length; i++)
 			{
-				includeSet.put(arr[i], Boolean.TRUE);
+				String tmp = arr[i];
+				int index = tmp.indexOf(':');
+				if (index == -1)
+				{
+					includeMap.put(tmp, tmp);
+				}
+				else
+				{
+					includeMap.put(tmp.substring(0, index), tmp.substring(index + 1));
+				}
 			}
 		}
 		else if (ref.getExclude() != null)
@@ -221,16 +231,34 @@ public class EntityImpl extends AbstractGenerator
 		while (tmpItr.hasNext())
 		{
 			EntityItem item = (EntityItem) tmpItr.next();
-			if (includeSet != null)
+			String newName = null, oldName = item.getName();
+			if (includeMap != null)
 			{
-				if (!includeSet.containsKey(item.getName()))
+				newName = (String) includeMap.get(oldName);
+				if (newName == null)
 				{
 					continue;
+				}
+				if (!newName.equals(oldName))
+				{
+					if (ref instanceof ItemGenerator)
+					{
+						item = ((ItemGenerator) ref).create(newName, item);
+					}
+					else
+					{
+						EntityItemGenerator tmp = new EntityItemGenerator();
+						tmp.setName(newName);
+						tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_OBJECT));
+						tmp = (EntityItemGenerator) tmp.create();
+						tmp.merge(item);
+						item = tmp;
+					}
 				}
 			}
 			else if (excludeSet != null)
 			{
-				if (excludeSet.containsKey(item.getName()))
+				if (excludeSet.containsKey(oldName))
 				{
 					continue;
 				}
@@ -241,13 +269,25 @@ public class EntityImpl extends AbstractGenerator
 				{
 					continue;
 				}
-				String msg = "Duplicate name [" + item.getName()
+				String msg = "Duplicate name [" + (newName == null ? oldName : newName)
 						+ "] from Entity [" + entity.getName() + "] in "
 						+ handler.getType() + " [" + handler.getName() + "].";
 				throw new EternaException(msg);
 			}
 			handler.add(item, ref.getTableAlias());
 		}
+	}
+
+	/**
+	 * 元素的创建接口.
+	 */
+	public interface ItemGenerator
+	{
+		/**
+		 * 根据基础元素对象, 使用新的名称创建.
+		 */
+		EntityItem create(String newName, EntityItem base);
+
 	}
 
 	/**

@@ -19,6 +19,7 @@ package self.micromagic.util;
 import java.util.List;
 
 import junit.framework.TestCase;
+import self.micromagic.eterna.digester2.ContainerManager;
 import tool.PrivateAccessor;
 
 public class PropertiesManagerTest extends TestCase
@@ -39,11 +40,12 @@ public class PropertiesManagerTest extends TestCase
 
 	public void testPreRead()
 	{
-		PropertiesManager pm = new PropertiesManager("conf/preRead.txt", null, null, false);
+		PropertiesManager pm = new PropertiesManager(
+				ContainerManager.createResource("cp:/conf/preRead.txt"), null, false);
 		pm.reload();
 		assertNull(pm.getProperty("p3"));
-		pm = new PropertiesManager("conf/preRead.txt", null, null, false);
-		pm.reload(null, new String[]{"baseName"});
+		pm = new PropertiesManager(ContainerManager.createResource("cp:/conf/preRead.txt"), null, false);
+		pm.reload(true, null, new String[]{"baseName"});
 		assertNotNull(pm.getProperty("p3"));
 		System.out.println("StringAppender:" + StringTool.createStringAppender().getClass());
 	}
@@ -72,7 +74,7 @@ public class PropertiesManagerTest extends TestCase
 		assertEquals("temp", t_prop_reload);
 		pm.setProperty("p5", "2");
 		assertEquals("2", t_prop_reload);
-		pm.setProperty("_child.properties", "conf/parent1.txt");
+		pm.setProperty("_child.properties", "cp:/conf/parent1.txt");
 		pm.reload();
 		assertEquals("none", t_prop_reload);
 		System.out.println(pm);

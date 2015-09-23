@@ -33,6 +33,7 @@ import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.dao.preparer.PreparedStatementWrapImpl;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
@@ -84,6 +85,7 @@ public abstract class AbstractDao extends AbstractGenerator
 				{
 					ParameterGenerator spg = (ParameterGenerator) itr.next();
 					Parameter param = spg.createParameter(paramIndex++);
+					ParseException.setContextInfo(null, null, spg.getName());
 					param.initialize(this.getFactory());
 					paramList.add(param);
 				}
@@ -110,11 +112,9 @@ public abstract class AbstractDao extends AbstractGenerator
 			}
 			if (this.daoManager.getParameterCount() != paramArray.length)
 			{
-				String msg = "There are " + paramArray.length + " parameter(s) in "
-						+ this.getType() + " [" + this.getName() + "], but the script ["
-						+ tmpScript + "] need " + this.daoManager.getParameterCount()
-						+ " parameter(s).";
-				throw new EternaException(msg);
+				String msg = "There are " + paramArray.length + " parameter(s), but the script ["
+						+ tmpScript + "] need " + this.daoManager.getParameterCount() + " parameter(s).";
+				throw new ParseException(msg);
 			}
 			this.checkParamPermission(tmpScript);
 			return false;

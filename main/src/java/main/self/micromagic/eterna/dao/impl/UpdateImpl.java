@@ -35,7 +35,7 @@ public class UpdateImpl extends BaseDao
 {
 	public Class getObjectType()
 	{
-		return UpdateImpl.class;
+		return this.getClass();
 	}
 
 	protected void initElse(EternaFactory factory)

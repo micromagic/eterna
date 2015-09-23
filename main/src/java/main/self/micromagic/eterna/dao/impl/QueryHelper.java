@@ -138,7 +138,7 @@ public class QueryHelper
 	public int getTotalCount()
 			throws EternaException
 	{
-		return this.query.getTotalCount();
+		return this.query.getTotalCountModel();
 	}
 
 	/**
@@ -251,7 +251,7 @@ public class QueryHelper
 				}
 
 				int totalCount = this.getTotalCount();
-				if (totalCount == Query.TOTAL_COUNT_AUTO)
+				if (totalCount == Query.TOTAL_COUNT_MODEL_AUTO)
 				{
 					if (!isForwardOnly)
 					{
@@ -268,11 +268,11 @@ public class QueryHelper
 					}
 					this.realRecordCountAvailable = true;
 				}
-				else if (totalCount == Query.TOTAL_COUNT_NONE)
+				else if (totalCount == Query.TOTAL_COUNT_MODEL_NONE)
 				{
 					this.realRecordCount = tmpRecordCount;
 				}
-				else if (totalCount == Query.TOTAL_COUNT_COUNT)
+				else if (totalCount == Query.TOTAL_COUNT_MODEL_COUNT)
 				{
 					if (!this.realRecordCountAvailable)
 					{
@@ -363,7 +363,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 {
 	protected int nowStartRow = 1;
 	protected int nowMaxRows = -1;
-	protected int nowTotalCount = Query.TOTAL_COUNT_NONE;
+	protected int nowTotalCount = Query.TOTAL_COUNT_MODEL_NONE;
 	protected Query.TotalCountInfo nowTotalCountExt;
 	protected String oldPreparedSQL;
 	protected String cacheSQL;
@@ -388,7 +388,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 			try
 			{
 				if (this.oldPreparedSQL != preparedSQL || this.nowStartRow != query.getStartRow()
-						|| this.nowMaxRows != query.getMaxCount() || this.nowTotalCount != query.getTotalCount()
+						|| this.nowMaxRows != query.getMaxCount() || this.nowTotalCount != query.getTotalCountModel()
 						|| !Utility.objectEquals(this.nowTotalCountExt, query.getTotalCountInfo()))
 				{
 					this.cacheSQL = null;
@@ -406,7 +406,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 			{
 				this.nowStartRow = query.getStartRow();
 				this.nowMaxRows = query.getMaxCount();
-				this.nowTotalCount = query.getTotalCount();
+				this.nowTotalCount = query.getTotalCountModel();
 				this.nowTotalCountExt = query.getTotalCountInfo();
 			}
 			catch (SQLException ex)
@@ -415,7 +415,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 			}
 			// 如果是读取全部记录或使用自动计数, 则使用原始的语句
 			this.useOldSQL = (this.nowMaxRows == -1 && this.nowStartRow == 1)
-					|| this.nowTotalCount == Query.TOTAL_COUNT_AUTO;
+					|| this.nowTotalCount == Query.TOTAL_COUNT_MODEL_AUTO;
 			if (this.useOldSQL)
 			{
 				this.cacheSQL = preparedSQL;
@@ -465,7 +465,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 					this.realRecordCount = tmpRecordCount += this.nowStartRow - 1;
 					this.realRecordCountAvailable = true;
 				}
-				else if (totalCount == Query.TOTAL_COUNT_COUNT)
+				else if (totalCount == Query.TOTAL_COUNT_MODEL_COUNT)
 				{
 					// 如果没有获取到记录且需要统计计数, 则需要进行统计查询
 					// 因为这时可能起始行大于总记录数
@@ -496,11 +496,11 @@ abstract class SpecialQueryHelper extends QueryHelper
 			}
 
 			int totalCount = this.nowTotalCount;
-			if (totalCount == Query.TOTAL_COUNT_NONE)
+			if (totalCount == Query.TOTAL_COUNT_MODEL_NONE)
 			{
 				this.realRecordCount = tmpRecordCount;
 			}
-			else if (totalCount == Query.TOTAL_COUNT_COUNT)
+			else if (totalCount == Query.TOTAL_COUNT_MODEL_COUNT)
 			{
 				if (!this.realRecordCountAvailable)
 				{

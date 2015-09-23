@@ -47,7 +47,7 @@ public class QueryHelperTest extends TestCase
 	{
 		List readerList = new ArrayList();
 		EmptyQuery query = new EmptyQuery();
-		query.setTotalCount(Query.TOTAL_COUNT_NONE);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_NONE);
 		QueryHelper qh = new OracleQueryHelper(query);
 		ResultSet rs;
 
@@ -100,7 +100,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		assertEquals("TEST", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, true, false, qh);
@@ -108,7 +108,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(13);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		assertEquals("TEST", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
@@ -116,7 +116,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		assertEquals("TEST", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
@@ -124,7 +124,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 0, false, true, true, qh);
@@ -132,7 +132,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(10);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
@@ -140,7 +140,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(4);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 15, true, true, false, qh);
@@ -148,7 +148,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(10);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 15, true, false, false, qh);
@@ -156,7 +156,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(0);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 15, true, false, false, qh);
@@ -164,21 +164,21 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(2);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		query.setTotalCount(15, new Query.TotalCountInfo(true, false));
+		query.setTotalCountModel(15, new Query.TotalCountInfo(true, false));
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(2, 15, false, true, false, qh);
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(11);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 11", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, true, qh);
 
 		rs = new OnlyCountResultSet(1);
 		query.setStartRow(10);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 10", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(1, 10, true, false, false, qh);
@@ -196,7 +196,7 @@ public class QueryHelperTest extends TestCase
 	{
 		List readerList = new ArrayList();
 		EmptyQuery query = new EmptyQuery();
-		query.setTotalCount(Query.TOTAL_COUNT_NONE);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_NONE);
 		QueryHelper qh = new MySqlQueryHelper(query);
 		ResultSet rs;
 		long maxValue = Integer.MAX_VALUE;
@@ -250,7 +250,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		assertEquals("TEST", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, true, false, qh);
@@ -258,7 +258,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(13);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		assertEquals("TEST", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
@@ -266,7 +266,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		assertEquals("TEST", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
@@ -274,7 +274,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		assertEquals("TEST limit 1, 4", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 0, false, true, true, qh);
@@ -282,7 +282,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(10);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		assertEquals("TEST limit 1, 11", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
@@ -290,7 +290,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(4);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		assertEquals("TEST limit 1, 4", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 15, true, true, false, qh);
@@ -298,7 +298,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(10);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		assertEquals("TEST limit 1, 11", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 15, true, false, false, qh);
@@ -306,7 +306,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(0);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		assertEquals("TEST limit 1, 4", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 15, true, false, false, qh);
@@ -314,7 +314,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(2);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		query.setTotalCount(15, new Query.TotalCountInfo(true, false));
+		query.setTotalCountModel(15, new Query.TotalCountInfo(true, false));
 		assertEquals("TEST limit 1, " + maxValue, qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(2, 15, false, true, false, qh);
@@ -332,7 +332,7 @@ public class QueryHelperTest extends TestCase
 	{
 		List readerList = new ArrayList();
 		EmptyQuery query = new EmptyQuery();
-		query.setTotalCount(Query.TOTAL_COUNT_NONE);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_NONE);
 		QueryHelper qh = new QueryHelper(query);
 		ResultSet rs;
 
@@ -378,56 +378,56 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(10, type);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, true, false, qh);
 
 		rs = new OnlyCountResultSet(10, type);
 		query.setMaxCount(13);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_AUTO);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(10, type);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		qh.readResults(rs, readerList);
 		assertResult(3, 0, false, true, true, qh);
 
 		rs = new OnlyCountResultSet(10, type);
 		query.setMaxCount(10);
 		query.setStartRow(2);
-		query.setTotalCount(Query.TOTAL_COUNT_COUNT);
+		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(10, type);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		qh.readResults(rs, readerList);
 		assertResult(3, 15, true, true, false, qh);
 
 		rs = new OnlyCountResultSet(10, type);
 		query.setMaxCount(10);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		qh.readResults(rs, readerList);
 		assertResult(9, 15, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(0, type);
 		query.setMaxCount(3);
 		query.setStartRow(2);
-		query.setTotalCount(15);
+		query.setTotalCountModel(15);
 		qh.readResults(rs, readerList);
 		assertResult(0, 15, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(2, type);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		query.setTotalCount(15, new Query.TotalCountInfo(true, false));
+		query.setTotalCountModel(15, new Query.TotalCountInfo(true, false));
 		qh.readResults(rs, readerList);
 		assertResult(1, 15, false, true, false, qh);
 	}
