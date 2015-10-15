@@ -291,10 +291,11 @@ public class CookieContainer extends AbstractContainerSetting
 			if (this.compressValue)
 			{
 				BooleanRef ziped = new BooleanRef();
-				str = this.doDeflater(str, ziped);
-				if (ziped.value)
+				String zipStr = this.doDeflater(str, ziped);
+				if (ziped.value && zipStr.length() + 8 < str.length())
 				{
-					str = COMPRESS_VALUE_PREFIX.concat(str);
+					// 已压缩且压缩后的尺寸小于原始尺寸的, 才作为压缩存放
+					str = COMPRESS_VALUE_PREFIX.concat(zipStr);
 				}
 				else
 				{

@@ -130,11 +130,6 @@ public class ObjectReader
 		this.attributes.convertType(factory, "reader");
 	}
 
-	public boolean isIgnore()
-	{
-		return this.getType() == TypeManager.TYPE_NULL;
-	}
-
 	public ResultFormat getFormat()
 	{
 		return this.format;

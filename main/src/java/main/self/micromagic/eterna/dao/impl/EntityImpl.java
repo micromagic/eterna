@@ -78,6 +78,7 @@ public class EntityImpl extends AbstractGenerator
 			tmp = OrderManager.doOrder(tmp, this.orderConfig, new ItemNameHandler());
 			// 重新排序后要重设名称和索引的对应关系
 			this.nameCache.clear();
+			count = tmp.size();
 			for (int i = 0; i < count; i++)
 			{
 				EntityItem item = (EntityItem) tmp.get(i);
@@ -239,21 +240,9 @@ public class EntityImpl extends AbstractGenerator
 				{
 					continue;
 				}
-				if (!newName.equals(oldName))
+				if (newName.equals(oldName))
 				{
-					if (ref instanceof ItemGenerator)
-					{
-						item = ((ItemGenerator) ref).create(newName, item);
-					}
-					else
-					{
-						EntityItemGenerator tmp = new EntityItemGenerator();
-						tmp.setName(newName);
-						tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_OBJECT));
-						tmp = (EntityItemGenerator) tmp.create();
-						tmp.merge(item);
-						item = tmp;
-					}
+					newName = null;
 				}
 			}
 			else if (excludeSet != null)
@@ -261,6 +250,31 @@ public class EntityImpl extends AbstractGenerator
 				if (excludeSet.containsKey(oldName))
 				{
 					continue;
+				}
+			}
+			String tableAlias = ref.getTableAlias();
+			if (newName != null || !StringTool.isEmpty(tableAlias))
+			{
+				// 如果有修改过的标识名称或表别名, 需要创建一个新的元素
+				String tmpName = newName == null ? oldName : newName;
+				if (ref instanceof ItemGenerator)
+				{
+					item = ((ItemGenerator) ref).create(tmpName, item, tableAlias);
+				}
+				else
+				{
+					EntityItemGenerator tmp = new EntityItemGenerator();
+					tmp.setName(tmpName);
+					tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_OBJECT));
+					tmp = (EntityItemGenerator) tmp.create();
+					tmp.merge(item);
+					String colName = tmp.getColumnName();
+					if (!StringTool.isEmpty(tableAlias) && colName.indexOf('.') == -1)
+					{
+						// 原始列中没有别名, 且设置了表别名, 需要添加表别名
+						tmp.setColumnName(tableAlias.concat(".").concat(colName));
+					}
+					item = tmp;
 				}
 			}
 			if (handler.contains(item))
@@ -286,7 +300,7 @@ public class EntityImpl extends AbstractGenerator
 		/**
 		 * 根据基础元素对象, 使用新的名称创建.
 		 */
-		EntityItem create(String newName, EntityItem base);
+		EntityItem create(String newName, EntityItem base, String tableAlias);
 
 	}
 

@@ -1,6 +1,5 @@
 
-baseName=child2.txt
+baseName=abc
 
 testName=test_${baseName}
 
-_child.properties=cp:/conf/${baseName}

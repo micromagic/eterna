@@ -26,6 +26,11 @@ public class PropertiesManagerTest extends TestCase
 {
 	public void testPropteriesValue()
 	{
+		System.out.println(50 * 60 * 100);
+		int mask = (1 << 18) - 1;
+		System.out.println(((long) mask));
+		System.out.println(Long.toHexString(System.currentTimeMillis() & ~( mask)));
+
 		PropertiesManager pm = new PropertiesManager("conf/main1.txt", this.getClass().getClassLoader());
 		assertEquals("z", pm.getProperty("p1"));
 		assertEquals("y", pm.getProperty("p2"));
@@ -35,19 +40,36 @@ public class PropertiesManagerTest extends TestCase
 		assertEquals("f", pm.getProperty("p6"));
 		assertEquals("g", pm.getProperty("p7"));
 		assertEquals("h", pm.getProperty("p8"));
+
+		pm.contains("flag", true);
+		assertEquals("", pm.getProperty("flag"));
 		System.out.println(pm);
 	}
 
 	public void testPreRead()
+			throws Exception
 	{
 		PropertiesManager pm = new PropertiesManager(
 				ContainerManager.createResource("cp:/conf/preRead.txt"), null, false);
+		nowPM = pm;
+		pm.addMethodPropertyManager("baseName", this.getClass(), "setBaseName");
 		pm.reload();
-		assertNull(pm.getProperty("p3"));
+		assertEquals("test_abc", pm.getResolvedProperty("testName"));
 		pm = new PropertiesManager(ContainerManager.createResource("cp:/conf/preRead.txt"), null, false);
+		nowPM = pm;
+		pm.addMethodPropertyManager("baseName", this.getClass(), "setBaseName");
+		System.out.println("When pre read, get other property is null.");
 		pm.reload(true, null, new String[]{"baseName"});
-		assertNotNull(pm.getProperty("p3"));
 		System.out.println("StringAppender:" + StringTool.createStringAppender().getClass());
+		nowPM = null;
+	}
+
+	public void testDynamicRes()
+	{
+		PropertiesManager pm = new PropertiesManager(
+				ContainerManager.createResource("cp:/conf/dResMain.txt"), null, false);
+		pm.reload();
+		assertEquals("1", pm.getProperty("testValue"));
 	}
 
 	public void testBindDefaultValue()
@@ -145,6 +167,12 @@ public class PropertiesManagerTest extends TestCase
 	public static void setPropParent(String v)
 	{
 		t_prop_parent_setted = true;
+	}
+
+	static PropertiesManager nowPM;
+	static void setBaseName(String name)
+	{
+		System.out.println("preReadBaseNameTest:" + nowPM.getResolvedProperty("testName"));
 	}
 
 }

@@ -392,7 +392,7 @@ public abstract class AbstractQuery extends BaseDao
 				String flag;
 				if (this.orderStrs != null && orderStr.equals(this.orderStrs[0]))
 				{
-					orderStr = orderStr + " DESC";
+					orderStr = orderStr.concat(" DESC");
 					flag = String.valueOf(ResultReaderManager.ORDER_FLAG_DESC);
 				}
 				else
@@ -451,7 +451,7 @@ public abstract class AbstractQuery extends BaseDao
 					continue;
 				}
 				String orderStr = reader.getOrderCol();
-				orderStr = orderFlag < 0 ? orderStr + " DESC" : orderStr;
+				orderStr = orderFlag < 0 ? orderStr.concat(" DESC") : orderStr;
 				tmpOrderNames.add(orderNames[i]);
 				tmpOrderStrs.add(orderStr);
 			}

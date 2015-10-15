@@ -73,6 +73,7 @@ public interface ResultReader
 
 	/**
 	 * 获取用于生成ORDER BY之后的列名.
+	 * 当列名设置为表达式时, 需要通过这个属性来生成排序的列名.
 	 */
 	String getOrderCol() throws EternaException;
 

@@ -43,6 +43,7 @@ import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.StringRef;
 
 public class ReaderManagerImpl
@@ -164,10 +165,30 @@ public class ReaderManagerImpl
 			count = this.allReaderList.size();
 			// 初始化完后, 需要将readerList和allReaderList设成一样的
 			this.readerList = this.allReaderList;
+			Map colNameMap = new HashMap();
+			boolean checkSameCol = BooleanConverter.toBoolean(factory.getAttribute(CHECK_SAME_COL));
 			for (int i = 0; i < count; i++)
 			{
 				// 这里不能用迭代, 因为有可能需要添加值
 				ResultReader reader = (ResultReader) this.allReaderList.get(i);
+				String colName = reader.getColumnName();
+				if (checkSameCol && reader.isUseAlias() && !StringTool.isEmpty(colName))
+				{
+					colName = colName.toUpperCase();
+					String oldAlias = (String) colNameMap.get(colName);
+					if (oldAlias != null)
+					{
+						// 如果是通过别名获取, 且设置了列名并已出现过, 则将别名设置成与之前相同的
+						if (reader instanceof ObjectReader)
+						{
+							((ObjectReader) reader).setAlias(oldAlias);
+						}
+					}
+					else
+					{
+						colNameMap.put(colName, reader.getAlias());
+					}
+				}
 				reader.initialize(factory);
 				String showName = (String) reader.getAttribute(SHOW_NAME_FLAG);
 				if (!StringTool.isEmpty(showName))
@@ -181,10 +202,10 @@ public class ReaderManagerImpl
 					}
 					else
 					{
-						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName(), false);
+						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName());
 						tmp.setNeedFormat(false);
 						this.allReaderList.set(i, tmp);
-						tmp = new ReaderWrapper(reader, showName, true);
+						tmp = new ReaderWrapper(reader, showName);
 						tmp.setNeedFormat(true);
 						this.nameToIndexMap.put(showName,
 								Utility.createInteger(this.allReaderList.size()));
@@ -368,7 +389,8 @@ public class ReaderManagerImpl
 			}
 			if (orderFlag != 0)
 			{
-				this.orderList.add(reader.getOrderCol() + (orderFlag < 0 ? " DESC" : "" ));
+				String orderCol = reader.getOrderCol();
+				this.orderList.add(orderFlag < 0 ? orderCol.concat(" DESC") : orderCol);
 			}
 			tmpNameToIndexMap.put(rName, Utility.createInteger(tmpReaderList.size()));
 			tmpReaderList.add(reader);
@@ -705,7 +727,7 @@ public class ReaderManagerImpl
 		reader.setAlias(item.getName());
 		reader.setPermissionSet(item.getPermissionSet());
 		String colName = item.getColumnName();
-		if (tableAlias != null)
+		if (tableAlias != null && colName.indexOf('.') == -1)
 		{
 			colName = tableAlias.concat(".").concat(colName);
 		}

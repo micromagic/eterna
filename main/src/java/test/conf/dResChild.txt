@@ -12,13 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-flag
-
-p1=a
-p2=b
-p3=c
-p4=d
-p5=e
-
-_parent.properties=parent1.txt
-_child.properties=cp:/conf/child1.txt
+testValue=1

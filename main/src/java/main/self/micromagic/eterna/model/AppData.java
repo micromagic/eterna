@@ -132,7 +132,7 @@ public class AppData
 	 */
 	public final Map dataMap = new HashMap();
 
-	public final Object[] caches = new Object[16];
+	public final Object[] caches = new Object[23];
 	public final Map[] maps = new Map[4];
 	public final ArrayList stack = new ArrayList();
 

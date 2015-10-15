@@ -48,6 +48,11 @@ public interface ResultReaderManager
 	String ORDER_COL = "orderCol";
 
 	/**
+	 * 在factory的arrtibute中设置是否需要检查相同列名的名称.
+	 */
+	String CHECK_SAME_COL = "checkSameCol";
+
+	/**
 	 * 在reader的名称前设置降序排序的标记.
 	 */
 	char ORDER_FLAG_DESC = '-';

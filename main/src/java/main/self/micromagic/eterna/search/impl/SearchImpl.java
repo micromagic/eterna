@@ -142,17 +142,19 @@ public class SearchImpl extends AbstractGenerator
 		{
 			this.queryId = this.getFactory().findObjectId(this.queryName);
 			// 如果不需要将query放入会话中, 将sessionQueryTag设为null.
-			Object tmpObj = factory.getAttribute(SESSION_QUERY_ATTRIBUTE);
+			Object tmpObj = factory.getAttribute(SESSION_STORE_FLAG);
 			if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
 			{
 				this.sessionQueryTag = null;
+				this.searchManagerName = null;
 			}
 			else
 			{
-				tmpObj = this.getAttribute(SESSION_QUERY_ATTRIBUTE);
+				tmpObj = this.getAttribute(SESSION_STORE_FLAG);
 				if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
 				{
 					this.sessionQueryTag = null;
+					this.searchManagerName = null;
 				}
 			}
 		}
@@ -771,7 +773,9 @@ public class SearchImpl extends AbstractGenerator
 	private SearchManager getSearchManager0(AppData data)
 			throws EternaException
 	{
-		if ("1".equals(data.getRequestAttributeMap().get(SearchManager.NEW_SEARCH_MANAGER)))
+		Map raMap = data.getRequestAttributeMap();
+		if (this.searchManagerName == null || raMap == null
+				|| BooleanConverter.toBoolean(raMap.get(SearchManager.NEW_SEARCH_MANAGER)))
 		{
 			return this.getFactory().createSearchManager();
 		}

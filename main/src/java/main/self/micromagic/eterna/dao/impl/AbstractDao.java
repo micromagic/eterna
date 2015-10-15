@@ -184,12 +184,13 @@ public abstract class AbstractDao extends AbstractGenerator
 	public int getParameterCount()
 			throws EternaException
 	{
-		if (this.daoManager == null)
+		if (this.daoManager == null && this.parameterArray == null)
 		{
 			throw new EternaException(this.getType() + " [" + this.getName()
 					+ "] not initialized.");
 		}
-		return this.daoManager.getParameterCount();
+		return this.daoManager == null ? this.parameterArray.length
+				: this.daoManager.getParameterCount();
 	}
 
 	public boolean hasActiveParam()

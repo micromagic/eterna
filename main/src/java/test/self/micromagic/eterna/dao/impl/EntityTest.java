@@ -48,9 +48,15 @@ public class EntityTest extends TestBase
 
 		Entity e4 = f.getEntity("e4");
 		assertEquals("c1", e4.getItem(0).getName());
+		assertEquals("c1", e4.getItem(0).getColumnName());
 		assertEquals("c2", e4.getItem(1).getName());
+		assertEquals("tmp.col2", e4.getItem(1).getColumnName());
 		assertEquals("x", e4.getItem(2).getName());
+		assertEquals("tmp.col1", e4.getItem(2).getColumnName());
 		assertEquals(TypeManager.TYPE_STRING, e4.getItem(2).getType());
+		assertEquals("c3", e4.getItem(3).getName());
+		assertEquals("new.x", e4.getItem(3).getColumnName());
+		assertEquals(TypeManager.TYPE_DOUBLE, e4.getItem(3).getType());
 	}
 
 }

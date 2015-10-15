@@ -327,11 +327,14 @@ public class StringTool
 	 * <code>""</code>，则返回<code>null</code>，只包含分隔符
 	 * <code>delimiter</code>，则返回长度为0的字符串数组。如果给出的
 	 * 字符串<code>str</code>可以分割，即不在上述情况之列，则返回一个
-	 * 字符串数组，每个单元包含一个被分隔出来的字符串。
+	 * 字符串数组，每个单元包含一个被分隔出来的字符串。 <p>
+	 * 注: 如果有多个相连的分隔符会作为一个处理.
 	 * <p>
 	 * 例如：
 	 * <blockquote><pre>
 	 * StringProcessor.separateString("一,二,三", ",")
+	 *         返回 {"一", "二", "三"}
+	 * StringProcessor.separateString("一,,二,三", ",")
 	 *         返回 {"一", "二", "三"}
 	 * StringProcessor.separateString("你好，大家好！我很好。", "，！")
 	 *         返回 {"你好", "大家好", "我很好。"}
@@ -354,6 +357,7 @@ public class StringTool
 	/**
 	 * 根据指定的分隔符<code>delimiter</code>分割一个字符串
 	 * <code>str</code>. <p>
+	 * 注: 如果有多个相连的分隔符会作为一个处理.
 	 *
 	 * @param str         要进行分割的字符串
 	 * @param delimiter   分隔符集合

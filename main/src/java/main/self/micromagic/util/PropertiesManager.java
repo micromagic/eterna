@@ -267,6 +267,7 @@ public class PropertiesManager
 		}
 		try
 		{
+			this.systemDefault = true;
 			Properties temp = this.loadProperties(preReadNames);
 			if (temp == null)
 			{
@@ -288,10 +289,6 @@ public class PropertiesManager
 			if (sd != null)
 			{
 				this.systemDefault = BooleanConverter.toBoolean(sd);
-			}
-			else
-			{
-				this.systemDefault = true;
 			}
 			this.changeProperties(temp, null);
 		}
@@ -366,8 +363,30 @@ public class PropertiesManager
 		{
 			this.changeProperties(temp, preReadNames);
 		}
-		this.loadChildProperties(temp, this.properties.getProperty(CHILD_PROPERTIES), this.propResource);
-		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES), this.propResource);
+		Map delayMap = new HashMap();
+		this.loadChildProperties(temp, this.properties.getProperty(CHILD_PROPERTIES),
+				this.propResource, delayMap, temp);
+		this.loadParentProperties(temp, this.properties.getProperty(PARENT_PROPERTIES),
+				this.propResource, delayMap, temp);
+		if (!delayMap.isEmpty())
+		{
+			Iterator itr = delayMap.entrySet().iterator();
+			while (itr.hasNext())
+			{
+				Map.Entry e = (Map.Entry) itr.next();
+				Object[] values = (Object[]) e.getValue();
+				if (Boolean.TRUE == values[0])
+				{
+					this.loadChildProperties((Properties) values[1], (String) e.getKey(),
+							this.propResource, null, temp);
+				}
+				else
+				{
+					this.loadParentProperties((Properties) values[1], (String) e.getKey(),
+							this.propResource, null, temp);
+				}
+			}
+		}
 		return temp;
 	}
 
@@ -701,7 +720,8 @@ public class PropertiesManager
 	/**
 	 * 载入子配置
 	 */
-	private void loadChildProperties(Properties props, String nowName, ConfigResource baseRes)
+	private void loadChildProperties(Properties props, String nowName, ConfigResource baseRes,
+			Map delayMap, Properties allProps)
 			throws IOException
 	{
 		String cName = nowName != null ? nowName : props.getProperty(CHILD_PROPERTIES);
@@ -709,14 +729,18 @@ public class PropertiesManager
 		{
 			return;
 		}
-		ConfigResource res = baseRes.getResource(this.resolveDynamicPropnames(cName));
+		ConfigResource res = this.checkDynamicRes(cName, allProps, false, baseRes, delayMap, props);
+		if (res == null)
+		{
+			return;
+		}
 		InputStream is = res.getAsStream();
 		if (is != null)
 		{
 			Properties tmpProps = new Properties();
 			tmpProps.load(is);
 			is.close();
-			this.loadChildProperties(tmpProps, null, res);
+			this.loadChildProperties(tmpProps, null, res, delayMap, allProps);
 			Iterator itr = tmpProps.entrySet().iterator();
 			while (itr.hasNext())
 			{
@@ -729,7 +753,8 @@ public class PropertiesManager
 	/**
 	 * 载入父配置
 	 */
-	private void loadParentProperties(Properties props, String nowName, ConfigResource baseRes)
+	private void loadParentProperties(Properties props, String nowName, ConfigResource baseRes,
+			Map delayMap, Properties allProps)
 			throws IOException
 	{
 		String pName = nowName != null ? nowName : props.getProperty(PARENT_PROPERTIES);
@@ -737,14 +762,18 @@ public class PropertiesManager
 		{
 			return;
 		}
-		ConfigResource res = baseRes.getResource(this.resolveDynamicPropnames(pName));
+		ConfigResource res = this.checkDynamicRes(pName, allProps, false, baseRes, delayMap, props);
+		if (res == null)
+		{
+			return;
+		}
 		InputStream is = res.getAsStream();
 		if (is != null)
 		{
 			Properties tmpProps = new Properties();
 			tmpProps.load(is);
 			is.close();
-			this.loadParentProperties(tmpProps, null, res);
+			this.loadParentProperties(tmpProps, null, res, delayMap, allProps);
 			Iterator itr = tmpProps.entrySet().iterator();
 			while (itr.hasNext())
 			{
@@ -755,6 +784,25 @@ public class PropertiesManager
 				}
 			}
 		}
+	}
+
+	/**
+	 * 检查需要载入的资源配置中是否有未解析的动态参数, 如果有需要延迟加载.
+	 */
+	private ConfigResource checkDynamicRes(String resName, Properties allProps, boolean child,
+			ConfigResource baseRes, Map delayMap, Properties nowProps)
+	{
+		String newRes = this.resolveDynamicPropnames(resName, allProps);
+		if (newRes.indexOf(DYNAMIC_PROPNAME_PREFIX) != -1)
+		{
+			// 存在动态参数标识, 需要延迟载入
+			if (delayMap != null)
+			{
+				delayMap.put(resName, new Object[]{child ? Boolean.TRUE : Boolean.FALSE, nowProps});
+			}
+			return null;
+		}
+		return baseRes.getResource(newRes);
 	}
 
 	public String toString()
@@ -853,7 +901,7 @@ public class PropertiesManager
 					}
 					if (pValue != null)
 					{
-						result.append(resolveDynamicPropnames(pValue, bindRes));
+						result.append(this.resolveDynamicPropnames(pValue, bindRes, onlyRes));
 					}
 					else
 					{

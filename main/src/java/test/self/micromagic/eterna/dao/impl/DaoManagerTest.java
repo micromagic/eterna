@@ -57,32 +57,25 @@ public class DaoManagerTest extends TestCase
 
 	public void testFrontParse1()
 	{
-		try
-		{
-			String str = daoManager.preParse("#auto[update;1,3]", query);
-			String result = "col_0 = ?, col_1 = ?, col_2 = ?";
-			assertEquals(result, str);
+		String str = daoManager.preParse("#auto[update;1,3]", query);
+		String result = "col_0 = ?, col_1 = ?, col_2 = ?";
+		assertEquals(result, str);
 
-			str = daoManager.preParse("##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]", query);
-			result = "##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]";
-			assertEquals(result, str);
+		str = daoManager.preParse("##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]", query);
+		result = "##auto[update,1,3] #? #param(t)[t = ?] #sub[($)]";
+		assertEquals(result, str);
 
-			str = daoManager.preParse("#auto[and;6,-2]", query);
-			result = "col_5 = ? and col_6 = ? and col_7 = ? and col_8 = ?";
-			assertEquals(result, str);
+		str = daoManager.preParse("#auto[and;6,-2]", query);
+		result = "col_5 = ? and col_6 = ? and col_7 = ? and col_8 = ?";
+		assertEquals(result, str);
 
-			str = daoManager.preParse("#auto[insertN;1,3] ###auto[insertV;1,-1]", query);
-			result = "col_0, col_1, col_2 ##?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
-			assertEquals(result, str);
+		str = daoManager.preParse("#auto[insertN;1,3] ###auto[insertV;1,-1]", query);
+		result = "col_0, col_1, col_2 ##?, ?, ?, ?, ?, ?, ?, ?, ?, ?";
+		assertEquals(result, str);
 
-			str = daoManager.preParse("#auto[or;i-name_2,i+name_3] ###auto[and;i=name_5,i+name_5]", query);
-			result = "col_1 = ? or col_2 = ? or col_3 = ? or col_4 = ? ##col_5 = ? and col_6 = ?";
-			assertEquals(result, str);
-		}
-		catch (EternaException ex)
-		{
-			fail("执行时不应抛出异常");
-		}
+		str = daoManager.preParse("#auto[or;i-name_2,i+name_3] ###auto[and;i=name_5,i+name_5]", query);
+		result = "col_1 = ? or col_2 = ? or col_3 = ? or col_4 = ? ##col_5 = ? and col_6 = ?";
+		assertEquals(result, str);
 	}
 
 	public void testFrontParse2()
@@ -119,15 +112,18 @@ public class DaoManagerTest extends TestCase
 	public void testFrontParse3()
 	{
 		List list = query.getReaderManager().getReaderList();
-		assertEquals(6, list.size());
+		assertEquals(7, list.size());
 		assertEquals("a", ((ResultReader) list.get(0)).getName());
 		assertEquals("b", ((ResultReader) list.get(1)).getName());
 		assertEquals("y", ((ResultReader) list.get(2)).getName());
 		assertEquals("c", ((ResultReader) list.get(3)).getName());
 		assertEquals("z", ((ResultReader) list.get(4)).getName());
-		assertEquals("x", ((ResultReader) list.get(5)).getName());
+		assertEquals("d", ((ResultReader) list.get(5)).getName());
+		assertEquals("x", ((ResultReader) list.get(6)).getName());
+
+		assertEquals("b", query.getReaderManager().getReader("d").getAlias());
 		String str = daoManager.preParse("select #auto[select]", query);
-		String result = "select a as \"a\", b as \"b\", c as \"c\", b as \"b\"";
+		String result = "select a as \"a\", b as \"b\", c as \"c\"";
 		assertEquals(result, str);
 	}
 
@@ -173,10 +169,17 @@ public class DaoManagerTest extends TestCase
 		r.addReader(reader);
 		reader = (ObjectReader) ReaderFactory.createReader("String", "b");
 		r.addReader(reader);
-		r.addReader(new ReaderWrapper(reader, "y", true));
+		r.addReader(new ReaderWrapper(reader, "y"));
 		r.addReader(ReaderFactory.createReader("String", "c"));
-		r.addReader(new ReaderWrapper(reader, "z", false));
-		r.initialize((EternaFactory) ContainerManager.getGlobalContainer().getFactory());
+		reader = (ObjectReader) ReaderFactory.createReader("String", "z");
+		reader.setColumnIndex(1);
+		r.addReader(reader);
+		reader = (ObjectReader) ReaderFactory.createReader("String", "d");
+		reader.setColumnName("b");
+		r.addReader(reader);
+		EternaFactory f = (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
+		f.setAttribute(ResultReaderManager.CHECK_SAME_COL, "1");
+		r.initialize(f);
 		return r;
 	}
 

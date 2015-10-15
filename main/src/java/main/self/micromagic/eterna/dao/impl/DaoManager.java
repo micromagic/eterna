@@ -19,7 +19,6 @@ package self.micromagic.eterna.dao.impl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +28,7 @@ import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReader;
-import self.micromagic.eterna.dao.reader.ReaderWrapper;
+import self.micromagic.eterna.dao.reader.InvalidReader;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
@@ -70,6 +69,13 @@ public class DaoManager
 
 	public static final char TEMPLATE_BEGIN = '[';
 	public static final char TEMPLATE_END = ']';
+
+	// 动态生成时, 不需要名称的标志
+	private static final int AUTO_NAME_NONE = 0;
+	// 动态生成时, 需要名称的标志
+	private static final int AUTO_NAME_NEED = 1;
+	// 动态生成时, 需要名称但不需要表名的标志
+	private static final int AUTO_NAME_SKIPTABLE = 2;
 
 	protected static final Log log = Tool.log;
 
@@ -273,112 +279,106 @@ public class DaoManager
 						}
 					}
 				}
-				int paramCount = 0;
+				int itemCount = 0;
 				try
 				{
 					BooleanRef dynamic = new BooleanRef();
 					String type = this.getAutoType(optParam, dynamic);
-					if (AUTO_TYPE_SELECT.equals(type))
+					boolean isSelect = AUTO_TYPE_SELECT.equals(type);
+					int begin, end;
+					if (isSelect)
 					{
-						if (!(dao instanceof Query))
-						{
-							String msg = "The " + dao.getType() +" [" + dao.getName()
-									+ "] isn't a Query, can't use #auto[" + AUTO_TYPE_SELECT + "...].";
-							throw new EternaException(msg);
-						}
-						if (readerArray == null)
-						{
-							// 生成reader列表
-							List tmp = ((Query) dao).getReaderManager().getReaderList();
-							LinkedList backList = null;
-							int readerCount = paramCount = tmp.size();
-							Iterator itr = tmp.iterator();
-							for (int i = 0; i < readerCount; i++)
-							{
-								Object obj = itr.next();
-								if (obj instanceof ReaderWrapper && ((ReaderWrapper) obj).isHidden())
-								{
-									// 需要去除外敷的需要隐藏的Reader
-									if (backList == null)
-									{
-										backList = new LinkedList(tmp);
-										itr = backList.listIterator(i);
-										itr.next();
-										tmp = backList;
-									}
-									itr.remove();
-									paramCount--;
-								}
-							}
-							readerArray = new ResultReader[paramCount];
-							tmp.toArray(readerArray);
-						}
-						int begin = this.getAutoParamIndex(beginParam, null, readerArray) - 1;
-						int end = this.getAutoParamIndex(endParam, null, readerArray);
-						if (begin > end || begin < 0)
-						{
-							throw new EternaException("Error #auto range [" + autoConfig + "].");
-						}
 						if (dynamic.value)
 						{
 							String msg = "Can't use dynamic in #auto[" + AUTO_TYPE_SELECT
 									+ "...], config [" + autoConfig + "]";
 							throw new EternaException(msg);
 						}
-						boolean first = true;
-						for (int i = begin; i < end; i++)
+						if (readerArray == null)
 						{
-							if (!first)
+							if (!(dao instanceof Query))
 							{
-								buf.append(", ");
+								String msg = "The " + dao.getType() +" [" + dao.getName()
+										+ "] isn't a Query, can't use #auto[" + AUTO_TYPE_SELECT + "...].";
+								throw new EternaException(msg);
 							}
-							first = false;
-							buf.append(readerArray[i].getColumnName()).append(" as ")
-									.append(this.nameQuote).append(readerArray[i].getAlias())
-									.append(this.nameQuote);
+							// 生成reader列表
+							readerArray = this.makeReaderArray((Query) dao);
+							itemCount = readerArray.length;
 						}
+						begin = this.getAutoParamIndex(beginParam, null, readerArray) - 1;
+						end = this.getAutoParamIndex(endParam, null, readerArray);
 					}
 					else
 					{
 						if (paramArray == null)
 						{
-							// 生成parameter列表
-							List tmp = new ArrayList();
+							// 生成parameter列表, 这里不能用getParameterCount, 因为DaoManager还没初始化
 							Iterator itr = dao.getParameterIterator();
+							List tmp = new ArrayList();
 							while (itr.hasNext())
 							{
 								tmp.add(itr.next());
+								itemCount++;
 							}
-							paramCount = tmp.size();
-							paramArray = new Parameter[paramCount];
+							paramArray = new Parameter[itemCount];
 							tmp.toArray(paramArray);
 						}
-						int begin = this.getAutoParamIndex(beginParam, paramArray, null) - 1;
-						int end = this.getAutoParamIndex(endParam, paramArray, null);
+						begin = this.getAutoParamIndex(beginParam, paramArray, null) - 1;
+						end = this.getAutoParamIndex(endParam, paramArray, null);
+					}
+					if (begin > end || begin < 0)
+					{
+						throw new EternaException("Error #auto range [" + autoConfig + "].");
+					}
+
+					if (isSelect)
+					{
+						boolean first = true;
+						for (int i = begin; i < end; i++)
+						{
+							if (!(readerArray[i] instanceof InvalidReader))
+							{
+								if (!first)
+								{
+									buf.append(", ");
+								}
+								else
+								{
+									first = false;
+								}
+								buf.append(readerArray[i].getColumnName()).append(" as ")
+										.append(this.nameQuote).append(readerArray[i].getAlias())
+										.append(this.nameQuote);
+							}
+						}
+					}
+					else
+					{
 						if (AUTO_TYPE_UPDATE.equals(type))
 						{
-							this.dealAuto(" = ?", ", ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value, true);
+							this.dealAuto(" = ?", ", ", buf, paramArray, begin, end,
+									AUTO_NAME_SKIPTABLE, dynamic.value);
 						}
 						else if (AUTO_TYPE_INSERT_N.equals(type))
 						{
-							this.dealAuto("", ", ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value, true);
+							this.dealAuto("", ", ", buf, paramArray, begin, end,
+									AUTO_NAME_SKIPTABLE, dynamic.value);
 						}
 						else if (AUTO_TYPE_INSERT_V.equals(type))
 						{
-							this.dealAuto("?", ", ", autoConfig, buf, paramArray, begin, end,
-									false, dynamic.value, false);
+							this.dealAuto("?", ", ", buf, paramArray, begin, end,
+									AUTO_NAME_NONE, dynamic.value);
 						}
 						else if (AUTO_TYPE_OR.equals(type))
 						{
-							this.dealAuto(" = ?", " or ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value, false);
+							this.dealAuto(" = ?", " or ", buf, paramArray, begin, end,
+									AUTO_NAME_NEED, dynamic.value);
 						}
 						else if (AUTO_TYPE_AND.equals(type))
 						{
-							this.dealAuto(" = ?", " and ", autoConfig, buf, paramArray, begin, end,
-									true, dynamic.value, false);
+							this.dealAuto(" = ?", " and ", buf, paramArray, begin, end,
+									AUTO_NAME_NEED, dynamic.value);
 						}
 						else
 						{
@@ -388,12 +388,14 @@ public class DaoManager
 				}
 				catch (Exception ex)
 				{
+					String msg = "Error #auto config [" + autoConfig
+							+ "], item count:" + itemCount + ".";
 					if (ex instanceof EternaException)
 					{
+						log.error(msg);
 						throw (EternaException) ex;
 					}
-					throw new EternaException("Error #auto config [" + autoConfig
-							+ "], parameter count:" + paramCount + ".", ex);
+					throw new EternaException(msg, ex);
 				}
 				dealedSql = dealedSql.substring(endI + 1);
 			}
@@ -406,6 +408,37 @@ public class DaoManager
 		}
 		buf.append(dealedSql);
 		return new String(buf.toString());
+	}
+
+	private ResultReader[] makeReaderArray(Query query)
+	{
+		List tmp = query.getReaderManager().getReaderList();
+		int itemCount = tmp.size();
+		ResultReader[] readerArray = new ResultReader[itemCount];
+		Iterator itr = tmp.iterator();
+		Map aliasSet = new HashMap();
+		for (int i = 0; i < itemCount; i++)
+		{
+			ResultReader reader = (ResultReader) itr.next();
+			if (reader.isUseColumnIndex())
+			{
+				readerArray[i] = new InvalidReader(reader.getName());
+			}
+			else
+			{
+				String upName = reader.getAlias().toUpperCase();
+				if (aliasSet.containsKey(upName))
+				{
+					readerArray[i] = new InvalidReader(reader.getName());
+				}
+				else
+				{
+					aliasSet.put(upName, Boolean.TRUE);
+					readerArray[i] = reader;
+				}
+			}
+		}
+		return readerArray;
 	}
 
 	/**
@@ -491,29 +524,28 @@ public class DaoManager
 		}
 	}
 
-	private void dealAuto(String plus, String separator, String template, StringAppender buf,
-			Parameter[] paramArray, int begin, int end, boolean needName, boolean dynamicAuto, boolean skipTable)
+	/**
+	 * 处理非select的动态语句.
+	 */
+	private void dealAuto(String plus, String separator, StringAppender buf,
+			Parameter[] paramArray, int begin, int end, int nameType, boolean dynamic)
 			throws EternaException
 	{
-		if (begin > end || begin < 0)
-		{
-			throw new EternaException("Error #auto range [" + template + "].");
-		}
 		boolean first = true;
 		for (int i = begin; i < end; i++)
 		{
-			if (dynamicAuto)
+			if (dynamic)
 			{
 				buf.append("#param(dAuto_").append(i).append(")[");
 			}
-			if (!first || dynamicAuto)
+			if (!first || dynamic)
 			{
 				buf.append(separator);
 			}
 			first = false;
-			if (needName)
+			if (nameType > AUTO_NAME_NONE)
 			{
-				if (skipTable)
+				if (nameType == AUTO_NAME_SKIPTABLE)
 				{
 					String cName = paramArray[i].getColumnName();
 					int tmpI = cName.indexOf('.');
@@ -525,7 +557,7 @@ public class DaoManager
 				}
 			}
 			buf.append(plus);
-			if (dynamicAuto)
+			if (dynamic)
 			{
 				buf.append(']');
 			}
