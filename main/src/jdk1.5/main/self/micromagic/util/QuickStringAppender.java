@@ -290,7 +290,7 @@ class QuickStringAppender
 		}
 		catch (Throwable ex)
 		{
-			ex.printStackTrace();
+			System.err.println("Error in get string constructor: [" + ex + "].");
 		}
 	}
 
