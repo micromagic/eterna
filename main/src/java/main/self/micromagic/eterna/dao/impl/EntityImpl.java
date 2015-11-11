@@ -75,7 +75,7 @@ public class EntityImpl extends AbstractGenerator
 		}
 		if (this.orderConfig != null)
 		{
-			tmp = OrderManager.doOrder(tmp, this.orderConfig, new ItemNameHandler());
+			tmp = OrderManager.doOrder(tmp, this.orderConfig, new ItemNameHandler(this.getName()));
 			// 重新排序后要重设名称和索引的对应关系
 			this.nameCache.clear();
 			count = tmp.size();
@@ -242,6 +242,7 @@ public class EntityImpl extends AbstractGenerator
 				}
 				if (newName.equals(oldName))
 				{
+					// 如果新的名称和当前名称相同, 则将新名称设为null
 					newName = null;
 				}
 			}
@@ -398,6 +399,17 @@ class EntityContainer
 class ItemNameHandler
 		implements OrderManager.NameHandler
 {
+	public ItemNameHandler(String name)
+	{
+		this.containerName = name;
+	}
+
+	public String getContainerName()
+	{
+		return this.containerName;
+	}
+	private final String containerName;
+
 	public String getName(Object obj)
 	{
 		return ((EntityItem) obj).getName();

@@ -133,8 +133,9 @@ public class OrderManager
 
 		List result = new ArrayList(list.size());
 		// 将分组完的对象重新排列
+		int groupSize = objGroup.size();
 		itr = objGroup.iterator();
-		while (itr.hasNext())
+		for (int i = 0; i < groupSize; i++)
 		{
 			List objList = (List) itr.next();
 			Iterator objItr = objList.iterator();
@@ -146,11 +147,23 @@ public class OrderManager
 					ObjContainer oc = (ObjContainer) tObj;
 					if (oc.obj == null)
 					{
-						String msg = "The name [" + oc.name + "] not found, config["
+						String msg = "The item name [" + oc.name + "] not found in object ["
+								+ nameHandler.getContainerName() + "]'s order config ["
 								+ orderConfig + "].";
-						throw new EternaException(msg);
+						if (i == 0 || i == groupSize - 1)
+						{
+							Tool.log.error(msg);
+						}
+						else
+						{
+							// 如果中间分组有不存在的名称需要抛出异常
+							throw new EternaException(msg);
+						}
 					}
-					result.add(oc.obj);
+					else
+					{
+						result.add(oc.obj);
+					}
 				}
 				else
 				{
@@ -175,15 +188,11 @@ public class OrderManager
 			String str = token.nextToken();
 			if (";".equals(str))
 			{
-				if (groupCount > 1)
+				if (groupCount > 1 && currentObjs.size() < 2)
 				{
-					if (currentObjs.size() < 2)
-					{
-						String msg = "Error name count [" + currentObjs.size()
-								+ "] in midle group(" + groupCount + "), at least 2. config ["
-								+ orderConfig + "].";
-						throw new EternaException(msg);
-					}
+					String msg = "Error item count [" + currentObjs.size() + "] in midle group("
+							+ groupCount + "), at least 2, order config [" + orderConfig + "].";
+					throw new EternaException(msg);
 				}
 				// 需要创建一个新的分组
 				currentObjs = new ArrayList();
@@ -197,7 +206,7 @@ public class OrderManager
 						currentObjs.size() == 0 ? currentObjs : null);
 				if (nameCache.containsKey(oc.name))
 				{
-					String msg = "Duplicate name [" + oc.name + "] in config ["
+					String msg = "Duplicate item name [" + oc.name + "] in order config ["
 							+ orderConfig + "].";
 					throw new EternaException(msg);
 				}
@@ -418,6 +427,8 @@ public class OrderManager
 	public interface NameHandler
 	{
 		String getName(Object obj);
+
+		String getContainerName();
 
 	}
 

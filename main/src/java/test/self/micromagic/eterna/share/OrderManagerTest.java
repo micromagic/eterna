@@ -76,6 +76,11 @@ public class OrderManagerTest extends TestCase
 class StrHandler
 		implements OrderManager.NameHandler
 {
+	public String getContainerName()
+	{
+		return "test";
+	}
+
 	public String getName(Object obj)
 	{
 		return (String) obj;

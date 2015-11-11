@@ -49,7 +49,7 @@ public interface Search
 	/**
 	 * 在item的arrtibute中设置条件构造列表的名称.
 	 */
-	String BUILDER_LIST_FLAG = "defaultBuilder";
+	String BUILDER_LIST_FLAG = "builderList";
 
 	/**
 	 * 在factory或search的属性中设置是否要将query对象及条件对象保存在会话中.

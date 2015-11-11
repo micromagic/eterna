@@ -36,13 +36,23 @@ public class ReaderWrapper
 	 * @param base      需要被外覆的ResultReader对象
 	 * @param newName   外覆后的ResultReader需要使用的新名称
 	 */
-	public ReaderWrapper(ResultReader base, String newName)
+	public ReaderWrapper(ResultReader base, String newName, boolean hidden)
 	{
 		this.base = base;
 		this.name = newName == null ? base.getName() : newName;
+		this.hidden = hidden;
 	}
 	private final ResultReader base;
 	private final String name;
+
+	/**
+	 * 是否不需要在自动生成的列表中出现.
+	 */
+	public boolean isHidden()
+	{
+		return this.hidden;
+	}
+	private final boolean hidden;
 
 	/**
 	 * 设置是否需要有format.

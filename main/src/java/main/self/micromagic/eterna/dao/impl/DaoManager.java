@@ -29,6 +29,7 @@ import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.reader.InvalidReader;
+import self.micromagic.eterna.dao.reader.ReaderWrapper;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
@@ -335,10 +336,18 @@ public class DaoManager
 					if (isSelect)
 					{
 						boolean first = true;
+						Map aliasSet = new HashMap();
 						for (int i = begin; i < end; i++)
 						{
-							if (!(readerArray[i] instanceof InvalidReader))
+							ResultReader reader = readerArray[i] ;
+							if (reader instanceof InvalidReader)
 							{
+								continue;
+							}
+							String upName = reader.getAlias().toUpperCase();
+							if (!aliasSet.containsKey(upName))
+							{
+								aliasSet.put(upName, Boolean.TRUE);
 								if (!first)
 								{
 									buf.append(", ");
@@ -416,27 +425,30 @@ public class DaoManager
 		int itemCount = tmp.size();
 		ResultReader[] readerArray = new ResultReader[itemCount];
 		Iterator itr = tmp.iterator();
-		Map aliasSet = new HashMap();
+		int realCount = 0;
 		for (int i = 0; i < itemCount; i++)
 		{
 			ResultReader reader = (ResultReader) itr.next();
+			if (reader instanceof ReaderWrapper && ((ReaderWrapper) reader).isHidden())
+			{
+				continue;
+			}
+			realCount++;
 			if (reader.isUseColumnIndex())
 			{
+				// 通过索引值定位列的不应该出现在自动生成里
 				readerArray[i] = new InvalidReader(reader.getName());
 			}
 			else
 			{
-				String upName = reader.getAlias().toUpperCase();
-				if (aliasSet.containsKey(upName))
-				{
-					readerArray[i] = new InvalidReader(reader.getName());
-				}
-				else
-				{
-					aliasSet.put(upName, Boolean.TRUE);
-					readerArray[i] = reader;
-				}
+				readerArray[i] = reader;
 			}
+		}
+		if (realCount < readerArray.length)
+		{
+			ResultReader[] tmpArr = new ResultReader[realCount];
+			System.arraycopy(readerArray, 0, tmpArr, 0, realCount);
+			return tmpArr;
 		}
 		return readerArray;
 	}
@@ -1405,7 +1417,7 @@ class CheckPart extends PartSQL
 
 			Map map = StringTool.string2Map(buf.toString(), ";", '=', true, false, null, null);
 			String tmp;
-			if ((tmp = (String) map.get("hasSub")) != null)
+			if ((tmp = (String) map.get("hasSub")) != null || (tmp = (String) map.get("append")) != null)
 			{
 				this.hasSubStr = tmp;
 			}

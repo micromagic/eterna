@@ -20,6 +20,7 @@ import java.sql.SQLException;
 
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.share.AttributeManager;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
@@ -66,7 +67,7 @@ class StringCreater extends AbstractPreparerCreater
 	protected void setAttributes(AttributeManager attributes)
 	{
 		super.setAttributes(attributes);
-		String tStr = (String) attributes.getAttribute(EMPTY_TO_NULL);
+		String tStr = (String) attributes.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
 		if (tStr != null)
 		{
 			this.emptyToNull = BooleanConverter.toBoolean(tStr);

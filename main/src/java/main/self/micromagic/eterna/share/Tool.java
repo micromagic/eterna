@@ -73,6 +73,10 @@ public class Tool
 	 * 在arrtibute中设置是否显示的名称.
 	 */
 	public static final String VISIBLE_FLAG = "visible";
+	/**
+	 * 在arrtibute中设置是否要将空字符串变为null的名称.
+	 */
+	public static final String EMPTY_TO_NULL_FLAG = "emptyToNull";
 
 	/**
 	 * 根据标题翻译列表的配置进行翻译.

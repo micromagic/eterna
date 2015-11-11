@@ -110,6 +110,22 @@ public class SearchImpl extends AbstractGenerator
 		{
 			this.searchManagerName = this.sessionQueryTag;
 		}
+		// 如果不需要将query放入会话中, 将sessionQueryTag设为null.
+		Object tmpObj = factory.getAttribute(SESSION_STORE_FLAG);
+		if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
+		{
+			this.sessionQueryTag = null;
+			this.searchManagerName = null;
+		}
+		else
+		{
+			tmpObj = this.getAttribute(SESSION_STORE_FLAG);
+			if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
+			{
+				this.sessionQueryTag = null;
+				this.searchManagerName = null;
+			}
+		}
 
 		if (this.otherName != null)
 		{
@@ -140,23 +156,7 @@ public class SearchImpl extends AbstractGenerator
 
 		if (this.queryName != null && !NONE_QUERY_NAME.equals(this.queryName))
 		{
-			this.queryId = this.getFactory().findObjectId(this.queryName);
-			// 如果不需要将query放入会话中, 将sessionQueryTag设为null.
-			Object tmpObj = factory.getAttribute(SESSION_STORE_FLAG);
-			if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
-			{
-				this.sessionQueryTag = null;
-				this.searchManagerName = null;
-			}
-			else
-			{
-				tmpObj = this.getAttribute(SESSION_STORE_FLAG);
-				if (tmpObj != null && !BooleanConverter.toBoolean(tmpObj))
-				{
-					this.sessionQueryTag = null;
-					this.searchManagerName = null;
-				}
-			}
+			this.queryId = factory.findObjectId(this.queryName);
 		}
 		else
 		{
@@ -165,7 +165,7 @@ public class SearchImpl extends AbstractGenerator
 		}
 		if (this.countSearchName != null)
 		{
-			this.countSearchId = this.getFactory().findObjectId(this.countSearchName);
+			this.countSearchId = factory.findObjectId(this.countSearchName);
 		}
 
 		List tmpList = new ArrayList();
@@ -194,7 +194,7 @@ public class SearchImpl extends AbstractGenerator
 		if (this.conditionPropertyOrder != null)
 		{
 			tmpList = OrderManager.doOrder(tmpList,
-					this.conditionPropertyOrder, new ConditionNameHandler());
+					this.conditionPropertyOrder, new ConditionNameHandler(this.getName()));
 		}
 		this.conditionProperties = tmpList;
 		this.allConditionProperties = new ConditionProperty[tmpList.size()];
@@ -945,6 +945,17 @@ class ConditionContainer
 class ConditionNameHandler
 		implements OrderManager.NameHandler
 {
+	public ConditionNameHandler(String name)
+	{
+		this.containerName = name;
+	}
+
+	public String getContainerName()
+	{
+		return this.containerName;
+	}
+	private final String containerName;
+
 	public String getName(Object obj)
 	{
 		return ((ConditionProperty) obj).getName();

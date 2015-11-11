@@ -413,6 +413,18 @@ public class ValueContainerMap extends AbstractMap
 			return this.session.getAttributeNames();
 		}
 
+		/**
+		 * 检查session是否有效, 如果session失效了则清空并重新获取.
+		 */
+		public void checkValid()
+		{
+			if (this.session != null && this.request != null
+					&& this.session != this.request.getSession(false))
+			{
+				this.session = null;
+			}
+		}
+
 		private boolean checkSession(boolean create)
 		{
 			if (this.session != null)

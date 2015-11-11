@@ -437,6 +437,7 @@ class ClassPathResource extends AbstractResource
 					URL tmpRes = new URL(tmp);
 					ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
 					this.findResources(result, stream, recursive, tmpRoot);
+					stream.close();
 				}
 				else
 				{
@@ -460,6 +461,7 @@ class ClassPathResource extends AbstractResource
 						URL tmpRes = new URL(tmp);
 						ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
 						this.findResources(result, stream, recursive, tmpRoot);
+						stream.close();
 					}
 				}
 			}

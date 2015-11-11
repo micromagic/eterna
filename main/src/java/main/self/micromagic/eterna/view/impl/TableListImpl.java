@@ -86,7 +86,7 @@ public class TableListImpl extends AbstractTable
 		if (this.columnOrder != null)
 		{
 			this.columns = OrderManager.doOrder(this.columns,
-					this.columnOrder, new ColumnNameHandler());
+					this.columnOrder, new ColumnNameHandler(this.getName()));
 		}
 		if (this.typicalColumn != null)
 		{
@@ -440,6 +440,17 @@ class ColumnContainer
 class ColumnNameHandler
 		implements OrderManager.NameHandler
 {
+	public ColumnNameHandler(String name)
+	{
+		this.containerName = name;
+	}
+
+	public String getContainerName()
+	{
+		return this.containerName;
+	}
+	private final String containerName;
+
 	public String getName(Object obj)
 	{
 		return ((TableList.Column) obj).getName();

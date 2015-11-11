@@ -23,8 +23,10 @@ import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.converter.BooleanConverter;
 
 /**
  * builder的实现类.
@@ -42,6 +44,7 @@ class ConditionBuilderImpl
 	}
 	private final String operator;
 	private final boolean needValue;
+	boolean emptyToNull = true;
 
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
@@ -54,6 +57,15 @@ class ConditionBuilderImpl
 		if (!StringTool.isEmpty(this.prepareName))
 		{
 			this.prepare = factory.getPrepare(this.prepareName);
+		}
+		String tStr = (String) this.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
+		if (tStr == null)
+		{
+			tStr = (String) factory.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
+		}
+		if (tStr != null)
+		{
+			this.emptyToNull = BooleanConverter.toBoolean(tStr);
 		}
 		return false;
 	}
@@ -91,7 +103,7 @@ class ConditionBuilderImpl
 	{
 		if (this.needValue)
 		{
-			if (StringTool.isEmpty(value))
+			if (value == null || (this.emptyToNull && StringTool.isEmpty(value)))
 			{
 				return this.getNullCheckCondition(colName);
 			}
@@ -102,7 +114,7 @@ class ConditionBuilderImpl
 			PreparerCreater pCreater = this.getPreparerCreater();
 			if (LIKE_OPT_TAG.equalsIgnoreCase(this.operator))
 			{
-				String strValue = value == null ? null : value.toString();
+				String strValue = value.toString();
 				if (pCreater != null)
 				{
 					String newStr = BuilderGenerator.dealEscapeString(strValue);

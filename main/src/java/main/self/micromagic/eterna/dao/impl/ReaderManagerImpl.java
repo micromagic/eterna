@@ -149,7 +149,7 @@ public class ReaderManagerImpl
 			if (this.readerOrder != null)
 			{
 				this.readerList = OrderManager.doOrder(this.readerList,
-						this.readerOrder, new ReaderNameHandler());
+						this.readerOrder, new ReaderNameHandler(this.getName()));
 				// 重新排序后要重设名称和索引的对应关系
 				this.nameToIndexMap.clear();
 				itr = this.readerList.iterator();
@@ -202,14 +202,14 @@ public class ReaderManagerImpl
 					}
 					else
 					{
-						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName());
+						ReaderWrapper tmp = new ReaderWrapper(reader, reader.getName(), false);
 						tmp.setNeedFormat(false);
 						this.allReaderList.set(i, tmp);
-						tmp = new ReaderWrapper(reader, showName);
-						tmp.setNeedFormat(true);
+						ReaderWrapper link = new ReaderWrapper(reader, showName, true);
+						link.setNeedFormat(true);
 						this.nameToIndexMap.put(showName,
 								Utility.createInteger(this.allReaderList.size()));
-						this.allReaderList.add(tmp);
+						this.allReaderList.add(link);
 					}
 				}
 				if (this.nonePermission && reader.getPermissionSet() != null)
@@ -816,6 +816,17 @@ class ReaderManagerContainer
 class ReaderNameHandler
 		implements OrderManager.NameHandler
 {
+	public ReaderNameHandler(String name)
+	{
+		this.containerName = name;
+	}
+
+	public String getContainerName()
+	{
+		return this.containerName;
+	}
+	private final String containerName;
+
 	public String getName(Object obj)
 	{
 		return ((ResultReader) obj).getName();

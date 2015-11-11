@@ -301,8 +301,15 @@ public class AppDataLogExecute extends AbstractExecute
 			Element appData = node.addElement("appData");
 			for (int i = 0; i < data.maps.length; i++)
 			{
-				Element mapNode = appData.addElement(AppData.MAP_NAMES[i]);
-				this.printObject(mapNode, data.maps[i]);
+				try
+				{
+					Element mapNode = appData.addElement(AppData.MAP_NAMES[i]);
+					this.printObject(mapNode, data.maps[i]);
+				}
+				catch (Exception ex)
+				{
+					log.error("Error in print app data map(" + i + ").", ex);
+				}
 			}
 			Element tmpNode = appData.addElement("cache");
 			this.printObject(tmpNode, data.caches);

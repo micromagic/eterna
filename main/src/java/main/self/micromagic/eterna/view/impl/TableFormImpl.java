@@ -89,7 +89,7 @@ public class TableFormImpl extends AbstractTable
 		if (this.cellOrder != null)
 		{
 			this.cells = OrderManager.doOrder(this.cells,
-					this.cellOrder, new CellNameHandler());
+					this.cellOrder, new CellNameHandler(this.getName()));
 		}
 		if (this.typicalCell != null)
 		{
@@ -530,6 +530,17 @@ class CellContainer
 class CellNameHandler
 		implements OrderManager.NameHandler
 {
+	public CellNameHandler(String name)
+	{
+		this.containerName = name;
+	}
+
+	public String getContainerName()
+	{
+		return this.containerName;
+	}
+	private final String containerName;
+
 	public String getName(Object obj)
 	{
 		return ((TableForm.Cell) obj).getName();

@@ -104,7 +104,6 @@ public class DaoManagerTest extends TestCase
 		}
 		catch (EternaException ex)
 		{
-			ex.printStackTrace();
 			fail("执行时不应抛出异常");
 		}
 	}
@@ -125,6 +124,31 @@ public class DaoManagerTest extends TestCase
 		String str = daoManager.preParse("select #auto[select]", query);
 		String result = "select a as \"a\", b as \"b\", c as \"c\"";
 		assertEquals(result, str);
+
+		str = daoManager.preParse("select #auto[select;1,-2]", query);
+		assertEquals(result, str);
+		str = daoManager.preParse("select #auto[select;1,6]", query);
+		assertEquals(result, str);
+		str = daoManager.preParse("select #auto[select;1,4]", query);
+		assertEquals(result, str);
+		str = daoManager.preParse("select #auto[select;1,2]", query);
+		result = "select a as \"a\", b as \"b\"";
+		assertEquals(result, str);
+		str = daoManager.preParse("select #auto[select;1,3]", query);
+		assertEquals(result, str);
+		str = daoManager.preParse("select #auto[select;2,4]", query);
+		result = "select b as \"b\", c as \"c\"";
+		assertEquals(result, str);
+		str = daoManager.preParse("select #auto[select;4]", query);
+		result = "select c as \"c\", b as \"b\"";
+		assertEquals(result, str);
+
+		try
+		{
+			str = daoManager.preParse("select #auto[select;1,7]", query);
+			fail();
+		}
+		catch (Exception ex) {}
 	}
 
 	public void testFrontParse_error()
@@ -169,7 +193,7 @@ public class DaoManagerTest extends TestCase
 		r.addReader(reader);
 		reader = (ObjectReader) ReaderFactory.createReader("String", "b");
 		r.addReader(reader);
-		r.addReader(new ReaderWrapper(reader, "y"));
+		r.addReader(new ReaderWrapper(reader, "y", false));
 		r.addReader(ReaderFactory.createReader("String", "c"));
 		reader = (ObjectReader) ReaderFactory.createReader("String", "z");
 		reader.setColumnIndex(1);

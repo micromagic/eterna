@@ -26,11 +26,6 @@ import self.micromagic.eterna.share.EternaObject;
 public interface PreparerCreater extends EternaObject
 {
 	/**
-	 * 在属性中设置, 是否要将空字符串变为null, 默认值为true.
-	 */
-	public static final String EMPTY_TO_NULL = "emptyToNull";
-
-	/**
 	 * 获取生成值准备器创建者的工厂.
 	 */
 	EternaFactory getFactory() throws EternaException;

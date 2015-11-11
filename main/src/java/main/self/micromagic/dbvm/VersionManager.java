@@ -55,6 +55,20 @@ public class VersionManager
 	 */
 	public static boolean checkVersion(Connection conn, String packagePath, ClassLoader loader)
 	{
+		return instance.doCheck(conn, packagePath, loader);
+	}
+	private static VersionManager instance = new VersionManager();
+
+	/**
+	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
+	 *
+	 * @param conn         数据库连接, 注: 执行完毕后此连接会被关闭
+	 * @param packagePath  版本信息所在的包路径
+	 * @param loader       版本信息所属的classloader
+	 */
+	public boolean doCheck(Connection conn, String packagePath, ClassLoader loader)
+	{
+
 		if (loader == null)
 		{
 			loader = Thread.currentThread().getContextClassLoader();
@@ -71,7 +85,7 @@ public class VersionManager
 			DataBaseLock.lock(conn, VERSION_LOCK_NAME, null, true);
 			synchronized (VersionManager.class)
 			{
-				result = checkVersion0(conn, packagePath, loader);
+				result = this.checkVersion0(conn, packagePath, loader);
 			}
 			success = true;
 		}
@@ -98,11 +112,13 @@ public class VersionManager
 		}
 		return result;
 	}
-	private static boolean checkVersion0(Connection conn, String packagePath, ClassLoader loader)
+
+	private boolean checkVersion0(Connection conn, String packagePath, ClassLoader loader)
 			throws Exception
 	{
 		ConfigResource res = ContainerManager.createClassPathResource(packagePath, loader);
-		String vName = isFullPackageName() ? res.getConfig() : res.getName();
+		String vName = StringTool.isEmpty(this.versionNamePrefix) ? res.getName()
+				: this.versionNamePrefix.concat(res.getName());
 		String dbName = conn.getMetaData().getDatabaseProductName();
 		EternaFactory f = DataBaseLock.getFactory(dbName);
 		int version = getVersionValue(conn, vName, f);
@@ -312,21 +328,21 @@ public class VersionManager
 	}
 
 	/**
-	 * 是否使用全的包路径作为版本名称.
+	 * 获取版本名称的前缀.
 	 */
-	public static boolean isFullPackageName()
+	public String getVersionNamePrefix()
 	{
-		return fullPackageName;
+		return this.versionNamePrefix;
 	}
 
 	/**
-	 * 设置是否使用全的包路径作为版本名称.
+	 * 设置版本名称的前缀.
 	 */
-	public static void setFullPackageName(boolean full)
+	public void setVersionNamePrefix(String prefix)
 	{
-		fullPackageName = full;
+		this.versionNamePrefix = prefix;
 	}
-	private static boolean fullPackageName;
+	private String versionNamePrefix;
 
 	/**
 	 * 用于数据库版本升级的锁.
