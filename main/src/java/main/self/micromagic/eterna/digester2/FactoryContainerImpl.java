@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
 
 import org.dom4j.DocumentException;
 
-import self.micromagic.eterna.share.AttributeManager;
+import self.micromagic.eterna.share.AbstractFactoryContainer;
 import self.micromagic.eterna.share.ConfigInclude;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Factory;
@@ -43,7 +43,7 @@ import self.micromagic.util.ref.StringRef;
 /**
  * 工厂容器的实现类.
  */
-public class FactoryContainerImpl
+public class FactoryContainerImpl extends AbstractFactoryContainer
 		implements FactoryContainer
 {
 	/**
@@ -78,11 +78,6 @@ public class FactoryContainerImpl
 	}
 	private String config;
 	private String[] parents;
-
-	public void reInit()
-	{
-		this.reInit(null);
-	}
 
 	public synchronized void reInit(StringRef msg)
 	{
@@ -124,7 +119,7 @@ public class FactoryContainerImpl
 				catch (Throwable err) {}
 				this.factory = null;
 			}
-			Digester.log.error("Error in initialize [" + this.id + "].", ex);
+			Digester.log.error("Error in initialize [" + this.getId() + "].", ex);
 			String tmpMsg = ParseException.getMessage(ex);
 			this.initErrMsg = tmpMsg;
 			if (msg != null)
@@ -335,45 +330,6 @@ public class FactoryContainerImpl
 	}
 	protected FactoryContainer shareContainer;
 
-	/**
-	 * 批量设置属性.
-	 */
-	public boolean setAttrs(Map attrs)
-	{
-		if (attrs != null)
-		{
-			boolean hasClassLoader = false;
-			int count = attrs.size();
-			Iterator itr = attrs.entrySet().iterator();
-			for (int i = 0; i < count; i++)
-			{
-				Map.Entry e = (Map.Entry) itr.next();
-				String name = (String) e.getKey();
-				if (!hasClassLoader && CLASSLOADER_FLAG.equals(name))
-				{
-					hasClassLoader = true;
-				}
-				this.setAttribute(name, e.getValue());
-			}
-			return hasClassLoader;
-		}
-		return false;
-	}
-
-	public void setAttribute(String name, Object attr)
-	{
-		this.attrs.setAttribute(name, attr);
-	}
-	public void removeAttribute(String name)
-	{
-		this.attrs.removeAttribute(name);
-	}
-	public Object getAttribute(String name)
-	{
-		return this.attrs.getAttribute(name);
-	}
-	protected AttributeManager attrs = new AttributeManager();
-
 	private void fireListener()
 	{
 		int count = this.listeners.size();
@@ -439,7 +395,7 @@ public class FactoryContainerImpl
 				if (!this.initialized)
 				{
 					// 同步状态下再次检查是否已初始化
-					String msg = "The factory container [" + this.id
+					String msg = "The factory container [" + this.getId()
 							+ "] hasn't initialized.";
 					if (!StringTool.isEmpty(this.initErrMsg))
 					{
@@ -483,7 +439,7 @@ public class FactoryContainerImpl
 						this.reInit(msg);
 						if (Digester.log.isInfoEnabled())
 						{
-							Digester.log.info("Auto reload [" + this.id + "] at time:"
+							Digester.log.info("Auto reload [" + this.getId() + "] at time:"
 									+ FormatTool.getCurrentDatetimeString()
 									+ ". with message:" + msg.toString());
 						}

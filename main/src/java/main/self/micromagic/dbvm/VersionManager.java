@@ -68,7 +68,6 @@ public class VersionManager
 	 */
 	public boolean doCheck(Connection conn, String packagePath, ClassLoader loader)
 	{
-
 		if (loader == null)
 		{
 			loader = Thread.currentThread().getContextClassLoader();
