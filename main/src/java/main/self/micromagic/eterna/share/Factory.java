@@ -87,6 +87,12 @@ public interface Factory
 	Object getAttribute(String name) throws EternaException;
 
 	/**
+	 * 判断工厂中是否拥有某个属性.
+	 * 只判断本工厂的, 不包括共享工厂中的属性.
+	 */
+	boolean hasAttribute(String name) throws EternaException;
+
+	/**
 	 * 获取工厂中的属性名称列表.
 	 * 如果没有任何属性则返回一个空的数组.
 	 */

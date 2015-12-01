@@ -529,9 +529,9 @@ public abstract class AbstractQuery extends BaseDao
 		{
 			String colName = meta.getColumnLabel(i + 1).toUpperCase();  // 这个取到的是别名
 			int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
-			if (readerMap.containsKey(colName))
+			if (!needAutoAddColumn(colName) || readerMap.containsKey(colName))
 			{
-				// 如果列的别名已存在, 则直接下一个
+				// 如果列的别名已存在, 或不需要自动添加的列, 则直接下一个
 				continue;
 			}
 			ColumnInfo ci = new ColumnInfo(colName, typeId);
@@ -644,18 +644,22 @@ public abstract class AbstractQuery extends BaseDao
 		{
 			//String colName = meta.getColumnName(i + 1); // 这个在有些数据库取到的是原始列名
 			String colName = meta.getColumnLabel(i + 1);  // 这个取到的是别名
-			String name = colName;
-			if (temp.get(name) != null)
+			if (needAutoAddColumn(colName))
 			{
-				// 当存在重复的列名时, 后面的列加上索引号
-				name = colName + "+" + (i + 1);
+				String name = colName;
+				if (temp.get(name) != null)
+				{
+					// 当存在重复的列名时, 后面的列加上索引号
+					name = colName + "+" + (i + 1);
+				}
+				temp.put(name, colName);
+				int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
+				String typeName = TypeManager.getTypeName(typeId);
+				ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, name);
+				reader.setColumnIndex(i + 1);
+				rm.addReader(reader);
 			}
-			temp.put(name, colName);
-			int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
-			String typeName = TypeManager.getTypeName(typeId);
-			ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, name);
-			reader.setColumnIndex(i + 1);
-			rm.addReader(reader);
+
 		}
 		rm.initialize(this.getFactory());
 		rm.lock();
@@ -668,6 +672,14 @@ public abstract class AbstractQuery extends BaseDao
 			}
 		}
 		return rm;
+	}
+
+	/**
+	 * 是否为需要自动添加的列名.
+	 */
+	private static boolean needAutoAddColumn(String colName)
+	{
+		return !QueryHelper.ORACLE_ROW_NUM.equalsIgnoreCase(colName);
 	}
 
 	public void execute(Connection conn)

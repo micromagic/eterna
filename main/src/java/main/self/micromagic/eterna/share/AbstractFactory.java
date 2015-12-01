@@ -116,7 +116,7 @@ public abstract class AbstractFactory
 	/**
 	 * 判断工厂中是否拥有某个属性.
 	 */
-	protected boolean hasAttribute(String name)
+	public boolean hasAttribute(String name)
 			throws EternaException
 	{
 		return this.attributes.hasAttribute(name);

@@ -46,9 +46,14 @@ public class QueryHelper
 	public static final String DB_NAME_ORACLE = "Oracle";
 
 	/**
-	 * 其他普通数据库名称
+	 * 其他普通数据库名称.
 	 */
 	public static final String DB_NAME_COMMON = "Common";
+
+	/**
+	 * oracle行号的别名.
+	 */
+	public static final String ORACLE_ROW_NUM = "eterna_oracle_rowNum";
 
 	/**
 	 * 获取一个查询辅助工具的实例.
@@ -554,8 +559,9 @@ class OracleQueryHelper extends SpecialQueryHelper
 		{
 			String condition1 = this.nowMaxRows == -1 ? ""
 					: " where rownum <= " + (this.nowMaxRows + this.nowStartRow);
-			String condition2 = " where theOracleRuwNum >= " + this.nowStartRow;
-			String part1 = "select * from (select tmpTable1.*, rownum as theOracleRuwNum from (";
+			String condition2 = " where " + ORACLE_ROW_NUM + " >= " + this.nowStartRow;
+			String part1 = "select * from (select tmpTable1.*, rownum as "
+					+ ORACLE_ROW_NUM + " from (";
 			String part2 = ") tmpTable1" + condition1 + ") tmpTable2" + condition2;
 			StringAppender buf = StringTool.createStringAppender(
 					part1.length() + part2.length() + preparedSQL.length());

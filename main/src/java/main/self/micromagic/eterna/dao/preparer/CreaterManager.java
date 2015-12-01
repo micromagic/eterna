@@ -26,9 +26,9 @@ import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.Factory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.ref.ObjectRef;
 
 /**
  * prepare对象创建者的构造器和管理类.
@@ -113,7 +113,9 @@ public class CreaterManager extends AbstractGenerator
 	static NullCreater createNullCreater(EternaFactory factory)
 			throws EternaException
 	{
-		Map createrCache = getCreaterCache(factory);
+		ObjectRef realFactory = new ObjectRef();
+		Map createrCache = getCreaterCache(factory, realFactory);
+		factory = (EternaFactory) realFactory.getObject();
 		String name = "null";
 		NullCreater creater = (NullCreater) createrCache.get(name);
 		if (creater != null)
@@ -136,7 +138,9 @@ public class CreaterManager extends AbstractGenerator
 			EternaFactory factory)
 			throws EternaException
 	{
-		Map createrCache = getCreaterCache(factory);
+		ObjectRef realFactory = new ObjectRef();
+		Map createrCache = getCreaterCache(factory, realFactory);
+		factory = (EternaFactory) realFactory.getObject();
 		String name = type;
 		if (pattern != null)
 		{
@@ -163,13 +167,24 @@ public class CreaterManager extends AbstractGenerator
 	/**
 	 * 从工厂属性中获取PreparerCreater的缓存.
 	 */
-	private static Map getCreaterCache(Factory factory)
+	private static Map getCreaterCache(EternaFactory factory, ObjectRef realFactory)
 	{
 		Map createrCache = (Map) factory.getAttribute(ATTR_CREATER);
 		if (createrCache == null)
 		{
 			createrCache = new HashMap();
 			factory.setAttribute(ATTR_CREATER, createrCache);
+			realFactory.setObject(factory);
+		}
+		else
+		{
+			// 存在缓存, 需要判断这个缓存是从那个工厂获取的
+			EternaFactory tmpFactory = factory;
+			while (!tmpFactory.hasAttribute(ATTR_CREATER))
+			{
+				tmpFactory = tmpFactory.getShareFactory();
+			}
+			realFactory.setObject(tmpFactory);
 		}
 		return createrCache;
 	}

@@ -318,6 +318,10 @@ public class EternaFactoryImpl extends AbstractFactory
 		for (int i = 0; i < size; i++)
 		{
 			container = (ObjectContainer) this.objectList.get(i);
+			if (container == null)
+			{
+				continue;
+			}
 			String objName = container.getName() + "(" + container.getType().getName() + ")";
 			ParseException.setContextInfo(null, objName, "");
 			container.initialize(this);
@@ -415,8 +419,13 @@ public class EternaFactoryImpl extends AbstractFactory
 		for (int i = 0; i < size; i++)
 		{
 			container = (ObjectContainer) this.objectList.get(i);
-			container.destroy();
+			if (container != null)
+			{
+				container.destroy();
+			}
 		}
+		this.objectList.clear();
+		this.objectMap.clear();
 	}
 
 
