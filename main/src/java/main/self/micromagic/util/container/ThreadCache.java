@@ -41,11 +41,11 @@ public class ThreadCache
 	private static final Map threadCaches = new SynHashMap(32, SynHashMap.WEAK);
 
 
-	private final Map propertys;
+	private final Map properties;
 
 	private ThreadCache()
 	{
-		this.propertys = new HashMap();
+		this.properties = new HashMap();
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class ThreadCache
 	 */
 	public void setProperty(String name, Object property)
 	{
-		this.propertys.put(name, property);
+		this.properties.put(name, property);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class ThreadCache
 	 */
 	public Object getProperty(String name)
 	{
-		return this.propertys.get(name);
+		return this.properties.get(name);
 	}
 
 	/**
@@ -113,7 +113,7 @@ public class ThreadCache
 	 */
 	public void removeProperty(String name)
 	{
-		this.propertys.remove(name);
+		this.properties.remove(name);
 	}
 
 	/**
@@ -121,21 +121,21 @@ public class ThreadCache
 	 */
 	public int size()
 	{
-		return this.propertys.size();
+		return this.properties.size();
 	}
 
 	/**
 	 * 清空当前线程缓存中的属性值.
 	 */
-	public void clearPropertys()
+	public void clearProperties()
 	{
-		this.propertys.clear();
+		this.properties.clear();
 	}
 
 	/**
 	 * 清空所有线程缓存中的属性值.
 	 */
-	public static void clearAllPropertys()
+	public static void clearAllProperties()
 	{
 		threadCaches.clear();
 	}

@@ -154,7 +154,7 @@ public class SessionCache
 	/**
 	 * 清空所有session中的属性值.
 	 */
-	public static void clearAllPropertys()
+	public static void clearAllProperties()
 	{
 		globalVersion++;
 	}

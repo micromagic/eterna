@@ -383,7 +383,7 @@ public class SearchImpl extends AbstractGenerator
 		this.conditionPropertyOrder = order;
 	}
 
-	public void clearConditionPropertys() throws EternaException
+	public void clearConditionProperties() throws EternaException
 	{
 		this.allConditionProperties = null;
 		this.conditionProperties.clear();
@@ -417,20 +417,20 @@ public class SearchImpl extends AbstractGenerator
 	public int getConditionPropertyCount()
 			throws EternaException
 	{
-		return this.getConditionPropertys0().length;
+		return this.getConditionProperties0().length;
 	}
 
 	public ConditionProperty getConditionProperty(int index)
 			throws EternaException
 	{
-		ConditionProperty[] temp = this.getConditionPropertys0();
+		ConditionProperty[] temp = this.getConditionProperties0();
 		return temp[index];
 	}
 
 	public ConditionProperty getConditionProperty(String name)
 			throws EternaException
 	{
-		this.getConditionPropertys0();
+		this.getConditionProperties0();
 		return (ConditionProperty) this.conditionPropertyMap.get(name);
 	}
 
@@ -795,7 +795,7 @@ public class SearchImpl extends AbstractGenerator
 		return manager;
 	}
 
-	private ConditionProperty[] getConditionPropertys0()
+	private ConditionProperty[] getConditionProperties0()
 			throws EternaException
 	{
 		return this.allConditionProperties;

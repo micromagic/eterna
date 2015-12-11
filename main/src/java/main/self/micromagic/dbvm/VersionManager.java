@@ -81,7 +81,7 @@ public class VersionManager
 		try
 		{
 			conn.setAutoCommit(false);
-			DataBaseLock.lock(conn, VERSION_LOCK_NAME, null, true);
+			DataBaseLocker.lock(conn, VERSION_LOCK_NAME, null, true);
 			synchronized (VersionManager.class)
 			{
 				result = this.checkVersion0(conn, packagePath, loader);
@@ -104,7 +104,7 @@ public class VersionManager
 				{
 					conn.rollback();
 				}
-				DataBaseLock.releaseDB(conn, VERSION_LOCK_NAME);
+				DataBaseLocker.releaseDB(conn, VERSION_LOCK_NAME);
 				conn.close();
 			}
 			catch (Exception ex) {}
@@ -119,7 +119,7 @@ public class VersionManager
 		String vName = StringTool.isEmpty(this.versionNamePrefix) ? res.getName()
 				: this.versionNamePrefix.concat(res.getName());
 		String dbName = conn.getMetaData().getDatabaseProductName();
-		EternaFactory f = DataBaseLock.getFactory(dbName);
+		EternaFactory f = DataBaseLocker.getFactory(dbName);
 		int version = getVersionValue(conn, vName, f);
 		if (version == -2)
 		{
@@ -129,7 +129,7 @@ public class VersionManager
 		if (version == -1)
 		{
 			// 版本信息为-1, 表示没有版本表, 需要创建版本表
-			upperVersion(conn, DataBaseLock.CONFIG_PREFIX + "impl/version1.xml",
+			upperVersion(conn, DataBaseLocker.CONFIG_PREFIX + "impl/version1.xml",
 					ETERNA_VERSION_TABLE, 1, VersionManager.class.getClassLoader());
 			version = 0;
 		}
@@ -144,7 +144,7 @@ public class VersionManager
 			// 版本表的版本小于目前系统定义的最大版本, 需要升级
 			ClassLoader tmpLoader = VersionManager.class.getClassLoader();
 			ConfigResource tmp = ContainerManager.createClassPathResource(
-					DataBaseLock.CONFIG_PREFIX + "impl/", tmpLoader);
+					DataBaseLocker.CONFIG_PREFIX + "impl/", tmpLoader);
 			checkVersion0(conn, tVersion + 1, ETERNA_VERSION_TABLE, tmp, tmpLoader);
 		}
 		version++;
@@ -186,7 +186,7 @@ public class VersionManager
 	{
 		log.info("Begin " + vName + " up to " + version + ". --------------------");
 		String dbName = conn.getMetaData().getDatabaseProductName();
-		FactoryContainer share = DataBaseLock.getContainer(dbName);
+		FactoryContainer share = DataBaseLocker.getContainer(dbName);
 		FactoryContainer c = ContainerManager.createFactoryContainer("v" + version,
 				config, null, getDigester(), null, loader, share, false);
 		StringRef msg = new StringRef();
@@ -399,7 +399,7 @@ public class VersionManager
 			Properties rConfig = new Properties();
 			rConfig.load(Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
 			ResManager rm2 = new ResManager();
-			rm2.load(DataBaseLock.class.getResourceAsStream("dbvm_rules.res"));
+			rm2.load(DataBaseLocker.class.getResourceAsStream("dbvm_rules.res"));
 			digester = new Digester(new ResManager[]{rm1, rm2}, rConfig);
 		}
 		catch (Exception ex)

@@ -83,6 +83,7 @@ public class TemplateBuilder extends AbstractGenerator
 
 	private boolean arrayParam;
 	private String subFlag = DEFAULT_SUB_FLAG;
+
 	/**
 	 * 非数字数据的分割符.
 	 */
@@ -112,6 +113,10 @@ public class TemplateBuilder extends AbstractGenerator
 	 * 是否以名称作为生成子句的标准.
 	 */
 	protected boolean nameSub;
+	/**
+	 * 当数据为空时使用的构造器.
+	 */
+	protected ConditionBuilder nullBuilder;
 
 	/**
 	 * 模板中参数的个数.
@@ -303,6 +308,11 @@ public class TemplateBuilder extends AbstractGenerator
 			{
 				this.nameSub = BooleanConverter.toBoolean(tmp);
 			}
+			tmp = (String) this.getAttribute("null_builder");
+			if (!StringTool.isEmpty(tmp))
+			{
+				this.nullBuilder = factory.getConditionBuilder(tmp);
+			}
 		}
 	}
 
@@ -333,6 +343,10 @@ public class TemplateBuilder extends AbstractGenerator
 		if (this.template.length() == 0)
 		{
 			return null;
+		}
+		if (this.nullBuilder != null && StringTool.isEmpty(value))
+		{
+			return this.nullBuilder.buildeCondition(colName, value, cp);
 		}
 
 		ObjectRef valueOut = new ObjectRef();
@@ -368,7 +382,7 @@ public class TemplateBuilder extends AbstractGenerator
 		if (this.hasSub)
 		{
 			Object[] values = (Object[]) valueOut.getObject();
-			if (values == null)
+			if (this.paramCount == -1 || values == null)
 			{
 				preparers = null;
 			}
@@ -514,55 +528,56 @@ class SubFlagTemplate
 		{
 			values = builder.getValues(value, cp);
 		}
-		if (values != null && values.length > 0)
+		if (values == null || values.length == 0)
 		{
-			valueOut.setObject(values);
-			StringAppender sqlPart = StringTool.createStringAppender(
-					values.length * 3 + this.beginStr.length() + this.endStr.length());
-			sqlPart.append(this.beginStr);
-			for (int i = 0; i < values.length; i++)
+			// 如果没有数组, 初始化包含单个空值的数组
+			values = new Object[1];
+		}
+		valueOut.setObject(values);
+		StringAppender sqlPart = StringTool.createStringAppender(
+				values.length * 3 + this.beginStr.length() + this.endStr.length());
+		sqlPart.append(this.beginStr);
+		for (int i = 0; i < values.length; i++)
+		{
+			if (i > 0)
 			{
-				if (i > 0)
+				sqlPart.append(builder.subLink);
+			}
+			if (builder.subIndexs != null && builder.subIndexs.length > 0)
+			{
+				for (int j = 0; j < builder.subCells.length; j++)
 				{
-					sqlPart.append(builder.subLink);
-				}
-				if (builder.subIndexs != null && builder.subIndexs.length > 0)
-				{
-					for (int j = 0; j < builder.subCells.length; j++)
+					if (j > 0)
 					{
-						if (j > 0)
+						if (builder.nameSub)
 						{
-							if (builder.nameSub)
+							int index = builder.subIndexs[j - 1];
+							if (index == 0)
 							{
-								int index = builder.subIndexs[j - 1];
-								if (index == 0)
-								{
-									// 如果是以列名作为子元素循环且名称索引值为0, 使用当前列名
-									sqlPart.append(colNames[i]);
-								}
-								else
-								{
-
-									sqlPart.append(colNames[index]);
-								}
+								// 如果是以列名作为子元素循环且名称索引值为0, 使用当前列名
+								sqlPart.append(colNames[i]);
 							}
 							else
 							{
-								sqlPart.append(colNames[builder.subIndexs[j - 1]]);
+
+								sqlPart.append(colNames[index]);
 							}
 						}
-						sqlPart.append(builder.subCells[j]);
+						else
+						{
+							sqlPart.append(colNames[builder.subIndexs[j - 1]]);
+						}
 					}
-				}
-				else
-				{
-					sqlPart.append(builder.subCells[0]);
+					sqlPart.append(builder.subCells[j]);
 				}
 			}
-			sqlPart.append(this.endStr);
-			return sqlPart.toString();
+			else
+			{
+				sqlPart.append(builder.subCells[0]);
+			}
 		}
-		return null;
+		sqlPart.append(this.endStr);
+		return sqlPart.toString();
 	}
 
 }

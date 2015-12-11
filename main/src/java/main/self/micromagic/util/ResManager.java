@@ -235,6 +235,7 @@ public class ResManager
 				resList.add(line);
 			}
 		}
+		in.close();
 
 		Iterator itr = initMap.entrySet().iterator();
 		while (itr.hasNext())

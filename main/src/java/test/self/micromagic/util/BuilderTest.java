@@ -24,6 +24,7 @@ import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.search.BuildeResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
+import self.micromagic.eterna.search.impl.BuilderGenerator;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
@@ -64,6 +65,36 @@ public class BuilderTest extends TestCase
 				"a,b,c,d,e", "0", new EmptyConditionProperty("a,b,c,d,e"));
 		assertEquals(5, con.preparers.length);
 		assertEquals("(a like ? or b like ? or c like ? or d like ? or e like ?)", con.scriptPart);
+
+		t = new TemplateBuilder();
+		t.setAttribute("template", "($)");
+		t.setAttribute("sub_cell", "[C] IS NULL");
+		t.setAttribute("sub_link", " or ");
+		t.setAttribute("name_sub", "true");
+		t.setAttribute("param_count", "-1");
+		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
+		con = t.buildeCondition(
+				"a,b,c,d,e", "2", new EmptyConditionProperty("a,b,c,d,e"));
+		assertEquals(0, con.preparers.length);
+		assertEquals("(a IS NULL or b IS NULL or c IS NULL or d IS NULL or e IS NULL)", con.scriptPart);
+
+		t = new TemplateBuilder();
+		t.setAttribute("template", "[C1] x ($)");
+		t.setAttribute("sub_cell", "[C0] like ?");
+		t.setAttribute("sub_link", " or ");
+		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
+		con = t.buildeCondition(
+				"a,b", "", new EmptyConditionProperty("a,b"));
+		assertEquals(1, con.preparers.length);
+		assertEquals("b x (a like ?)", con.scriptPart);
+
+		BuilderGenerator bg = new BuilderGenerator();
+		bg.setOperator("IS NULL");
+		PrivateAccessor.set(t, "nullBuilder", bg.create());
+		con = t.buildeCondition(
+				"a", null, new EmptyConditionProperty("a"));
+		assertEquals(0, con.preparers.length);
+		assertEquals("a IS NULL", con.scriptPart);
 	}
 
 	public void testTemplate1()

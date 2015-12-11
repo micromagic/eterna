@@ -14,7 +14,7 @@
 
 p1=test
 p5=change
-_system.default=0
+_need.default=0
 
 
 _child.properties=parent2.txt

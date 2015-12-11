@@ -164,7 +164,7 @@ public class ClassKeyCache
 	/**
 	 * 清空所有的属性值.
 	 */
-	public void clearPropertys()
+	public void clearProperties()
 	{
 		this.caches.clear();
 	}

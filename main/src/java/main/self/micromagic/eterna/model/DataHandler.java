@@ -16,27 +16,35 @@
 
 package self.micromagic.eterna.model;
 
+import java.io.StringReader;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import self.micromagic.cg.BeanTool;
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.grammer.GrammerElement;
-import self.micromagic.grammer.GrammerException;
-import self.micromagic.grammer.GrammerManager;
-import self.micromagic.grammer.ParserData;
-import self.micromagic.grammer.ParserData.GrammerCell;
+import self.micromagic.expression.ExpTool;
+import self.micromagic.expression.Expression;
+import self.micromagic.expression.antlr.ExpLexer;
+import self.micromagic.expression.antlr.ExpParser;
+import self.micromagic.expression.antlr.ExpTokenTypes;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
+import self.micromagic.util.ref.BooleanRef;
 import self.micromagic.util.ref.StringRef;
+import antlr.collections.AST;
 
 /**
  * 数据处理者.
  */
 public class DataHandler
+		implements ExpTokenTypes
 {
 	/**
 	 * 读取数据的配置.
@@ -52,17 +60,13 @@ public class DataHandler
 	/**
 	 * 读取/设置map中数据的名称.
 	 */
-	private String[] subNames;
+	private Object[] subs;
 
 	/**
 	 * 从定义的变量中读取/设置数据.
 	 */
 	private VarCache.VarInfo varInfo;
 
-	/**
-	 * 读取的常量数据的值.
-	 */
-	private String constValue = null;
 
 	private boolean needMapDataName = true;
 	private boolean readOnly = true;
@@ -88,7 +92,7 @@ public class DataHandler
 	{
 		this.config = null;
 		this.mapGetter = null;
-		this.subNames = null;
+		this.subs = null;
 		this.varInfo = null;
 	}
 
@@ -101,23 +105,21 @@ public class DataHandler
 	}
 
 	/**
-	 * 设置处理配置.
+	 * 通过语法分析的节点设置配置.
 	 */
-	public void setConfig(String config)
-			throws EternaException
+	public void setConfig(AST node)
 	{
-		this.clearConfig();
-		this.config = config;
-		List subs = new ArrayList();
-		String mainName = this.parseConfig(config, subs);
-
-		String[] subNames = null;
-		int subCount = subs.size();
-		if (subCount > 0)
+		if (node.getType() != VAR)
 		{
-			subNames = new String[subCount];
-			subs.toArray(subNames);
+			throw new EternaException("The node's type isn't [VAR].");
 		}
+		if (this.config == null)
+		{
+			this.clearConfig();
+			this.config = node.toStringTree();
+		}
+		List subs = new ArrayList();
+		String mainName = this.parseConfig(node, subs);
 
 		Object tObj = mapNameIndex.get(mainName);
 		if (tObj != null)
@@ -126,9 +128,9 @@ public class DataHandler
 		}
 		if (this.mapGetter != null)
 		{
-			if (subNames != null)
+			if (!subs.isEmpty())
 			{
-				this.subNames = subNames;
+				this.subs = subs.toArray(new Object[subs.size()]);
 				return;
 			}
 			if (!this.needMapDataName)
@@ -144,34 +146,41 @@ public class DataHandler
 			this.varInfo = this.getVarCache().getVarInfo(mainName, !this.readOnly, err);
 			if (err.getString() != null)
 			{
-				AppData.log.error("Error " + this.caption + " [" + config + "], msg: "
+				AppData.log.error("Error " + this.caption + " [" + this.config + "], msg: "
 						+ err.getString());
 			}
-			if (subNames != null)
+			if (!subs.isEmpty())
 			{
-				this.subNames = subNames;
+				this.subs = subs.toArray(new Object[subs.size()]);
 			}
 			return;
 		}
-		else if (subNames == null)
-		{
-			// 没有子名称, 默认是对data数据集的操作
-			this.mapGetter = (MapGetter) mapNameIndex.get("data");
-			this.subNames = new String[]{mainName};
-		}
-		if (this.readOnly)
-		{
-			if ("value".equals(mainName))
-			{
-				if (subNames != null && subNames.length == 1)
-				{
-					this.constValue = subNames[0];
-					return;
-				}
-			}
-		}
+		throw new EternaException("Error " + this.caption + " main name [" + mainName + "].");
+	}
 
-		throw new EternaException("Error " + this.caption + " [" + config + "].");
+	/**
+	 * 设置处理配置.
+	 */
+	public void setConfig(String config)
+			throws EternaException
+	{
+		this.clearConfig();
+		this.config = config;
+		ExpLexer lex = new ExpLexer(new StringReader(config));
+		ExpParser parser = new ExpParser(lex);
+		try
+		{
+			parser.identVar();
+		}
+		catch (RuntimeException ex)
+		{
+			throw ex;
+		}
+		catch (Exception ex)
+		{
+			throw new EternaException(ex);
+		}
+		this.setConfig(parser.getAST());
 	}
 
 	private VarCache getVarCache()
@@ -194,26 +203,22 @@ public class DataHandler
 			throws EternaException
 	{
 		Object value = null;
-		if (this.constValue != null)
-		{
-			value = this.constValue;
-		}
-		else if (this.mapGetter != null)
+		if (this.mapGetter != null)
 		{
 			Map tmpMap = this.mapGetter.getMap(data);
-			if (this.subNames != null)
+			if (this.subs != null)
 			{
-				if (this.subNames.length == 1)
+				if (this.subs.length == 1)
 				{
-					value = tmpMap.get(this.subNames[0]);
+					value = tmpMap.get(this.subs[0]);
 					if (remove)
 					{
-						tmpMap.remove(this.subNames[0]);
+						tmpMap.remove(this.subs[0]);
 					}
 				}
 				else
 				{
-					value = this.dealMap(tmpMap, this.subNames, remove, null);
+					value = this.dealValue(tmpMap, this.subs, data, remove, null);
 				}
 			}
 			else
@@ -223,10 +228,10 @@ public class DataHandler
 		}
 		else if (this.varInfo != null)
 		{
-			if (this.subNames != null)
+			if (this.subs != null)
 			{
-				value = this.dealMap(this.varInfo.getValue(data),
-						this.subNames, remove, null);
+				value = this.dealValue(this.varInfo.getValue(data),
+						this.subs, data, remove, null);
 			}
 			else
 			{
@@ -253,27 +258,27 @@ public class DataHandler
 		if (this.mapGetter != null)
 		{
 			Map tmpMap = this.mapGetter.getMap(data);
-			if (this.subNames.length == 1)
+			if (this.subs.length == 1)
 			{
 				if (value == null)
 				{
-					tmpMap.remove(this.subNames[0]);
+					tmpMap.remove(this.subs[0]);
 				}
 				else
 				{
-					tmpMap.put(this.subNames[0], value);
+					tmpMap.put(this.subs[0], value);
 				}
 			}
 			else
 			{
-				this.dealMap(tmpMap, this.subNames, true, value);
+				this.dealValue(tmpMap, this.subs, data, true, value);
 			}
 		}
 		else if (this.varInfo != null)
 		{
-			if (this.subNames != null)
+			if (this.subs != null)
 			{
-				this.dealMap(this.varInfo.getValue(data), this.subNames, true, value);
+				this.dealValue(this.varInfo.getValue(data), this.subs, data, true, value);
 			}
 			else
 			{
@@ -283,40 +288,60 @@ public class DataHandler
 	}
 
 	/**
-	 * 深度处理map类型对象中的值.
+	 * 深度处理map/array/list类型对象中的值.
 	 *
-	 * @param map     需要处理的map类型的对象
+	 * @param obj     需要处理的对象
 	 * @param subs    需要处理的子名称列表
 	 * @param remove  是否需要将原来的值移除
 	 * @param newVal  需要设置的新值
-	 * @return  map中的原始值
+	 * @return  obj中的原始值
 	 */
-	private Object dealMap(Object map, String[] subs, boolean remove, Object newVal)
+	private Object dealValue(Object obj, Object[] subs, AppData data, boolean remove, Object newVal)
 	{
 		int dCount = subs.length;
 		if (newVal != null || remove)
 		{
 			dCount--;
 		}
-		Object currentVal = map;
+		Object currentVal = obj;
 		for (int i = 0; i < dCount; i++)
 		{
 			if (currentVal == null)
 			{
 				return null;
 			}
-			if (currentVal instanceof Map)
+			BooleanRef isInt = new BooleanRef();
+			Object sub = this.getSubValue(subs[i], data, isInt);
+			if (isInt.value)
 			{
-				currentVal = ((Map) currentVal).get(subs[i]);
-			}
-			else if (BeanTool.checkBean(currentVal.getClass()))
-			{
-				currentVal = BeanTool.getBeanMap(currentVal).get(subs[i]);
+				if (currentVal instanceof List)
+				{
+					currentVal = ((List) currentVal).get(((Number) sub).intValue());
+				}
+				else if (currentVal instanceof Collection)
+				{
+					int count = ((Number) sub).intValue();
+					Iterator itr = ((Collection) currentVal).iterator();
+					for (int j = 1; j < count; j++)
+					{
+						itr.next();
+					}
+					currentVal = itr.next();
+				}
+				else if (ClassGenerator.isArray(currentVal.getClass()))
+				{
+					currentVal = Array.get(currentVal, ((Number) sub).intValue());
+				}
+				else
+				{
+					// 当前值不是list或array无法处理
+					throw new EternaException(
+							"The value type [" + obj.getClass() + "] can't trans to list or array.");
+				}
 			}
 			else
 			{
-				// 当前值不是map无法处理
-				return null;
+				currentVal = tran2Map(currentVal);
 			}
 		}
 		if (dCount == subs.length)
@@ -324,104 +349,209 @@ public class DataHandler
 			// 如果没有特殊处理, 将当前值返回
 			return currentVal;
 		}
-		Map tmpMap;
-		if (currentVal instanceof Map)
+		BooleanRef isInt = new BooleanRef();
+		Object sub = this.getSubValue(subs[subs.length - 1], data, isInt);
+		return this.modifyValue(currentVal, sub, isInt.value, newVal);
+	}
+
+	/**
+	 * 修改对象中的值.
+	 */
+	private Object modifyValue(Object obj, Object sub, boolean isInt, Object newVal)
+	{
+		if (isInt)
 		{
-			tmpMap = (Map) currentVal;
-		}
-		else if (BeanTool.checkBean(currentVal.getClass()))
-		{
-			tmpMap = BeanTool.getBeanMap(currentVal);
+			int index = ((Number) sub).intValue();
+			if (obj instanceof List)
+			{
+				List list = (List) obj;
+				int size = list.size();
+				if (size < 0 || size <= index)
+				{
+					if (size >= 0)
+					{
+						int count = index - list.size();
+						for (int i = 0; i < count; i++)
+						{
+							list.add(null);
+						}
+					}
+					list.add(newVal);
+					return null;
+				}
+				else
+				{
+					return list.set(index, newVal);
+				}
+			}
+			else if (ClassGenerator.isArray(obj.getClass()))
+			{
+				Object old = Array.get(obj, index);
+				Array.set(obj, index, newVal);
+				return old;
+			}
+			else
+			{
+				// 当前值不是list或array无法处理
+				throw new EternaException(
+						"The value type [" + obj.getClass() + "] can't trans to list or array.");
+			}
 		}
 		else
 		{
-			// 当前值不是map无法处理
-			return null;
-		}
-		// 进行特殊处理, 移除或设置新值.
-		if (newVal != null)
-		{
-			return tmpMap.put(subs[subs.length - 1], newVal);
-		}
-		else
-		{
-			return tmpMap.remove(subs[subs.length - 1]);
+			Map tmpMap = tran2Map(obj);
+			// 进行特殊处理, 移除或设置新值.
+			if (newVal != null)
+			{
+				return tmpMap.put(sub, newVal);
+			}
+			else
+			{
+				return tmpMap.remove(sub);
+			}
 		}
 	}
 
 	/**
-	 * 解析一个配置表达式, 并将主名称返回.
-	 *
-	 * @param subs  添加子名称的列表
+	 * 将对象转换为map.
 	 */
-	protected String parseConfig(String config, List subs)
-			throws EternaException
+	private static Map tran2Map(Object obj)
 	{
-		GrammerElement ge = rootGE;
-		ParserData pd = new ParserData(config);
-		try
+		if (obj instanceof Map)
 		{
-			if (!ge.verify(pd))
+			return (Map) obj;
+		}
+		if (BeanTool.checkBean(obj.getClass()))
+		{
+			return BeanTool.getBeanMap(obj);
+		}
+		throw new EternaException("The value type [" + obj.getClass() + "] can't trans to map.");
+	}
+
+	/**
+	 * 获取子名称列表的值.
+	 */
+	private Object getSubValue(Object sub, AppData data, BooleanRef isInt)
+	{
+		Object r = null;
+		if (sub instanceof DataHandler)
+		{
+			r = ((DataHandler) sub).getData(data, false);
+		}
+		else if (sub instanceof Expression)
+		{
+			r = ((Expression) sub).getResult(data);
+		}
+		else
+		{
+			r = sub;
+		}
+		if (r instanceof Number)
+		{
+			isInt.value = true;
+			if (!(r instanceof Integer))
 			{
-				throw new EternaException("Error " + this.caption + " config [" + config + "].");
+				r = Utility.createInteger(((Number) r).intValue());
 			}
 		}
-		catch (GrammerException ex)
+		else if (r != null)
 		{
-			throw new EternaException(ex);
+			r = r.toString();
 		}
-		List cells = pd.getGrammerCellLst();
-		// refName的词法结构会被解析在子节点中
-		Iterator itr = ((GrammerCell) cells.get(0)).subCells.iterator();
-		GrammerCell cell = (GrammerCell) itr.next();
-		String mainName = cell.textBuf;
-		while (itr.hasNext())
+		return r;
+	}
+
+	/**
+	 * 解析配置的语法分析节点.
+	 */
+	protected String parseConfig(AST node, List subs)
+			throws EternaException
+	{
+		AST first = node.getFirstChild();
+		String mainName = first.getText();
+		AST tmp = first.getNextSibling();
+		while (tmp != null)
 		{
-			cell = (GrammerCell) itr.next();
-			// 第二个词法节点为名称节点, 可直接作为子名称
-			GrammerCell secondCell = (GrammerCell) cell.subCells.get(1);
-			if (secondCell.grammerElement.getType() == GrammerElement.TYPE_NAME)
+			if (tmp.getType() == DOT)
 			{
-				subs.add(secondCell.textBuf);
+				tmp = tmp.getNextSibling();
+				subs.add(tmp.getText());
+			}
+			else if (tmp.getType() == LBRACK)
+			{
+				tmp = tmp.getNextSibling();
+				Object obj = ExpTool.parseExpNode(tmp);
+				if (obj != null)
+				{
+					if (obj instanceof Number)
+					{
+						if (!(obj instanceof Integer))
+						{
+							obj = Utility.createInteger(((Number) obj).intValue());
+						}
+					}
+					else if (obj instanceof Expression)
+					{
+						obj = ((Expression) obj).tryGetResult(null);
+					}
+					else if (!(obj instanceof DataHandler))
+					{
+						obj = obj.toString();
+					}
+				}
+				subs.add(obj);
 			}
 			else
 			{
-				subs.add(this.getStrValue(cell));
+				throw new EternaException("Error node type in data handler [" + node.getText() + "].");
 			}
+			tmp = tmp.getNextSibling();
 		}
 		return mainName;
 	}
 
 	/**
-	 * 从词法列表中获取定义的字符串.
+	 * 将语法节点转换为字符串.
 	 */
-	public String getStrValue(GrammerCell subCell)
+	private String transNode2Str(AST node)
 	{
-		StringAppender buf = null;
-		Iterator itr = subCell.subCells.iterator();
-		while (itr.hasNext())
+		StringAppender buf = StringTool.createStringAppender(32);
+		AST first = node.getFirstChild();
+		buf.append(first.getText());
+		AST tmp = first.getNextSibling();
+		while (tmp != null)
 		{
-			GrammerCell cell = (GrammerCell) itr.next();
-			if ("\"".equals(cell.textBuf))
+			if (tmp.getType() == DOT)
 			{
-				if (buf == null)
-				{
-					buf = StringTool.createStringAppender();
-				}
-				else
-				{
-					// 如果buf不为空, 说明是第二个引号, 返回字符串
-					return buf.toString();
-				}
+				tmp = tmp.getNextSibling();
+				buf.append('.');
+				this.appendSub(tmp, buf);
 			}
-			else if (buf != null)
+			else if (tmp.getType() == LBRACK)
 			{
-				// 如果buf已存在说明是处理字符串中间的部分
-				buf.append((String) Expression.getValue(cell));
+				tmp = tmp.getNextSibling();
+				buf.append('[');
+				this.appendSub(tmp, buf);
+				buf.append(']');
+			}
+			tmp = tmp.getNextSibling();
+		}
+		return buf.toString();
+	}
+	private void appendSub(AST sub, StringAppender buf)
+	{
+		if (sub.getType() == VAR)
+		{
+			buf.append(this.transNode2Str(sub));
+		}
+		else
+		{
+			AST tmp = sub.getFirstChild();
+			if (tmp != null)
+			{
+				buf.append(tmp.toStringList());
 			}
 		}
-		throw new EternaException("Error " + this.caption + " sub "
-				+ subCell.textBuf + ".");
 	}
 
 	/**
@@ -445,9 +575,6 @@ public class DataHandler
 	 */
 	private static final Map mapNameIndex = new HashMap();
 
-	private static GrammerManager grammerManager;
-	private static GrammerElement rootGE;
-
 	static
 	{
 		mapNameIndex.put(AppData.REQUEST_PARAMETER_MAP_NAME, new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
@@ -462,23 +589,6 @@ public class DataHandler
 		mapNameIndex.put("SA", new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
 		mapNameIndex.put("header", new HeaderGetter());
 		mapNameIndex.put("cookie", new CookieGetter());
-
-		try
-		{
-			grammerManager = new GrammerManager();
-			grammerManager.init(DataHandler.class.getClassLoader().getResource(
-					"self/micromagic/eterna/model/grammer.xml").openStream());
-			rootGE = grammerManager.getGrammerElement("refName");
-			if (rootGE == null)
-			{
-				AppData.log.error("Init check expression error, "
-						+ "not found GrammerElement [refName]");
-			}
-		}
-		catch (Exception ex)
-		{
-			AppData.log.error("Init data config expression error.", ex);
-		}
 	}
 
 }

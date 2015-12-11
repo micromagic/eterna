@@ -17,6 +17,7 @@
 package self.micromagic.util;
 
 import java.util.List;
+import java.util.Properties;
 
 import junit.framework.TestCase;
 import self.micromagic.eterna.digester2.ContainerManager;
@@ -118,6 +119,14 @@ public class PropertiesManagerTest extends TestCase
 		assertEquals("a", t_prop_sd);
 		pm1.setProperty("test.001", "d");
 		assertEquals("d", t_prop_sd);
+
+		Properties d = new Properties();
+		d.setProperty("test.001", "x");
+		PropertiesManager.setDefaultProperties(d);
+		pm1 = new PropertiesManager("conf/main1.txt", this.getClass().getClassLoader());
+		assertEquals("xb", pm1.resolveDynamicPropnames("${test.001}b"));
+		pm2 = new PropertiesManager("conf/main2.txt", this.getClass().getClassLoader());
+		assertEquals("${test.001}btest", pm2.resolveDynamicPropnames("${test.001}b${p1}"));
 	}
 	public static String t_prop_sd;
 

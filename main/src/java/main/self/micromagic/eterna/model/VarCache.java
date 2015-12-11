@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import self.micromagic.util.Utility;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -27,6 +28,16 @@ import self.micromagic.util.ref.StringRef;
  */
 public class VarCache
 {
+	/**
+	 * 配置中设置是否需要警报变量未初始化的标识.
+	 */
+	public static final String WARN_NOT_SETTED_FLAG = "var.warnNotInit";
+
+	/**
+	 * 是否需要警报变量未设置.
+	 */
+	private static boolean warnNotInit = true;
+
 	/**
 	 * 获取全局的自定义变量的缓存.
 	 */
@@ -38,6 +49,12 @@ public class VarCache
 	static
 	{
 		global.globalCache = true;
+		try
+		{
+			Utility.addFieldPropertyManager(WARN_NOT_SETTED_FLAG,
+					VarCache.class, "warnNotInit");
+		}
+		catch (Exception ex) {}
 	}
 
 	/**
@@ -110,7 +127,7 @@ public class VarCache
 				info = new ModelVarInfo(name, this.varCount++);
 			}
 			this.varList.add(info);
-			if (!writeOrRead && err != null)
+			if (warnNotInit && !writeOrRead && err != null)
 			{
 				err.setString("The var [" + name + "] hasn't setted value.");
 			}

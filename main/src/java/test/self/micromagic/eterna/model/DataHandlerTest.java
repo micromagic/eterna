@@ -23,31 +23,27 @@ import tool.PrivateAccessor;
 public class DataHandlerTest extends TestCase
 {
 	public void testSetMap1()
+			throws Exception
 	{
 		DataHandler handler = new DataHandler("testMap1", true, true);
-		try
-		{
-			handler.setConfig("RP.t1");
-			assertEquals("RP.t1", Utility.createInteger(AppData.REQUEST_PARAMETER_MAP),
-					this.getMapIndex(handler));
-			assertEquals("RP.t1", "t1", PrivateAccessor.get(handler, "mapDataName"));
-			handler.setConfig("RA.t2");
-			assertEquals("RA.t2", Utility.createInteger(AppData.REQUEST_ATTRIBUTE_MAP),
-					this.getMapIndex(handler));
-			assertEquals("RA.t2", "t2", PrivateAccessor.get(handler, "mapDataName"));
-			handler.setConfig("param.t3");
-			assertEquals("param.t3", Utility.createInteger(AppData.REQUEST_PARAMETER_MAP),
-					this.getMapIndex(handler));
-			assertEquals("param.t3", "t3", PrivateAccessor.get(handler, "mapDataName"));
-			handler.setConfig("data.t4");
-			assertEquals("data.t4", Utility.createInteger(AppData.DATA_MAP),
-					this.getMapIndex(handler));
-			assertEquals("data.t4", "t4", PrivateAccessor.get(handler, "mapDataName"));
-		}
-		catch (Exception ex)
-		{
-			fail(ex.getMessage());
-		}
+
+		handler.setConfig("RP.t1");
+		assertEquals("RP.t1", Utility.createInteger(AppData.REQUEST_PARAMETER_MAP),
+				this.getMapIndex(handler));
+		assertEquals("RP.t1", "t1", ((Object[]) PrivateAccessor.get(handler, "subs"))[0]);
+		handler.setConfig("RA.t2");
+		assertEquals("RA.t2", Utility.createInteger(AppData.REQUEST_ATTRIBUTE_MAP),
+				this.getMapIndex(handler));
+		assertEquals("RA.t2", "t2", ((Object[]) PrivateAccessor.get(handler, "subs"))[0]);
+		handler.setConfig("param.t3");
+		assertEquals("param.t3", Utility.createInteger(AppData.REQUEST_PARAMETER_MAP),
+				this.getMapIndex(handler));
+		assertEquals("param.t3", "t3", ((Object[]) PrivateAccessor.get(handler, "subs"))[0]);
+		handler.setConfig("data.t4");
+		assertEquals("data.t4", Utility.createInteger(AppData.DATA_MAP),
+				this.getMapIndex(handler));
+		assertEquals("data.t4", "t4", ((Object[]) PrivateAccessor.get(handler, "subs"))[0]);
+
 		try
 		{
 			handler.setConfig("data");
@@ -55,60 +51,42 @@ public class DataHandlerTest extends TestCase
 		}
 		catch (Exception ex)
 		{
-			assertEquals("Error testMap1 [data].", ex.getMessage());
+			assertEquals("Error testMap1 main name [data].", ex.getMessage());
 		}
 	}
 
 	public void testSetMap2()
+		throws Exception
 	{
 		DataHandler handler = new DataHandler("testMap2", false, true);
-		try
-		{
-			handler.setConfig("RP");
-			assertEquals("RP", Utility.createInteger(AppData.REQUEST_PARAMETER_MAP),
-					this.getMapIndex(handler));
-			assertEquals("RP", null, PrivateAccessor.get(handler, "mapDataName"));
-			handler.setConfig("RA.t2");
-			assertEquals("RA.t2", Utility.createInteger(AppData.REQUEST_ATTRIBUTE_MAP),
-					this.getMapIndex(handler));
-			assertEquals("RA.t2", "t2", PrivateAccessor.get(handler, "mapDataName"));
-			handler.setConfig("session.t3");
-			assertEquals("session.t3", Utility.createInteger(AppData.SESSION_ATTRIBUTE_MAP),
-					this.getMapIndex(handler));
-			assertEquals("session.t3", "t3", PrivateAccessor.get(handler, "mapDataName"));
-			handler.setConfig("data");
-			assertEquals("data", Utility.createInteger(AppData.DATA_MAP),
-					this.getMapIndex(handler));
-			assertEquals("data", null, PrivateAccessor.get(handler, "mapDataName"));
-		}
-		catch (Exception ex)
-		{
-			fail(ex.getMessage());
-		}
-	}
 
-	public void testConstValue()
-	{
+		handler.setConfig("RP");
+		assertEquals("RP", Utility.createInteger(AppData.REQUEST_PARAMETER_MAP),
+				this.getMapIndex(handler));
+		assertEquals("RP", null, (PrivateAccessor.get(handler, "subs")));
+		handler.setConfig("RA.t2");
+		assertEquals("RA.t2", Utility.createInteger(AppData.REQUEST_ATTRIBUTE_MAP),
+				this.getMapIndex(handler));
+		assertEquals("RA.t2", "t2", ((Object[]) PrivateAccessor.get(handler, "subs"))[0]);
+		handler.setConfig("session.t3");
+		assertEquals("session.t3", Utility.createInteger(AppData.SESSION_ATTRIBUTE_MAP),
+				this.getMapIndex(handler));
+		assertEquals("session.t3", "t3", ((Object[]) PrivateAccessor.get(handler, "subs"))[0]);
+		handler.setConfig("data");
+		assertEquals("data", Utility.createInteger(AppData.DATA_MAP),
+				this.getMapIndex(handler));
+		assertEquals("data", null, (PrivateAccessor.get(handler, "subs")));
+
 		try
 		{
-			DataHandler handler = new DataHandler("testConst1", false, true);
-			handler.setConfig("value.constTest");
-			assertEquals("constTest", "constTest", PrivateAccessor.get(handler, "constValue"));
+			handler.setConfig("other");
+			fail("Error map name.");
 		}
 		catch (Exception ex)
 		{
-			fail(ex.getMessage());
+			assertEquals("Error testMap2 main name [other].", ex.getMessage());
 		}
-		try
-		{
-			DataHandler handler = new DataHandler("testConst2", true, false);
-			handler.setConfig("value.constTest2");
-			fail("Const can't use in read only.");
-		}
-		catch (Exception ex)
-		{
-			assertEquals("Error testConst2 [value.constTest2].", ex.getMessage());
-		}
+
 	}
 
 	private Object getMapIndex(DataHandler handler)

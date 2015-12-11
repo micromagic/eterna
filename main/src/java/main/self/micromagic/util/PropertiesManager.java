@@ -71,19 +71,24 @@ public class PropertiesManager
 	public static final String CHILD_PROPERTIES = "_child.properties";
 
 	/**
-	 * 设置是否需要将系统的properties的值作为默认值.
-	 * 当本配置管理器中的值不存在时, 会再读取系统的properties中的值. 如果
+	 * 设置是否需要将defaultProperties的值作为默认值.
+	 * 当本配置管理器中的值不存在时, 会再读取defaultProperties中的值. 如果
 	 * 父配置管理器中设置为true, 那当前的值就会默认为false.
 	 * 当未设置此属性时, 默认值为true.
-	 * 注: 系统的properties中的值的修改不会触发当前配置管理器的事件, 只是
+	 * 注: defaultProperties中的值的修改不会触发当前配置管理器的事件, 只是
 	 * 能够在读取时被取到.
 	 */
-	public static final String SYSTEM_DEFAULT = "_system.default";
+	public static final String NEED_DEFAULT = "_need.default";
 
 	/**
 	 * 日志的名称.
 	 */
 	private static final String LOGGER_NAME = "eterna.util";
+
+	/**
+	 * 全局默认的配置值.
+	 */
+	private static Properties defaultProperties = System.getProperties();
 
 	/**
 	 * 配置文件资源对象.
@@ -188,6 +193,17 @@ public class PropertiesManager
 	}
 
 	/**
+	 * 设置全局默认的资源配置.
+	 */
+	public static void setDefaultProperties(Properties properties)
+	{
+		if (properties != null)
+		{
+			defaultProperties = properties;
+		}
+	}
+
+	/**
 	 * 创建一个基础配置资源对象.
 	 */
 	private static ConfigResource createBaseResource(String propName, ClassLoader loader)
@@ -285,7 +301,7 @@ public class PropertiesManager
 			}
 			temp.remove(CHILD_PROPERTIES);
 			temp.remove(PARENT_PROPERTIES);
-			String sd = (String) temp.remove(SYSTEM_DEFAULT);
+			String sd = (String) temp.remove(NEED_DEFAULT);
 			if (sd != null)
 			{
 				this.systemDefault = BooleanConverter.toBoolean(sd);
@@ -450,12 +466,12 @@ public class PropertiesManager
 				value = this.parent.getProperty(key);
 				if (value == null && !this.parent.isSystemDefault() && this.systemDefault)
 				{
-					value = System.getProperty(key);
+					value = defaultProperties.getProperty(key);
 				}
 			}
 			else if (this.systemDefault)
 			{
-				value = System.getProperty(key);
+				value = defaultProperties.getProperty(key);
 			}
 		}
 		return value;

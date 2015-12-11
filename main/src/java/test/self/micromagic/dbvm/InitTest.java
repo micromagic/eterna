@@ -76,11 +76,11 @@ public class InitTest extends TestCase
 
 	static EternaFactory initTestFactory(String file)
 	{
-		ClassLoader loader = DataBaseLock.class.getClassLoader();
-		String config = DataBaseLock.CONFIG_PREFIX + file;
+		ClassLoader loader = DataBaseLocker.class.getClassLoader();
+		String config = DataBaseLocker.CONFIG_PREFIX + file;
 		FactoryContainer c = ContainerManager.createFactoryContainer(file,
 				config, null, VersionManager.getDigester(), null, loader,
-				DataBaseLock.getContainer("MySQL"), false);
+				DataBaseLocker.getContainer("MySQL"), false);
 		StringRef msg = new StringRef();
 		c.reInit(msg);
 		if (!StringTool.isEmpty(msg.getString()))

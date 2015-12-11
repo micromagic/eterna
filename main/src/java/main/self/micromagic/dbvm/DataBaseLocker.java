@@ -37,7 +37,7 @@ import self.micromagic.util.ref.StringRef;
 /**
  * 数据库锁.
  */
-public class DataBaseLock
+public class DataBaseLocker
 {
 	/**
 	 * 通过一个数据库连接获取数据库时间.
@@ -279,7 +279,7 @@ public class DataBaseLock
 			{
 				return c;
 			}
-			ClassLoader loader = DataBaseLock.class.getClassLoader();
+			ClassLoader loader = DataBaseLocker.class.getClassLoader();
 			String config = CONFIG_PREFIX + "def_" + dbName + ".xml;"
 					+ CONFIG_PREFIX + "db_lock.xml;" + CONFIG_PREFIX + "db_common.xml;";
 			c = ContainerManager.createFactoryContainer(dbName, config, null,
