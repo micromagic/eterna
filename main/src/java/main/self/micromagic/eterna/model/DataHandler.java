@@ -25,17 +25,22 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.dom4j.Element;
+
 import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.ClassGenerator;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.expression.ExpTool;
+import self.micromagic.expression.DynamicObject;
+import self.micromagic.expression.ExprTool;
 import self.micromagic.expression.Expression;
-import self.micromagic.expression.antlr.ExpLexer;
-import self.micromagic.expression.antlr.ExpParser;
-import self.micromagic.expression.antlr.ExpTokenTypes;
+import self.micromagic.expression.antlr.ExprLexer;
+import self.micromagic.expression.antlr.ExprParser;
+import self.micromagic.expression.antlr.ExprTokenTypes;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.container.ValueContainerMap;
 import self.micromagic.util.ref.BooleanRef;
 import self.micromagic.util.ref.StringRef;
 import antlr.collections.AST;
@@ -44,8 +49,31 @@ import antlr.collections.AST;
  * 数据处理者.
  */
 public class DataHandler
-		implements ExpTokenTypes
+		implements ExprTokenTypes, DynamicObject
 {
+	/**
+	 * 配置中设置是否需要在日志中记录原始值的标识.
+	 */
+	public static final String LOG_OLD_VALUE_FLAG = "eterna.data.logOldValue";
+
+	/**
+	 * 无操作.
+	 */
+	private static final int OPT_TYPE_NONE = 0;
+	/**
+	 * 修改操作.
+	 */
+	private static final int OPT_TYPE_MODIFY = 1;
+	/**
+	 * 移除操作.
+	 */
+	private static final int OPT_TYPE_DELETE = 3;
+
+	/**
+	 * null的标识对象.
+	 */
+	public static final Object NULL_FLAG = new Object();
+
 	/**
 	 * 读取数据的配置.
 	 */
@@ -67,10 +95,30 @@ public class DataHandler
 	 */
 	private VarCache.VarInfo varInfo;
 
+	/**
+	 * 在一个表达式对象中读取/设置数据.
+	 */
+	private Object exprObj;
+
 
 	private boolean needMapDataName = true;
 	private boolean readOnly = true;
 	private String caption = "config";
+
+	/**
+	 * 是否需要在日志中记录原始值.
+	 */
+	private static boolean logOldValue;
+
+	static
+	{
+		try
+		{
+			Utility.addFieldPropertyManager(LOG_OLD_VALUE_FLAG,
+					DataHandler.class, "logOldValue");
+		}
+		catch (Exception ex) {}
+	}
 
 	/**
 	 * @param caption           显示错误信息是使用的标题
@@ -93,6 +141,7 @@ public class DataHandler
 		this.config = null;
 		this.mapGetter = null;
 		this.subs = null;
+		this.exprObj = null;
 		this.varInfo = null;
 	}
 
@@ -102,6 +151,22 @@ public class DataHandler
 	public String getConfig()
 	{
 		return this.config;
+	}
+
+	/**
+	 * 判断给出的名称是否为有效的变量名主名称.
+	 */
+	public static boolean isValidMainName(String name)
+	{
+		if (name == null)
+		{
+			return false;
+		}
+		if (mapNameIndex.containsKey(name))
+		{
+			return true;
+		}
+		return name.startsWith("$");
 	}
 
 	/**
@@ -121,6 +186,17 @@ public class DataHandler
 		List subs = new ArrayList();
 		String mainName = this.parseConfig(node, subs);
 
+		if (this.exprObj != null)
+		{
+			// 使用表达式对象
+			if (!ExprTool.isConstObject(this.exprObj))
+			{
+				// 不是静态对象, 需要有个变量暂存结果
+				this.varInfo = this.getVarCache().getVarInfo("$", false, null);
+			}
+			this.subs = subs.toArray(new Object[subs.size()]);
+			return;
+		}
 		Object tObj = mapNameIndex.get(mainName);
 		if (tObj != null)
 		{
@@ -166,8 +242,8 @@ public class DataHandler
 	{
 		this.clearConfig();
 		this.config = config;
-		ExpLexer lex = new ExpLexer(new StringReader(config));
-		ExpParser parser = new ExpParser(lex);
+		ExprLexer lex = new ExprLexer(new StringReader(config));
+		ExprParser parser = new ExprParser(lex);
 		try
 		{
 			parser.identVar();
@@ -193,6 +269,11 @@ public class DataHandler
 		return data.varCache;
 	}
 
+	public Object getResult(AppData data)
+	{
+		return this.getData(data, false);
+	}
+
 	/**
 	 * 根据处理配置读取数据.
 	 *
@@ -202,6 +283,7 @@ public class DataHandler
 	public Object getData(AppData data, boolean remove)
 			throws EternaException
 	{
+		int optType = remove ? OPT_TYPE_DELETE : OPT_TYPE_NONE;
 		Object value = null;
 		if (this.mapGetter != null)
 		{
@@ -210,15 +292,16 @@ public class DataHandler
 			{
 				if (this.subs.length == 1)
 				{
-					value = tmpMap.get(this.subs[0]);
+					Object sub = getExprValue(this.subs[0], data, null);
+					value = tmpMap.get(sub);
 					if (remove)
 					{
-						tmpMap.remove(this.subs[0]);
+						tmpMap.remove(sub);
 					}
 				}
 				else
 				{
-					value = this.dealValue(tmpMap, this.subs, data, remove, null);
+					value = this.dealValue(tmpMap, this.subs, data, optType, null);
 				}
 			}
 			else
@@ -226,12 +309,17 @@ public class DataHandler
 				value = tmpMap;
 			}
 		}
+		else if (this.exprObj != null)
+		{
+			Object tmp = this.getExprObj(data);
+			value = this.dealValue(tmp, this.subs, data, optType, null);
+		}
 		else if (this.varInfo != null)
 		{
 			if (this.subs != null)
 			{
-				value = this.dealValue(this.varInfo.getValue(data),
-						this.subs, data, remove, null);
+				Object tmp = this.varInfo.getValue(data);
+				value = this.dealValue(tmp, this.subs, data, optType, null);
 			}
 			else
 			{
@@ -246,9 +334,11 @@ public class DataHandler
 	}
 
 	/**
-	 * 根据处理配置设置数据
+	 * 根据处理配置设置数据.
+	 *
+	 * @return 原始数据
 	 */
-	public void setData(AppData data, Object value)
+	public Object setData(AppData data, Object value)
 			throws EternaException
 	{
 		if (this.readOnly)
@@ -260,30 +350,54 @@ public class DataHandler
 			Map tmpMap = this.mapGetter.getMap(data);
 			if (this.subs.length == 1)
 			{
-				if (value == null)
-				{
-					tmpMap.remove(this.subs[0]);
-				}
-				else
-				{
-					tmpMap.put(this.subs[0], value);
-				}
+				Object sub = getExprValue(this.subs[0], data, null);
+				return tmpMap.put(sub, value);
 			}
 			else
 			{
-				this.dealValue(tmpMap, this.subs, data, true, value);
+				return this.dealValue(tmpMap, this.subs, data, OPT_TYPE_MODIFY, value);
 			}
+		}
+		else if (this.exprObj != null)
+		{
+			Object tmp = this.getExprObj(data);
+			return this.dealValue(tmp, this.subs, data, OPT_TYPE_MODIFY, value);
 		}
 		else if (this.varInfo != null)
 		{
 			if (this.subs != null)
 			{
-				this.dealValue(this.varInfo.getValue(data), this.subs, data, true, value);
+				Object tmp = this.varInfo.getValue(data);
+				return this.dealValue(tmp, this.subs, data, OPT_TYPE_MODIFY, value);
 			}
 			else
 			{
+				Object old = this.varInfo.getValue(data);
 				this.varInfo.setValue(data, value);
+				if (data.getLogType() > 0)
+				{
+					Element nowNode = data.getCurrentNode();
+					if (nowNode != null)
+					{
+						Element vNode = nowNode.addElement("set-var-value");
+						vNode.addAttribute("name", this.varInfo.getName());
+						if (logOldValue)
+						{
+							AppDataLogExecute.printObject(vNode.addElement("new-value"), value);
+							AppDataLogExecute.printObject(vNode.addElement("old-value"), old);
+						}
+						else
+						{
+							AppDataLogExecute.printObject(vNode, value);
+						}
+					}
+				}
+				return old;
 			}
+		}
+		else
+		{
+			return null;
 		}
 	}
 
@@ -296,10 +410,10 @@ public class DataHandler
 	 * @param newVal  需要设置的新值
 	 * @return  obj中的原始值
 	 */
-	private Object dealValue(Object obj, Object[] subs, AppData data, boolean remove, Object newVal)
+	private Object dealValue(Object obj, Object[] subs, AppData data, int optType, Object newVal)
 	{
 		int dCount = subs.length;
-		if (newVal != null || remove)
+		if (newVal != null || optType > OPT_TYPE_NONE)
 		{
 			dCount--;
 		}
@@ -311,12 +425,15 @@ public class DataHandler
 				return null;
 			}
 			BooleanRef isInt = new BooleanRef();
-			Object sub = this.getSubValue(subs[i], data, isInt);
+			Object sub = getExprValue(subs[i], data, isInt);
+			Object nextValue;
 			if (isInt.value)
 			{
 				if (currentVal instanceof List)
 				{
-					currentVal = ((List) currentVal).get(((Number) sub).intValue());
+					int index = ((Number) sub).intValue();
+					List list = (List) currentVal;
+					nextValue = list.size() > index ? list.get(index) : null;
 				}
 				else if (currentVal instanceof Collection)
 				{
@@ -326,11 +443,16 @@ public class DataHandler
 					{
 						itr.next();
 					}
-					currentVal = itr.next();
+					nextValue = itr.next();
+				}
+				else if (currentVal instanceof CharSequence)
+				{
+					int index = ((Number) sub).intValue();
+					nextValue = new Character(((CharSequence) currentVal).charAt(index));
 				}
 				else if (ClassGenerator.isArray(currentVal.getClass()))
 				{
-					currentVal = Array.get(currentVal, ((Number) sub).intValue());
+					nextValue = Array.get(currentVal, ((Number) sub).intValue());
 				}
 				else
 				{
@@ -341,23 +463,40 @@ public class DataHandler
 			}
 			else
 			{
-				currentVal = tran2Map(currentVal);
+				nextValue = tran2Map(currentVal).get(sub);
 			}
+			if (nextValue == null && optType == OPT_TYPE_MODIFY)
+			{
+				BooleanRef nextInt = new BooleanRef();
+				// 判断下一个对象的类型
+				getExprValue(subs[i + 1], data, nextInt);
+				// 如果是赋值操作, 需要生成对象
+				if (nextInt.value)
+				{
+					nextValue = new ArrayList();
+				}
+				else
+				{
+					nextValue = new HashMap();
+				}
+				this.modifyValue(currentVal, sub, isInt.value, optType, nextValue);
+			}
+			currentVal = nextValue;
 		}
-		if (dCount == subs.length)
+		if (dCount == subs.length || currentVal == null)
 		{
 			// 如果没有特殊处理, 将当前值返回
 			return currentVal;
 		}
 		BooleanRef isInt = new BooleanRef();
-		Object sub = this.getSubValue(subs[subs.length - 1], data, isInt);
-		return this.modifyValue(currentVal, sub, isInt.value, newVal);
+		Object sub = getExprValue(subs[subs.length - 1], data, isInt);
+		return this.modifyValue(currentVal, sub, isInt.value, optType, newVal);
 	}
 
 	/**
 	 * 修改对象中的值.
 	 */
-	private Object modifyValue(Object obj, Object sub, boolean isInt, Object newVal)
+	private Object modifyValue(Object obj, Object sub, boolean isInt, int optType, Object newVal)
 	{
 		if (isInt)
 		{
@@ -378,6 +517,10 @@ public class DataHandler
 					}
 					list.add(newVal);
 					return null;
+				}
+				else if (optType == OPT_TYPE_DELETE)
+				{
+					return list.remove(index);
 				}
 				else
 				{
@@ -401,13 +544,13 @@ public class DataHandler
 		{
 			Map tmpMap = tran2Map(obj);
 			// 进行特殊处理, 移除或设置新值.
-			if (newVal != null)
+			if (optType == OPT_TYPE_DELETE)
 			{
-				return tmpMap.put(sub, newVal);
+				return tmpMap.remove(sub);
 			}
 			else
 			{
-				return tmpMap.remove(sub);
+				return tmpMap.put(sub, newVal);
 			}
 		}
 	}
@@ -421,6 +564,10 @@ public class DataHandler
 		{
 			return (Map) obj;
 		}
+		if (obj instanceof ResultRow)
+		{
+			return ValueContainerMap.createResultRowMap((ResultRow) obj);
+		}
 		if (BeanTool.checkBean(obj.getClass()))
 		{
 			return BeanTool.getBeanMap(obj);
@@ -429,34 +576,53 @@ public class DataHandler
 	}
 
 	/**
-	 * 获取子名称列表的值.
+	 * 从表达式对象中获取数据.
 	 */
-	private Object getSubValue(Object sub, AppData data, BooleanRef isInt)
+	private Object getExprObj(AppData data)
+	{
+		if (this.varInfo == null)
+		{
+			// 没有定义变量, 说明是个常数
+			return this.exprObj;
+		}
+		Object tmp = this.varInfo.getValue(data);
+		if (tmp == null)
+		{
+			tmp = getExprValue(this.exprObj, data, null);
+			if (tmp == null)
+			{
+				tmp = NULL_FLAG;
+			}
+			this.varInfo.setValue(data, tmp);
+		}
+		return tmp == NULL_FLAG ? null : tmp;
+	}
+
+	/**
+	 * 获取表达式对象的值.
+	 */
+	private static Object getExprValue(Object expr, AppData data, BooleanRef isInt)
 	{
 		Object r = null;
-		if (sub instanceof DataHandler)
+		if (expr instanceof DynamicObject)
 		{
-			r = ((DataHandler) sub).getData(data, false);
-		}
-		else if (sub instanceof Expression)
-		{
-			r = ((Expression) sub).getResult(data);
+			r = ((DynamicObject) expr).getResult(data);
 		}
 		else
 		{
-			r = sub;
+			r = expr;
 		}
-		if (r instanceof Number)
+		if (isInt != null)
 		{
-			isInt.value = true;
-			if (!(r instanceof Integer))
+			// isInt不为null, 表示需要整型或字符串
+			if (r instanceof Number)
 			{
-				r = Utility.createInteger(((Number) r).intValue());
+				isInt.value = true;
 			}
-		}
-		else if (r != null)
-		{
-			r = r.toString();
+			else if (r != null)
+			{
+				r = r.toString();
+			}
 		}
 		return r;
 	}
@@ -468,7 +634,19 @@ public class DataHandler
 			throws EternaException
 	{
 		AST first = node.getFirstChild();
-		String mainName = first.getText();
+		String mainName = null;
+		if (first.getType() == EXPR)
+		{
+			if (first.getNextSibling() == null)
+			{
+				throw new EternaException("Not found sub after expression.");
+			}
+			this.exprObj = this.parseNode(first);
+		}
+		else
+		{
+			mainName = first.getText();
+		}
 		AST tmp = first.getNextSibling();
 		while (tmp != null)
 		{
@@ -480,26 +658,7 @@ public class DataHandler
 			else if (tmp.getType() == LBRACK)
 			{
 				tmp = tmp.getNextSibling();
-				Object obj = ExpTool.parseExpNode(tmp);
-				if (obj != null)
-				{
-					if (obj instanceof Number)
-					{
-						if (!(obj instanceof Integer))
-						{
-							obj = Utility.createInteger(((Number) obj).intValue());
-						}
-					}
-					else if (obj instanceof Expression)
-					{
-						obj = ((Expression) obj).tryGetResult(null);
-					}
-					else if (!(obj instanceof DataHandler))
-					{
-						obj = obj.toString();
-					}
-				}
-				subs.add(obj);
+				subs.add(this.parseNode(tmp));
 			}
 			else
 			{
@@ -509,6 +668,32 @@ public class DataHandler
 		}
 		return mainName;
 	}
+	/**
+	 * 解析表达式节点对象.
+	 */
+	protected Object parseNode(AST node)
+	{
+		Object obj = ExprTool.parseExpNode(node);
+		if (obj != null)
+		{
+			if (obj instanceof Number)
+			{
+				if (!(obj instanceof Integer))
+				{
+					obj = Utility.createInteger(((Number) obj).intValue());
+				}
+			}
+			else if (obj instanceof Expression)
+			{
+				obj = ((Expression) obj).tryGetResult(null);
+			}
+			else if (!(obj instanceof DataHandler))
+			{
+				obj = obj.toString();
+			}
+		}
+		return obj;
+	}
 
 	/**
 	 * 将语法节点转换为字符串.
@@ -517,7 +702,14 @@ public class DataHandler
 	{
 		StringAppender buf = StringTool.createStringAppender(32);
 		AST first = node.getFirstChild();
-		buf.append(first.getText());
+		if (first.getType() == EXPR)
+		{
+			buf.append(first.toStringTree());
+		}
+		else
+		{
+			buf.append(first.getText());
+		}
 		AST tmp = first.getNextSibling();
 		while (tmp != null)
 		{

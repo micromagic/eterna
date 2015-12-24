@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import self.micromagic.util.container.SynHashMap;
 import self.micromagic.util.container.ThreadCache;
 
 public class FormatTool
@@ -40,6 +41,72 @@ public class FormatTool
 	private static final DateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
 	private static final NumberFormat currencyFormat = new DecimalFormat("#0.00");
 	private static final NumberFormat currency2Format = new DecimalFormat("#,##0.00");
+
+	/**
+	 * 存放缓存的format对象.
+	 */
+	private static Map formatCache = new SynHashMap();
+
+	/**
+	 * 获取缓存的format对象.
+	 */
+	public static Format getCachedFormat(String pattern)
+	{
+		Format format = (Format) formatCache.get(pattern);
+		if (format == null)
+		{
+			format = createFormat(pattern);
+		}
+		return format;
+	}
+	private static Format createFormat(String pattern)
+	{
+		synchronized (formatCache)
+		{
+			Format format = (Format) formatCache.get(pattern);
+			if (format != null)
+			{
+				return format;
+			}
+			if (pattern == null)
+			{
+				throw new NullPointerException("The pattern is null.");
+			}
+			boolean numFormat = false;
+			int len = pattern.length();
+			for (int i = 0; i < len; i++)
+			{
+				char c = pattern.charAt(i);
+				if (c == '0' || c == '#')
+				{
+					// 有"0"或"#"可以判断为数字的格式化模式
+					numFormat = true;
+					break;
+				}
+			}
+			if (numFormat)
+			{
+				format = new DecimalFormat(pattern);
+			}
+			else
+			{
+				format = new SimpleDateFormat(pattern);
+			}
+			formatCache.put(pattern, format);
+			return format;
+		}
+	}
+
+	/**
+	 * 将一个format对象放入缓存.
+	 */
+	public static void putFormat(String key, Format format)
+	{
+		synchronized (formatCache)
+		{
+			formatCache.put(key, format);
+		}
+	}
 
 	/**
 	 * 在线程中存放Format实例的缓存.

@@ -49,6 +49,7 @@ import javassist.compiler.ast.Declarator;
 import javassist.compiler.ast.MethodDecl;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 import self.micromagic.util.container.SynHashMap;
 
 /**
@@ -59,6 +60,11 @@ import self.micromagic.util.container.SynHashMap;
 public class JavassistCG
 		implements CG
 {
+	/**
+	 * 配置文件中设置javassist重新构造实现类的类名.
+	 */
+	private static final String REBUILDER_CLASS_FLAG = "self.micromagic.compile.javassist.reBuilder";
+
 	/**
 	 * 用javassist作为编译类型时使用的名称.
 	 */
@@ -156,6 +162,37 @@ public class JavassistCG
 
 	private static Map classPoolCache = new SynHashMap(8, SynHashMap.WEAK);
 
+	private static ReBuilder reBuilder;
+
+	/**
+	 * 设置执行重新构造的实现类.
+	 */
+	static void setReBuilderClass(String className)
+	{
+		try
+		{
+			reBuilder = (ReBuilder) Class.forName(className).newInstance();
+		}
+		catch (Exception ex)
+		{
+			if (ClassGenerator.COMPILE_LOG_TYPE > COMPILE_LOG_TYPE_ERROR)
+			{
+				log.error("Can't create [" + className + "].", ex);
+			}
+		}
+	}
+
+	static
+	{
+		try
+		{
+			Utility.addMethodPropertyManager(REBUILDER_CLASS_FLAG,
+					JavassistCG.class, "setReBuilderClass");
+		}
+		catch (Exception ex) {}
+	}
+
+
 	/**
 	 * 根据使用的ClassLoader获得一个ClassPool.
 	 */
@@ -219,6 +256,10 @@ public class JavassistCG
 					MethodDecl md = (MethodDecl) obj.dec;
 					md.accept(obj.gen);
 					constructor.getMethodInfo().setCodeAttribute(obj.b.toCodeAttribute());
+				}
+				if (reBuilder != null)
+				{
+					reBuilder.reBuild(obj.member);
 				}
 			}
 		}
@@ -463,6 +504,15 @@ public class JavassistCG
 			}
 			return this.className + ".class";
 		}
+
+	}
+
+	/**
+	 * 执行重新构造的接口.
+	 */
+	public interface ReBuilder
+	{
+		void reBuild(CtBehavior member);
 
 	}
 

@@ -755,7 +755,39 @@ else if (${converter} instanceof ValueConverter)
 {
 	${dest}${levelIndex}[i${levelIndex}] = (${cellType}) ((ValueConverter) ${converter}).convert(tmpObj);
 }
-else if (${needThrow} && tmpObj != null)
+else if (${needThrow})
+{
+	throw new ClassCastException("Can't cast [" + tmpObj + "](" + tmpObj.getClass() + ") to (${cellType}).");
+}
+
+# 数组中的元素类型对数组的类型进行判断并转换
+## arrayCell.convert.array
+Object tmpObj = ${src}${levelIndex}[i${levelIndex}];
+if (tmpObj instanceof ${cellType})
+{
+	${dest}${levelIndex}[i${levelIndex}] = (${cellType}) tmpObj;
+}
+else if (tmpObj instanceof java.util.Collection || ClassGenerator.isArray(tmpObj.getClass()))
+{
+	if (${converter} instanceof ValueConverter)
+	{
+		${dest}${levelIndex}[i${levelIndex}] = (${cellType}) ArrayTool.convertArray(
+				${cell.arrayLevel}, ${cell.cellType}.class, tmpObj, ${dest}${levelIndex}[i${levelIndex}],
+				(ValueConverter) ${converter}, ${needThrow});
+	}
+	else if (${converter} instanceof BeanMap)
+	{
+		${dest}${levelIndex}[i${levelIndex}] = (${cellType}) ArrayTool.convertArray(
+				${cell.arrayLevel}, ${cell.cellType}.class, tmpObj, ${dest}${levelIndex}[i${levelIndex}],
+				(BeanMap) ${converter}, ${needThrow});
+	}
+	else
+	{
+		${dest}${levelIndex}[i${levelIndex}] = (${cellType}) ArrayTool.convertArray(
+				${cell.arrayLevel}, ${cell.cellType}.class, tmpObj, ${dest}${levelIndex}[i${levelIndex}], ${needThrow});
+	}
+}
+else if (${needThrow})
 {
 	throw new ClassCastException("Can't cast [" + tmpObj + "](" + tmpObj.getClass() + ") to (${cellType}).");
 }

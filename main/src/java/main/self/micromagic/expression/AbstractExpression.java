@@ -47,16 +47,9 @@ public abstract class AbstractExpression
 	 */
 	public static Object getValue(Object arg, AppData data)
 	{
-		if (arg != null)
+		if (arg instanceof DynamicObject)
 		{
-			if (arg instanceof DataHandler)
-			{
-				return ((DataHandler) arg).getData(data, false);
-			}
-			else if (arg instanceof Expression)
-			{
-				return ((Expression) arg).getResult(data);
-			}
+			return ((DynamicObject) arg).getResult(data);
 		}
 		return arg;
 	}

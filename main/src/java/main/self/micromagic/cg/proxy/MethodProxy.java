@@ -28,6 +28,6 @@ public interface MethodProxy
 	 * @param args    方法的参数, 需要与目标方法需要的一致
 	 * @return  方法调用的返回值
 	 */
-	Object invoke(Object target, Object[] args) throws Throwable;
+	Object invoke(Object target, Object[] args) throws Exception;
 
 }

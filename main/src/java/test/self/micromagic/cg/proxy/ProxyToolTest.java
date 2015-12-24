@@ -189,7 +189,7 @@ public class ProxyToolTest extends TestCase
 	}
 
 	public void testInJava()
-			throws Throwable
+			throws Exception
 	{
 		try
 		{
@@ -256,7 +256,7 @@ public class ProxyToolTest extends TestCase
 		System.out.println(obj);
 
 	public void testInvoke()
-			throws Throwable
+			throws Exception
 	{
 		Class c = this.getClass();
 		java.lang.reflect.Method m = c.getMethod("doT", new Class[]{String.class, int.class, Double.class});

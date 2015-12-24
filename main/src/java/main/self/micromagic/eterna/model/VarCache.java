@@ -38,14 +38,13 @@ public class VarCache
 	 */
 	private static boolean warnNotInit = true;
 
-	/**
-	 * 获取全局的自定义变量的缓存.
-	 */
-	public static VarCache getGlobalCache()
-	{
-		return global;
-	}
 	private static final VarCache global = new VarCache();
+
+	/**
+	 * 是否为全局的自定义变量的缓存.
+	 */
+	private boolean globalCache;
+
 	static
 	{
 		global.globalCache = true;
@@ -58,9 +57,13 @@ public class VarCache
 	}
 
 	/**
-	 * 是否为全局的自定义变量的缓存.
+	 * 获取全局的自定义变量的缓存.
 	 */
-	private boolean globalCache;
+	public static VarCache getGlobalCache()
+	{
+		return global;
+	}
+
 
 	/**
 	 * 创建一个变量的存储空间.
@@ -101,19 +104,23 @@ public class VarCache
 			return global.getVarInfo(name, writeOrRead, null);
 		}
 		VarInfo info = null;
-		Iterator itr = this.varList.iterator();
-		for (int i = 0; i < this.varCount; i++)
+		if (!"$".equals(name))
 		{
-			AbstractVarInfo tmp = (AbstractVarInfo) itr.next();
-			if (name.equals(tmp.getName()))
+			// 单个$表示临时变量, 每次都要创建
+			Iterator itr = this.varList.iterator();
+			for (int i = 0; i < this.varCount; i++)
 			{
-				if (!writeOrRead)
+				AbstractVarInfo tmp = (AbstractVarInfo) itr.next();
+				if (name.equals(tmp.getName()))
 				{
-					// 如果是读取, 设置为被使用
-					tmp.used = true;
+					if (!writeOrRead)
+					{
+						// 如果是读取, 设置为被使用
+						tmp.used = true;
+					}
+					info = tmp;
+					break;
 				}
-				info = tmp;
-				break;
 			}
 		}
 		if (info == null)

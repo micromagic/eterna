@@ -16,20 +16,19 @@
 
 package self.micromagic.cg;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.HashMap;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 import junit.framework.TestCase;
-import self.micromagic.util.Utility;
 import self.micromagic.util.FormatTool;
-import self.micromagic.util.converter.DateConverter;
+import self.micromagic.util.Utility;
 import self.micromagic.util.converter.UtilDateConverter;
 import self.micromagic.util.ref.StringRef;
 
@@ -73,7 +72,7 @@ public class BeanMapTest extends TestCase
 		Object obj = bm.get("subInfo");
 		assertTrue(obj instanceof Map);
 
-		TestArrayBean ab = this.getArrayBean(null);
+		TestArrayBean ab = getArrayBean(null);
 		bm = BeanTool.getBeanMap(ab);
 		bm.setBean2Map(true);
 		obj = bm.get("mainBean1");
@@ -145,7 +144,7 @@ public class BeanMapTest extends TestCase
 	public void testArrayBean()
 	{
 		Map tMap = new HashMap();
-		TestArrayBean ab = this.getArrayBean(tMap);
+		TestArrayBean ab = getArrayBean(tMap);
 		BeanMap bm = BeanTool.getBeanMap(ab);
 		assertEquals("113", bm.get("subBean2[1][0][2].id"));
 		assertEquals("1", bm.get("mainBean2[1][0].subInfo.id"));

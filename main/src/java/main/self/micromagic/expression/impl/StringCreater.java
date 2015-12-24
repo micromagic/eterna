@@ -1,8 +1,8 @@
 
 package self.micromagic.expression.impl;
 
-import self.micromagic.expression.ExpCreater;
-import self.micromagic.expression.antlr.ExpTokenTypes;
+import self.micromagic.expression.ExprCreater;
+import self.micromagic.expression.antlr.ExprTokenTypes;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.IntegerRef;
@@ -12,7 +12,7 @@ import antlr.collections.AST;
  * 构造字符串的表达式.
  */
 public class StringCreater
-		implements ExpCreater, ExpTokenTypes
+		implements ExprCreater, ExprTokenTypes
 {
 	public Object create(AST node)
 	{

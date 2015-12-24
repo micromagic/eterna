@@ -26,6 +26,7 @@ import java.util.Map;
 
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.EternaException;
@@ -132,18 +133,18 @@ public class DataBaseLocker
 		}
 		modify.setString("lockName", lockName);
 		boolean gettedLock = false;
-		long beginTime = System.currentTimeMillis();
-		String preLockValue = RELEASED_VALUE;
 		while (!gettedLock)
 		{
 			String lockValue = null;
 			boolean needSleep = false;
+			ResultRow row = null;
 			try
 			{
 				ResultIterator ritr = query.executeQuery(conn);
 				if (ritr.hasNext())
 				{
-					lockValue = ritr.nextRow().getString("lockValue");
+					row = ritr.nextRow();
+					lockValue = row.getString("lockValue");
 				}
 				else
 				{
@@ -206,13 +207,7 @@ public class DataBaseLocker
 			}
 			else
 			{
-				if (!preLockValue.equals(lockValue))
-				{
-					// 如果lockValue有变化, 则重置时间
-					preLockValue = lockValue;
-					beginTime = System.currentTimeMillis();
-				}
-				if (System.currentTimeMillis() - beginTime > maxWaitTime)
+				if (row != null && row.getLong("nowTime") - row.getLong("lockTime") > maxWaitTime)
 				{
 					// 如果超过了最长等待时间, 则强制获取锁
 					if (tryGetLock(conn, modify, lockValue))
@@ -227,7 +222,7 @@ public class DataBaseLocker
 				}
 				else
 				{
-					// 不是当前的lockValue, 则等待并重新查询
+					// 时间未到, 则等待并重新查询
 					needSleep = true;
 				}
 			}
@@ -240,7 +235,7 @@ public class DataBaseLocker
 				}
 				try
 				{
-					Thread.sleep(15L);
+					Thread.sleep(73L);
 				}
 				catch (InterruptedException ex) {}
 			}

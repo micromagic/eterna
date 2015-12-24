@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package self.micromagic.cg;
+package self.micromagic.cg.proxy;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
+import self.micromagic.cg.BeanMethodInfo;
+import self.micromagic.cg.BeanTool;
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.IntegerRef;
@@ -29,7 +32,7 @@ import self.micromagic.util.ref.IntegerRef;
  *
  * @author micromagic@sina.com
  */
-class BeanPropertyWriteProcesser
+public class BeanPropertyWriteProcesser
 		implements UnitProcesser
 {
 	protected Map paramCache = new HashMap();
@@ -86,20 +89,20 @@ class BeanPropertyWriteProcesser
 		}
 		else
 		{
-			int vcIndex = BeanTool.converterManager.getConverterIndex(type);
+			int vcIndex = BeanTool.getConverterIndex(type);
 			if (vcIndex != -1)
 			{
-				BeanTool.codeRes.printRes(BeanTool.GET_FIRST_VALUE_RES, this.paramCache, 1, sa).appendln();
+				BeanTool.printRes(BeanTool.GET_FIRST_VALUE_RES, this.paramCache, 1, sa).appendln();
 				this.paramCache.put("converterName", this.beanMapName + ".getConverter(" + vcIndex + ")");
 				this.paramCache.put("className", ClassGenerator.getClassName(type));
-				BeanTool.codeRes.printRes(resNames[1], this.paramCache, 1, sa).appendln();
+				BeanTool.printRes(resNames[1], this.paramCache, 1, sa).appendln();
 			}
 			else if (BeanTool.checkBean(type))
 			{
 				this.paramCache.put("className", ClassGenerator.getClassName(type));
 				this.paramCache.put("tempItemName", "_tmpItem");
-				BeanTool.codeRes.printRes("beanMap.convertBeanType", this.paramCache, 1, sa).appendln();
-				BeanTool.codeRes.printRes(resNames[2], this.paramCache, 1, sa).appendln();
+				BeanTool.printRes("beanMap.convertBeanType", this.paramCache, 1, sa).appendln();
+				BeanTool.printRes(resNames[2], this.paramCache, 1, sa).appendln();
 			}
 			else if (type.isArray())
 			{
@@ -109,12 +112,12 @@ class BeanPropertyWriteProcesser
 				this.paramCache.put("cellClass", ClassGenerator.getClassName(eType));
 				this.paramCache.put("arrayLevel", level);
 				this.paramCache.put("beanMapName", this.beanMapName);
-				BeanTool.codeRes.printRes(resNames[4], this.paramCache, 1, sa).appendln();
+				BeanTool.printRes(resNames[4], this.paramCache, 1, sa).appendln();
 			}
 			else
 			{
 				this.paramCache.put("className", ClassGenerator.getClassName(type));
-				BeanTool.codeRes.printRes(resNames[3], this.paramCache, 1, sa).appendln();
+				BeanTool.printRes(resNames[3], this.paramCache, 1, sa).appendln();
 			}
 		}
 		return sa.toString();

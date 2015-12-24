@@ -153,7 +153,7 @@ public class FactoryContainerImpl extends AbstractFactoryContainer
 	 * 解析配置信息并分别进行初始化.
 	 */
 	protected void initializeXML()
-			throws Throwable
+			throws Exception
 	{
 		Thread currentThread = Thread.currentThread();
 		ClassLoader oldCL = currentThread.getContextClassLoader();

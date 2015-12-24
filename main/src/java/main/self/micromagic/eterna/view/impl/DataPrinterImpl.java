@@ -126,6 +126,10 @@ public class DataPrinterImpl extends AbstractGenerator
 		{
 			out.write(value.toString());
 		}
+		else if (value instanceof BeanPrinter)
+		{
+			((BeanPrinter) value).print(this, out, value);
+		}
 		else if (value instanceof Map)
 		{
 			this.printMap(out, (Map) value);
@@ -159,10 +163,6 @@ public class DataPrinterImpl extends AbstractGenerator
 		else if (value instanceof Iterator)
 		{
 			this.printIterator(out, (Iterator) value);
-		}
-		else if (value instanceof BeanPrinter)
-		{
-			((BeanPrinter) value).print(this, out, value);
 		}
 		else if (value instanceof Enumeration)
 		{

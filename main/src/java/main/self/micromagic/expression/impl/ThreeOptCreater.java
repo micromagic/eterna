@@ -3,8 +3,8 @@ package self.micromagic.expression.impl;
 
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.expression.AbstractExpression;
-import self.micromagic.expression.ExpCreater;
-import self.micromagic.expression.ExpTool;
+import self.micromagic.expression.ExprCreater;
+import self.micromagic.expression.ExprTool;
 import self.micromagic.expression.Expression;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.BooleanRef;
@@ -14,12 +14,12 @@ import antlr.collections.AST;
  * 构造三目操作的表达式.
  */
 public class ThreeOptCreater
-		implements ExpCreater
+		implements ExprCreater
 {
 	public Object create(AST node)
 	{
 		AST tmp = node.getFirstChild();
-		Object arg1 = ExpTool.parseExpNode(tmp);
+		Object arg1 = ExprTool.parseExpNode(tmp);
 		BooleanRef getted = new BooleanRef();
 		arg1 = AbstractExpression.tryGetValue(arg1, getted);
 		if (getted.value)
@@ -28,20 +28,20 @@ public class ThreeOptCreater
 			{
 				// get arg2
 				tmp = tmp.getNextSibling();
-				return ExpTool.parseExpNode(tmp);
+				return ExprTool.parseExpNode(tmp);
 			}
 			else
 			{
 				// get arg3
 				tmp = tmp.getNextSibling();
 				tmp = tmp.getNextSibling();
-				return ExpTool.parseExpNode(tmp);
+				return ExprTool.parseExpNode(tmp);
 			}
 		}
 		tmp = tmp.getNextSibling();
-		Object arg2 = ExpTool.parseExpNode(tmp);
+		Object arg2 = ExprTool.parseExpNode(tmp);
 		tmp = tmp.getNextSibling();
-		Object arg3 = ExpTool.parseExpNode(tmp);
+		Object arg3 = ExprTool.parseExpNode(tmp);
 		return new ThreeOptExpression(arg1, arg2, arg3);
 	}
 

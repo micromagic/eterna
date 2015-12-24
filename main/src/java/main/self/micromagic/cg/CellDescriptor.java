@@ -16,6 +16,9 @@
 
 package self.micromagic.cg;
 
+import self.micromagic.cg.proxy.BeanPropertyReader;
+import self.micromagic.cg.proxy.BeanPropertyWriter;
+
 /**
  * bean属性单元的描述类.
  *

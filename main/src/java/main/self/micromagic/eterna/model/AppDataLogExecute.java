@@ -492,6 +492,26 @@ public class AppDataLogExecute extends AbstractExecute
 			{
 				parent.addAttribute("type", "null");
 			}
+			else if (value instanceof String)
+			{
+				parent.addAttribute("type", "String");
+				parent.addAttribute("value", (String) value);
+			}
+			else if (value instanceof Number)
+			{
+				parent.addAttribute("type", "Number");
+				parent.addAttribute("class", ClassGenerator.getClassName(value.getClass()));
+				parent.addAttribute("value", String.valueOf(value));
+			}
+			else if (value instanceof Boolean)
+			{
+				parent.addAttribute("type", "Boolean");
+				parent.addAttribute("value", String.valueOf(value));
+			}
+			else if (value instanceof BeanPrinter)
+			{
+				((BeanPrinter) value).print(this, parent, value);
+			}
 			else if (value instanceof ResultRow)
 			{
 				printResultRow(parent, (ResultRow) value);
@@ -577,22 +597,6 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("queryTypeKeep", sma.queryTypeKeep);
 				parent.addAttribute("queryTypeTag", sma.queryTypeTag);
 			}
-			else if (value instanceof String)
-			{
-				parent.addAttribute("type", "String");
-				parent.addAttribute("value", (String) value);
-			}
-			else if (value instanceof Number)
-			{
-				parent.addAttribute("type", "Number");
-				parent.addAttribute("class", ClassGenerator.getClassName(value.getClass()));
-				parent.addAttribute("value", String.valueOf(value));
-			}
-			else if (value instanceof Boolean)
-			{
-				parent.addAttribute("type", "Boolean");
-				parent.addAttribute("value", String.valueOf(value));
-			}
 			else if (value instanceof Map)
 			{
 				parent.addAttribute("type", "Map");
@@ -650,10 +654,6 @@ public class AppDataLogExecute extends AbstractExecute
 				parent.addAttribute("type", "Calendar");
 				Date d = ((Calendar) value).getTime();
 				parent.addAttribute("value", FormatTool.formatFullDate(d));
-			}
-			else if (value instanceof BeanPrinter)
-			{
-				((BeanPrinter) value).print(this, parent, value);
 			}
 			else if (Tool.isBean(value.getClass()))
 			{

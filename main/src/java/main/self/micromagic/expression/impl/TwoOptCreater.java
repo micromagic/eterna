@@ -4,21 +4,20 @@ package self.micromagic.expression.impl;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.expression.AbstractExpression;
-import self.micromagic.expression.ExpCreater;
-import self.micromagic.expression.ExpTool;
+import self.micromagic.expression.ExprCreater;
+import self.micromagic.expression.ExprTool;
 import self.micromagic.expression.Expression;
 import self.micromagic.expression.Operation;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.BooleanRef;
-import self.micromagic.util.ref.ObjectRef;
 import antlr.collections.AST;
 
 /**
  * 构造双目目操作的表达式.
  */
 public class TwoOptCreater
-		implements ExpCreater
+		implements ExprCreater
 {
 	final int typeLevel;
 	final String optName;
@@ -34,9 +33,9 @@ public class TwoOptCreater
 	public Object create(AST node)
 	{
 		AST tmp = node.getFirstChild();
-		Object arg1 = ExpTool.parseExpNode(tmp);
+		Object arg1 = ExprTool.parseExpNode(tmp);
 		tmp = tmp.getNextSibling();
-		Object arg2 = ExpTool.parseExpNode(tmp);
+		Object arg2 = ExprTool.parseExpNode(tmp);
 		return new TwoOptExpression(arg1, arg2, this);
 	}
 
@@ -105,10 +104,8 @@ class TwoOptExpression extends AbstractExpression
 	 */
 	private static Object exec(Object arg1, Object arg2, TwoOptCreater creater)
 	{
-		ObjectRef ref1 = new ObjectRef(arg1);
-		ObjectRef ref2 = new ObjectRef(arg2);
-		int level1 = ExpTool.getNumberLevel(ref1, true);
-		int level2 = ExpTool.getNumberLevel(ref2, true);
+		int level1 = ExprTool.getNumberLevel(arg1, true);
+		int level2 = ExprTool.getNumberLevel(arg2, true);
 		Operation opt;
 		if (level1 == -1 || level2 == -1)
 		{
@@ -141,14 +138,24 @@ class TwoOptExpression extends AbstractExpression
 		}
 		else
 		{
-			int level = Math.max(level1, level2);
-			if (level > ExpTool.LONG_LEVEL && (creater.typeLevel & TYPE_LEVLE_INT) != 0)
+			if (level1 >= ExprTool.NEED_CAST_LEVEL)
 			{
-				level = ExpTool.LONG_LEVEL;
+				arg1 = ExprTool.cast2Number(level1, arg1);
+				level1 ^= ExprTool.NEED_CAST_LEVEL;
 			}
-			opt = ExpTool.getNumberOpt(level, creater.optName, creater.optFlag);
+			if (level2 >= ExprTool.NEED_CAST_LEVEL)
+			{
+				arg2 = ExprTool.cast2Number(level2, arg2);
+				level2 ^= ExprTool.NEED_CAST_LEVEL;
+			}
+			int level = Math.max(level1, level2);
+			if (level > ExprTool.LONG_LEVEL && (creater.typeLevel & TYPE_LEVLE_INT) != 0)
+			{
+				level = ExprTool.LONG_LEVEL;
+			}
+			opt = ExprTool.getNumberOpt(level, creater.optName, creater.optFlag);
 		}
-		return opt.exec(ref1.getObject(), ref2.getObject());
+		return opt.exec(arg1, arg2);
 	}
 
 	private static Boolean getCompareResult(Object arg1, Object arg2, int level)

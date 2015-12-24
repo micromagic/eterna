@@ -153,6 +153,7 @@ public class AppData
 		}
 	}
 
+	public AppData()
 	{
 		this.maps[DATA_MAP] = this.dataMap;
 	}
@@ -502,6 +503,8 @@ public class AppData
 		{
 			this.caches[i] = null;
 		}
+		this.modelVars = null;
+		this.globalVars = null;
 		// 恢复App日志状态并清空
 		this.logType = APP_LOG_TYPE;
 		if (this.nodeStack != null)

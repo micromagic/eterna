@@ -127,18 +127,10 @@ public class EqualTool
 					// 如果是静态成员, 则不用比较
 					continue;
 				}
-				boolean setAccessible = !field.isAccessible();
-				if (setAccessible)
-				{
-					field.setAccessible(true);
-				}
+				field.setAccessible(true);
 				if (!checkEquals0(field.get(obj1), field.get(obj2)))
 				{
 					return false;
-				}
-				if (setAccessible)
-				{
-					field.setAccessible(false);
 				}
 			}
 			Class superC = c.getSuperclass();
@@ -200,9 +192,9 @@ public class EqualTool
 	 */
 	private static class CheckedObject
 	{
-		private int hashCode;
-		private Object obj1;
-		private Object obj2;
+		private final int hashCode;
+		private final Object obj1;
+		private final Object obj2;
 
 		public CheckedObject(Object obj1, Object obj2)
 		{

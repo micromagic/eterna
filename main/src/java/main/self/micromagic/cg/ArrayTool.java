@@ -16,16 +16,20 @@
 
 package self.micromagic.cg;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import self.micromagic.cg.proxy.PrimitiveArrayWrapper;
+import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ValueConverter;
 import self.micromagic.util.ref.IntegerRef;
-import self.micromagic.eterna.dao.ResultRow;
 
 /**
  * 管理数组相关的自动处理代码.
@@ -227,13 +231,17 @@ public class ArrayTool
 			Object result = null;
 			if (ac != null)
 			{
+				if (array instanceof Collection)
+				{
+					array = collection2Array((Collection) array, true);
+				}
 				result = destArr == null ? ac.convertArray(array, converter, needThrow)
 						: ac.convertArray(array, destArr, converter, needThrow);
 			}
 			if (result == null && array != null && needThrow)
 			{
 				throw new CGException("The param array(" + ClassGenerator.getClassName(array.getClass())
-						+ "）can't cast to (" + ClassGenerator.getClassName(cellType)
+						+ ") can't cast to (" + ClassGenerator.getClassName(cellType)
 						+ ClassGenerator.getArrayDefine(arrayLevel) + ").");
 			}
 			return result;
@@ -338,8 +346,8 @@ public class ArrayTool
 		// 实现接口中不带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object converter, boolean needThrow)").appendln()
-				.append("      throws Throwable").appendln().append('{').appendln();
-		BeanTool.codeRes.printRes("convertArrayType", tmpParam, 0, fnCode)
+				.append("      throws Exception").appendln().append('{').appendln();
+		BeanTool.printRes("convertArrayType", tmpParam, 0, fnCode)
 				.appendln().append('}');
 		cg.addMethod(fnCode.toString());
 
@@ -347,21 +355,21 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object destArr, Object converter, boolean needThrow)")
 				.appendln()
-				.append("      throws Throwable").appendln().append('{').appendln();
-		BeanTool.codeRes.printRes("convertArrayType.withDest", tmpParam, 0, fnCode)
+				.append("      throws Exception").appendln().append('{').appendln();
+		BeanTool.printRes("convertArrayType.withDest", tmpParam, 0, fnCode)
 				.appendln().append('}');
 		cg.addMethod(fnCode.toString());
 
 		// 准备类型转换需要的变量
 		String wrapName = BeanTool.getPrimitiveWrapClassName(ClassGenerator.getClassName(cellType));
-		int vcIndex = BeanTool.converterManager.getConverterIndex(cellType);
+		int vcIndex = BeanTool.getConverterIndex(cellType);
 		boolean beanType = BeanTool.checkBean(cellType);
 
 		// 生成不带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray(Object").append(srcVLStr)
 				.append(" array0, Object converter, boolean needThrow)").appendln()
-				.append("      throws Throwable").appendln().append('{').appendln();
+				.append("      throws Exception").appendln().append('{').appendln();
 		fnCode.append(destType).append(destVLStr).append(" destArr0 = new ")
 				.append(destType).append("[array0.length]").append(destVLStr.substring(2)).append(';').appendln();
 		appendConvertArrayCode(fnCode, cellType, srcVLStr.substring(2), destVLStr.substring(2),
@@ -374,7 +382,7 @@ public class ArrayTool
 		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray(Object").append(srcVLStr)
 				.append(" array0, ").append(destType).append(destVLStr)
 				.append(" destArr0, Object converter, boolean needThrow)").appendln()
-				.append("      throws Throwable").appendln().append('{').appendln();
+				.append("      throws Exception").appendln().append('{').appendln();
 		fnCode.append("if (destArr0 == null)").appendln().append('{').appendln()
 				.append("return this.convertArray(array0, converter, needThrow);").appendln().append('}')
 				.appendln();
@@ -397,9 +405,9 @@ public class ArrayTool
 	{
 		params.put("levelIndex", Integer.toString(levelIndex));
 		params.put("nextIndex", Integer.toString(levelIndex + 1));
-		BeanTool.codeRes.printRes("array2array_for", params, 0, bodyCode).appendln();
+		BeanTool.printRes("array2array_for", params, 0, bodyCode).appendln();
 		bodyCode.append('{').appendln();
-		BeanTool.codeRes.printRes("array2array_if", params, 0, bodyCode).appendln();
+		BeanTool.printRes("array2array_if", params, 0, bodyCode).appendln();
 		bodyCode.append('{').appendln();
 		if (levelIndex < arrayLevel - 1)
 		{
@@ -407,11 +415,11 @@ public class ArrayTool
 			params.put("srcArrayDef", srcVLStr.substring(2));
 			if (hasDest)
 			{
-				BeanTool.codeRes.printRes("array2array_def_withDest", params, 0, bodyCode).appendln();
+				BeanTool.printRes("array2array_def_withDest", params, 0, bodyCode).appendln();
 			}
 			else
 			{
-				BeanTool.codeRes.printRes("array2array_def", params, 0, bodyCode).appendln();
+				BeanTool.printRes("array2array_def", params, 0, bodyCode).appendln();
 			}
 			appendConvertArrayCode(bodyCode, cellType, srcVLStr.substring(2), destVLStr.substring(2),
 					params, levelIndex + 1, arrayLevel, wrapName, vcIndex, beanType, hasDest);
@@ -425,20 +433,28 @@ public class ArrayTool
 				params.put("vcIndex", new Integer(vcIndex));
 				params.put("converterMethod",
 						"convertTo" + Character.toUpperCase(typeName.charAt(0)) + typeName.substring(1));
-				BeanTool.codeRes.printRes("arrayCell.convert.primitive", params, 0, bodyCode).appendln();
+				BeanTool.printRes("arrayCell.convert.primitive", params, 0, bodyCode).appendln();
 			}
 			else if (vcIndex != -1)
 			{
 				params.put("vcIndex", new Integer(vcIndex));
-				BeanTool.codeRes.printRes("arrayCell.convert.byTool", params, 0, bodyCode).appendln();
+				BeanTool.printRes("arrayCell.convert.byTool", params, 0, bodyCode).appendln();
 			}
 			else if (beanType)
 			{
-				BeanTool.codeRes.printRes("arrayCell.convert.bean", params, 0, bodyCode).appendln();
+				BeanTool.printRes("arrayCell.convert.bean", params, 0, bodyCode).appendln();
+			}
+			else if (ClassGenerator.isArray(cellType))
+			{
+				IntegerRef cellLevel = new IntegerRef();
+				Class tmpType = ClassGenerator.getArrayElementType(cellType, cellLevel);
+				params.put("cell.arrayLevel", new Integer(cellLevel.value));
+				params.put("cell.cellType", ClassGenerator.getClassName(tmpType));
+				BeanTool.printRes("arrayCell.convert.array", params, 0, bodyCode).appendln();
 			}
 			else
 			{
-				BeanTool.codeRes.printRes("arrayCell.convert.other", params, 0, bodyCode).appendln();
+				BeanTool.printRes("arrayCell.convert.other", params, 0, bodyCode).appendln();
 			}
 		}
 		bodyCode.append('}').appendln().append('}').appendln();
@@ -490,7 +506,7 @@ public class ArrayTool
 		if (result == null && array != null && needThrow)
 		{
 			throw new CGException("The param array(" + ClassGenerator.getClassName(array.getClass())
-					+ "） isn't primitive array.");
+					+ ") isn't primitive array.");
 		}
 		return result;
 	}
@@ -512,7 +528,7 @@ public class ArrayTool
 			tmpParam.put("arrayObj", "obj");
 			tmpParam.put("arrayDef", arrVLStr);
 			tmpParam.put("arrayLevel", arrayLevel);
-			BeanTool.codeRes.printRes("checkAndConvertPrimitiveArrayType", tmpParam, 0, fnCode)
+			BeanTool.printRes("checkAndConvertPrimitiveArrayType", tmpParam, 0, fnCode)
 					.appendln().append('}');
 			Iterator itr = BeanTool.primitiveWrapClass.keySet().iterator();
 			while (itr.hasNext())
@@ -566,20 +582,20 @@ public class ArrayTool
 		tmpParam.put("destType", wrapType);
 		tmpParam.put("src", "array");
 		tmpParam.put("dest", "wrapArr");
-		BeanTool.codeRes.printRes("array2array_for", tmpParam, 0, bodyCode).appendln();
+		BeanTool.printRes("array2array_for", tmpParam, 0, bodyCode).appendln();
 		bodyCode.append('{').appendln();
 		if (levelIndex < arrayLevel - 1)
 		{
 			tmpParam.put("srcArrayDef", arrVLStr.substring(2));
 			tmpParam.put("destArrayDef", arrVLStr.substring(2));
-			BeanTool.codeRes.printRes("array2array_def", tmpParam, 0, bodyCode).appendln();
+			BeanTool.printRes("array2array_def", tmpParam, 0, bodyCode).appendln();
 			appendPrimitiveArrayWrapCode(bodyCode, primitiveType, arrVLStr.substring(2),
 					levelIndex + 1, arrayLevel, wrapType);
 		}
 		else
 		{
 			tmpParam.put("wrapType", wrapType);
-			BeanTool.codeRes.printRes("arrayCell.convert.wrap", tmpParam, 0, bodyCode).appendln();
+			BeanTool.printRes("arrayCell.convert.wrap", tmpParam, 0, bodyCode).appendln();
 		}
 		bodyCode.append('}').appendln();
 	}
@@ -671,7 +687,7 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("private Map").append(arrVLStr)
 				.append(" convertArray(Object").append(arrVLStr).append(" array0, Object converter)").appendln()
-				.append("      throws Throwable").appendln().append('{').appendln();
+				.append("      throws Exception").appendln().append('{').appendln();
 		fnCode.append("Map").append(arrVLStr).append(" destArr0 = new Map[array0.length]")
 				.append(arrVLStr.substring(2)).append(';').appendln();
 		appendBeanArray2MapCode(fnCode, arrVLStr.substring(2), tmpParam, 0, level);
@@ -681,7 +697,7 @@ public class ArrayTool
 		// 实现接口中不带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object converter, boolean needThrow)").appendln()
-				.append("      throws Throwable").appendln().append('{').appendln()
+				.append("      throws Exception").appendln().append('{').appendln()
 				.append("return this.convertArray((Object").append(arrVLStr).append(") array, converter);")
 				.appendln().append('}');
 		cg.addMethod(fnCode.toString());
@@ -690,7 +706,7 @@ public class ArrayTool
 		fnCode = StringTool.createStringAppender();
 		fnCode.append("public Object convertArray(Object array, Object destArr, Object converter, boolean needThrow)")
 				.appendln()
-				.append("      throws Throwable").appendln().append('{').appendln()
+				.append("      throws Exception").appendln().append('{').appendln()
 				.append("return null;").appendln().append('}');
 		cg.addMethod(fnCode.toString());
 	}
@@ -703,22 +719,71 @@ public class ArrayTool
 	{
 		params.put("levelIndex", Integer.toString(levelIndex));
 		params.put("nextIndex", Integer.toString(levelIndex + 1));
-		BeanTool.codeRes.printRes("array2array_for", params, 0, bodyCode).appendln();
+		BeanTool.printRes("array2array_for", params, 0, bodyCode).appendln();
 		bodyCode.append('{').appendln();
-		BeanTool.codeRes.printRes("array2array_if", params, 0, bodyCode).appendln();
+		BeanTool.printRes("array2array_if", params, 0, bodyCode).appendln();
 		bodyCode.append('{').appendln();
 		if (levelIndex < arrayLevel - 1)
 		{
 			params.put("destArrayDef", arrVLStr.substring(2));
 			params.put("srcArrayDef", arrVLStr.substring(2));
-			BeanTool.codeRes.printRes("array2array_def", params, 0, bodyCode).appendln();
+			BeanTool.printRes("array2array_def", params, 0, bodyCode).appendln();
 			appendBeanArray2MapCode(bodyCode, arrVLStr.substring(2), params, levelIndex + 1, arrayLevel);
 		}
 		else
 		{
-			BeanTool.codeRes.printRes("arrayCell.convert.map", params, 0, bodyCode).appendln();
+			BeanTool.printRes("arrayCell.convert.map", params, 0, bodyCode).appendln();
 		}
 		bodyCode.append('}').appendln().append('}').appendln();
+	}
+
+	/**
+	 * 将一个Collection对象转换成数组.
+	 *
+	 * @param deep  是否需要深度解析每一个元素
+	 */
+	public static Object collection2Array(Collection collection, boolean deep)
+	{
+		if (collection == null)
+		{
+			return null;
+		}
+		Iterator itr = collection.iterator();
+		int count = collection.size();
+		if (count >= 0)
+		{
+			Object[] result = new Object[count];
+			for (int i = 0; i < count; i++)
+			{
+				if (deep)
+				{
+					Object tmp = itr.next();
+					result[i] = tmp instanceof Collection ? collection2Array((Collection) tmp, deep) : tmp;
+				}
+				else
+				{
+					result[i] = itr.next();
+				}
+			}
+			return result;
+		}
+		else
+		{
+			List result = new ArrayList(128);
+			while (itr.hasNext())
+			{
+				if (deep)
+				{
+					Object tmp = itr.next();
+					result.add(tmp instanceof Collection ? collection2Array((Collection) tmp, deep) : tmp);
+				}
+				else
+				{
+					result.add(itr.next());
+				}
+			}
+			return result.toArray();
+		}
 	}
 
 	/**

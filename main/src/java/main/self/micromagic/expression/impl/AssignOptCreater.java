@@ -5,10 +5,10 @@ import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.expression.AbstractExpression;
-import self.micromagic.expression.ExpCreater;
-import self.micromagic.expression.ExpTool;
+import self.micromagic.expression.ExprCreater;
+import self.micromagic.expression.ExprTool;
 import self.micromagic.expression.Expression;
-import self.micromagic.expression.antlr.ExpTokenTypes;
+import self.micromagic.expression.antlr.ExprTokenTypes;
 import self.micromagic.util.ref.BooleanRef;
 import antlr.collections.AST;
 
@@ -16,20 +16,20 @@ import antlr.collections.AST;
  * 构造赋值操作的表达式.
  */
 public class AssignOptCreater
-		implements ExpCreater
+		implements ExprCreater
 {
 	public Object create(AST node)
 	{
 		int assignType = node.getType();
 		AST tmp = node.getFirstChild();
-		if (tmp.getType() != ExpTokenTypes.VAR)
+		if (tmp.getType() != ExprTokenTypes.VAR)
 		{
 			throw new EternaException("Only assign to var, the node is [" + tmp.getType() + "].");
 		}
 		DataHandler var = VarCreater.create("assign", tmp, false);
 		tmp = tmp.getNextSibling();
-		Object arg = ExpTool.parseExpNode(tmp);
-		if (assignType == ExpTokenTypes.PLUS_ASSIGN)
+		Object arg = ExprTool.parseExpNode(tmp);
+		if (assignType == ExprTokenTypes.PLUS_ASSIGN)
 		{
 			arg = new PlusExpression(var, arg);
 		}

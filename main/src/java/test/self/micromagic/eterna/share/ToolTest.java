@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import junit.framework.TestCase;
+import self.micromagic.eterna.share.sub.TestClass;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ByteConverter;
 import self.micromagic.util.converter.DoubleConverter;
@@ -29,6 +30,17 @@ import tool.PrivateAccessor;
 
 public class ToolTest extends TestCase
 {
+	public void testInvoke()
+			throws Exception
+	{
+		Object obj = new TestClass.TestClass3();
+		Object r = Tool.invokeExactMethod(obj, "getValue", new Object[]{"0000"});
+		System.out.println(r);
+		obj = new TestClass.TestClass4();
+		r = Tool.invokeExactMethod(obj, "getValue", new Object[]{"11111"});
+		System.out.println(r);
+	}
+
 	public void testMakeAllAttrTypeDefMap()
 			throws Exception
 	{
@@ -90,3 +102,4 @@ public class ToolTest extends TestCase
 	}
 
 }
+

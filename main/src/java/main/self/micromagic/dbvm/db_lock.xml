@@ -39,7 +39,8 @@
 			<!-- 获取数据库锁信息 -->
 			<query name="getLockInfo">
 				<prepared-sql noLine="true">
-					select lockName, lockValue from #const(db_lock_table)
+					select lockName, lockValue, lockTime, #const(now) as nowTime
+					from #const(db_lock_table)
 					where lockName = ?
 				</prepared-sql>
 				<parameters>
@@ -48,6 +49,8 @@
 				<readers>
 					<reader name="lockName" type="String" />
 					<reader name="lockValue" type="String" />
+					<reader name="lockTime" type="Datetime" />
+					<reader name="nowTime" type="Datetime" />
 				</readers>
 			</query>
 			<!-- 添加数据库锁信息 -->

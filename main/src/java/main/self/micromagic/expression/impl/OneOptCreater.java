@@ -4,20 +4,19 @@ package self.micromagic.expression.impl;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.expression.AbstractExpression;
-import self.micromagic.expression.ExpCreater;
-import self.micromagic.expression.ExpTool;
+import self.micromagic.expression.ExprCreater;
+import self.micromagic.expression.ExprTool;
 import self.micromagic.expression.Expression;
 import self.micromagic.expression.Operation;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.BooleanRef;
-import self.micromagic.util.ref.ObjectRef;
 import antlr.collections.AST;
 
 /**
  * 构造单目操作的表达式.
  */
 public class OneOptCreater
-		implements ExpCreater
+		implements ExprCreater
 {
 	final int typeLevel;
 	final String optName;
@@ -33,7 +32,7 @@ public class OneOptCreater
 	public Object create(AST node)
 	{
 		AST tmp = node.getFirstChild();
-		Object arg = ExpTool.parseExpNode(tmp);
+		Object arg = ExprTool.parseExpNode(tmp);
 		return new OneOptExpression(arg, this);
 	}
 
@@ -80,18 +79,22 @@ class OneOptExpression extends AbstractExpression
 		{
 			return !BooleanConverter.toBoolean(arg) ? Boolean.TRUE : Boolean.FALSE;
 		}
-		ObjectRef ref = new ObjectRef(arg);
-		int level = ExpTool.getNumberLevel(ref, true);
+		int level = ExprTool.getNumberLevel(arg, true);
 		if (level == -1)
 		{
 			throw new EternaException("The [" + arg.getClass() + "] isn't number.");
 		}
-		if (level > ExpTool.LONG_LEVEL && (creater.typeLevel & TYPE_LEVLE_INT) != 0)
+		if (level >= ExprTool.NEED_CAST_LEVEL)
 		{
-			level = ExpTool.LONG_LEVEL;
+			arg = ExprTool.cast2Number(level, arg);
+			level ^= ExprTool.NEED_CAST_LEVEL;
 		}
-		Operation opt = ExpTool.getNumberOpt(level, creater.optName, creater.optFlag);
-		return opt.exec(ref.getObject(), null);
+		if (level > ExprTool.LONG_LEVEL && (creater.typeLevel & TYPE_LEVLE_INT) != 0)
+		{
+			level = ExprTool.LONG_LEVEL;
+		}
+		Operation opt = ExprTool.getNumberOpt(level, creater.optName, creater.optFlag);
+		return opt.exec(arg, null);
 	}
 
 }

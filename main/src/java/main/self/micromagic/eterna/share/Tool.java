@@ -409,6 +409,7 @@ public class Tool
 		Method method = c.getMethod(methodName, parameterTypes);
 		try
 		{
+			method.setAccessible(true);
 			return method.invoke(object, args);
 		}
 		catch (InvocationTargetException ex)
@@ -468,6 +469,7 @@ public class Tool
 		}
 		try
 		{
+			method.setAccessible(true);
 			return method.invoke(object, args);
 		}
 		catch (InvocationTargetException ex)

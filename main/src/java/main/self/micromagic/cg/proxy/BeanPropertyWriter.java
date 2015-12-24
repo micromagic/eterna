@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-package self.micromagic.cg;
+package self.micromagic.cg.proxy;
 
 import java.lang.reflect.Member;
+
+import self.micromagic.cg.BeanMap;
+import self.micromagic.cg.CellDescriptor;
 
 /**
  * 设置一个bean属性的工具.
@@ -45,6 +48,6 @@ public interface BeanPropertyWriter
 	 * @return              成功设置了值的属性的个数
 	 */
 	int setBeanValue(CellDescriptor cd, int[] indexs, Object bean, Object value, String prefix,
-			BeanMap beanMap, Object originObj, Object oldValue) throws Throwable;
+			BeanMap beanMap, Object originObj, Object oldValue) throws Exception;
 
 }

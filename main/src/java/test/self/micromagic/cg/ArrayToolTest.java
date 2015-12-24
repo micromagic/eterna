@@ -1,10 +1,31 @@
 
 package self.micromagic.cg;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import junit.framework.TestCase;
+import self.micromagic.util.Utility;
 
 public class ArrayToolTest extends TestCase
 {
+	public void testCollection()
+	{
+		List list = new ArrayList();
+		list.add(new Object[]{"1"});
+		list.add(Arrays.asList(new Object[]{"2", "3"}));
+		Object arr = ArrayTool.convertArray(1, Integer[].class, list, true);
+		assertEquals(Integer[][].class, arr.getClass());
+		assertEquals(2, ((Object[]) arr).length);
+		Integer[][] real = (Integer[][]) arr;
+		assertEquals(1, real[0].length);
+		assertEquals(2, real[1].length);
+		assertEquals(Utility.INTEGER_1, real[0][0]);
+		assertEquals(Utility.INTEGER_2, real[1][0]);
+		assertEquals(Utility.INTEGER_3, real[1][1]);
+	}
+
 	public void testConvertArray()
 	{
 		//self.micromagic.util.Utility.setProperty(CG.COMPILE_TYPE_PROPERTY, "ant");

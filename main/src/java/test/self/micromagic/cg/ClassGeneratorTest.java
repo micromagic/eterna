@@ -17,6 +17,7 @@
 package self.micromagic.cg;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -35,11 +36,60 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.UtilityTest;
+import self.micromagic.util.container.SynHashMap;
 import tool.PrivateAccessor;
 
 public class ClassGeneratorTest extends TestCase
 {
-	public void testClassKeyCache()
+	public void testClassKeyCache1()
+			throws Exception
+	{
+		ClassKeyCache cache = ClassKeyCache.getInstance();
+		ClassLoader thisLoader = this.getClass().getClassLoader();
+		ClassLoader loader = new UtilityTest.ReleaseTestClassLoader(thisLoader);
+		WeakReference ref = checkRelease(cache, loader);
+		Object obj = PrivateAccessor.invoke(cache, "getCacheCell", new Object[]{loader});
+		assertTrue(obj.getClass().getName().endsWith("CacheCellImpl1"));
+		loader = null;
+		int index = 0;
+		while (ref.get() != null)
+		{
+			System.out.println("t1:" + index++);
+			System.gc();
+			Thread.sleep(1200L);
+		}
+		assertEquals(0, cache.size());
+		System.out.println("--- end1 -----------");
+
+		loader = new TestCachedClassLoader(thisLoader);
+		ref = checkRelease(cache, loader);
+		obj = PrivateAccessor.invoke(cache, "getCacheCell", new Object[]{loader});
+		assertTrue(obj.getClass().getName().endsWith("CacheCellImpl2"));
+		loader = null;
+		index = 0;
+		while (ref.get() != null)
+		{
+			System.out.println("t2:" + index++);
+			System.gc();
+			Thread.sleep(1200L);
+		}
+		assertEquals(0, cache.size());
+		System.out.println("--- end2 -----------");
+	}
+
+	private WeakReference checkRelease(ClassKeyCache cache, ClassLoader loader)
+			throws Exception
+	{
+		ClassGenerator cg = getClassGenerator("cg.test.KeyAnt");
+		cg.setCompileType(CG.COMPILE_TYPE_ANT);
+		cg.setClassLoader(loader);
+		Class key1 = cg.createClass();
+		cache.setProperty(key1, key1.newInstance());
+		assertEquals(1, cache.size());
+		return new WeakReference(key1);
+	}
+
+	public void testClassKeyCache2()
 			throws Exception
 	{
 		ClassKeyCache ckc = ClassKeyCache.getInstance();
@@ -375,6 +425,23 @@ public class ClassGeneratorTest extends TestCase
 		public synchronized void t2()
 		{
 
+		}
+
+	}
+
+	public static class TestCachedClassLoader extends ClassLoader
+			implements CachedClassLoader
+	{
+		private final Map caches = new SynHashMap(3, SynHashMap.WEAK);
+
+		public TestCachedClassLoader(ClassLoader parent)
+		{
+			super(parent);
+		}
+
+		public void addCache(Object key, Object cache)
+		{
+			this.caches.put(key, cache);
 		}
 
 	}

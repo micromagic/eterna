@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package self.micromagic.cg;
+package self.micromagic.cg.proxy;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+
+import self.micromagic.cg.BeanMethodInfo;
+import self.micromagic.cg.ClassGenerator;
 
 /**
  * 对一个属性单元的代码生成器.

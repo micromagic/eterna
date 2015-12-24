@@ -32,7 +32,7 @@ public interface ArrayConverter
 	 * @param needThrow  当给出的数组不是基本类型数组时, 是否要抛出异常
 	 * @return  转换后的数组
 	 */
-	Object convertArray(Object array, Object destArr, Object converter, boolean needThrow) throws Throwable;
+	Object convertArray(Object array, Object destArr, Object converter, boolean needThrow) throws Exception;
 
 	/**
 	 * 处理数组类型的转换.
@@ -42,6 +42,6 @@ public interface ArrayConverter
 	 * @param needThrow  当给出的数组不是基本类型数组时, 是否要抛出异常
 	 * @return  转换后的数组
 	 */
-	Object convertArray(Object array, Object converter, boolean needThrow) throws Throwable;
+	Object convertArray(Object array, Object converter, boolean needThrow) throws Exception;
 
 }

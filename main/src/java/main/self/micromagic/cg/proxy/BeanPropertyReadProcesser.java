@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package self.micromagic.cg;
+package self.micromagic.cg.proxy;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Collection;
 
+import self.micromagic.cg.BeanMethodInfo;
+import self.micromagic.cg.BeanTool;
+import self.micromagic.cg.CG;
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.IntegerRef;
@@ -30,7 +34,7 @@ import self.micromagic.util.ref.IntegerRef;
  *
  * @author micromagic@sina.com
  */
-class BeanPropertyReadProcesser
+public class BeanPropertyReadProcesser
 		implements UnitProcesser
 {
 	protected Map paramCache = new HashMap();
@@ -77,7 +81,7 @@ class BeanPropertyReadProcesser
 		if (wrapName != null)
 		{
 			this.paramCache.put("wrapName", wrapName);
-			BeanTool.codeRes.printRes(resNames[0], this.paramCache, 1, sa).appendln();
+			BeanTool.printRes(resNames[0], this.paramCache, 1, sa).appendln();
 		}
 		else if (type.isArray())
 		{
@@ -86,13 +90,13 @@ class BeanPropertyReadProcesser
 		else if (Collection.class.isAssignableFrom(type))
 		{
 			StringAppender tmpBuf = StringTool.createStringAppender(64);
-			BeanTool.codeRes.printRes("collectionTypeIndexGet", this.paramCache, 0, tmpBuf);
+			BeanTool.printRes("collectionTypeIndexGet", this.paramCache, 0, tmpBuf);
 			this.paramCache.put("getCollectionIndexCode", tmpBuf.toString());
-			BeanTool.codeRes.printRes(resNames[3], this.paramCache, 1, sa).appendln();
+			BeanTool.printRes(resNames[3], this.paramCache, 1, sa).appendln();
 		}
 		else
 		{
-			BeanTool.codeRes.printRes(resNames[1], this.paramCache, 1, sa).appendln();
+			BeanTool.printRes(resNames[1], this.paramCache, 1, sa).appendln();
 		}
 		return sa.toString();
 	}
@@ -107,7 +111,7 @@ class BeanPropertyReadProcesser
 		Class eType = ClassGenerator.getArrayElementType(type, level);
 		String arrVLStr1 = ClassGenerator.getArrayDefine(level.value);
 		this.paramCache.put("arrayLevel", level);
-		BeanTool.codeRes.printRes(resNames[2], this.paramCache, 1, sa).appendln();
+		BeanTool.printRes(resNames[2], this.paramCache, 1, sa).appendln();
 		String tmpWrapName = null;
 		String tmpResName = "arrayTypeOtherGet";
 		if (eType.isPrimitive())
@@ -122,7 +126,7 @@ class BeanPropertyReadProcesser
 		String fnName = "public Object getBeanValue(CellDescriptor cd, int[] indexs, Object arrObj, "
 				+ "String prefix, BeanMap beanMap)";
 		String beginCode = StringTool.createStringAppender().append(fnName).appendln()
-				.append("      throws Throwable").appendln().append('{').appendln()
+				.append("      throws Exception").appendln().append('{').appendln()
 				.append(ClassGenerator.getClassName(eType)).append(arrVLStr1).append(' ')
 				.append(BeanTool.DEF_ARRAY_NAME).append(" = (").append(ClassGenerator.getClassName(eType))
 				.append(arrVLStr1).append(") arrObj;").toString();
@@ -146,7 +150,7 @@ class BeanPropertyReadProcesser
 			{
 				tmpResName = "arrayTypePrimitiveGet";
 			}
-			BeanTool.codeRes.printRes(tmpResName, this.paramCache, 0, bodyCode).appendln();
+			BeanTool.printRes(tmpResName, this.paramCache, 0, bodyCode).appendln();
 			Object defObj = BeanTool.createPropertyProcesser("P_arr_" + pName, this.beanClass,
 					UnitProcesser.BeanProperty.class, BeanPropertyReader.class,
 					beginCode, bodyCode.toString(), endCode, imports);

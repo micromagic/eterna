@@ -34,6 +34,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import self.micromagic.cg.proxy.BeanPropertyReadProcesser;
+import self.micromagic.cg.proxy.BeanPropertyReader;
+import self.micromagic.cg.proxy.BeanPropertyWriteProcesser;
+import self.micromagic.cg.proxy.BeanPropertyWriter;
+import self.micromagic.cg.proxy.MapToBean;
+import self.micromagic.cg.proxy.MapToBeanProcesser;
+import self.micromagic.cg.proxy.ProcesserInfo;
+import self.micromagic.cg.proxy.UnitProcesser;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
@@ -283,7 +291,7 @@ public class BeanTool
 				String fnName = "public int setBeanValue(CellDescriptor cd, int[] indexs, Object bean, "
 						+ "Object value, String prefix, BeanMap beanMap, Object originObj, Object oldValue)";
 				String mh = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Throwable").toString();
+						.append("		throws Exception").toString();
 				String beginCode = StringTool.createStringAppender()
 						.append("	int ").append(SETTED_COUNT_NAME).append(" = 0;").appendln()
 						.toString();
@@ -330,7 +338,7 @@ public class BeanTool
 				fnName = "public Object getBeanValue(CellDescriptor cd, int[] indexs, Object bean, "
 						+ "String prefix, BeanMap beanMap)";
 				mh = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Throwable").toString();
+						.append("		throws Exception").toString();
 				beginCode = endCode = "";
 				BeanPropertyReadProcesser rp = new BeanPropertyReadProcesser(beanClass);
 				tmp = createPropertyProcessers(beanClass, BeanPropertyReader.class,
@@ -375,7 +383,7 @@ public class BeanTool
 
 				// 这里的fnName和前面的相同, 就不用重新赋值了
 				beginCode = StringTool.createStringAppender().append(fnName).appendln()
-						.append("		throws Throwable").appendln().append('{').toString();
+						.append("		throws Exception").appendln().append('{').toString();
 				endCode = "}";
 				String bodyCode = "return new " + ClassGenerator.getClassName(beanClass) + "();";
 				CellDescriptor tmpBMC = null;
@@ -442,7 +450,7 @@ public class BeanTool
 			{
 				String mh = StringTool.createStringAppender()
 						.append("public int setBeanValues(Object bean, Map values, String prefix)").appendln()
-						.append("		throws Throwable").toString();
+						.append("		throws Exception").toString();
 				String beginCode = StringTool.createStringAppender()
 						.append("	Object ").append(TMP_OBJ_NAME).append(';').appendln()
 						.append("	int ").append(SETTED_COUNT_NAME).append(" = 0;").appendln()
@@ -910,7 +918,7 @@ public class BeanTool
 	 * @param imports         要引入的包
 	 * @return  返回相应的处理类
 	 */
-	static Object createPropertyProcesser(String suffix, Class beanClass, Class superClass,
+	public static Object createPropertyProcesser(String suffix, Class beanClass, Class superClass,
 			Class interfaceClass, String beginCode, String bodyCode, String endCode, String[] imports)
 	{
 		ClassGenerator cg = ClassGenerator.createClassGenerator(
@@ -1005,6 +1013,14 @@ public class BeanTool
 	}
 
 	/**
+	 * 根据值的类型获得转换器的索引值.
+	 */
+	public static int getConverterIndex(Class type)
+	{
+		return converterManager.getConverterIndex(type);
+	}
+
+	/**
 	 * 根据转换器的索引值获取对应的转换器.
 	 *
 	 * @param index  转换器的索引值
@@ -1017,7 +1033,7 @@ public class BeanTool
 	/**
 	 * 获取对基础类型设置的代码.
 	 */
-	static StringAppender getPrimitiveSetCode(String wrapName, Class type, String converterBase,
+	public static StringAppender getPrimitiveSetCode(String wrapName, Class type, String converterBase,
 			String resName, Map paramCache, StringAppender sa)
 	{
 		int vcIndex = converterManager.getConverterIndex(type);
@@ -1037,7 +1053,7 @@ public class BeanTool
 	/**
 	 * 基本类型对应的外覆类.
 	 */
-	static Map primitiveWrapClass = new HashMap();
+	static final Map primitiveWrapClass = new HashMap();
 
 	/**
 	 * 如果给出的类名是一个基本类型, 则给出他的外覆类的类名.
@@ -1182,9 +1198,17 @@ public class BeanTool
 	public static final CharacterConverter charConverter = new CharacterConverter();
 
 	/**
+	 * 输出资源的值.
+	 */
+	public static StringAppender printRes(String resName, Map paramBind, int indentCount, StringAppender buf)
+	{
+		return codeRes.printRes(resName, paramBind, indentCount, buf);
+	}
+
+	/**
 	 * 代码段资源.
 	 */
-	static ResManager codeRes = new ResManager();
+	private static ResManager codeRes = new ResManager();
 
 	/**
 	 * 初始化代码资源及各种类型对应的转换器.
@@ -1249,51 +1273,51 @@ public class BeanTool
 	/**
 	 * 获取字符串数组第一个元素的代码资源名称
 	 */
-	static final String GET_FIRST_VALUE_RES = "getFirstValue";
+	public static final String GET_FIRST_VALUE_RES = "getFirstValue";
 
 	/**
 	 * 存放读取的临时对象的变量名.
 	 */
-	static final String TMP_OBJ_NAME = "tmpObj";
+	public static final String TMP_OBJ_NAME = "tmpObj";
 
 	/**
 	 * 属性描述类的变量名.
 	 */
-	static final String CELL_DESCRIPTOR_NAME = "cd";
+	public static final String CELL_DESCRIPTOR_NAME = "cd";
 
 	/**
 	 * 当前的BeanMap对象的变量名.
 	 */
-	static final String BEAN_MAP_NAME = "beanMap";
+	public static final String BEAN_MAP_NAME = "beanMap";
 
 	/**
 	 * 存放设置的属性个数的变量名.
 	 */
-	static final String SETTED_COUNT_NAME = "settedCount";
+	public static final String SETTED_COUNT_NAME = "settedCount";
 
 	/**
 	 * 存放需要读取的名称前缀的变量名.
 	 */
-	static final String PREFIX_NAME = "prefix";
+	public static final String PREFIX_NAME = "prefix";
 
 	/**
 	 * 存放需要读取的名称(即拼接上前缀后的名称)的变量名.
 	 */
-	static final String TMP_STR_NAME = "tmpStr";
+	public static final String TMP_STR_NAME = "tmpStr";
 
 	/**
 	 * 数组或Collection使用的索引值列表.
 	 */
-	static final String INDEXS_NAME = "indexs";
+	public static final String INDEXS_NAME = "indexs";
 
 	/**
 	 * 定义的数组的名称.
 	 */
-	static final String DEF_ARRAY_NAME = "tmpArr";
+	public static final String DEF_ARRAY_NAME = "tmpArr";
 
 	/**
 	 * 处理者数组的名称.
 	 */
-	static final String PROCESSER_ARRAY_NAME = "processerArr";
+	public static final String PROCESSER_ARRAY_NAME = "processerArr";
 
 }

@@ -13,39 +13,59 @@ import self.micromagic.util.ref.BooleanRef;
 public class SpecialExpression extends AbstractExpression
 		implements Expression
 {
+	private final boolean canTry;
 	private final Object[] args;
 	private final SpecialOpt opt;
 
-	public SpecialExpression(Object[] args, SpecialOpt opt)
+	public SpecialExpression(Object[] args, SpecialOpt opt, boolean allArgConst)
 	{
 		this.opt = opt;
-		this.args = new Object[args.length];
+		this.args = args;
+		this.allArgConst = allArgConst;
+		this.canTry = allArgConst && opt.isStabile();
+	}
+
+	/**
+	 * 检测并处理所有可变为常量的参数.
+	 *
+	 * return 是否所有的参数都变为常量
+	 */
+	public static boolean checkArgs(Object[] args)
+	{
 		boolean allConst = true;
+		BooleanRef ref = new BooleanRef();
 		for (int i = 0; i < args.length; i++)
 		{
-			BooleanRef ref = new BooleanRef();
-			this.args[i] = tryGetValue(args[i], ref);
-			if (!ref.value)
+			args[i] = tryGetValue(args[i], ref);
+			if (allConst && !ref.value)
 			{
 				allConst = false;
 			}
 		}
-		this.allArgConst = allConst && opt.isStabile();
+		return allConst;
 	}
 
 	public Object getResult(AppData data)
 	{
-		Object[] values = new Object[this.args.length];
-		for (int i = 0; i < values.length; i++)
+		Object[] values;
+		if (this.allArgConst)
 		{
-			values[i] = getValue(this.args[i], data);
+			values = this.args;
+		}
+		else
+		{
+			values = new Object[this.args.length];
+			for (int i = 0; i < values.length; i++)
+			{
+				values[i] = getValue(this.args[i], data);
+			}
 		}
 		return this.opt.exec(values);
 	}
 
 	public Object tryGetResult(BooleanRef getted)
 	{
-		if (this.allArgConst)
+		if (this.canTry)
 		{
 			if (getted != null)
 			{

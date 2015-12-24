@@ -1,6 +1,7 @@
 
 package self.micromagic.expression;
 
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,10 +13,12 @@ import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Tool;
-import self.micromagic.expression.antlr.ExpTokenTypes;
+import self.micromagic.expression.antlr.ExprLexer;
+import self.micromagic.expression.antlr.ExprParser;
+import self.micromagic.expression.antlr.ExprTokenTypes;
 import self.micromagic.expression.impl.AssignOptCreater;
-import self.micromagic.expression.impl.IncreaseOptCreater;
 import self.micromagic.expression.impl.NumValueCreater;
+import self.micromagic.expression.impl.ObjValueCreater;
 import self.micromagic.expression.impl.OneOptCreater;
 import self.micromagic.expression.impl.PlusCreater;
 import self.micromagic.expression.impl.SpecialExpression;
@@ -23,21 +26,57 @@ import self.micromagic.expression.impl.StringCreater;
 import self.micromagic.expression.impl.ThreeOptCreater;
 import self.micromagic.expression.impl.TwoOptCreater;
 import self.micromagic.expression.impl.VarCreater;
+import self.micromagic.expression.impl.VarOptCreater;
 import self.micromagic.expression.opts.DefaultOptCreater;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.Utility;
-import self.micromagic.util.ref.ObjectRef;
+import antlr.ANTLRException;
 import antlr.collections.AST;
 
 /**
  * 表达式的工具类.
  */
-public class ExpTool
-		implements ExpTokenTypes
+public class ExprTool
+		implements ExprTokenTypes
 {
 	public static final int INTEGER_LEVEL = 2;
 	public static final int LONG_LEVEL = 3;
 	public static final int DOUBLE_LEVEL = 5;
+	public static final int NEED_CAST_LEVEL = 0x100;
+
+	/**
+	 * 解析一段脚本, 变为一个表达式列表.
+	 *
+	 * @param keepConst  是否需要保留常量表达式.
+	 */
+	public static Object[] parseExps(String statements, boolean keepConst)
+	{
+		ExprLexer lex = new ExprLexer(new StringReader(statements));
+		ExprParser parser = new ExprParser(lex);
+		try
+		{
+			parser.compoundStatement();
+		}
+		catch (ANTLRException ex)
+		{
+			throw new EternaException(ex);
+		}
+		AST tmp = parser.getAST();
+		List result = new ArrayList();
+		while (tmp != null)
+		{
+			if (tmp.getType() != EMPTY_STAT)
+			{
+				Object obj = AbstractExpression.tryGetValue(parseExpNode(tmp), null);
+				if (keepConst || !isConstObject(obj))
+				{
+					result.add(obj);
+				}
+			}
+			tmp = tmp.getNextSibling();
+		}
+		return result.toArray();
+	}
 
 	/**
 	 * 解析一个表达式节点.
@@ -55,7 +94,7 @@ public class ExpTool
 		{
 			return createSpecialExp(node);
 		}
-		ExpCreater creater = createrCache[type];
+		ExprCreater creater = createrCache[type];
 		if (creater == null)
 		{
 			throw new EternaException("Error node type [" + type + "] [" + node.getText() + "].");
@@ -63,35 +102,44 @@ public class ExpTool
 		return creater.create(node);
 	}
 
-	private static ExpCreater[] createrCache = new ExpCreater[128];
+	private static ExprCreater[] createrCache = new ExprCreater[128];
 
 	/**
 	 * 获取字符的类型等级.
 	 *
 	 * @param null2Zero  是否要将空转换为0
 	 */
-	public static int getNumberLevel(ObjectRef number, boolean null2Zero)
+	public static int getNumberLevel(Object number, boolean null2Zero)
 	{
-		Object obj = number.getObject();
-		if (obj == null)
+		if (number == null)
 		{
 			if (null2Zero)
 			{
-				number.setObject(Utility.INTEGER_0);
-				return INTEGER_LEVEL;
+				return INTEGER_LEVEL | NEED_CAST_LEVEL;
 			}
 			return -1;
 		}
-		if (obj instanceof Character)
+		if (number instanceof Character)
 		{
-			number.setObject(new Integer(((Character) obj).charValue()));
-			return INTEGER_LEVEL;
+			return INTEGER_LEVEL | NEED_CAST_LEVEL;
 		}
-		if (!(obj instanceof Number))
+		if (!(number instanceof Number))
 		{
 			return -1;
 		}
-		return getNumberLevel((Number) obj);
+		return getNumberLevel((Number) number);
+	}
+
+	/**
+	 * 转换成数字类型.
+	 */
+	public static Number cast2Number(int level, Object number)
+	{
+		if (number == null)
+		{
+			return Utility.INTEGER_0;
+		}
+		return Utility.createInteger(((Character) number).charValue());
 	}
 
 	/**
@@ -128,6 +176,18 @@ public class ExpTool
 	}
 
 	/**
+	 * 判断对象是否为常量.
+	 */
+	public static boolean isConstObject(Object obj)
+	{
+		if (obj == null)
+		{
+			return true;
+		}
+		return !(obj instanceof DynamicObject);
+	}
+
+	/**
 	 * 创建特殊操作表达式.
 	 */
 	private static SpecialExpression createSpecialExp(AST node)
@@ -147,12 +207,13 @@ public class ExpTool
 			tmp = tmp.getNextSibling();
 		}
 		Object[] args = argList.toArray();
+		boolean allArgConst = SpecialExpression.checkArgs(args);
 		SpecialOpt opt = getSpecialOpt(optName, args);
 		if (opt == null)
 		{
 			throw new EternaException("Not found special opt [" + optName + "].");
 		}
-		return new SpecialExpression(args, opt);
+		return new SpecialExpression(args, opt, allArgConst);
 	}
 
 	/**
@@ -210,8 +271,8 @@ public class ExpTool
 		{
 			String type = NUM_TYPE_NAMES[level];
 			ClassGenerator cg = new ClassGenerator();
-			cg.setClassName(ExpTool.class + "$numOpt" + level + "$" + optName);
-			cg.setClassLoader(ExpTool.class.getClassLoader());
+			cg.setClassName(ExprTool.class + "$numOpt" + level + "$" + optName);
+			cg.setClassLoader(ExprTool.class.getClassLoader());
 			cg.addInterface(Operation.class);
 			char optType = optName.charAt(optName.length() - 1);
 			String resName = optType == '1' ? "oneOpt_num" : optType == '2' ? "twoOpt_num"
@@ -250,7 +311,7 @@ public class ExpTool
 	{
 		try
 		{
-			codeRes.load(ExpTool.class.getResourceAsStream("ExpTool.res"));
+			codeRes.load(ExprTool.class.getResourceAsStream("ExprTool.res"));
 		}
 		catch (Exception ex)
 		{
@@ -259,6 +320,9 @@ public class ExpTool
 		specialList.add(new DefaultOptCreater());
 
 		createrCache[VAR] = new VarCreater();
+		createrCache[OBJ_MAP] = new ObjValueCreater();
+		createrCache[OBJ_LIST] = createrCache[OBJ_MAP];
+
 		createrCache[QUESTION] = new ThreeOptCreater();
 		createrCache[ASSIGN] = new AssignOptCreater();
 		createrCache[PLUS_ASSIGN] = createrCache[ASSIGN];
@@ -277,7 +341,7 @@ public class ExpTool
 		createrCache[MINUS] = new TwoOptCreater(
 				AbstractExpression.TYPE_LEVLE_NUM, "MINUS2", "-");
 		createrCache[STAR] = new TwoOptCreater(
-				AbstractExpression.TYPE_LEVLE_NUM, "STAR2", "-");
+				AbstractExpression.TYPE_LEVLE_NUM, "STAR2", "*");
 		createrCache[DIV] = new TwoOptCreater(
 				AbstractExpression.TYPE_LEVLE_NUM, "DIV2", "/");
 		createrCache[MOD] = new TwoOptCreater(
@@ -323,10 +387,11 @@ public class ExpTool
 		createrCache[UNARY_PLUS] = new OneOptCreater(
 				AbstractExpression.TYPE_LEVLE_NUM, "UNARY_PLUS1", "+");
 
-		createrCache[INC] = new IncreaseOptCreater();
+		createrCache[INC] = new VarOptCreater();
 		createrCache[DEC] = createrCache[INC];
 		createrCache[POST_INC] = createrCache[INC];
 		createrCache[POST_DEC] = createrCache[INC];
+		createrCache[DELETE] = createrCache[INC];
 	}
 
 }

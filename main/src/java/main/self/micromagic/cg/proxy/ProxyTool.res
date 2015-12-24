@@ -16,7 +16,7 @@
 # 代理方法的定义
 ## methodProxy.invoke.declare
 public Object invoke(Object target, Object[] args)
-		throws Throwable
+		throws Exception
 
 # 检查目标对象的类型
 ## methodProxy.check.target

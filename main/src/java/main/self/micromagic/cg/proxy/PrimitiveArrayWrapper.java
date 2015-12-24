@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package self.micromagic.cg;
+package self.micromagic.cg.proxy;
 
 /**
- * 处理的信息类.
+ * 基本类型数组的外覆类包装接口.
  *
  * @author micromagic@sina.com
  */
-class ProcesserInfo
+public interface PrimitiveArrayWrapper
 {
-	public final String name;
-	public final Class type;
-	public final Object processer;
-
-	public ProcesserInfo(String name, Class type, Object processer)
-	{
-		this.name = name;
-		this.type = type;
-		this.processer = processer;
-	}
+	/**
+	 * 处理对基本类型数组的外覆类包装.
+	 */
+	Object doWrap(Object obj);
 
 }

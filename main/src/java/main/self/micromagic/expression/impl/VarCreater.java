@@ -2,14 +2,14 @@
 package self.micromagic.expression.impl;
 
 import self.micromagic.eterna.model.DataHandler;
-import self.micromagic.expression.ExpCreater;
+import self.micromagic.expression.ExprCreater;
 import antlr.collections.AST;
 
 /**
  * 构造变量的表达式.
  */
 public class VarCreater
-		implements ExpCreater
+		implements ExprCreater
 {
 	public Object create(AST node)
 	{

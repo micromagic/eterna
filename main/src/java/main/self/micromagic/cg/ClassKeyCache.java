@@ -43,7 +43,7 @@ public class ClassKeyCache
 	/**
 	 * 以<code>ClassLoader</code>为键值, 存放的<code>CacheCell</code>.
 	 */
-	private Map caches;
+	private final Map caches;
 
 	private ClassKeyCache()
 	{
@@ -194,7 +194,7 @@ public class ClassKeyCache
 		CacheCell cc = (CacheCell) this.caches.get(cl);
 		if (cc == null)
 		{
-			cc = getCacheCell0(cl, this.caches);
+			cc = getCacheCell0(cl, this.caches, this);
 		}
 		return cc;
 	}
@@ -203,7 +203,8 @@ public class ClassKeyCache
 	 * 根据<code>ClassLoader</code>获取缓存的<code>CacheCell</code>, 如果
 	 * 缓存中没有, 则创建一个.
 	 */
-	private static synchronized CacheCell getCacheCell0(ClassLoader cl, Map caches)
+	private static synchronized CacheCell getCacheCell0(ClassLoader cl, Map caches,
+			ClassKeyCache instance)
 	{
 		CacheCell cc = (CacheCell) caches.get(cl);
 		if (cc == null)
@@ -211,6 +212,12 @@ public class ClassKeyCache
 			if (cl == null || idParentLoader(cl))
 			{
 				cc = new CacheCellImpl0();
+			}
+			else if (cl instanceof CachedClassLoader)
+			{
+				Map cache = new SynHashMap(8, SynHashMap.WEAK);
+				((CachedClassLoader) cl).addCache(instance, cache);
+				cc = new CacheCellImpl2(cache);
 			}
 			else
 			{
@@ -275,7 +282,6 @@ public class ClassKeyCache
 		{
 			method.setAccessible(true);
 			cachesClass = (Class) method.invoke(loader, args);
-			method.setAccessible(false);
 		}
 		catch (ClassFormatError ex)
 		{
@@ -371,7 +377,7 @@ public class ClassKeyCache
 	private static class CacheCellImpl0
 			implements CacheCell
 	{
-		private Map cache = new SynHashMap();
+		private final Map cache = new SynHashMap();
 
 		public Object get(Class c)
 		{
@@ -405,7 +411,7 @@ public class ClassKeyCache
 		 * 这里使用<code>WeakReference</code>来引用对应的类和缓存,
 		 * 这样就不会影响其正常的释放.
 		 */
-		private WeakReference cellClass;
+		private final WeakReference cellClass;
 		private WeakReference cacheObj;
 
 		public CacheCellImpl1(Class cellClass)
@@ -495,6 +501,66 @@ public class ClassKeyCache
 		public int size()
 		{
 			Map cache = this.getCache();
+			if (cache != null)
+			{
+				return cache.size();
+			}
+			return 0;
+		}
+
+	}
+
+
+	/**
+	 * 针对CachedClassLoader的 缓存单元 的实现
+	 */
+	private static class CacheCellImpl2
+			implements CacheCell
+	{
+		/**
+		 * 这里使用<code>WeakReference</code>来引用对应的类和缓存,
+		 * 这样就不会影响其正常的释放.
+		 */
+		private final WeakReference cacheObj;
+
+		public CacheCellImpl2(Map cache)
+		{
+			this.cacheObj = new WeakReference(cache);
+		}
+
+		public Object get(Class c)
+		{
+			Map cache = (Map) this.cacheObj.get();
+			if (cache != null)
+			{
+				return cache.get(c);
+			}
+			return null;
+		}
+
+		public Object put(Class c, Object value)
+		{
+			Map cache = (Map) this.cacheObj.get();
+			if (cache != null)
+			{
+				return cache.put(c, value);
+			}
+			return null;
+		}
+
+		public Object remove(Class c)
+		{
+			Map cache = (Map) this.cacheObj.get();
+			if (cache != null)
+			{
+				return cache.remove(c);
+			}
+			return null;
+		}
+
+		public int size()
+		{
+			Map cache = (Map) this.cacheObj.get();
 			if (cache != null)
 			{
 				return cache.size();

@@ -2,8 +2,8 @@
 package self.micromagic.expression.impl;
 
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.expression.ExpCreater;
-import self.micromagic.expression.antlr.ExpTokenTypes;
+import self.micromagic.expression.ExprCreater;
+import self.micromagic.expression.antlr.ExprTokenTypes;
 import self.micromagic.util.Utility;
 import antlr.collections.AST;
 
@@ -11,7 +11,7 @@ import antlr.collections.AST;
  * 构造数值的表达式.
  */
 public class NumValueCreater
-		implements ExpCreater, ExpTokenTypes
+		implements ExprCreater, ExprTokenTypes
 {
 	public Object create(AST node)
 	{

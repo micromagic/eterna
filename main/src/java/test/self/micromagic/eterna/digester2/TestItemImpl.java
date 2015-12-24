@@ -21,9 +21,9 @@ import java.lang.reflect.Method;
 
 import self.micromagic.cg.BeanDescriptor;
 import self.micromagic.cg.BeanMap;
-import self.micromagic.cg.BeanPropertyWriter;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.CellDescriptor;
+import self.micromagic.cg.proxy.BeanPropertyWriter;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.impl.ParameterGroup;
@@ -122,7 +122,7 @@ public class TestItemImpl extends AbstractGenerator
 		bd.getCell("type").setWriteProcesser(new BeanPropertyWriter() {
 			public int setBeanValue(CellDescriptor cd, int[] indexs, Object bean, Object value,
 					String prefix, BeanMap beanMap, Object originObj, Object oldValue)
-					throws Throwable
+					throws Exception
 			{
 				((TestItemImpl) bean).setType((String) value);
 				return 1;

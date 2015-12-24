@@ -24,24 +24,21 @@
 
       <objs>
 
-         <reader-manager name="beanTool.test">
-            <reader name="valid" type="boolean"/>
-            <reader name="name" type="String"/>
-            <reader name="mainBean.id" type="String"/>
-            <reader name="mainBean.subInfo.id" type="String"/>
-            <reader name="mainBean.name" type="String"/>
-            <reader name="mainBean.subInfo.amount" type="double"/>
-            <reader name="mainBean.other" type="String"/>
-            <reader name="mainBean.birth" type="Date"/>
-            <reader name="mainBean.gradeYear" type="int"/>
-            <reader name="mainBean.subInfo.phone" type="String"/>
-            <reader name="mainBean.subInfo.otherInfo" type="Object"/>
-         </reader-manager>
+         <entity name="beanTool.test">
+            <item name="valid" type="boolean"/>
+            <item name="name" type="String"/>
+            <item name="mainBean.id" type="String"/>
+            <item name="mainBean.subInfo.id" type="String"/>
+            <item name="mainBean.name" type="String"/>
+            <item name="mainBean.subInfo.amount" type="double"/>
+            <item name="mainBean.other" type="String"/>
+            <item name="mainBean.birth" type="Date"/>
+            <item name="mainBean.gradeYear" type="int"/>
+            <item name="mainBean.subInfo.phone" type="String"/>
+            <item name="mainBean.subInfo.otherInfo" type="Object"/>
+         </entity>
 
       </objs>
-
-      <attributes>
-      </attributes>
 
    </factory>
 </eterna-config>

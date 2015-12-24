@@ -217,7 +217,7 @@ public class BeanToolTest extends TestCase
 		}
 		catch (IllegalArgumentException ex)
 		{
-			System.out.println(ex);
+			System.out.println("ok: " + ex);
 		}
 		try
 		{
@@ -412,11 +412,15 @@ public class BeanToolTest extends TestCase
 		assertEquals(expTB.toString(), tb.toString());
 	}
 
+	private static FactoryContainer instance;
 	private ResultRow getResultRow()
 			throws Exception
 	{
-		FactoryContainer instance = ContainerManager.createFactoryContainer(
-				"shareTest", "cp:self/micromagic/cg/shareTest.xml", null);
+		if (instance == null)
+		{
+			instance = ContainerManager.createFactoryContainer(
+					"beanTool.shareTest", "cp:self/micromagic/cg/shareTest.xml", null);
+		}
 		EternaFactory f = (EternaFactory) instance.getFactory();
 		CustomResultIterator cri = new CustomResultIterator(f.getEntity("beanTool.test"), null);
 		cri.createRow(new Object[]{

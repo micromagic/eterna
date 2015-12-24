@@ -77,6 +77,10 @@ public class LongConverter extends ObjectConverter
 		{
 			return this.convertToLong((String) value, format);
 		}
+		if (value instanceof java.util.Date)
+		{
+			return ((java.util.Date) value).getTime();
+		}
 		Object tmpObj = this.changeByPropertyEditor(value);
 		if (tmpObj instanceof Long)
 		{

@@ -7,7 +7,7 @@ import self.micromagic.util.ref.BooleanRef;
 /**
  * 表达式对象.
  */
-public interface Expression
+public interface Expression extends DynamicObject
 {
 	/**
 	 * 获取表达式的结果.

@@ -1265,13 +1265,8 @@ public class PropertiesManager
 				if (!theField.isAccessible())
 				{
 					theField.setAccessible(true);
-					theField.set(null, objValue);
-					theField.setAccessible(false);
 				}
-				else
-				{
-					theField.set(null, objValue);
-				}
+				theField.set(null, objValue);
 			}
 			else
 			{
@@ -1279,13 +1274,8 @@ public class PropertiesManager
 				if (!theMethod.isAccessible())
 				{
 					theMethod.setAccessible(true);
-					theMethod.invoke(null, new Object[]{value});
-					theMethod.setAccessible(false);
 				}
-				else
-				{
-					theMethod.invoke(null, new Object[]{value});
-				}
+				theMethod.invoke(null, new Object[]{value});
 			}
 		}
 
