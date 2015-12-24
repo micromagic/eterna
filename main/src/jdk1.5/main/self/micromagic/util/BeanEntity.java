@@ -25,10 +25,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 import self.micromagic.cg.BeanDescriptor;
-import self.micromagic.cg.BeanPropertyReader;
-import self.micromagic.cg.BeanPropertyWriter;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.CellDescriptor;
+import self.micromagic.cg.proxy.BeanPropertyReader;
+import self.micromagic.cg.proxy.BeanPropertyWriter;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.dao.impl.EntityImpl;
