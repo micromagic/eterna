@@ -55,6 +55,10 @@ public class DataHandler
 	 * 配置中设置是否需要在日志中记录原始值的标识.
 	 */
 	public static final String LOG_OLD_VALUE_FLAG = "eterna.data.logOldValue";
+	/**
+	 * 配置中设置是否需要在日志中记录变量值变更信息的标识.
+	 */
+	public static final String LOG_VAR_CHANGED_FLAG = "eterna.data.logVarChanged";
 
 	/**
 	 * 无操作.
@@ -109,6 +113,10 @@ public class DataHandler
 	 * 是否需要在日志中记录原始值.
 	 */
 	private static boolean logOldValue;
+	/**
+	 * 是否需要在日志中记录变量值的变更.
+	 */
+	private static boolean logVarChanged;
 
 	static
 	{
@@ -116,6 +124,8 @@ public class DataHandler
 		{
 			Utility.addFieldPropertyManager(LOG_OLD_VALUE_FLAG,
 					DataHandler.class, "logOldValue");
+			Utility.addFieldPropertyManager(LOG_VAR_CHANGED_FLAG,
+					DataHandler.class, "logVarChanged");
 		}
 		catch (Exception ex) {}
 	}
@@ -374,7 +384,7 @@ public class DataHandler
 			{
 				Object old = this.varInfo.getValue(data);
 				this.varInfo.setValue(data, value);
-				if (data.getLogType() > 0)
+				if (logVarChanged && data.getLogType() > 0)
 				{
 					Element nowNode = data.getCurrentNode();
 					if (nowNode != null)

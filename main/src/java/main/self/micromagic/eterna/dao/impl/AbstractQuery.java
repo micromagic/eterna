@@ -531,12 +531,15 @@ public abstract class AbstractQuery extends BaseDao
 			int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
 			if (!needAutoAddColumn(colName) || readerMap.containsKey(colName))
 			{
-				// 如果列的别名已存在, 或不需要自动添加的列, 则直接下一个
-				continue;
+				// 如果列的别名已存在, 或不需要自动添加的列, 则添加一个空值
+				rReaders.add(null);
 			}
-			ColumnInfo ci = new ColumnInfo(colName, typeId);
-			rReaders.add(ci);
-			readerMap.put(colName, ci);
+			else
+			{
+				ColumnInfo ci = new ColumnInfo(colName, typeId);
+				rReaders.add(ci);
+				readerMap.put(colName, ci);
+			}
 		}
 
 		// 检查reader中的配置是否在结果中存在
@@ -552,7 +555,7 @@ public abstract class AbstractQuery extends BaseDao
 			{
 				tmp = (ColumnInfo) readerMap.get(r.getAlias().toUpperCase());
 			}
-			if (r.isUseColumnIndex())
+			else if (r.isUseColumnIndex())
 			{
 				int tmpIndex = r.getColumnIndex();
 				if (tmpIndex > 0 && tmpIndex <= count)
@@ -586,7 +589,7 @@ public abstract class AbstractQuery extends BaseDao
 		for (int i = 0; itr.hasNext(); i++)
 		{
 			ColumnInfo tmp = (ColumnInfo) itr.next();
-			if (!tmp.exists)
+			if (tmp != null && !tmp.exists)
 			{
 				hasColumn = true;
 				// 如果结果中的列不在reader配置中, 则添加

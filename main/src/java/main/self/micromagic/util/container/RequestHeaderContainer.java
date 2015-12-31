@@ -16,11 +16,11 @@
 
 package self.micromagic.util.container;
 
-import java.util.Enumeration;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,7 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 public class RequestHeaderContainer extends AbstractContainerSetting
 		implements ValueContainer
 {
-	private HttpServletRequest request;
+	private final HttpServletRequest request;
 	private HttpServletResponse response;
 
 	/**
@@ -101,7 +101,8 @@ public class RequestHeaderContainer extends AbstractContainerSetting
 	 */
 	private Object getHeader(String name, boolean array)
 	{
-		Object value = this.settedMap == null ? null : this.settedMap.get(name);
+		Object value = this.settedMap == null ? null
+				: this.settedMap.get(name == null ? null : name.toLowerCase());
 		if (value == null)
 		{
 			name = this.encodeStr(name, this.request.getCharacterEncoding());
@@ -159,7 +160,8 @@ public class RequestHeaderContainer extends AbstractContainerSetting
 		}
 		if (this.settedMap != null)
 		{
-			return this.settedMap.containsKey(key);
+			return this.settedMap.containsKey(
+					key == null ? null : key.toString().toLowerCase());
 		}
 		return false;
 	}
@@ -210,7 +212,7 @@ public class RequestHeaderContainer extends AbstractContainerSetting
 		{
 			this.settedMap = new HashMap();
 		}
-		this.settedMap.put(name, value);
+		this.settedMap.put(name.toLowerCase(), value);
 	}
 
 	public void removeValue(Object key)
