@@ -71,7 +71,8 @@ objs
 sub:{
 	query,update,format,prepare,entity,constant,daoLogger,
 	search,builderList,builder,
-	model,export,dataPrinter,typicalComponent,view,function,resource
+	model,export,
+	dataPrinter,stringCoder,typicalComponent,view,function,resource
 }
 
 
@@ -356,6 +357,17 @@ same:{name}
 log:{name}
 create:{generator}
 attr:{name}
+sub:{attribute}
+stack:{registerObject,n:0,g:0}
+
+
+## stringCoder
+string-coder
+same:{name}
+log:{name}
+create:{generator}
+attr:{name}
+sub:{attribute}
 stack:{registerObject,n:0,g:0}
 
 

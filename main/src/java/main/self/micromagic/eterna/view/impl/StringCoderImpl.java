@@ -19,7 +19,10 @@ package self.micromagic.eterna.view.impl;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.Map;
 
+import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.StringCoder;
@@ -29,7 +32,7 @@ import self.micromagic.util.StringTool;
 /**
  * @author micromagic@sina.com
  */
-public class StringCoderImpl
+public class StringCoderImpl extends AbstractGenerator
 		implements StringCoder
 {
 	/**
@@ -45,24 +48,24 @@ public class StringCoderImpl
 	/**
 	 * JSON的特殊字符.
 	 */
-	protected static final String[] ESCAPES_JSON = new String[CHAR_TABLE_SIZE];
+	protected final String[] ESCAPES_JSON = new String[CHAR_TABLE_SIZE];
 
 	/**
 	 * HTML的特殊字符.
 	 */
-	protected static final String[] ESCAPES_HTML = new String[CHAR_TABLE_SIZE];
+	protected final String[] ESCAPES_HTML = new String[CHAR_TABLE_SIZE];
 
 	/**
 	 * 有效的名称字符.
 	 */
-	protected static final boolean[] VALID_NAME_CHARS = new boolean[CHAR_TABLE_SIZE];
+	protected final boolean[] VALID_NAME_CHARS = new boolean[CHAR_TABLE_SIZE];
 
 	/**
 	 * 有效的起始名称字符.
 	 */
-	protected static final boolean[] VALID_FIRST_NAME_CHARS = new boolean[CHAR_TABLE_SIZE];
+	protected final boolean[] VALID_FIRST_NAME_CHARS = new boolean[CHAR_TABLE_SIZE];
 
-	static
+	public StringCoderImpl()
 	{
 		for (int i = 0; i < ' '; i++)
 		{
@@ -107,9 +110,50 @@ public class StringCoderImpl
 		}
 	}
 
-	public void initStringCoder(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
+		if (this.initialized)
+		{
+			return true;
+		}
+		this.initialized = true;
+		String json = (String) this.getAttribute("ESCAPES_JSON");
+		if (!StringTool.isEmpty(json))
+		{
+			Map dic = StringTool.string2Map(json, ";", '=');
+			this.changeEscapesDic(ESCAPES_JSON, dic, "ESCAPES_JSON");
+		}
+		String html = (String) this.getAttribute("ESCAPES_HTML");
+		if (!StringTool.isEmpty(html))
+		{
+			Map dic = StringTool.string2Map(html, ";", '=');
+			this.changeEscapesDic(ESCAPES_HTML, dic, "ESCAPES_HTML");
+		}
+		return false;
+	}
+	protected boolean initialized;
+
+	/**
+	 * 修改转换映射表.
+	 */
+	private void changeEscapesDic(String[] dic, Map newIndex, String name)
+	{
+		Iterator itr = newIndex.entrySet().iterator();
+		while (itr.hasNext())
+		{
+			Map.Entry e = (Map.Entry) itr.next();
+			String key = (String) e.getKey();
+			char c;
+			if (key.length() != 1 || (c = key.charAt(0)) >= CHAR_TABLE_SIZE)
+			{
+				log.warn("The " + name + " in [" + this.getName()
+						+ "] has error key [" + key + "].");
+				continue;
+			}
+			String v = (String) e.getValue();
+			dic[c] = StringTool.isEmpty(v) ? null : v;
+		}
 	}
 
 	public String parseJsonRefName(String str)
@@ -369,6 +413,11 @@ public class StringCoderImpl
 			}
 		}
 
+	}
+
+	public Object create()
+	{
+		return this;
 	}
 
 }

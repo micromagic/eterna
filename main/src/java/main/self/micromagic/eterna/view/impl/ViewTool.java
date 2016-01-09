@@ -33,6 +33,7 @@ import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.Function;
 import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.Replacement;
+import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.eterna.view.View;
 import self.micromagic.grammer.GrammerElement;
 import self.micromagic.grammer.GrammerManager;
@@ -335,6 +336,7 @@ public class ViewTool
 		{
 			return;
 		}
+		StringCoder stringCoder = factory.getStringCoder(StringCoder.DEFAULT_NAME);
 		Iterator itr = gclist.iterator();
 		while (itr.hasNext())
 		{
@@ -377,11 +379,11 @@ public class ViewTool
 								String caption = Tool.translateCaption(factory, tmpName);
 								if (caption == null)
 								{
-									buf.append(factory.getStringCoder().toJsonString(tmpName));
+									buf.append(stringCoder.toJsonString(tmpName));
 								}
 								else
 								{
-									buf.append(factory.getStringCoder().toJsonString(caption));
+									buf.append(stringCoder.toJsonString(caption));
 								}
 								buf.append('"');
 							}
@@ -397,7 +399,7 @@ public class ViewTool
 								}
 								else
 								{
-									buf.append(factory.getStringCoder().parseJsonRefName(tmpName));
+									buf.append(stringCoder.parseJsonRefName(tmpName));
 								}
 							}
 						}

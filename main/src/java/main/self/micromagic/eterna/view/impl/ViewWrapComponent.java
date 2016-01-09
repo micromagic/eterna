@@ -21,10 +21,11 @@ import java.util.Iterator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
+import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.eterna.view.View;
-import self.micromagic.util.container.UnmodifiableIterator;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.container.UnmodifiableIterator;
 
 public class ViewWrapComponent extends ComponentImpl
 		implements Component
@@ -46,7 +47,7 @@ public class ViewWrapComponent extends ComponentImpl
 		}
 		this.eternaFactory = factory;
 		this.initialized = true;
-		this.stringCoder = factory.getStringCoder();
+		this.stringCoder = factory.getStringCoder(StringCoder.DEFAULT_NAME);
 		String tmp;
 
 		tmp = (String) factory.getAttribute(VIEW_WRPA_NEED_SCRIPT_FLAG);

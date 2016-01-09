@@ -27,9 +27,9 @@ import java.util.Set;
 
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.eterna.view.Event;
@@ -96,7 +96,7 @@ public class ViewImpl extends AbstractGenerator
 			this.initScript = ViewTool.dealScriptPart(
 					this.viewRes, this.initScript, ViewTool.GRAMMER_TYPE_EXPRESSION, factory);
 
-			this.stringCoder = factory.getStringCoder();
+			this.stringCoder = factory.getStringCoder(StringCoder.DEFAULT_NAME);
 			this.viewGlobalSetting = this.getFactory().getViewGlobalSetting();
 			this.viewGlobalSetting = ViewTool.dealScriptPart(
 					this.viewRes, this.viewGlobalSetting, ViewTool.GRAMMER_TYPE_JSON, factory);

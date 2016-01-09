@@ -288,6 +288,13 @@ public interface EternaFactory extends Factory
 	DataPrinter getDataPrinter(String name) throws EternaException;
 
 	/**
+	 * 获得一个字符串格式转换的编码器.
+	 *
+	 * @param name       字符串格式转换编码器的名称.
+	 */
+	StringCoder getStringCoder(String name) throws EternaException;
+
+	/**
 	 * 获取一个界面中的函数对象.
 	 */
 	Function getFunction(String name) throws EternaException;
@@ -296,10 +303,6 @@ public interface EternaFactory extends Factory
 	 * 获取一个可在界面使用的控件对象.
 	 */
 	Component getTypicalComponent(String name) throws EternaException;
-
-	StringCoder getStringCoder() throws EternaException;
-
-	void setStringCoder(StringCoder sc)throws EternaException;
 
 	/**
 	 * 生成一个<code>View</code>的实例.

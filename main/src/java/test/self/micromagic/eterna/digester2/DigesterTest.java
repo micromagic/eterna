@@ -16,6 +16,8 @@
 
 package self.micromagic.eterna.digester2;
 
+import java.io.Writer;
+
 import junit.framework.TestCase;
 import self.micromagic.eterna.dao.CustomResultIterator;
 import self.micromagic.eterna.dao.Entity;
@@ -31,6 +33,7 @@ import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.view.Component;
+import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.eterna.view.Resource;
 import self.micromagic.eterna.view.View;
 import self.micromagic.util.FormatTool;
@@ -46,12 +49,13 @@ public class DigesterTest extends TestCase
 		assertNotNull(container.getAttribute(MetaDataImpl.CATTR_RRM));
 		container.reInit();
 		assertNull(container.getAttribute(MetaDataImpl.CATTR_RRM));
+		f = (EternaFactory) container.getFactory();
 	}
 
 	public void testThreadInit()
 			throws Exception
 	{
-		InitThread[] arr = new InitThread[32];
+		InitThread[] arr = new InitThread[0];
 		for (int i = 0; i < arr.length; i++)
 		{
 			arr[i] = new InitThread("t1");
@@ -169,6 +173,10 @@ public class DigesterTest extends TestCase
 		assertEquals("iName", entity.getItem(0).getCaption());
 		assertNull(entity.getItem(1).getCaption());
 		assertEquals("ID00002", entity.getItem(2).getName());
+
+		entity = f.getEntity("tmp_e_7");
+		assertEquals(3, entity.getItemCount());
+		assertEquals("ID00003", entity.getItem(2).getName());
 	}
 
 	public void testQuery2()
@@ -183,6 +191,8 @@ public class DigesterTest extends TestCase
 		assertTrue(tmpSQL.endsWith(")  and p3 = ? and t.x2 = ?"));
 		query2.setIgnore("p3");
 		assertTrue(query2.getPreparedScript().endsWith(")  and t.x2 = ?"));
+		assertTrue(query2.getParameterCount() > 5);
+		assertTrue(query2.getReaderManager().getReaderCount() > 5);
 	}
 
 	public void testQuery3()
@@ -308,6 +318,22 @@ public class DigesterTest extends TestCase
 
 		Resource resource = f.getResource("testR");
 		assertEquals("begint.jspend", resource.getValue());
+	}
+
+	public void testDataPrinter()
+			throws Exception
+	{
+		DataPrinter p;
+		Writer out;
+		p = f.getDataPrinter(View.DEFAULT_DATA_PRINTER_NAME);
+		out = StringTool.createWriter();
+		p.print(out, "ab/'c");
+		assertEquals("\"ab\\/\\'c\"", out.toString());
+
+		p = f.getDataPrinter("p02");
+		out = StringTool.createWriter();
+		p.print(out, "ab/'c");
+		assertEquals("\"(a)b/'c\"", out.toString());
 	}
 
 	static void init()

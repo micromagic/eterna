@@ -35,9 +35,14 @@ import self.micromagic.eterna.share.EternaObject;
 public interface DataPrinter extends EternaObject
 {
 	/**
+	 * 在属性中设置使用的字符串格式转换编码器的名称.
+	 */
+	String STRING_CODER_FLAG = "stringCoderName";
+
+	/**
 	 * 获取此数据集输出器的名称.
 	 */
-	public String getName() throws EternaException;
+	String getName() throws EternaException;
 
 	/**
 	 * 输出数据集.

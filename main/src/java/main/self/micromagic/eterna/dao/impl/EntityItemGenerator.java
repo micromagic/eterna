@@ -28,9 +28,16 @@ import self.micromagic.util.converter.BooleanConverter;
 public class EntityItemGenerator extends AbstractGenerator
 		implements EntityItem
 {
+	protected boolean initialized;
+
 	public void initialize(Entity entity)
 			throws EternaException
 	{
+		if (this.initialized)
+		{
+			return;
+		}
+		this.initialized = true;
 		EternaFactory factory = entity.getFactory();
 		this.attributes.convertType(factory, "item");
 		if (this.permissionConfig != null)

@@ -40,19 +40,22 @@ public class TestItemImpl extends AbstractGenerator
 	public void initialize(Entity entity)
 			throws EternaException
 	{
-		this.type = TypeManager.getTypeId(this.typeName);
-		this.columnName = this.columnName == null ? this.getName() : this.columnName;
-		this.attributes.convertType(entity.getFactory(), "item");
-		this.entity = entity;
-		Object obj = this.attributes.getAttribute("myType");
-		if (obj != null)
+		if (this.entity == null)
 		{
-			TestItemPrepare p = new TestItemPrepare();
-			p.setType((String) obj);
-			String tmpName = "n_" + this.getName();
-			p.setName(tmpName);
-			entity.getFactory().registerObject(p);
-			this.setAttribute(ParameterGroup.PREPARE_FLAG, tmpName);
+			this.type = TypeManager.getTypeId(this.typeName);
+			this.columnName = this.columnName == null ? this.getName() : this.columnName;
+			this.attributes.convertType(entity.getFactory(), "item");
+			this.entity = entity;
+			Object obj = this.attributes.getAttribute("myType");
+			if (obj != null)
+			{
+				TestItemPrepare p = new TestItemPrepare();
+				p.setType((String) obj);
+				String tmpName = "n_" + this.getName();
+				p.setName(tmpName);
+				entity.getFactory().registerObject(p);
+				this.setAttribute(ParameterGroup.PREPARE_FLAG, tmpName);
+			}
 		}
 	}
 	private Entity entity;
@@ -97,6 +100,10 @@ public class TestItemImpl extends AbstractGenerator
 	private String columnName;
 
 	public void setType(String type)
+	{
+		this.typeName = type;
+	}
+	public void setTypeName(String type)
 	{
 		this.typeName = type;
 	}

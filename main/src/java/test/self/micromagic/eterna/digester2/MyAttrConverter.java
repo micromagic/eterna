@@ -22,7 +22,19 @@ public class MyAttrConverter extends ObjectConverter
 {
 	public Object convert(Object value)
 	{
-		return this.convert((String) value);
+		if (value instanceof MyType)
+		{
+			return value;
+		}
+		try
+		{
+			return this.convert((String) value);
+		}
+		catch (RuntimeException ex)
+		{
+			System.out.println(ex);
+			throw ex;
+		}
 	}
 
 	public Object convert(String value)

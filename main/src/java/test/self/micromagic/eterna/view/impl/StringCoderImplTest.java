@@ -57,6 +57,14 @@ public class StringCoderImplTest extends TestCase
 		assertEquals("[\"abcdefghijklmnopqrstuvwxyz0123456789\"]", this.stringCoder.parseJsonRefName("abcdefghijklmnopqrstuvwxyz0123456789"));
 	}
 
+	public void testEscapesDic()
+	{
+		assertEquals("a\\'b", this.stringCoder.toJsonString("a'b"));
+		this.stringCoder.ESCAPES_JSON['\''] = null;
+		assertEquals("a'b", this.stringCoder.toJsonString("a'b"));
+		assertEquals("a\\'b", (new StringCoderImpl()).toJsonString("a'b"));
+	}
+
 	public void testToJsonString()
 			throws Exception
 	{

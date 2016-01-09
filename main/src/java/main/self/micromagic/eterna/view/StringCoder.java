@@ -19,18 +19,17 @@ package self.micromagic.eterna.view;
 import java.io.IOException;
 import java.io.Writer;
 
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 
 /**
  * 用于字符串格式转换的编码器.
  */
-public interface StringCoder
+public interface StringCoder extends EternaObject
 {
 	/**
-	 * 初始化.
+	 * 工厂中默认的字符串格式转换的名称.
 	 */
-	void initStringCoder(EternaFactory factory) throws EternaException;
+	String DEFAULT_NAME = "stringCoder";
 
 	/**
 	 * 解析json使用属性的名称. <p>

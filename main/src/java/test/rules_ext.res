@@ -20,8 +20,8 @@ map:{setAttribute,x1(m=0,c=1),x2(m=0):web.h,x3(m=0):i}
 item2
 injectSub:{entity}
 log:{$}
-create:{generator,${entityItem}}
-attr:{$serial(pattern=ID00000):name,colName(m=0):columnName,type(m=0,i=0),$text.iName:caption}
+create:{generator,self.micromagic.eterna.digester2.TestItemImpl}
+attr:{$serial(pattern=ID00000):name,name(m=0),colName(m=0):columnName,type(m=0,i=0),$text.iName:caption}
 stack:{addItem,n:0,g:1}
 
 

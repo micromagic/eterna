@@ -62,7 +62,6 @@ import self.micromagic.eterna.view.Function;
 import self.micromagic.eterna.view.Resource;
 import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.eterna.view.View;
-import self.micromagic.eterna.view.impl.StringCoderImpl;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.IntegerConverter;
@@ -299,14 +298,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.modelCaller = new ModelCallerImpl();
 		}
 		this.modelCaller.initModelCaller(this);
-
-		// 初始化, string-coder
-		ParseException.setContextInfo(null, "stringCoder", "");
-		if (this.stringCoder == null)
-		{
-			this.stringCoder = new StringCoderImpl();
-		}
-		this.stringCoder.initStringCoder(this);
 
 		// 初始化, dao-logger
 		this.initDaoLogger();
@@ -670,7 +661,6 @@ public class EternaFactoryImpl extends AbstractFactory
 	//----------------------------------  view  --------------------------------------
 
 	private String viewGlobalSetting;
-	private StringCoder stringCoder;
 
 	public String getViewGlobalSetting() throws EternaException
 	{
@@ -691,6 +681,11 @@ public class EternaFactoryImpl extends AbstractFactory
 		return (DataPrinter) this.createObject(name);
 	}
 
+	public StringCoder getStringCoder(String name)
+	{
+		return (StringCoder) this.createObject(name);
+	}
+
 	public Function getFunction(String name)
 			throws EternaException
 	{
@@ -701,31 +696,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			throws EternaException
 	{
 		return (Component) this.createObject(name);
-	}
-
-	public StringCoder getStringCoder()
-	{
-		return this.stringCoder;
-	}
-
-	public void setStringCoder(StringCoder sc)
-			throws EternaException
-	{
-		if (this.stringCoder != null)
-		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate StringCoder.");
-			}
-		}
-		else if (sc != null)
-		{
-			if (this.initialized)
-			{
-				sc.initStringCoder(this);
-			}
-			this.stringCoder = sc;
-		}
 	}
 
 	public View createView(String name)

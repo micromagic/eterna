@@ -202,13 +202,13 @@
 				</parameters>
 			</update>
 			<entity name="tmp_e_7">
-				<item name="t1" type="int" generator="self.micromagic.eterna.digester2.TestItemImpl"/>
+				<item name="t1" type="int"/>
 				<item name="t2" type="int" generator="self.micromagic.eterna.digester2.TestItemImpl">
 					<attribute name="myType" value="int"/>
 				</item>
-				<item name="t3" type="int" generator="self.micromagic.eterna.digester2.TestItemImpl">
+				<item2 type="int">
 					<attribute name="myType" value="int"/>
-				</item>
+				</item2>
 			</entity>
 
 			<search name="s1" queryName="q2" conditionIndex="2">
@@ -280,6 +280,14 @@
 			<export name="export" path="${test.page}" viewName="v1"/>
 			
 			<resource name="testR">begin${test.page}end</resource>
+			
+			<data-printer name="p02" generator="self.micromagic.eterna.view.impl.DataPrinterImpl">
+				<attribute name="stringCoderName" value="sc02"/>
+			</data-printer>
+			<string-coder name="stringCoder" generator="self.micromagic.eterna.view.impl.StringCoderImpl"/>
+			<string-coder name="sc02" generator="self.micromagic.eterna.view.impl.StringCoderImpl">
+				<attribute name="ESCAPES_JSON">'=;/=;a=(a);</attribute>
+			</string-coder>
 
 		</objs>
 

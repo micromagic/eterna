@@ -98,11 +98,15 @@ class ParameterImpl
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
-		this.prepare = CreaterManager.createPreparerCreater(this.type, this.prepareName, factory);
-		this.attrs.convertType(factory, "parameter");
-		if (this.permissionConfig != null)
+		if (this.prepare == null)
 		{
-			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
+			this.prepare = CreaterManager.createPreparerCreater(
+					this.type, this.prepareName, factory);
+			this.attrs.convertType(factory, "parameter");
+			if (this.permissionConfig != null)
+			{
+				this.permissionSet = factory.createPermissionSet(this.permissionConfig);
+			}
 		}
 	}
 

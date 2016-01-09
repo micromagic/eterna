@@ -21,7 +21,7 @@ public class TestPermissionSetCreater
 
 	public PermissionSet createPermissionSet(String permission)
 	{
-		System.out.println("p:" + permission);
+		//System.out.println("Permission:" + permission);
 		return new TestPermissionSet(permission);
 	}
 

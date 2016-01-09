@@ -43,6 +43,7 @@ import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.util.FormatTool;
+import self.micromagic.util.StringTool;
 
 /**
  * @author micromagic@sina.com
@@ -69,7 +70,12 @@ public class DataPrinterImpl extends AbstractGenerator
 		{
 			return true;
 		}
-		this.stringCoder = factory.getStringCoder();
+		String name = (String) this.getAttribute(STRING_CODER_FLAG);
+		if (StringTool.isEmpty(name))
+		{
+			name = StringCoder.DEFAULT_NAME;
+		}
+		this.stringCoder = factory.getStringCoder(name);
 		return false;
 	}
 

@@ -74,6 +74,7 @@
 			</builder-list>
 
 			<data-printer name="dataPrinter" generator="self.micromagic.eterna.view.impl.DataPrinterImpl"/>
+			<string-coder name="stringCoder" generator="self.micromagic.eterna.view.impl.StringCoderImpl"/>
 
 			<!-- 给标签库使用的默认空界面 -->
 			<view name="empty.view"/>
