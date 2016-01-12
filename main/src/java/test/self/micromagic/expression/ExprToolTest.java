@@ -85,6 +85,7 @@ public class ExprToolTest extends TestCase
 				+ "$check1 := ++{1, 2}[$list[0] - 1];\n"
 				+ "($map2 := {map@ name1:1,name2:2}).nameX := \"abc\";\n"
 				+ "$check2 := ($map3 := {map@}).test1[2][$map2.nameX].name2 := 'c';\n"
+				+ "$checkMap.a := $checkList[1] := 1;\n"
 				+ "merge({map@ name1:1,name2:2}, const {map@ name3:3});\n";
 		Object[] objs = ExprTool.parseExps(exprs, false);
 		data.modelVars = data.varCache.createCache();
@@ -109,6 +110,13 @@ public class ExprToolTest extends TestCase
 		assertEquals(Utility.INTEGER_2, getValue("$check1"));
 		assertEquals(new Character('c'), getValue("$check2"));
 		System.out.println(getValue("$map3"));
+		checkMap.clear();
+		checkMap.put("a", Utility.INTEGER_1);
+		assertEquals(checkMap, getValue("$checkMap"));
+		list = new ArrayList();
+		list.add(null);
+		list.add(Utility.INTEGER_1);
+		assertEquals(list, getValue("$checkList"));
 		data.clearData();
 	}
 

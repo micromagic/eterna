@@ -378,6 +378,21 @@ public class DataHandler
 			if (this.subs != null)
 			{
 				Object tmp = this.varInfo.getValue(data);
+				if (tmp == null)
+				{
+					// 如果变量值为空, 初始化此变量
+					BooleanRef nextInt = new BooleanRef();
+					getExprValue(this.subs[0], data, nextInt);
+					if (nextInt.value)
+					{
+						tmp = new ArrayList();
+					}
+					else
+					{
+						tmp = new HashMap();
+					}
+					this.varInfo.setValue(data, tmp);
+				}
 				return this.dealValue(tmp, this.subs, data, OPT_TYPE_MODIFY, value);
 			}
 			else

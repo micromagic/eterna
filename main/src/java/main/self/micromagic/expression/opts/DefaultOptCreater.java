@@ -34,6 +34,7 @@ public class DefaultOptCreater
 		optCache.put("split", new SplitString());
 		optCache.put("charAt", new CharAt());
 		optCache.put("length", new GetLength());
+		optCache.put("isEmpty", new CheckEmpty());
 
 		optCache.put("hasNext", new HasNext());
 		optCache.put("next", new NextValue());
