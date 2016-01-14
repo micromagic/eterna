@@ -83,10 +83,10 @@ public class ExprToolTest extends TestCase
 		String exprs = "$list := {1, 2};\n"
 				+ "merge($list, 3, 4, 5)[2]--;\n"
 				+ "$check1 := ++{1, 2}[$list[0] - 1];\n"
-				+ "($map2 := {map@ name1:1,name2:2}).nameX := \"abc\";\n"
-				+ "$check2 := ($map3 := {map@}).test1[2][$map2.nameX].name2 := 'c';\n"
+				+ "($map2 := map@{name1:1,name2:2}).nameX := \"abc\";\n"
+				+ "$check2 := ($map3 := map@{}).test1[2][$map2.nameX].name2 := 'c';\n"
 				+ "$checkMap.a := $checkList[1] := 1;\n"
-				+ "merge({map@ name1:1,name2:2}, const {map@ name3:3});\n";
+				+ "merge(map@{name1:1,name2:2}, const map@{name3:3});\n";
 		Object[] objs = ExprTool.parseExps(exprs, false);
 		data.modelVars = data.varCache.createCache();
 		for (int i = 0; i < objs.length; i++)
@@ -125,10 +125,10 @@ public class ExprToolTest extends TestCase
 	{
 		AppData data = AppData.getCurrentData();
 		String exprs = "$list := {1, 2, 3, 4, 5};\n"
-				+ "$map1 := {map@ \"a\":\"test\",'b':$list,'c':toDate(\"2015-12-12\")};\n"
+				+ "$map1 := map@{\"a\":\"test\",'b':$list,'c':toDate(\"2015-12-12\")};\n"
 				+ "$testName := $map1.a;\n"
 				+ ";\n" // none
-				+ "$map2 := {map@ $testName:1,name2:2,name3:3};\n"
+				+ "$map2 := map@{$testName:1,name2:2,name3:3};\n"
 				+ "link('a', 'b');\n" // const
 				+ "$map1.b[5] := $map2;\n"
 				+ "$check1 := 3 == $map1.b[5].name3 && $map2.test == 1;\n"
@@ -152,6 +152,41 @@ public class ExprToolTest extends TestCase
 		assertEquals(Boolean.TRUE, getValue("$check5"));
 		assertEquals(Boolean.TRUE, getValue("$check6"));
 		assertEquals(Utility.INTEGER_2, getValue("$v1"));
+		data.clearData();
+	}
+
+	public void testConst()
+	{
+		AppData data = AppData.getCurrentData();
+		String exprs = "$testMap := const map@{name1:1};\n"
+				+ "$testList := const {1};\n"
+				+ "$testMap[\"t\" + $index] := $index;\n"
+				+ "merge($testList, 2);\n";
+		Object[] objs = ExprTool.parseExps(exprs, false);
+		data.modelVars = data.varCache.createCache();
+		setValue("$index", "2");
+		for (int i = 0; i < objs.length; i++)
+		{
+			((Expression) objs[i]).getResult(data);
+		}
+		List checkList = new ArrayList();
+		checkList.add(Utility.INTEGER_1);
+		checkList.add(Utility.INTEGER_2);
+		assertEquals(checkList, getValue("$testList"));
+		Map checkMap = new HashMap();
+		checkMap.put("name1", Utility.INTEGER_1);
+		checkMap.put("t2", "2");
+		assertEquals(checkMap, getValue("$testMap"));
+
+		setValue("$index", Utility.INTEGER_3);
+		for (int i = 0; i < objs.length; i++)
+		{
+			((Expression) objs[i]).getResult(data);
+		}
+		checkList.add(Utility.INTEGER_2);
+		assertEquals(checkList, getValue("$testList"));
+		checkMap.put("t3", Utility.INTEGER_3);
+		assertEquals(checkMap, getValue("$testMap"));
 		data.clearData();
 	}
 

@@ -87,6 +87,9 @@ public ExprParser(ParserSharedInputState state) {
 		AST s_AST = null;
 		
 		switch ( LA(1)) {
+		case OBJ_MAP:
+		case OBJ_LIST:
+		case OBJ_SET:
 		case PLUS:
 		case MINUS:
 		case INC:
@@ -256,6 +259,9 @@ public ExprParser(ParserSharedInputState state) {
 		
 		{
 		switch ( LA(1)) {
+		case OBJ_MAP:
+		case OBJ_LIST:
+		case OBJ_SET:
 		case PLUS:
 		case MINUS:
 		case INC:
@@ -837,6 +843,9 @@ public ExprParser(ParserSharedInputState state) {
 			unaryExpression_AST = (AST)currentAST.root;
 			break;
 		}
+		case OBJ_MAP:
+		case OBJ_LIST:
+		case OBJ_SET:
 		case BNOT:
 		case LNOT:
 		case IDENT:
@@ -895,6 +904,9 @@ public ExprParser(ParserSharedInputState state) {
 			unaryExpressionNotPlusMinus_AST = (AST)currentAST.root;
 			break;
 		}
+		case OBJ_MAP:
+		case OBJ_LIST:
+		case OBJ_SET:
 		case IDENT:
 		case LITERAL_true:
 		case LITERAL_false:
@@ -1176,6 +1188,9 @@ public ExprParser(ParserSharedInputState state) {
 			primaryExpression_AST = (AST)currentAST.root;
 			break;
 		}
+		case OBJ_MAP:
+		case OBJ_LIST:
+		case OBJ_SET:
 		case CONST:
 		case LCURLY:
 		{
@@ -1209,10 +1224,10 @@ public ExprParser(ParserSharedInputState state) {
 		Token  lp = null;
 		AST lp_AST = null;
 		
-		boolean synPredMatched79 = false;
+		boolean synPredMatched82 = false;
 		if (((LA(1)==IDENT) && (LA(2)==LPAREN))) {
-			int _m79 = mark();
-			synPredMatched79 = true;
+			int _m82 = mark();
+			synPredMatched82 = true;
 			inputState.guessing++;
 			try {
 				{
@@ -1221,12 +1236,12 @@ public ExprParser(ParserSharedInputState state) {
 				}
 			}
 			catch (RecognitionException pe) {
-				synPredMatched79 = false;
+				synPredMatched82 = false;
 			}
-			rewind(_m79);
+			rewind(_m82);
 inputState.guessing--;
 		}
-		if ( synPredMatched79 ) {
+		if ( synPredMatched82 ) {
 			AST tmp46_AST = null;
 			tmp46_AST = astFactory.create(LT(1));
 			astFactory.addASTChild(currentAST, tmp46_AST);
@@ -1249,7 +1264,7 @@ inputState.guessing--;
 			astFactory.addASTChild(currentAST, tmp48_AST);
 			match(IDENT);
 			{
-			_loop81:
+			_loop84:
 			do {
 				if ((LA(1)==DOT) && (LA(2)==IDENT)) {
 					AST tmp49_AST = null;
@@ -1271,7 +1286,7 @@ inputState.guessing--;
 					match(RBRACK);
 				}
 				else {
-					break _loop81;
+					break _loop84;
 				}
 				
 			} while (true);
@@ -1367,8 +1382,12 @@ inputState.guessing--;
 		returnAST = null;
 		ASTPair currentAST = new ASTPair();
 		AST primaryObject_AST = null;
-		Token  obj = null;
-		AST obj_AST = null;
+		Token  objMap = null;
+		AST objMap_AST = null;
+		Token  objSet = null;
+		AST objSet_AST = null;
+		Token  objList = null;
+		AST objList_AST = null;
 		
 		{
 		switch ( LA(1)) {
@@ -1380,6 +1399,9 @@ inputState.guessing--;
 			match(CONST);
 			break;
 		}
+		case OBJ_MAP:
+		case OBJ_LIST:
+		case OBJ_SET:
 		case LCURLY:
 		{
 			break;
@@ -1390,18 +1412,22 @@ inputState.guessing--;
 		}
 		}
 		}
-		obj = LT(1);
-		obj_AST = astFactory.create(obj);
-		astFactory.makeASTRoot(currentAST, obj_AST);
-		match(LCURLY);
 		{
 		switch ( LA(1)) {
 		case OBJ_MAP:
 		{
+			{
 			match(OBJ_MAP);
 			match(AT);
+			objMap = LT(1);
+			objMap_AST = astFactory.create(objMap);
+			astFactory.makeASTRoot(currentAST, objMap_AST);
+			match(LCURLY);
 			{
 			switch ( LA(1)) {
+			case OBJ_MAP:
+			case OBJ_LIST:
+			case OBJ_SET:
 			case PLUS:
 			case MINUS:
 			case INC:
@@ -1429,7 +1455,7 @@ inputState.guessing--;
 				assignmentExpression();
 				astFactory.addASTChild(currentAST, returnAST);
 				{
-				_loop67:
+				_loop68:
 				do {
 					if ((LA(1)==COMMA)) {
 						match(COMMA);
@@ -1440,7 +1466,7 @@ inputState.guessing--;
 						astFactory.addASTChild(currentAST, returnAST);
 					}
 					else {
-						break _loop67;
+						break _loop68;
 					}
 					
 				} while (true);
@@ -1458,16 +1484,26 @@ inputState.guessing--;
 			}
 			}
 			if ( inputState.guessing==0 ) {
-				obj_AST.setType(OBJ_MAP);
+				objMap_AST.setType(OBJ_MAP);
+			}
+			match(RCURLY);
 			}
 			break;
 		}
 		case OBJ_SET:
 		{
+			{
 			match(OBJ_SET);
 			match(AT);
+			objSet = LT(1);
+			objSet_AST = astFactory.create(objSet);
+			astFactory.makeASTRoot(currentAST, objSet_AST);
+			match(LCURLY);
 			{
 			switch ( LA(1)) {
+			case OBJ_MAP:
+			case OBJ_LIST:
+			case OBJ_SET:
 			case PLUS:
 			case MINUS:
 			case INC:
@@ -1492,7 +1528,7 @@ inputState.guessing--;
 				assignmentExpression();
 				astFactory.addASTChild(currentAST, returnAST);
 				{
-				_loop72:
+				_loop74:
 				do {
 					if ((LA(1)==COMMA)) {
 						match(COMMA);
@@ -1500,7 +1536,7 @@ inputState.guessing--;
 						astFactory.addASTChild(currentAST, returnAST);
 					}
 					else {
-						break _loop72;
+						break _loop74;
 					}
 					
 				} while (true);
@@ -1518,33 +1554,16 @@ inputState.guessing--;
 			}
 			}
 			if ( inputState.guessing==0 ) {
-				obj_AST.setType(OBJ_SET);
+				objSet_AST.setType(OBJ_SET);
+			}
+			match(RCURLY);
 			}
 			break;
 		}
 		case OBJ_LIST:
-		case PLUS:
-		case MINUS:
-		case INC:
-		case DEC:
-		case DELETE:
-		case BNOT:
-		case LNOT:
-		case IDENT:
-		case LITERAL_true:
-		case LITERAL_false:
-		case LITERAL_null:
-		case LPAREN:
-		case CONST:
 		case LCURLY:
-		case RCURLY:
-		case NUM_INT:
-		case CHAR_LITERAL:
-		case STRING_LITERAL:
-		case NUM_FLOAT:
-		case NUM_LONG:
-		case NUM_DOUBLE:
 		{
+			{
 			{
 			switch ( LA(1)) {
 			case OBJ_LIST:
@@ -1553,27 +1572,7 @@ inputState.guessing--;
 				match(AT);
 				break;
 			}
-			case PLUS:
-			case MINUS:
-			case INC:
-			case DEC:
-			case DELETE:
-			case BNOT:
-			case LNOT:
-			case IDENT:
-			case LITERAL_true:
-			case LITERAL_false:
-			case LITERAL_null:
-			case LPAREN:
-			case CONST:
 			case LCURLY:
-			case RCURLY:
-			case NUM_INT:
-			case CHAR_LITERAL:
-			case STRING_LITERAL:
-			case NUM_FLOAT:
-			case NUM_LONG:
-			case NUM_DOUBLE:
 			{
 				break;
 			}
@@ -1583,8 +1582,15 @@ inputState.guessing--;
 			}
 			}
 			}
+			objList = LT(1);
+			objList_AST = astFactory.create(objList);
+			astFactory.makeASTRoot(currentAST, objList_AST);
+			match(LCURLY);
 			{
 			switch ( LA(1)) {
+			case OBJ_MAP:
+			case OBJ_LIST:
+			case OBJ_SET:
 			case PLUS:
 			case MINUS:
 			case INC:
@@ -1609,7 +1615,7 @@ inputState.guessing--;
 				assignmentExpression();
 				astFactory.addASTChild(currentAST, returnAST);
 				{
-				_loop76:
+				_loop79:
 				do {
 					if ((LA(1)==COMMA)) {
 						match(COMMA);
@@ -1617,7 +1623,7 @@ inputState.guessing--;
 						astFactory.addASTChild(currentAST, returnAST);
 					}
 					else {
-						break _loop76;
+						break _loop79;
 					}
 					
 				} while (true);
@@ -1635,7 +1641,9 @@ inputState.guessing--;
 			}
 			}
 			if ( inputState.guessing==0 ) {
-				obj_AST.setType(OBJ_LIST);
+				objList_AST.setType(OBJ_LIST);
+			}
+			match(RCURLY);
 			}
 			break;
 		}
@@ -1645,7 +1653,6 @@ inputState.guessing--;
 		}
 		}
 		}
-		match(RCURLY);
 		primaryObject_AST = (AST)currentAST.root;
 		returnAST = primaryObject_AST;
 	}
@@ -1656,31 +1663,31 @@ inputState.guessing--;
 		ASTPair currentAST = new ASTPair();
 		AST identVar_AST = null;
 		
-		AST tmp72_AST = null;
-		tmp72_AST = astFactory.create(LT(1));
-		astFactory.addASTChild(currentAST, tmp72_AST);
+		AST tmp74_AST = null;
+		tmp74_AST = astFactory.create(LT(1));
+		astFactory.addASTChild(currentAST, tmp74_AST);
 		match(IDENT);
 		{
-		_loop84:
+		_loop87:
 		do {
 			switch ( LA(1)) {
 			case DOT:
 			{
-				AST tmp73_AST = null;
-				tmp73_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp73_AST);
+				AST tmp75_AST = null;
+				tmp75_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp75_AST);
 				match(DOT);
-				AST tmp74_AST = null;
-				tmp74_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp74_AST);
+				AST tmp76_AST = null;
+				tmp76_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp76_AST);
 				match(IDENT);
 				break;
 			}
 			case LBRACK:
 			{
-				AST tmp75_AST = null;
-				tmp75_AST = astFactory.create(LT(1));
-				astFactory.addASTChild(currentAST, tmp75_AST);
+				AST tmp77_AST = null;
+				tmp77_AST = astFactory.create(LT(1));
+				astFactory.addASTChild(currentAST, tmp77_AST);
 				match(LBRACK);
 				expression();
 				astFactory.addASTChild(currentAST, returnAST);
@@ -1689,7 +1696,7 @@ inputState.guessing--;
 			}
 			default:
 			{
-				break _loop84;
+				break _loop87;
 			}
 			}
 		} while (true);
@@ -1764,8 +1771,8 @@ inputState.guessing--;
 		"LPAREN",
 		"RPAREN",
 		"\"const\"",
-		"LCURLY",
 		"AT",
+		"LCURLY",
 		"RCURLY",
 		"NUM_INT",
 		"CHAR_LITERAL",
@@ -1787,7 +1794,7 @@ inputState.guessing--;
 	};
 	
 	private static final long[] mk_tokenSet_0() {
-		long[] data = { -451276749276119040L, 1L, 0L, 0L};
+		long[] data = { -379219155238190992L, 1L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_0 = new BitSet(mk_tokenSet_0());
@@ -1797,7 +1804,7 @@ inputState.guessing--;
 	}
 	public static final BitSet _tokenSet_1 = new BitSet(mk_tokenSet_1());
 	private static final long[] mk_tokenSet_2() {
-		long[] data = { -451276749276184576L, 1L, 0L, 0L};
+		long[] data = { -379219155238256528L, 1L, 0L, 0L};
 		return data;
 	}
 	public static final BitSet _tokenSet_2 = new BitSet(mk_tokenSet_2());

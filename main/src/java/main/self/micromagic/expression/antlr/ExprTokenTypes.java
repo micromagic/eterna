@@ -57,8 +57,8 @@ public interface ExprTokenTypes {
 	int LPAREN = 53;
 	int RPAREN = 54;
 	int CONST = 55;
-	int LCURLY = 56;
-	int AT = 57;
+	int AT = 56;
+	int LCURLY = 57;
 	int RCURLY = 58;
 	int NUM_INT = 59;
 	int CHAR_LITERAL = 60;
