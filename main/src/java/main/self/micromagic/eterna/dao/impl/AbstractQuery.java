@@ -525,10 +525,10 @@ public abstract class AbstractQuery extends BaseDao
 		int count = meta.getColumnCount();
 		List rReaders = new ArrayList(count);
 		Map readerMap = new HashMap(count * 2);
-		for (int i = 0; i < count; i++)
+		for (int i = 1; i <= count; i++)
 		{
-			String colName = meta.getColumnLabel(i + 1).toUpperCase();  // 这个取到的是别名
-			int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
+			String colName = meta.getColumnLabel(i).toUpperCase();  // 这个取到的是别名
+			int typeId = TypeManager.transSQLType(meta.getColumnType(i));
 			if (!needAutoAddColumn(colName) || readerMap.containsKey(colName))
 			{
 				// 如果列的别名已存在, 或不需要自动添加的列, 则添加一个空值
@@ -586,7 +586,7 @@ public abstract class AbstractQuery extends BaseDao
 		ReaderManagerImpl tmpRm = this.createTempReaderManager0(false);
 		tmpRm.setColNameSensitive(false);
 		itr = rReaders.iterator();
-		for (int i = 0; itr.hasNext(); i++)
+		for (int i = 1; itr.hasNext(); i++)
 		{
 			ColumnInfo tmp = (ColumnInfo) itr.next();
 			if (tmp != null && !tmp.exists)
@@ -595,7 +595,7 @@ public abstract class AbstractQuery extends BaseDao
 				// 如果结果中的列不在reader配置中, 则添加
 				String typeName = TypeManager.getTypeName(tmp.typeId);
 				ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, tmp.colName);
-				reader.setColumnIndex(i + 1);
+				reader.setColumnIndex(i);
 				tmpRm.addReader(reader);
 				newReaders.add(reader);
 			}
@@ -643,23 +643,23 @@ public abstract class AbstractQuery extends BaseDao
 		Map temp = new HashMap();
 		ResultSetMetaData meta = rs.getMetaData();
 		int count = meta.getColumnCount();
-		for (int i = 0; i < count; i++)
+		for (int i = 1; i <= count; i++)
 		{
-			//String colName = meta.getColumnName(i + 1); // 这个在有些数据库取到的是原始列名
-			String colName = meta.getColumnLabel(i + 1);  // 这个取到的是别名
+			//String colName = meta.getColumnName(i); // 这个在有些数据库取到的是原始列名
+			String colName = meta.getColumnLabel(i).toUpperCase();  // 这个取到的是别名
 			if (needAutoAddColumn(colName))
 			{
 				String name = colName;
 				if (temp.get(name) != null)
 				{
 					// 当存在重复的列名时, 后面的列加上索引号
-					name = colName + "+" + (i + 1);
+					name = colName + "+" + i;
 				}
 				temp.put(name, colName);
-				int typeId = TypeManager.transSQLType(meta.getColumnType(i + 1));
+				int typeId = TypeManager.transSQLType(meta.getColumnType(i));
 				String typeName = TypeManager.getTypeName(typeId);
 				ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, name);
-				reader.setColumnIndex(i + 1);
+				reader.setColumnIndex(i);
 				rm.addReader(reader);
 			}
 
