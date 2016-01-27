@@ -32,31 +32,120 @@ import self.micromagic.util.ref.IntegerRef;
 
 public class TypeManager
 {
+	/**
+	 * 没有类型的标识.
+	 */
+	public static final int TYPE_NONE = -1;
+
+	/**
+	 * 空类型.
+	 */
 	public static final int TYPE_NULL = 0;
+
+	/**
+	 * 字符串类型.
+	 */
 	public static final int TYPE_STRING = 1;
+
+	/**
+	 * 整型.
+	 */
 	public static final int TYPE_INTEGER = 2;
+
+	/**
+	 * 双精度浮点型.
+	 */
 	public static final int TYPE_DOUBLE = 3;
+
+	/**
+	 * 字节数组.
+	 */
 	public static final int TYPE_BYTES = 4;
+
+	/**
+	 * 布尔型.
+	 */
 	public static final int TYPE_BOOLEAN = 5;
+
+	/**
+	 * 日期型.
+	 */
 	public static final int TYPE_DATE = 6;
+
+	/**
+	 * 日期时间型.
+	 */
 	public static final int TYPE_TIMPSTAMP = 7;
+
+	/**
+	 * 长整型.
+	 */
 	public static final int TYPE_LONG = 8;
+
+	/**
+	 * 时间型.
+	 */
 	public static final int TYPE_TIME = 9;
+
+	/**
+	 * 短整型.
+	 */
 	public static final int TYPE_SHORT = 10;
+
+	/**
+	 * 字节型.
+	 */
 	public static final int TYPE_BYTE = 11;
+
+	/**
+	 * 浮点型.
+	 */
 	public static final int TYPE_FLOAT = 12;
+
+	/**
+	 * 复杂对象型.
+	 */
 	public static final int TYPE_OBJECT = 13;
+
+	/**
+	 * 大字符串类型.
+	 */
 	public static final int TYPE_BIGSTRING = 14;
+
+	/**
+	 * 字节流类型.
+	 */
 	public static final int TYPE_STREAM = 15;
+
+	/**
+	 * 字符流类型.
+	 */
 	public static final int TYPE_CHARS = 16;
+
+	/**
+	 * 十进制数类型.
+	 */
 	public static final int TYPE_DECIMAL = 17;
+
+	/**
+	 * 大数据块类型.
+	 */
 	public static final int TYPE_BLOB = 18;
+
+	/**
+	 * 大字符快类型.
+	 */
 	public static final int TYPE_CLOB = 19;
 
+	/**
+	 * 可使用的类型个数.
+	 */
 	public static final int TYPES_COUNT = 20;
 
+	// 类型名称->索引值的对应表
 	private static Map typeMap = new HashMap();
 
+	// 对于SQL类型的数组
 	private static int[] SQL_TYPES = new int[]{
 		Types.NULL,           //TYPE_NULL
 		Types.VARCHAR,        //TYPE_STRING
@@ -80,6 +169,7 @@ public class TypeManager
 		Types.CLOB            //TYPE_CLOB
 	};
 
+	// 对应类型名称的数组
 	private static String[] typeNames = {
 		"null",
 		"String",
@@ -103,7 +193,10 @@ public class TypeManager
 		"Clob"
 	};
 
+	// 对应类型转换器的数组
 	private static ValueConverter[] converters;
+
+	// 对应java类型的数组
 	private static Class[] javaTypes = {
 		null,
 		String.class,
@@ -129,6 +222,7 @@ public class TypeManager
 
 	static
 	{
+		typeMap.put("none", Utility.INTEGER_MINUS1);
 		typeMap.put("null", Utility.INTEGER_0);
 		typeMap.put("String", Utility.INTEGER_1);
 		typeMap.put("string", Utility.INTEGER_1);
@@ -190,13 +284,13 @@ public class TypeManager
 	 *
 	 * @param name   类型的名称
 	 * @return    与类型名称对应的id, 如果该类型名称没有对应的类型id则
-	 *            返回TYPE_NULL
+	 *            返回TYPE_NONE
 	 */
 	public static int getTypeId(String name)
 	{
 		if (name == null)
 		{
-			return TYPE_NULL;
+			return TYPE_NONE;
 		}
 		int param = 0;
 		name = name.trim();
@@ -224,7 +318,7 @@ public class TypeManager
 		if (i == null)
 		{
 			Tool.log.warn("Error type [" + name + "].");
-			return TYPE_NULL;
+			return TYPE_NONE;
 		}
 		return i.intValue() | param;
 	}
@@ -235,14 +329,14 @@ public class TypeManager
 	 * 如: 长度 精度等.
 	 *
 	 * @param id  类型的id
-	 * @return   纯类型id, 如果给出的类型id无效则返回TYPE_NULL
+	 * @return   纯类型id, 如果给出的类型id无效则返回TYPE_NONE
 	 */
 	public static int getPureType(int id)
 	{
 		int realId = id & 0xff;
 		if (realId < 0 || realId >= typeNames.length)
 		{
-			return TYPE_NULL;
+			return TYPE_NONE;
 		}
 		return realId;
 	}

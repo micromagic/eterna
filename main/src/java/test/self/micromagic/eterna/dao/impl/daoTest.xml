@@ -16,7 +16,7 @@
 				</item>
 			</entity>
 			<entity name="e2">
-				<item name="c1" type="Object">
+				<item name="c1" type="none">
 					<attribute name="a1" value="xxxxxxx"/>
 				</item>
 				<item name="c2" type="long" caption="my_c2"/>
@@ -28,12 +28,16 @@
 					<attribute name="x" value="?"/>
 					<attribute name="ignoreParent" value="1"/>
 				</item>
+				<item name="c_none" colName="test2" type="none">
+					<attribute name="x" value="?"/>
+					<attribute name="ignoreParent" value="1"/>
+				</item>
 			</entity>
 			<entity name="e4">
 				<item name="c1" type="int"/>
 				<item name="c2" type="long" caption="my_c2"/>
 				<entity-ref entityName="e1" include="c1:x,c2,c3" tableAlias="tmp"/>
-				<item name="c3" type="Object" caption="my_c3" colName="new.x"/>
+				<item name="c3" type="none" caption="my_c3" colName="new.x"/>
 			</entity>
 
 			<update name="t1" logType="log1">

@@ -93,3 +93,52 @@ public class FirstValue extends AbstractOneSpecial
 	}
 
 }
+
+/**
+ * 获取迭代器的下一个值.
+ */
+class NextValue extends AbstractOneSpecial
+		implements SpecialOpt
+{
+	protected Object exec(Object obj, Object[] args)
+	{
+		if (obj instanceof Iterator)
+		{
+			return ((Iterator) obj).next();
+		}
+		if (obj instanceof Enumeration)
+		{
+			return ((Enumeration) obj).nextElement();
+		}
+		return null;
+	}
+
+}
+
+/**
+ * 获取Entry的key或value.
+ */
+class EntryValue extends AbstractOneSpecial
+		implements SpecialOpt
+{
+	/**
+	 * 标识获取key还是value.
+	 */
+	private final boolean getKey;
+
+	public EntryValue(boolean getKey)
+	{
+		this.getKey = getKey;
+	}
+
+	protected Object exec(Object obj, Object[] args)
+	{
+		if (obj instanceof Map.Entry)
+		{
+			Map.Entry e = (Map.Entry) obj;
+			return this.getKey ? e.getKey() : e.getValue();
+		}
+		return null;
+	}
+
+}

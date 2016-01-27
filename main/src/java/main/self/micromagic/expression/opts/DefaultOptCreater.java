@@ -31,6 +31,7 @@ public class DefaultOptCreater
 	static
 	{
 		optCache.put("link", new LinkString());
+		optCache.put("sub", new SubObject());
 		optCache.put("split", new SplitString());
 		optCache.put("charAt", new CharAt());
 		optCache.put("length", new GetLength());

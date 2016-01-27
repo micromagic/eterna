@@ -80,7 +80,7 @@ public class EntityItemGenerator extends AbstractGenerator
 		{
 			this.caption = other.getCaption();
 		}
-		if (this.type == TypeManager.TYPE_OBJECT)
+		if (this.type == TypeManager.TYPE_NONE)
 		{
 			this.type = other.getType();
 		}

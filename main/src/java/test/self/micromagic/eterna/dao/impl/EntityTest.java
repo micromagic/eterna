@@ -36,7 +36,7 @@ public class EntityTest extends TestBase
 		assertEquals("2", e2.getItem("c2").getAttribute("a2"));
 
 		Entity e3 = f.getEntity("e3");
-		assertEquals(2, e3.getItemCount());
+		assertEquals(3, e3.getItemCount());
 		assertEquals(TypeManager.TYPE_OBJECT, e3.getItem("c2").getType());
 		assertEquals("test", e3.getItem("c2").getColumnName());
 		assertNull(e3.getItem("c2").getCaption());
@@ -45,6 +45,7 @@ public class EntityTest extends TestBase
 		assertEquals(TypeManager.TYPE_DOUBLE, e3.getItem("c3").getType());
 		assertEquals("title3", e3.getItem("c3").getCaption());
 		assertEquals("3", e3.getItem("c3").getAttribute("a3"));
+		assertEquals(TypeManager.TYPE_NONE, e3.getItem("c_none").getType());
 
 		Entity e4 = f.getEntity("e4");
 		assertEquals("c1", e4.getItem(0).getName());

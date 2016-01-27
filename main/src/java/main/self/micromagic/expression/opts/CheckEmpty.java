@@ -9,10 +9,11 @@ import java.util.Map;
 
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.Entity;
+import self.micromagic.expression.AbstractOneSpecial;
 import self.micromagic.expression.SpecialOpt;
 
 /**
- * 获取对象的长度.
+ * 检查对象是否为null, 或空字符串/空数组等.
  */
 public class CheckEmpty extends AbstractCheck
 		implements SpecialOpt
@@ -59,6 +60,32 @@ public class CheckEmpty extends AbstractCheck
 			{
 				return ((Object[]) obj).length == 0 ? Boolean.TRUE : Boolean.FALSE;
 			}
+		}
+		return Boolean.FALSE;
+	}
+
+}
+
+/**
+ * 判断迭代器是否有下一个.
+ */
+class HasNext extends AbstractOneSpecial
+		implements SpecialOpt
+{
+	public HasNext()
+	{
+		this.defaultValue = Boolean.FALSE;
+	}
+
+	protected Object exec(Object obj, Object[] args)
+	{
+		if (obj instanceof Iterator)
+		{
+			return ((Iterator) obj).hasNext() ? Boolean.TRUE : Boolean.FALSE;
+		}
+		if (obj instanceof Enumeration)
+		{
+			return ((Enumeration) obj).hasMoreElements() ? Boolean.TRUE : Boolean.FALSE;
 		}
 		return Boolean.FALSE;
 	}

@@ -24,9 +24,6 @@ import junit.framework.TestCase;
 import self.micromagic.eterna.dao.EmptyQuery;
 import self.micromagic.eterna.dao.OnlyCountResultSet;
 import self.micromagic.eterna.dao.Query;
-import self.micromagic.eterna.dao.impl.MySqlQueryHelper;
-import self.micromagic.eterna.dao.impl.OracleQueryHelper;
-import self.micromagic.eterna.dao.impl.QueryHelper;
 
 public class QueryHelperTest extends TestCase
 {
@@ -53,33 +50,33 @@ public class QueryHelperTest extends TestCase
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(11);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 11", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 11", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, false, qh);
 
 		rs = new OnlyCountResultSet(1);
 		query.setStartRow(10);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 10", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 10", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(1, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 15", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 15", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, false, qh);
 
 		rs = new OnlyCountResultSet(6);
 		query.setMaxCount(5);
 		query.setStartRow(2);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 7) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 7) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(5, 7, false, true, false, qh);
 
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -93,7 +90,7 @@ public class QueryHelperTest extends TestCase
 		rs = new OnlyCountResultSet(3);
 		query.setMaxCount(5);
 		query.setStartRow(8);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 13) tmpTable2 where theOracleRuwNum >= 8", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 13) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 8", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, false, false, qh);
 
@@ -125,7 +122,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 0, false, true, true, qh);
 
@@ -133,7 +130,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(10);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -141,7 +138,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 15, true, true, false, qh);
 
@@ -149,7 +146,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(10);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 15, true, false, false, qh);
 
@@ -157,7 +154,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 15, true, false, false, qh);
 
@@ -165,21 +162,21 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(-1);
 		query.setStartRow(2);
 		query.setTotalCountModel(15, new Query.TotalCountInfo(true, false));
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(2, 15, false, true, false, qh);
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(11);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 11", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 11", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, true, qh);
 
 		rs = new OnlyCountResultSet(1);
 		query.setStartRow(10);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as theOracleRuwNum from (TEST) tmpTable1) tmpTable2 where theOracleRuwNum >= 10", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 10", qh.getQuerySQL("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(1, 10, true, false, false, qh);
 

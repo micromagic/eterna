@@ -201,7 +201,7 @@ public class EntityImpl extends AbstractGenerator
 	{
 		Entity entity = factory.getEntity(ref.getEntityName());
 		Map excludeSet = null, includeMap = null;
-		if (ref.getInclude() != null)
+		if (!StringTool.isEmpty(ref.getInclude()))
 		{
 			String[] arr = StringTool.separateString(ref.getInclude(), ",", true);
 			includeMap = new HashMap();
@@ -219,7 +219,7 @@ public class EntityImpl extends AbstractGenerator
 				}
 			}
 		}
-		else if (ref.getExclude() != null)
+		if (!StringTool.isEmpty(ref.getExclude()))
 		{
 			String[] arr = StringTool.separateString(ref.getExclude(), ",", true);
 			excludeSet = new HashMap();
@@ -228,32 +228,36 @@ public class EntityImpl extends AbstractGenerator
 				excludeSet.put(arr[i], Boolean.TRUE);
 			}
 		}
+		String tableAlias = ref.getTableAlias();
 		Iterator tmpItr = entity.getItemIterator();
 		while (tmpItr.hasNext())
 		{
 			EntityItem item = (EntityItem) tmpItr.next();
 			String newName = null, oldName = item.getName();
-			if (includeMap != null)
-			{
-				newName = (String) includeMap.get(oldName);
-				if (newName == null)
-				{
-					continue;
-				}
-				if (newName.equals(oldName))
-				{
-					// 如果新的名称和当前名称相同, 则将新名称设为null
-					newName = null;
-				}
-			}
-			else if (excludeSet != null)
+			if (excludeSet != null)
 			{
 				if (excludeSet.containsKey(oldName))
 				{
 					continue;
 				}
 			}
-			String tableAlias = ref.getTableAlias();
+			if (includeMap != null)
+			{
+				newName = (String) includeMap.get(oldName);
+				if (newName == null)
+				{
+					if (excludeSet == null)
+					{
+						// 如果未设置排除, 则没有包含的需去除
+						continue;
+					}
+				}
+				else if (newName.equals(oldName))
+				{
+					// 如果新的名称和当前名称相同, 则将新名称设为null
+					newName = null;
+				}
+			}
 			if (newName != null || !StringTool.isEmpty(tableAlias))
 			{
 				// 如果有修改过的标识名称或表别名, 需要创建一个新的元素
@@ -266,7 +270,7 @@ public class EntityImpl extends AbstractGenerator
 				{
 					EntityItemGenerator tmp = new EntityItemGenerator();
 					tmp.setName(tmpName);
-					tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_OBJECT));
+					tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_NONE));
 					tmp = (EntityItemGenerator) tmp.create();
 					tmp.merge(item);
 					String colName = tmp.getColumnName();
