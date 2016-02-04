@@ -33,9 +33,11 @@ public class DefaultOptCreater
 		optCache.put("link", new LinkString());
 		optCache.put("sub", new SubObject());
 		optCache.put("split", new SplitString());
+		optCache.put("indexOf", new IndexOf());
 		optCache.put("charAt", new CharAt());
 		optCache.put("length", new GetLength());
 		optCache.put("isEmpty", new CheckEmpty());
+		optCache.put("contains", new CheckContains());
 
 		optCache.put("hasNext", new HasNext());
 		optCache.put("next", new NextValue());

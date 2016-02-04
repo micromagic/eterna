@@ -67,6 +67,58 @@ public class CheckEmpty extends AbstractCheck
 }
 
 /**
+ * 检查是否包含某个对象或集合.
+ */
+class CheckContains
+		implements SpecialOpt
+{
+	private static IndexOf indexOf = new IndexOf();
+
+	public Object exec(Object[] args)
+	{
+		if (args == null || args.length < 2 || args[0] == null)
+		{
+			return Boolean.FALSE;
+		}
+		if (args[0] instanceof CharSequence)
+		{
+			Integer i = (Integer) indexOf.exec(args);
+			return i != null && i.intValue() != -1 ? Boolean.TRUE : Boolean.FALSE;
+		}
+		boolean result = false;
+		if (args[0] instanceof Collection)
+		{
+			if (args[1] instanceof Collection)
+			{
+				result = ((Collection) args[0]).containsAll((Collection) args[1]);
+			}
+			else
+			{
+				result = ((Collection) args[0]).contains(args[1]);
+			}
+		}
+		else if (args[0] instanceof Map)
+		{
+			if (args[1] instanceof Collection)
+			{
+				result = ((Map) args[0]).keySet().containsAll((Collection) args[1]);
+			}
+			else
+			{
+				result = ((Map) args[0]).containsKey(args[1]);
+			}
+		}
+		return result ? Boolean.TRUE : Boolean.FALSE;
+	}
+
+	public boolean isStabile()
+	{
+		return true;
+	}
+
+}
+
+/**
  * 判断迭代器是否有下一个.
  */
 class HasNext extends AbstractOneSpecial

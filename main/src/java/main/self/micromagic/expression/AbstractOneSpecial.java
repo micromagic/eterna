@@ -14,12 +14,11 @@ public abstract class AbstractOneSpecial
 
 	public Object exec(Object[] args)
 	{
-		if (args == null || args.length == 0)
+		if (args == null || args.length == 0 || args[0] == null)
 		{
 			return this.defaultValue;
 		}
-		Object obj = args[0];
-		return obj == null ? this.defaultValue : this.exec(args[0], args);
+		return this.exec(args[0], args);
 	}
 
 	/**
