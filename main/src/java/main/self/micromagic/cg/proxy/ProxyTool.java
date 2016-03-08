@@ -18,18 +18,19 @@ package self.micromagic.cg.proxy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
-import self.micromagic.util.Utility;
+
+import self.micromagic.cg.BeanTool;
+import self.micromagic.cg.CGException;
+import self.micromagic.cg.ClassGenerator;
+import self.micromagic.cg.ClassKeyCache;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.cg.ClassKeyCache;
-import self.micromagic.cg.ClassGenerator;
-import self.micromagic.cg.BeanTool;
-import self.micromagic.cg.CGException;
+import self.micromagic.util.Utility;
 
 /**
  * 动态代理类的生成工具.
@@ -37,6 +38,10 @@ import self.micromagic.cg.CGException;
  */
 public class ProxyTool
 {
+	private ProxyTool()
+	{
+	}
+
 	/**
 	 * 创建一个方法调用的代理.
 	 *
@@ -316,9 +321,9 @@ public class ProxyTool
 	 */
 	static class MethodProxyKey
 	{
-		private String methodName;
-		private boolean paramCheck;
-		private Class[] params;
+		private final String methodName;
+		private final boolean paramCheck;
+		private final Class[] params;
 		public MethodProxyKey(String methodName, boolean paramCheck, Class[] params)
 		{
 			this.methodName = methodName;

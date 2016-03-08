@@ -347,6 +347,7 @@ public class DaoManager
 							String upName = reader.getAlias().toUpperCase();
 							if (!aliasSet.containsKey(upName))
 							{
+								// 如果别名已生成过, 则不出现在select列表中
 								aliasSet.put(upName, Boolean.TRUE);
 								if (!first)
 								{
@@ -431,12 +432,13 @@ public class DaoManager
 			ResultReader reader = (ResultReader) itr.next();
 			if (reader instanceof ReaderWrapper && ((ReaderWrapper) reader).isHidden())
 			{
+				// 自动添加的reader, 不占用自动生成列表的位置
 				continue;
 			}
 			realCount++;
 			if (reader.isUseColumnIndex())
 			{
-				// 通过索引值定位列的不应该出现在自动生成里
+				// 通过索引值定位列的不应该出现在自动生成里, 但需要占位
 				readerArray[i] = new InvalidReader(reader.getName());
 			}
 			else

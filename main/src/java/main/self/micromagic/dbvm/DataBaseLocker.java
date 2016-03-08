@@ -40,6 +40,10 @@ import self.micromagic.util.ref.StringRef;
  */
 public class DataBaseLocker
 {
+	private DataBaseLocker()
+	{
+	}
+
 	/**
 	 * 通过一个数据库连接获取数据库时间.
 	 */

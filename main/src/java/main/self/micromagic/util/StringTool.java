@@ -49,6 +49,10 @@ public class StringTool
 
 	public static final int MAX_INTERN_SIZE = 1024 * 8;
 
+	private StringTool()
+	{
+	}
+
 	/**
 	 * 计算一个字符串中某个字符出现的次数.
 	 *

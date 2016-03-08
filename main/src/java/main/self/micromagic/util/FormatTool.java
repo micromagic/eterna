@@ -47,6 +47,10 @@ public class FormatTool
 	 */
 	private static Map formatCache = new SynHashMap();
 
+	private FormatTool()
+	{
+	}
+
 	/**
 	 * 获取缓存的format对象.
 	 */

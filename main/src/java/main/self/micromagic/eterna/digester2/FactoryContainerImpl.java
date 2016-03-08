@@ -245,15 +245,11 @@ public class FactoryContainerImpl extends AbstractFactoryContainer
 		{
 			if (src instanceof InputStream)
 			{
-				InputStream in = (InputStream) src;
-				this.digester.parse(in);
-				in.close();
+				this.digester.parse((InputStream) src);
 			}
 			else
 			{
-				Reader reader = (Reader) src;
-				this.digester.parse(reader);
-				reader.close();
+				this.digester.parse((Reader) src);
 			}
 			// 处理需要引用的配置.
 			List includes = (List) this.getAttribute(ConfigInclude.INCLUDE_LIST_FLAG);

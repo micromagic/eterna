@@ -33,8 +33,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 
-import self.micromagic.eterna.digester2.dom.EternaDocumentFactory;
-import self.micromagic.eterna.digester2.dom.EternaSAXReader;
+import self.micromagic.eterna.digester2.dom.DocumentCreater;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringTool;
@@ -101,11 +100,13 @@ public class Digester
 	private Digester()
 	{
 	}
+
 	static Digester getInstance()
 	{
 		return instance;
 	}
 	private static Digester instance = new Digester();
+
 	private static void initRules()
 			throws IOException
 	{
@@ -129,6 +130,7 @@ public class Digester
 			instance.initRules(rm, rConfig);
 		}
 	}
+
 	static
 	{
 		try
@@ -228,30 +230,26 @@ public class Digester
 
 	/**
 	 * 对一个xml数据流进行解析.
+	 *	解析完毕后会关闭数据流.
 	 *
 	 * @param in  xml数据流
-	 * @throws DocumentException
 	 */
 	void parse(InputStream in)
-			throws DocumentException
+			throws DocumentException, IOException
 	{
-		EternaSAXReader reader = new EternaSAXReader(new EternaDocumentFactory());
-		Document doc = reader.read(in);
-		this.parse(doc);
+		this.parse(DocumentCreater.createDoc(in, true, true));
 	}
 
 	/**
 	 * 对一个xml数据流进行解析.
+	 *	解析完毕后会关闭数据流.
 	 *
 	 * @param in  xml数据流
-	 * @throws DocumentException
 	 */
 	void parse(Reader in)
-			throws DocumentException
+			throws DocumentException, IOException
 	{
-		EternaSAXReader reader = new EternaSAXReader(new EternaDocumentFactory());
-		Document doc = reader.read(in);
-		this.parse(doc);
+		this.parse(DocumentCreater.createDoc(in, true, true));
 	}
 
 	/**

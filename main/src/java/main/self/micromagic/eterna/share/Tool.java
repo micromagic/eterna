@@ -78,6 +78,10 @@ public class Tool
 	 */
 	public static final String EMPTY_TO_NULL_FLAG = "emptyToNull";
 
+	private Tool()
+	{
+	}
+
 	/**
 	 * 根据标题翻译列表的配置进行翻译.
 	 */

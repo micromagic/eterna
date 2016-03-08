@@ -97,6 +97,27 @@ public class MemoryStream
 		}
 	}
 
+	/**
+	 * 获取单个存储单元的大小.
+	 */
+	public int getBlockSize()
+	{
+		return this.blockSize;
+	}
+
+	/**
+	 * 获取使用存储单元的个数.
+	 * 如果返回-1表示未存储在内存中.
+	 */
+	public int getBlockCount()
+	{
+		List list = this.blockList;
+		return list == null ? -1 : list.size();
+	}
+
+	/**
+	 * 数据是否存储在内存中.
+	 */
 	public boolean isInMemory()
 	{
 		return this.inMemory;

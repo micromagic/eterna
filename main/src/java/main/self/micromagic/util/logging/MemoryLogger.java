@@ -84,6 +84,14 @@ public class MemoryLogger
 	}
 
 	/**
+	 * 当前日志是否有效.
+	 */
+	public boolean isLogValid()
+	{
+		return this.logValid;
+	}
+
+	/**
 	 * 设置当前内存日志是否有效.
 	 */
 	public void setLogValid(boolean valid)

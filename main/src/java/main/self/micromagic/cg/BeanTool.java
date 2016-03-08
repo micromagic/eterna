@@ -82,6 +82,10 @@ public class BeanTool
 	 */
 	public static final String CG_USE_DBC_PROPERTY = "self.micromagic.cg.use.defaultBeanChecker";
 
+	private BeanTool()
+	{
+	}
+
 	/**
 	 * 获取对象类型中的某个属性.
 	 *

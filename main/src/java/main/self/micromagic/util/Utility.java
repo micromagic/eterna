@@ -115,6 +115,10 @@ public class Utility
 		LINE_SEPARATOR = nextLine;
 	}
 
+	private Utility()
+	{
+	}
+
 	/**
 	 * 重新载入配置
 	 *

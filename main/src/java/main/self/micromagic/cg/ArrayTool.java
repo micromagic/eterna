@@ -38,6 +38,10 @@ import self.micromagic.util.ref.IntegerRef;
  */
 public class ArrayTool
 {
+	private ArrayTool()
+	{
+	}
+
 	/**
 	 * 将一个数组转换成指定类型的数组.
 	 *

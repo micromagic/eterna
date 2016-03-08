@@ -44,6 +44,10 @@ public class ExprTool
 	public static final int DOUBLE_LEVEL = 5;
 	public static final int NEED_CAST_LEVEL = 0x100;
 
+	private ExprTool()
+	{
+	}
+
 	/**
 	 * 解析一段脚本, 变为一个表达式列表.
 	 *

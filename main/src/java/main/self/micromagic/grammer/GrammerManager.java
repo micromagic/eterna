@@ -16,7 +16,6 @@
 
 package self.micromagic.grammer;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -24,9 +23,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 
 import self.micromagic.util.Utility;
 
@@ -44,39 +41,29 @@ public class GrammerManager
 
 	private final Map grammerElementMap = new HashMap();
 
-	public void init(InputStream is)
+	public void init(Document doc)
 			throws GrammerException
 	{
-		try
+		Element root = doc.getRootElement();
+		if (!ROOT_ELEMENT.equals(root.getName()))
 		{
-			SAXReader reader = new SAXReader();
-			Document doc = reader.read(is);
-			Element root = doc.getRootElement();
-			if (!ROOT_ELEMENT.equals(root.getName()))
+			throw new GrammerException("Not found the root element [" + ROOT_ELEMENT + "].");
+		}
+		Iterator itr = root.elementIterator();
+		while (itr.hasNext())
+		{
+			Element el = (Element) itr.next();
+			GrammerElement ge = this.getElement(el, true);
+			if (this.grammerElementMap.put(ge.getName(), ge) != null)
 			{
-				throw new GrammerException("Not found the root element [" + ROOT_ELEMENT + "].");
-			}
-			Iterator itr = root.elementIterator();
-			while (itr.hasNext())
-			{
-				Element el = (Element) itr.next();
-				GrammerElement ge = this.getElement(el, true);
-				if (this.grammerElementMap.put(ge.getName(), ge) != null)
-				{
-					throw new GrammerException("Duplicated name:" + ge.getName() + ".");
-				}
-			}
-			itr = this.grammerElementMap.values().iterator();
-			while (itr.hasNext())
-			{
-				GrammerElement ge = (GrammerElement) itr.next();
-				ge.initialize(this.grammerElementMap);
+				throw new GrammerException("Duplicated name:" + ge.getName() + ".");
 			}
 		}
-		catch (DocumentException ex)
+		itr = this.grammerElementMap.values().iterator();
+		while (itr.hasNext())
 		{
-			log.error("Error in init GrammerManager.", ex);
-			throw new GrammerException(ex);
+			GrammerElement ge = (GrammerElement) itr.next();
+			ge.initialize(this.grammerElementMap);
 		}
 	}
 

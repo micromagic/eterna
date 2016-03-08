@@ -20,9 +20,9 @@ import junit.framework.TestCase;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 
 import self.micromagic.eterna.digester2.ContainerManager;
+import self.micromagic.eterna.digester2.dom.DocumentCreater;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.StringTool;
@@ -35,8 +35,8 @@ public class InitTest extends TestCase
 	public void testInit1()
 			throws Exception
 	{
-		SAXReader r = new SAXReader();
-		Document doc = r.read(this.getClass().getResourceAsStream("testdb/version2.xml"));
+		Document doc = DocumentCreater.createDoc(
+				this.getClass().getResourceAsStream("testdb/version2.xml"));
 		Element e = (Element) doc.getRootElement().element("table").elements("column").get(1);
 		System.out.println(e.attributeValue("name"));
 		System.out.println(e.attribute("desc").getStringValue());
