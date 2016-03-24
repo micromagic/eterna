@@ -210,7 +210,12 @@ public class DataHandler
 		Object tObj = mapNameIndex.get(mainName);
 		if (tObj != null)
 		{
-			this.mapGetter = (MapGetter) tObj;
+			MapGetter tmp = (MapGetter) tObj;
+			if (tmp.needInit())
+			{
+				tmp = tmp.init();
+			}
+			this.mapGetter = tmp;
 		}
 		if (this.mapGetter != null)
 		{

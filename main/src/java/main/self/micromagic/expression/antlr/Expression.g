@@ -244,10 +244,7 @@ options {
 	exportVocab=Expr;     // call the vocabulary "Expr"
 	testLiterals=false;   // don't automatically test for literals
 	k=4;                  // four characters of lookahead
-	charVocabulary='\u0003'..'\u7FFE';
-	// without inlining some bitset tests, couldn't do unicode;
-	// I need to make ANTLR generate smaller bitsets; see
-	// bottom of JavaLexer.java
+	charVocabulary='\u0020'..'\uFFFF';
 	codeGenBitsetTestThreshold=20;
 }
 

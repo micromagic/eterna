@@ -24,7 +24,7 @@ import java.util.Map;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.search.BuildeResult;
+import self.micromagic.eterna.search.BuilderResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.AbstractGenerator;
@@ -337,7 +337,7 @@ public class TemplateBuilder extends AbstractGenerator
 		return subTemplate;
 	}
 
-	public BuildeResult buildeCondition(String colName, Object value, ConditionProperty cp)
+	public BuilderResult buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
 		if (this.template.length() == 0)
@@ -421,7 +421,7 @@ public class TemplateBuilder extends AbstractGenerator
 			}
 		}
 		preparers = this.specialParam(preparers, colName, value, cp);
-		return new BuildeResult(sqlPart, preparers);
+		return new BuilderResult(sqlPart, preparers);
 	}
 
 	/**

@@ -16,19 +16,36 @@
 
 package self.micromagic.eterna.model;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-import self.micromagic.util.container.ValueContainerMap;
-import self.micromagic.util.container.RequestHeaderContainer;
 import self.micromagic.util.container.CookieContainer;
+import self.micromagic.util.container.RequestHeaderContainer;
+import self.micromagic.util.container.ValueContainerMap;
 
 /**
  * 用于获取AppData中各类map的工具.
  */
 public interface MapGetter
 {
+	/**
+	 * 获取对应的map对象.
+	 */
 	Map getMap(AppData data);
+
+	/**
+	 * 是否需要初始化.
+	 * 即在初始化时, 是否需要生成一个新的对象.
+	 */
+	boolean needInit();
+
+	/**
+	 * 初始化并生成一个新的对象.
+	 * 如果不需要初始化, 则返回对象本身.
+	 *
+	 * @see #needInit()
+	 */
+	MapGetter init();
 
 	/**
 	 * 在AppData中存放特殊的map的标签.
@@ -43,7 +60,7 @@ public interface MapGetter
 class BaseMapGetter
 		implements MapGetter
 {
-	private int mapIndex;
+	private final int mapIndex;
 	public BaseMapGetter(int mapIndex)
 	{
 		this.mapIndex = mapIndex;
@@ -52,6 +69,16 @@ class BaseMapGetter
 	public Map getMap(AppData data)
 	{
 		return data.maps[this.mapIndex];
+	}
+
+	public boolean needInit()
+	{
+		return false;
+	}
+
+	public MapGetter init()
+	{
+		return this;
 	}
 
 }
@@ -81,6 +108,16 @@ class HeaderGetter
 		return r;
 	}
 
+	public boolean needInit()
+	{
+		return false;
+	}
+
+	public MapGetter init()
+	{
+		return this;
+	}
+
 }
 
 /**
@@ -106,6 +143,16 @@ class CookieGetter
 			data.addSpcialData(SPECIAL_MAP_FLAG, "cookie", r);
 		}
 		return r;
+	}
+
+	public boolean needInit()
+	{
+		return false;
+	}
+
+	public MapGetter init()
+	{
+		return this;
 	}
 
 }

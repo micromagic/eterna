@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.DataHandler;
 import self.micromagic.eterna.model.VarCache.VarInfo;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.expression.antlr.ExprLexer;
 import self.micromagic.expression.antlr.ExprParser;
 import self.micromagic.expression.antlr.ExprTokenTypes;
@@ -74,6 +75,62 @@ public class ExprToolTest extends TestCase
 			}
 		}
 		return null;
+	}
+
+	public void testThrow()
+			throws Exception
+	{
+		AppData data = AppData.getCurrentData();
+		Expression expression;
+		BooleanRef getted = new BooleanRef();
+
+		expression = createExp("throw($ex)");
+		data.modelVars = data.varCache.createCache();
+		setValue("$ex", new IllegalArgumentException());
+		expression.tryGetResult(getted);
+		assertFalse(getted.value);
+		try
+		{
+			expression.getResult(data);
+			fail();
+		}
+		catch (IllegalArgumentException ex) {}
+
+		setValue("$ex", new Exception("test"));
+		try
+		{
+			expression.getResult(data);
+			fail();
+		}
+		catch (EternaException ex)
+		{
+			assertEquals("test", ex.getCause().getMessage());
+		}
+
+		expression = createExp("throw($ex, \"java.lang.RuntimeException\")");
+		setValue("$ex", new Exception("test"));
+		expression.tryGetResult(getted);
+		assertFalse(getted.value);
+		try
+		{
+			expression.getResult(data);
+			fail();
+		}
+		catch (RuntimeException ex)
+		{
+			assertTrue(ex.getClass() == RuntimeException.class);
+			assertEquals("test", ex.getCause().getMessage());
+		}
+
+		expression = createExp("throw($ex, \"tmp.None\")");
+		expression = createExp("throw($ex, \"java.lang.Throwable\")");
+		expression = createExp("throw($ex, \"java.lang.IllegalArgumentException\")");
+
+		expression = createExp("throw(\"java.lang.RuntimeException\")");
+		expression.tryGetResult(getted);
+		assertFalse(getted.value);
+
+		data.clearData();
 	}
 
 	public void testParseStatement2()
@@ -216,6 +273,23 @@ public class ExprToolTest extends TestCase
 		assertEquals("3",  expResult);
 		assertEquals(3, tmpList.size());
 		System.out.println("list: " + tmpList);
+		data.clearData();
+	}
+
+	public void testParseExpCN()
+			throws Exception
+	{
+		Expression expression;
+		int $i = 3;
+		String str = "测上下马测试\uffff\u0020";
+		AppData data = AppData.getCurrentData();
+		String exp = "$a := \"" + str + "\" + $i;";
+		expression = createExp(exp);
+		data.modelVars = data.varCache.createCache();
+		setValue("$i", Utility.createInteger($i));
+		Object expResult = expression.getResult(data);
+		assertEquals(str + $i, expResult);
+		assertEquals('\u0020', ' ');
 		data.clearData();
 	}
 

@@ -24,7 +24,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 /**
- * @author micromagic@sina.com
+ * 条件配置信息.
  */
 public interface ConditionProperty
 {

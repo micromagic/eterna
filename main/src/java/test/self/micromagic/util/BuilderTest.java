@@ -21,7 +21,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.digester2.ContainerManager;
-import self.micromagic.eterna.search.BuildeResult;
+import self.micromagic.eterna.search.BuilderResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.search.impl.BuilderGenerator;
@@ -40,7 +40,7 @@ public class BuilderTest extends TestCase
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
 		int[] indexs = (int[]) PrivateAccessor.get(t, "indexs");
 		assertEquals(3, indexs.length);
-		BuildeResult con = t.buildeCondition(
+		BuilderResult con = t.buildeCondition(
 				"a,b", "1,2,3, 4, 5", new EmptyConditionProperty("a,b"));
 		assertEquals(5, con.preparers.length);
 		assertEquals("b.a.b IN (?, ?, ?, ?, ?)", con.scriptPart);
@@ -118,7 +118,7 @@ public class BuilderTest extends TestCase
 		t = new TemplateBuilder();
 		t.setAttribute("template", "123 456");
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
-		BuildeResult con = t.buildeCondition("a", "1", null);
+		BuilderResult con = t.buildeCondition("a", "1", null);
 		assertEquals("123 456", con.scriptPart);
 
 		t = new TemplateBuilder();
@@ -139,7 +139,7 @@ public class BuilderTest extends TestCase
 		t.setAttribute("template", "([C0] like ? or [C1] like ?)");
 		PrivateAccessor.invoke(t, "parseTemplate", new Object[0]);
 		t.initialize(f);
-		BuildeResult condition = t.buildeCondition("a,b", "str", null);
+		BuilderResult condition = t.buildeCondition("a,b", "str", null);
 		assertEquals("(a like ? or b like ?)", condition.scriptPart);
 		assertEquals(2, condition.preparers.length);
 		assertEquals("%str%", PrivateAccessor.get(condition.preparers[0], "value"));
@@ -150,7 +150,7 @@ public class BuilderTest extends TestCase
 	{
 		EternaFactory f = (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
 		ConditionBuilder b;
-		BuildeResult condition;
+		BuilderResult condition;
 		EmptyConditionProperty cp = new EmptyConditionProperty("a");
 
 		b = f.getConditionBuilder("isNull");

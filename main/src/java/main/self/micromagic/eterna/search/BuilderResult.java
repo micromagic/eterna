@@ -21,21 +21,21 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * 一个通过ConditionBuilder构造的条件对象.
+ * 一个通过ConditionBuilder构造的条件结果对象.
  */
-public class BuildeResult
+public class BuilderResult
 {
 	public final String scriptPart;
 	public final ValuePreparer[] preparers;
 
-	public BuildeResult(String scriptPart)
+	public BuilderResult(String scriptPart)
 	{
 		this(scriptPart, null);
 	}
 
-	public BuildeResult(String sqlPart, ValuePreparer[] preparers)
+	public BuilderResult(String scriptPart, ValuePreparer[] preparers)
 	{
-		this.scriptPart = sqlPart;
+		this.scriptPart = scriptPart;
 		this.preparers = preparers == null ? ConditionBuilder.EMPTY_PREPARERS : preparers;
 	}
 

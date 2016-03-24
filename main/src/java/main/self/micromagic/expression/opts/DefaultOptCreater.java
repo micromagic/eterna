@@ -38,6 +38,7 @@ public class DefaultOptCreater
 		optCache.put("length", new GetLength());
 		optCache.put("isEmpty", new CheckEmpty());
 		optCache.put("contains", new CheckContains());
+		optCache.put("throw", new ThrowCreater());
 
 		optCache.put("hasNext", new HasNext());
 		optCache.put("next", new NextValue());

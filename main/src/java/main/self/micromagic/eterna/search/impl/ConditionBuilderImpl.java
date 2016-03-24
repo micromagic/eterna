@@ -18,7 +18,7 @@ package self.micromagic.eterna.search.impl;
 
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
-import self.micromagic.eterna.search.BuildeResult;
+import self.micromagic.eterna.search.BuilderResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.EternaException;
@@ -98,7 +98,7 @@ class ConditionBuilderImpl
 	}
 	private PreparerCreater prepare;
 
-	public BuildeResult buildeCondition(String colName, Object value, ConditionProperty cp)
+	public BuilderResult buildeCondition(String colName, Object value, ConditionProperty cp)
 			throws EternaException
 	{
 		if (this.needValue)
@@ -139,23 +139,23 @@ class ConditionBuilderImpl
 			{
 				preparers[0] = pCreater.createPreparer(value);
 			}
-			return new BuildeResult(sqlPart.toString(), preparers);
+			return new BuilderResult(sqlPart.toString(), preparers);
 		}
 		else
 		{
 			int count = colName.length() + this.operator.length() + 1;
 			StringAppender temp = StringTool.createStringAppender(count);
 			temp.append(colName).append(' ').append(this.operator);
-			return new BuildeResult(temp.toString());
+			return new BuilderResult(temp.toString());
 		}
 	}
 
-	protected BuildeResult getNullCheckCondition(String colName)
+	protected BuilderResult getNullCheckCondition(String colName)
 	{
 		boolean equalsFlag = EQUALS_OPT_TAG.equalsIgnoreCase(this.operator)
 				|| LIKE_OPT_TAG.equalsIgnoreCase(this.operator);
 		String temp = equalsFlag ? colName + " IS NULL" : colName + " IS NOT NULL";
-		return new BuildeResult(temp);
+		return new BuilderResult(temp);
 	}
 
 	public Object getAttribute(String name)

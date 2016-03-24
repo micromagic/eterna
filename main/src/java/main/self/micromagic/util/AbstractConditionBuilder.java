@@ -17,7 +17,9 @@
 package self.micromagic.util;
 
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.ConditionBuilder;
+import self.micromagic.eterna.search.ConditionProperty;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -58,6 +60,28 @@ public abstract class AbstractConditionBuilder extends AbstractGenerator
 		this.operator = operator;
 	}
 	protected String operator;
+
+	/**
+	 * 构造一个值准备器.
+	 * 如果当前条件构造器设置了值准备器, 则使用它生成值准备器.
+	 * 如果未设置, 则使用条件配置对象生成值准备器.
+	 */
+	protected ValuePreparer createValuePreparer(ConditionProperty cp, String value)
+	{
+		return this.prepare == null ? cp.createValuePreparer(value)
+				: this.prepare.createPreparer(value);
+	}
+
+	/**
+	 * 构造一个值准备器.
+	 * 如果当前条件构造器设置了值准备器, 则使用它生成值准备器.
+	 * 如果未设置, 则使用条件配置对象生成值准备器.
+	 */
+	protected ValuePreparer createValuePreparer(ConditionProperty cp, Object value)
+	{
+		return this.prepare == null ? cp.createValuePreparer(value)
+				: this.prepare.createPreparer(value);
+	}
 
 	public void setPrepare(String prepare)
 			throws EternaException

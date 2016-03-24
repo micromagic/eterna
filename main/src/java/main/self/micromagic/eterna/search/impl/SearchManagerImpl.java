@@ -35,7 +35,7 @@ import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.DataHandler;
-import self.micromagic.eterna.search.BuildeResult;
+import self.micromagic.eterna.search.BuilderResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionInfo;
 import self.micromagic.eterna.search.ConditionProperty;
@@ -358,7 +358,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					{
 						cb = search.getFactory().getConditionBuilder(info.builderName);
 					}
-					BuildeResult cbCon = null;
+					BuilderResult cbCon = null;
 					try
 					{
 						cbCon = cb.buildeCondition(cp.getColumnName(), info.value, cp);
@@ -494,7 +494,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			if (!cp.isIgnore() && !(param.skipEmpty ? StringTool.isEmpty(value) : value == null))
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
-				BuildeResult cbCon = null;
+				BuilderResult cbCon = null;
 				try
 				{
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
@@ -582,7 +582,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			if (!cp.isIgnore() && !StringTool.isEmpty(value))
 			{
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
-				BuildeResult cbCon = null;
+				BuilderResult cbCon = null;
 				try
 				{
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
@@ -754,7 +754,7 @@ public class SearchManagerImpl extends AbstractGenerator
 				ConditionProperty cp = (ConditionProperty) pair[0];
 				value = pair[1];
 				ConditionBuilder cb = cp.getDefaultConditionBuilder();
-				BuildeResult cbCon = null;
+				BuilderResult cbCon = null;
 				try
 				{
 					cbCon = cb.buildeCondition(cp.getColumnName(), value, cp);
