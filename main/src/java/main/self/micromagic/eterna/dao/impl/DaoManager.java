@@ -54,7 +54,7 @@ public class DaoManager
 
 	public static final String AUTO_NAME = "auto";
 	public static final String CHECK_NAME = "check";
-	public static final String SUBSQL_NAME = "sub";
+	public static final String SUB_SCRIPT_NAME = "sub";
 	public static final String PARAMETER_NAME = "param";
 	public static final String CONSTANT_NAME = "const";
 
@@ -90,13 +90,13 @@ public class DaoManager
 	 */
 	private String nameQuote = "\"";
 
-	private PartSQL[] partSQLs = new PartSQL[0];
+	private PartScript[] partScripts = new PartScript[0];
 
 	private ParameterManager[] parameterManagers = new ParameterManager[0];
 	private int[] subPartIndexs = new int[0];
 
 	private boolean changed = true;
-	private String cacheSQL;
+	private String cacheScript;
 	private Dao dao;
 
 	public void initialize(Dao dao)
@@ -112,12 +112,12 @@ public class DaoManager
 			this.nameQuote = tmpQuote;
 		}
 		int subIndex = 1;
-		for (int i = 0; i < this.partSQLs.length; i++)
+		for (int i = 0; i < this.partScripts.length; i++)
 		{
-			this.partSQLs[i].initialize(factory);
-			if (this.partSQLs[i] instanceof SubPart)
+			this.partScripts[i].initialize(factory);
+			if (this.partScripts[i] instanceof SubPart)
 			{
-				((SubPart) this.partSQLs[i]).setSubIndex(subIndex++);
+				((SubPart) this.partScripts[i]).setSubIndex(subIndex++);
 			}
 		}
 		for (int i = 0; i < this.parameterManagers.length; i++)
@@ -126,7 +126,7 @@ public class DaoManager
 		}
 	}
 
-	public String getPreparedSQL()
+	public String getPreparedScript()
 			throws EternaException
 	{
 		if (this.changed)
@@ -134,42 +134,48 @@ public class DaoManager
 			IntegerRef size = new IntegerRef();
 			try
 			{
-				this.cacheSQL = this.buildePreparedSQL(size);
+				this.cacheScript = this.buildPreparedScript(size);
 			}
 			catch (Exception ex)
 			{
-				String msg = "Error in " + this.dao.getType() + " ["
-						+ this.dao.getName() + "]'s SQL.";
+				String msg = "Error in build " + this.dao.getType() + " ["
+						+ this.dao.getName() + "]'s script.";
 				throw new EternaException(msg, ex);
 			}
 			this.changed = false;
 			if (log.isDebugEnabled())
 			{
-				log.debug("size:" + size + " bufSize:" + this.cacheSQL.length());
+				log.debug("size:" + size + " bufSize:" + this.cacheScript.length());
 			}
 		}
-		return this.cacheSQL;
+		return this.cacheScript;
 	}
-	public String getTempPreparedSQL(int[] indexs, String[] subParts)
+	public String getTempPreparedScript(int[] indexs, String[] subParts)
 			throws EternaException
 	{
 		this.backupSubParts();
 		try
 		{
 			this.setSubParts(indexs, subParts);
-			return this.buildePreparedSQL(null);
+			return this.buildPreparedScript(null);
+		}
+		catch (Exception ex)
+		{
+			String msg = "Error in build " + this.dao.getType() + " ["
+					+ this.dao.getName() + "]'s script.";
+			throw new EternaException(msg, ex);
 		}
 		finally
 		{
 			this.recoverSubParts();
 		}
 	}
-	private String buildePreparedSQL(IntegerRef bufSize)
+	private String buildPreparedScript(IntegerRef bufSize)
 	{
 		int size = 0;
-		for (int i = 0; i < this.partSQLs.length; i++)
+		for (int i = 0; i < this.partScripts.length; i++)
 		{
-			size += this.partSQLs[i].getLength();
+			size += this.partScripts[i].getLength();
 		}
 		if (bufSize != null)
 		{
@@ -177,23 +183,23 @@ public class DaoManager
 		}
 		StringAppender temp = StringTool.createStringAppender(size);
 		CheckContainer currentCheck = new CheckContainer();
-		for (int i = 0; i < this.partSQLs.length; i++)
+		for (int i = 0; i < this.partScripts.length; i++)
 		{
 			CheckPart check = currentCheck.checkPart;
 			if (check == null)
 			{
-				if (this.partSQLs[i] instanceof CheckPart)
+				if (this.partScripts[i] instanceof CheckPart)
 				{
-					currentCheck.checkPart = (CheckPart) this.partSQLs[i];
+					currentCheck.checkPart = (CheckPart) this.partScripts[i];
 				}
 				else
 				{
-					temp.append(this.partSQLs[i].getSQL());
+					temp.append(this.partScripts[i].getScript());
 				}
 			}
 			else
 			{
-				temp.append(check.doCheck(this.partSQLs[i], currentCheck));
+				temp.append(check.doCheck(this.partScripts[i], currentCheck));
 			}
 		}
 		if (currentCheck.checkPart != null)
@@ -214,15 +220,15 @@ public class DaoManager
 		}
 		other.subPartIndexs = this.subPartIndexs;
 
-		other.partSQLs = new PartSQL[this.partSQLs.length];
-		for (int i = 0; i < this.partSQLs.length; i++)
+		other.partScripts = new PartScript[this.partScripts.length];
+		for (int i = 0; i < this.partScripts.length; i++)
 		{
-			other.partSQLs[i] = this.partSQLs[i].copy(clear, other);
+			other.partScripts[i] = this.partScripts[i].copy(clear, other);
 		}
 
 		if (!clear)
 		{
-			other.cacheSQL = this.cacheSQL;
+			other.cacheScript = this.cacheScript;
 			other.changed = this.changed;
 		}
 		return other;
@@ -241,26 +247,26 @@ public class DaoManager
 		ResultReader[] readerArray = null;
 		Parameter[] paramArray = null;
 		StringAppender buf = StringTool.createStringAppender(script.length() + 16);
-		String dealedSql = script;
-		int index = dealedSql.indexOf(EXTEND_FLAG + AUTO_NAME);
+		String dealedScript = script;
+		int index = dealedScript.indexOf(EXTEND_FLAG + AUTO_NAME);
 		while (index != -1)
 		{
 			// 不是个转义标记, 处理自动生成
-			if (!isExtendBefore(dealedSql, index))
+			if (!isExtendBefore(dealedScript, index))
 			{
-				buf.append(dealedSql.substring(0, index));
-				dealedSql = dealedSql.substring(index);
-				if (dealedSql.length() <= 1 + AUTO_NAME.length()
-						|| dealedSql.charAt(1 + AUTO_NAME.length()) != TEMPLATE_BEGIN)
+				buf.append(dealedScript.substring(0, index));
+				dealedScript = dealedScript.substring(index);
+				if (dealedScript.length() <= 1 + AUTO_NAME.length()
+						|| dealedScript.charAt(1 + AUTO_NAME.length()) != TEMPLATE_BEGIN)
 				{
 					throw new EternaException("After #auto must with a \"[\".");
 				}
-				int endI = dealedSql.indexOf(TEMPLATE_END);
+				int endI = dealedScript.indexOf(TEMPLATE_END);
 				if (endI == -1)
 				{
 					throw new EternaException("After #auto not found \"]\".");
 				}
-				String autoConfig = dealedSql.substring(1 + AUTO_NAME.length() + 1, endI);
+				String autoConfig = dealedScript.substring(1 + AUTO_NAME.length() + 1, endI);
 				int sIndex = autoConfig.indexOf(';');
 				String beginParam = "1";
 				String endParam = "-1";
@@ -407,16 +413,16 @@ public class DaoManager
 					}
 					throw new EternaException(msg, ex);
 				}
-				dealedSql = dealedSql.substring(endI + 1);
+				dealedScript = dealedScript.substring(endI + 1);
 			}
 			else
 			{
 				buf.append(script.substring(0, index + 1 + AUTO_NAME.length()));
-				dealedSql = script.substring(index + 1 + AUTO_NAME.length());
+				dealedScript = script.substring(index + 1 + AUTO_NAME.length());
 			}
-			index = dealedSql.indexOf(EXTEND_FLAG + AUTO_NAME);
+			index = dealedScript.indexOf(EXTEND_FLAG + AUTO_NAME);
 		}
-		buf.append(dealedSql);
+		buf.append(dealedScript);
 		return new String(buf.toString());
 	}
 
@@ -578,25 +584,25 @@ public class DaoManager
 		}
 	}
 
-	public void parse(String sql)
+	public void parse(String script)
 			throws EternaException
 	{
 		this.changed = true;
 		ArrayList partList = new ArrayList();
 		ArrayList paramList = new ArrayList();
-		ArrayList subSQLList = new ArrayList();
+		ArrayList subScriptList = new ArrayList();
 		ArrayList subList = new ArrayList();
-		parse(sql, false, partList, paramList, subSQLList, subList);
+		parse(script, false, partList, paramList, subScriptList, subList);
 
-		this.partSQLs = (PartSQL[]) partList.toArray(new PartSQL[0]);
+		this.partScripts = (PartScript[]) partList.toArray(new PartScript[0]);
 		this.parameterManagers = (ParameterManager[]) paramList.toArray(new ParameterManager[0]);
 		for (int i = 0; i < this.parameterManagers.length; i++)
 		{
 			this.parameterManagers[i].setIndex(i);
 			this.parameterManagers[i].preCheck();
 		}
-		this.subPartIndexs = new int[subSQLList.size()];
-		Iterator itr = subSQLList.iterator();
+		this.subPartIndexs = new int[subScriptList.size()];
+		Iterator itr = subScriptList.iterator();
 		for (int i = 0; i < this.subPartIndexs.length; i++)
 		{
 			this.subPartIndexs[i] = ((Integer) itr.next()).intValue();
@@ -606,145 +612,146 @@ public class DaoManager
 	/**
 	 * @param onlyC   是否只能有常量
 	 */
-	public static void parse(String sql, boolean onlyC, List partList, List paramList,
-			List subSQLList, List subList)
+	public static void parse(String script, boolean onlyC, List partList, List paramList,
+			List subScriptList, List subList)
 			throws EternaException
 	{
 		HashMap paramMap = new HashMap();
-		String dealedSql = sql;
-		int index = dealedSql.indexOf(EXTEND_FLAG);
-		PartSQL partSQL;
+		String dealedScript = script;
+		int index = dealedScript.indexOf(EXTEND_FLAG);
+		PartScript partScript;
 		while (index != -1)
 		{
-			if (index == dealedSql.length() - 1)
+			if (index == dealedScript.length() - 1)
 			{
-				// EXTEND_FLAG 在最后, 所以作为normal sql处理
-				addNormalPart(partList, paramList, subList, index, dealedSql);
-				partList.add(new NormalSQL(EXTEND_FLAG_STR));
-				dealedSql = "";
+				// EXTEND_FLAG 在最后, 所以作为normal 脚本处理
+				addNormalPart(partList, paramList, subList, index, dealedScript);
+				partList.add(new NormalScript(EXTEND_FLAG_STR));
+				dealedScript = "";
 			}
-			else if (dealedSql.charAt(index + 1) == EXTEND_FLAG)
+			else if (dealedScript.charAt(index + 1) == EXTEND_FLAG)
 			{
 				// 连续两个EXTEND_FLAG, 合并成一个处理
-				dealedSql = addNormalPart(partList, paramList, subList, index + 1, dealedSql);
+				dealedScript = addNormalPart(partList, paramList, subList, index + 1, dealedScript);
 			}
-			else if (dealedSql.charAt(index + 1) == PARAMETER_FLAG || dealedSql.charAt(index + 1) == SUBPART_FLAG
-					|| dealedSql.charAt(index + 1) == EXTEND_NAME_BEGIN || dealedSql.charAt(index + 1) == EXTEND_NAME_END
-					|| dealedSql.charAt(index + 1) == TEMPLATE_BEGIN || dealedSql.charAt(index + 1) == TEMPLATE_END)
+			else if (dealedScript.charAt(index + 1) == PARAMETER_FLAG || dealedScript.charAt(index + 1) == SUBPART_FLAG
+					|| dealedScript.charAt(index + 1) == EXTEND_NAME_BEGIN || dealedScript.charAt(index + 1) == EXTEND_NAME_END
+					|| dealedScript.charAt(index + 1) == TEMPLATE_BEGIN || dealedScript.charAt(index + 1) == TEMPLATE_END)
 			{
-				// 接着的其他特殊标记, 作为普通的sql处理
-				dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
-				partList.add(new NormalSQL(dealedSql.substring(0, 1)));
-				dealedSql = dealedSql.substring(1);
+				// 接着的其他特殊标记, 作为普通的脚本处理
+				dealedScript = addNormalPart(partList, paramList, subList, index, dealedScript);
+				partList.add(new NormalScript(dealedScript.substring(0, 1)));
+				dealedScript = dealedScript.substring(1);
 			}
 			else
 			{
-				String checked = checkExtendType(dealedSql, index);
-				if (checked == SUBSQL_NAME)
+				String checked = checkExtendType(dealedScript, index);
+				if (checked == SUB_SCRIPT_NAME)
 				{
 					if (onlyC)
 					{
-						throw new EternaException("In template can't use sub_sql, sql:" + sql + ".");
+						throw new EternaException("In template can't use sub, script:" + script + ".");
 					}
-					// 是一个sub sql
-					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
-					dealedSql = dealedSql.substring(SUBSQL_NAME.length());
-					if (dealedSql.length() > 0 && dealedSql.charAt(0) == TEMPLATE_BEGIN)
+					// 是一个sub脚本
+					dealedScript = addNormalPart(partList, paramList, subList, index, dealedScript);
+					dealedScript = dealedScript.substring(SUB_SCRIPT_NAME.length());
+					if (dealedScript.length() > 0 && dealedScript.charAt(0) == TEMPLATE_BEGIN)
 					{
-						index = getEndTemplateIndex(dealedSql);
-						partSQL = new SubPart(dealedSql.substring(1, index), paramList.size());
-						dealedSql = dealedSql.substring(index + 1);
+						index = getEndTemplateIndex(dealedScript);
+						partScript = new SubPart(dealedScript.substring(1, index), paramList.size());
+						dealedScript = dealedScript.substring(index + 1);
 					}
 					else
 					{
-						partSQL = new SubPart(SUBPART_FLAG + "",  paramList.size());
+						partScript = new SubPart(SUBPART_FLAG + "",  paramList.size());
 					}
 					Integer tempIndex = new Integer(partList.size());
-					partList.add(partSQL);
-					subSQLList.add(tempIndex);
+					partList.add(partScript);
+					subScriptList.add(tempIndex);
 				}
 				else if (checked == PARAMETER_NAME)
 				{
 					if (onlyC)
 					{
-						throw new EternaException("In template can't use parameter, sql:" + sql + ".");
+						throw new EternaException("In template can't use parameter, script:" + script + ".");
 					}
 					// 是一个动态参数
-					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
-					dealedSql = dealedSql.substring(PARAMETER_NAME.length());
-					if (dealedSql.length() == 0 || dealedSql.charAt(0) != EXTEND_NAME_BEGIN)
+					dealedScript = addNormalPart(partList, paramList, subList, index, dealedScript);
+					dealedScript = dealedScript.substring(PARAMETER_NAME.length());
+					if (dealedScript.length() == 0 || dealedScript.charAt(0) != EXTEND_NAME_BEGIN)
 					{
-						throw new EternaException("Not found dynamic parameter group, sql:" + sql + ".");
+						throw new EternaException("Not found dynamic parameter group, script:" + script + ".");
 					}
-					dealedSql = addParamPart(partList, paramList, paramMap, dealedSql);
+					dealedScript = addParamPart(partList, paramList, paramMap, dealedScript);
 				}
 				else if (checked == CONSTANT_NAME)
 				{
 					// 是一个常量
-					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
-					dealedSql = dealedSql.substring(CONSTANT_NAME.length());
-					if (dealedSql.length() == 0 || dealedSql.charAt(0) != EXTEND_NAME_BEGIN)
+					dealedScript = addNormalPart(partList, paramList, subList, index, dealedScript);
+					dealedScript = dealedScript.substring(CONSTANT_NAME.length());
+					if (dealedScript.length() == 0 || dealedScript.charAt(0) != EXTEND_NAME_BEGIN)
 					{
-						throw new EternaException("Not found constant name [" + sql + "].");
+						throw new EternaException("Not found constant name [" + script + "].");
 					}
-					index = dealedSql.indexOf(EXTEND_NAME_END);
+					index = dealedScript.indexOf(EXTEND_NAME_END);
 					if (index == -1)
 					{
-						throw new EternaException("Not end constant name [" + sql + "].");
+						throw new EternaException("Not end constant name [" + script + "].");
 					}
-					partSQL = new ConstantSQL(dealedSql.substring(1, index));
-					partList.add(partSQL);
-					dealedSql = dealedSql.substring(index + 1);
+					partScript = new ConstantScript(dealedScript.substring(1, index));
+					partList.add(partScript);
+					dealedScript = dealedScript.substring(index + 1);
 				}
 				else if (checked == CHECK_NAME)
 				{
 					// 是一个检测标识
-					dealedSql = addNormalPart(partList, paramList, subList, index, dealedSql);
-					dealedSql = dealedSql.substring(CHECK_NAME.length());
-					if (dealedSql.length() > 0 && dealedSql.charAt(0) == TEMPLATE_BEGIN)
+					dealedScript = addNormalPart(partList, paramList, subList, index, dealedScript);
+					dealedScript = dealedScript.substring(CHECK_NAME.length());
+					if (dealedScript.length() > 0 && dealedScript.charAt(0) == TEMPLATE_BEGIN)
 					{
-						index = getEndTemplateIndex(dealedSql);
-						partSQL = new CheckPart(dealedSql.substring(1, index));
-						dealedSql = dealedSql.substring(index + 1);
+						index = getEndTemplateIndex(dealedScript);
+						partScript = new CheckPart(dealedScript.substring(1, index));
+						dealedScript = dealedScript.substring(index + 1);
 					}
 					else
 					{
-						// 这里不需要对dealedSql截取子串
-						partSQL = new CheckPart(null);
+						// 这里不需要对dealedScript截取子串
+						partScript = new CheckPart(null);
 					}
-					partList.add(partSQL);
+					partList.add(partScript);
 				}
 				else
 				{
-					// 没有发现匹配的EXTEND类型, 所以作为normal sql处理, 扩展标志作为普通字符
-					addNormalPart(partList, paramList, subList, index + 1, dealedSql);
-					dealedSql = dealedSql.substring(index + 1);
+					// 没有发现匹配的EXTEND类型, 所以作为normal 脚本处理, 扩展标志作为普通字符
+					addNormalPart(partList, paramList, subList, index + 1, dealedScript);
+					dealedScript = dealedScript.substring(index + 1);
 				}
 			}
-			index = dealedSql.indexOf(EXTEND_FLAG);
+			index = dealedScript.indexOf(EXTEND_FLAG);
 		}
-		if (dealedSql.length() > 0)
+		if (dealedScript.length() > 0)
 		{
-			addNormalPart(partList, paramList, subList, dealedSql.length(), dealedSql);
+			addNormalPart(partList, paramList, subList, dealedScript.length(), dealedScript);
 		}
 	}
 
 	/**
-	 * @return 此subSql前面的参数个数
+	 * @return 此sub脚本前面的参数个数
 	 */
 	public int setSubPart(int index, String subPart)
 			throws EternaException
 	{
 		if (index < 0 || index >= this.subPartIndexs.length)
 		{
-			throw new EternaException("The position [" + (index + 1) + "] hasn't sub sql.");
+			throw new EternaException("The position [" + (index + 1) + "] hasn't sub.");
 		}
 		if (subPart == null)
 		{
-			throw new EternaException("The position [" + (index + 1) + "] sub sql can't set [null].");
+			throw new EternaException("The position [" + (index + 1)
+					+ "]'s sub can't be setted null.");
 		}
 		int temp = this.subPartIndexs[index];
-		SubPart sp = (SubPart) this.partSQLs[temp];
+		SubPart sp = (SubPart) this.partScripts[temp];
 		if (!sp.checkSubPartSame(subPart))
 		{
 			this.changed = true;
@@ -766,14 +773,15 @@ public class DaoManager
 			int index = indexs[i];
 			if (index < 0 || index >= this.subPartIndexs.length)
 			{
-				throw new EternaException("The position [" + (index + 1) + "] hasn't sub sql.");
+				throw new EternaException("The position [" + (index + 1) + "] hasn't sub.");
 			}
 			if (subParts[i] == null)
 			{
-				throw new EternaException("The position [" + (index + 1) + "] sub sql can't set [null].");
+				throw new EternaException("The position [" + (index + 1)
+						+ "]'s sub can't be setted null.");
 			}
 			int temp = this.subPartIndexs[index];
-			SubPart sp = (SubPart) this.partSQLs[temp];
+			SubPart sp = (SubPart) this.partScripts[temp];
 			sp.setSubPart(subParts[i]);
 		}
 	}
@@ -782,7 +790,7 @@ public class DaoManager
 	{
 		for (int i = 0; i < this.subPartIndexs.length; i++)
 		{
-			SubPart sp = (SubPart) this.partSQLs[this.subPartIndexs[i]];
+			SubPart sp = (SubPart) this.partScripts[this.subPartIndexs[i]];
 			sp.backup();
 		}
 	}
@@ -791,7 +799,7 @@ public class DaoManager
 	{
 		for (int i = 0; i < this.subPartIndexs.length; i++)
 		{
-			SubPart sp = (SubPart) this.partSQLs[this.subPartIndexs[i]];
+			SubPart sp = (SubPart) this.partScripts[this.subPartIndexs[i]];
 			sp.recover();
 		}
 	}
@@ -842,23 +850,23 @@ public class DaoManager
 		return this.parameterManagers[index];
 	}
 
-	private static String checkExtendType(String dealedSql, int extendFlagIndex)
+	private static String checkExtendType(String dealedScript, int extendFlagIndex)
 	{
-		int size = dealedSql.length();
-		int tempLimit = SUBSQL_NAME.length() + 1;
+		int size = dealedScript.length();
+		int tempLimit = SUB_SCRIPT_NAME.length() + 1;
 		String tempStr;
 		if (extendFlagIndex + tempLimit <= size)
 		{
-			tempStr = dealedSql.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
-			if (SUBSQL_NAME.equals(tempStr))
+			tempStr = dealedScript.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
+			if (SUB_SCRIPT_NAME.equals(tempStr))
 			{
-				return SUBSQL_NAME;
+				return SUB_SCRIPT_NAME;
 			}
 		}
 		tempLimit = PARAMETER_NAME.length() + 1;
 		if (extendFlagIndex + tempLimit <= size)
 		{
-			tempStr = dealedSql.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
+			tempStr = dealedScript.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
 			if (PARAMETER_NAME.equals(tempStr))
 			{
 				return PARAMETER_NAME;
@@ -867,7 +875,7 @@ public class DaoManager
 		tempLimit = CONSTANT_NAME.length() + 1;
 		if (extendFlagIndex + tempLimit <= size)
 		{
-			tempStr = dealedSql.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
+			tempStr = dealedScript.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
 			if (CONSTANT_NAME.equals(tempStr))
 			{
 				return CONSTANT_NAME;
@@ -876,7 +884,7 @@ public class DaoManager
 		tempLimit = CHECK_NAME.length() + 1;
 		if (extendFlagIndex + tempLimit <= size)
 		{
-			tempStr = dealedSql.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
+			tempStr = dealedScript.substring(extendFlagIndex + 1, extendFlagIndex + tempLimit);
 			if (CHECK_NAME.equals(tempStr))
 			{
 				return CHECK_NAME;
@@ -886,19 +894,20 @@ public class DaoManager
 	}
 
 	/**
-	 * 将结束位置前面部分的sql语句作为normal部分, 添加到PartSQL列表中. <p>
-	 * 添加时, 还将解析sql中的普通参数和子句标志.
+	 * 将结束位置前面部分的脚本作为normal部分, 添加到PartScript列表中. <p>
+	 * 添加时, 还将解析脚本中的普通参数和子句标志.
 	 *
-	 * @return   返回结束位置之后的sql语句
+	 * @return   返回结束位置之后的脚本
 	 */
-	private static String addNormalPart(List partList, List paramList, List subList, int endIndex, String dealedSql)
+	private static String addNormalPart(List partList, List paramList, List subList, int endIndex,
+			String dealedScript)
 	{
-		String temp = dealedSql.substring(0, endIndex);
+		String temp = dealedScript.substring(0, endIndex);
 		paramList.addAll(getNormalParameters(temp));
 		int index = temp.indexOf(SUBPART_FLAG);
 		while (index != -1)
 		{
-			partList.add(new NormalSQL(temp.substring(0, index)));
+			partList.add(new NormalScript(temp.substring(0, index)));
 			SubFlagPart sfp = new SubFlagPart();
 			partList.add(sfp);
 			subList.add(sfp);
@@ -907,24 +916,25 @@ public class DaoManager
 		}
 		if (temp.length() > 0)
 		{
-			partList.add(new NormalSQL(temp));
+			partList.add(new NormalScript(temp));
 		}
-		return endIndex < dealedSql.length() ? dealedSql.substring(endIndex + 1) : "";
+		return endIndex < dealedScript.length() ? dealedScript.substring(endIndex + 1) : "";
 	}
 
-	private static int getEndTemplateIndex(String dealedSql)
+	private static int getEndTemplateIndex(String dealedScript)
 			throws EternaException
 	{
 		int index = 0;
 		do
 		{
-			index = dealedSql.indexOf(TEMPLATE_END, index + 1);
+			index = dealedScript.indexOf(TEMPLATE_END, index + 1);
 			if (index == -1)
 			{
-				throw new EternaException("Not found the template end, dealedSql:" + dealedSql + ".");
+				throw new EternaException("Not found the template end, dealed script:"
+						+ dealedScript + ".");
 			}
 		// 如果模板结束标记前是个扩展标记, 则继续寻找下一个结束标记
-		} while (isExtendBefore(dealedSql, index));
+		} while (isExtendBefore(dealedScript, index));
 		return index;
 	}
 
@@ -932,12 +942,12 @@ public class DaoManager
 	 * 判断给定位置前是否存在有效的扩展标记. <p>
 	 * 出现连续的奇数个扩展标记就是有效的扩展标记.
 	 */
-	private static boolean isExtendBefore(String dealedSql, int index)
+	private static boolean isExtendBefore(String dealedScript, int index)
 	{
 		int count = 0;
 		for (int i = index - 1; i >= 0; i--)
 		{
-			if (dealedSql.charAt(i) == EXTEND_FLAG)
+			if (dealedScript.charAt(i) == EXTEND_FLAG)
 			{
 				count++;
 			}
@@ -949,17 +959,18 @@ public class DaoManager
 		return (count & 0x1) == 1;
 	}
 
-	private static String addParamPart(List partList, List paramList, Map paramMap, String dealedSql)
+	private static String addParamPart(List partList, List paramList, Map paramMap, String dealedScript)
 			throws EternaException
 	{
-		int index = dealedSql.indexOf(EXTEND_NAME_END);
+		int index = dealedScript.indexOf(EXTEND_NAME_END);
 		if (index == -1)
 		{
-			throw new EternaException("Not end dynamic parameter group name, dealedSql:" + dealedSql + ".");
+			throw new EternaException("Not end dynamic parameter group name, dealed script:"
+					+ dealedScript + ".");
 		}
 
 		// 根据组名 归类动态参数
-		String group = dealedSql.substring(1, index);
+		String group = dealedScript.substring(1, index);
 		ParameterManager pm = (ParameterManager) paramMap.get(group);
 		if (pm == null)
 		{
@@ -969,17 +980,18 @@ public class DaoManager
 		}
 
 		// 获取动态参数的template
-		dealedSql = dealedSql.substring(index + 1);
-		if (dealedSql.charAt(0) != TEMPLATE_BEGIN)
+		dealedScript = dealedScript.substring(index + 1);
+		if (dealedScript.charAt(0) != TEMPLATE_BEGIN)
 		{
-			throw new EternaException("Not found dynamic parameter template, dealedSql:" + dealedSql + ".");
+			throw new EternaException("Not found dynamic parameter template, dealed script:"
+					+ dealedScript + ".");
 		}
-		index = getEndTemplateIndex(dealedSql);
+		index = getEndTemplateIndex(dealedScript);
 
-		String temp = dealedSql.substring(1, index);
+		String temp = dealedScript.substring(1, index);
 		pm.addParameterTemplate(temp);
-		PartSQL partSQL = new ParameterPart(pm, pm.getParameterTemplateCount() - 1);
-		partList.add(partSQL);
+		PartScript partScript = new ParameterPart(pm, pm.getParameterTemplateCount() - 1);
+		partList.add(partScript);
 		int tmpI = temp.indexOf(PARAMETER_FLAG);
 		if (tmpI != -1)
 		{
@@ -999,17 +1011,17 @@ public class DaoManager
 				paramList.add(pm);
 			}
 		}
-		return dealedSql.substring(index + 1);
+		return dealedScript.substring(index + 1);
 	}
 
-	private static List getNormalParameters(String sql)
+	private static List getNormalParameters(String script)
 	{
 		ArrayList paramList = new ArrayList();
-		int index = sql.indexOf(PARAMETER_FLAG);
+		int index = script.indexOf(PARAMETER_FLAG);
 		while (index != -1)
 		{
 			paramList.add(new ParameterManager(ParameterManager.NORMAL_PARAMETER));
-			index = sql.indexOf(PARAMETER_FLAG, index + 1);
+			index = script.indexOf(PARAMETER_FLAG, index + 1);
 		}
 		return paramList;
 	}
@@ -1018,25 +1030,25 @@ public class DaoManager
 
 
 /**
- * sql 语句的片断, 可以是一部分普通的sql语句, 或一个子sql语句,
+ * SQL脚本的片断, 可以是一部分普通的脚本, 或一个子语句脚本,
  * 或可选参数, 或一个常量.
  */
-abstract class PartSQL
+abstract class PartScript
 {
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
 	}
 
-	public abstract PartSQL copy(boolean clear, DaoManager manager);
+	public abstract PartScript copy(boolean clear, DaoManager manager);
 
 	public abstract int getLength() throws EternaException;
 
-	public abstract String getSQL() throws EternaException;
+	public abstract String getScript() throws EternaException;
 
 }
 
-class ParameterPart extends PartSQL
+class ParameterPart extends PartScript
 {
 	private ParameterManager paramManager;
 	private int templateIndex;
@@ -1055,7 +1067,7 @@ class ParameterPart extends PartSQL
 	{
 	}
 
-	public PartSQL copy(boolean clear, DaoManager manager)
+	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		ParameterManager pm = manager.getParameterManager(this.paramManager.getIndex());
 		ParameterPart other = new ParameterPart();
@@ -1078,7 +1090,7 @@ class ParameterPart extends PartSQL
 		}
 	}
 
-	public String getSQL()
+	public String getScript()
 			throws EternaException
 	{
 		String temp = this.paramManager.getParameterTemplate(this.templateIndex);
@@ -1086,7 +1098,7 @@ class ParameterPart extends PartSQL
 	}
 }
 
-class SubFlagPart extends PartSQL
+class SubFlagPart extends PartScript
 {
 	private String insertString = null;
 
@@ -1095,7 +1107,7 @@ class SubFlagPart extends PartSQL
 		this.insertString = subPart;
 	}
 
-	public PartSQL copy(boolean clear, DaoManager manager)
+	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		SubFlagPart other = new SubFlagPart();
 		other.insertString = clear ? null : this.insertString;
@@ -1107,16 +1119,16 @@ class SubFlagPart extends PartSQL
 		return this.insertString == null ? 1 : this.insertString.length();
 	}
 
-	public String getSQL()
+	public String getScript()
 	{
 		return this.insertString == null ? DaoManager.SUBPART_FLAG + "" : this.insertString;
 	}
 }
 
-class SubPart extends PartSQL
+class SubPart extends PartScript
 {
 	private int flagPartIndex = -1;
-	private PartSQL[] parts = null;
+	private PartScript[] parts = null;
 	private final String template;
 	private final int aheadParamCount;
 	private int subIndex = 0;
@@ -1134,7 +1146,7 @@ class SubPart extends PartSQL
 		this.aheadParamCount = aheadParamCount;
 	}
 
-	public PartSQL copy(boolean clear, DaoManager manager)
+	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		SubPart other = new SubPart(this.template, this.aheadParamCount);
 		other.subIndex = this.subIndex;
@@ -1143,7 +1155,7 @@ class SubPart extends PartSQL
 		if (this.parts != null)
 		{
 			other.flagPartIndex = this.flagPartIndex;
-			other.parts = new PartSQL[this.parts.length];
+			other.parts = new PartScript[this.parts.length];
 			for (int i = 0; i < this.parts.length; i++)
 			{
 				other.parts[i] = this.parts[i].copy(clear, manager);
@@ -1160,26 +1172,25 @@ class SubPart extends PartSQL
 			super.initialize(factory);
 			ArrayList partList = new ArrayList();
 			ArrayList paramList = new ArrayList();
-			ArrayList subSQLList = new ArrayList();
+			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(this.template, true, partList, paramList, subSQLList, subList);
+			DaoManager.parse(this.template, true, partList, paramList, subScriptList, subList);
 
 			if (paramList.size() > 0)
 			{
-				throw new EternaException(
-						"The parameter flag '?' can't int the sub SQL tamplet:"
+				throw new EternaException( "The parameter flag '?' can't int the sub tamplet:"
 						+ this.template + ".");
 			}
 			if (subList.size() != 1)
 			{
-				throw new EternaException(
-						"Error sub flag count in template [" + this.template + "].");
+				throw new EternaException("Error sub flag count in template ["
+						+ this.template + "].");
 			}
-			this.parts = new PartSQL[partList.size()];
+			this.parts = new PartScript[partList.size()];
 			Iterator itr = partList.iterator();
 			for (int i = 0; i < this.parts.length; i++)
 			{
-				PartSQL ps = (PartSQL) itr.next();
+				PartScript ps = (PartScript) itr.next();
 				ps.initialize(factory);
 				this.parts[i] = ps;
 			}
@@ -1217,7 +1228,7 @@ class SubPart extends PartSQL
 	{
 		if (this.insertString == null)
 		{
-			throw new EternaException("Sub SQL unsetted, subsql:[" + this.template + "].");
+			throw new EternaException("Sub part unsetted, template [" + this.template + "].");
 		}
 
 		if (this.insertString.length() == 0)
@@ -1235,12 +1246,12 @@ class SubPart extends PartSQL
 		}
 	}
 
-	public String getSQL() throws EternaException
+	public String getScript() throws EternaException
 	{
 		if (this.insertString == null)
 		{
-			throw new EternaException("Sub SQL unsetted, index:[" + this.subIndex
-					+ "], subsql:[" + this.template + "].");
+			throw new EternaException("Sub part unsetted, index [" + this.subIndex
+					+ "], template [" + this.template + "].");
 		}
 
 		if (this.insertString.length() == 0)
@@ -1251,7 +1262,7 @@ class SubPart extends PartSQL
 		StringAppender temp = StringTool.createStringAppender(this.getLength());
 		for (int i = 0; i < this.parts.length; i++)
 		{
-			temp.append(this.parts[i].getSQL());
+			temp.append(this.parts[i].getScript());
 		}
 		return temp.toString();
 	}
@@ -1282,13 +1293,13 @@ class SubPart extends PartSQL
 
 }
 
-class ConstantSQL extends PartSQL
+class ConstantScript extends PartScript
 {
 	private final String name;
 
 	private String value = null;
 
-	public ConstantSQL(String name)
+	public ConstantScript(String name)
 	{
 		if (name == null)
 		{
@@ -1312,9 +1323,9 @@ class ConstantSQL extends PartSQL
 
 			ArrayList partList = new ArrayList();
 			ArrayList paramList = new ArrayList();
-			ArrayList subSQLList = new ArrayList();
+			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(this.value, true, partList, paramList, subSQLList, subList);
+			DaoManager.parse(this.value, true, partList, paramList, subScriptList, subList);
 
 			if (paramList.size() > 0)
 			{
@@ -1326,15 +1337,15 @@ class ConstantSQL extends PartSQL
 			Iterator itr = partList.iterator();
 			for (int i = 0; i < partList.size(); i++)
 			{
-				PartSQL ps = (PartSQL) itr.next();
+				PartScript ps = (PartScript) itr.next();
 				ps.initialize(factory);
-				buf.append(ps.getSQL());
+				buf.append(ps.getScript());
 			}
 			this.value = StringTool.intern(buf.toString(), true);
 		}
 	}
 
-	public PartSQL copy(boolean clear, DaoManager manager)
+	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		return this;
 	}
@@ -1357,7 +1368,7 @@ class ConstantSQL extends PartSQL
 		return this.value.length();
 	}
 
-	public String getSQL()
+	public String getScript()
 	{
 		if (this.value == null)
 		{
@@ -1368,7 +1379,7 @@ class ConstantSQL extends PartSQL
 
 }
 
-class CheckPart extends PartSQL
+class CheckPart extends PartScript
 {
 	private String hasSubStr;
 	private String noneSubStr;
@@ -1397,9 +1408,9 @@ class CheckPart extends PartSQL
 			super.initialize(factory);
 			ArrayList partList = new ArrayList();
 			ArrayList paramList = new ArrayList();
-			ArrayList subSQLList = new ArrayList();
+			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(tmpStr, true, partList, paramList, subSQLList, subList);
+			DaoManager.parse(tmpStr, true, partList, paramList, subScriptList, subList);
 
 			if (paramList.size() > 0)
 			{
@@ -1412,9 +1423,9 @@ class CheckPart extends PartSQL
 			Iterator itr = partList.iterator();
 			for (int i = 0; i < count; i++)
 			{
-				PartSQL ps = (PartSQL) itr.next();
+				PartScript ps = (PartScript) itr.next();
 				ps.initialize(factory);
-				buf.append(ps.getSQL());
+				buf.append(ps.getScript());
 			}
 
 			Map map = StringTool.string2Map(buf.toString(), ";", '=', true, false, null, null);
@@ -1445,7 +1456,7 @@ class CheckPart extends PartSQL
 	 * @param currentCheck  当前的检查片段的引用
 	 * @return  经过检查后需要输出的脚本片段
 	 */
-	public String doCheck(PartSQL part, CheckContainer currentCheck)
+	public String doCheck(PartScript part, CheckContainer currentCheck)
 	{
 		if (this.end)
 		{
@@ -1478,7 +1489,7 @@ class CheckPart extends PartSQL
 		}
 		if (this.waitEnd)
 		{
-			String partStr = part == null ? "" : part.getSQL();
+			String partStr = part == null ? "" : part.getScript();
 			if (partStr.trim().length() == 0)
 			{
 				// 等待结束标记时, 空白片段原样输出
@@ -1493,7 +1504,7 @@ class CheckPart extends PartSQL
 		}
 		if (part instanceof SubPart || part instanceof ParameterPart)
 		{
-			String partStr = part.getSQL();
+			String partStr = part.getScript();
 			if (partStr.length() == 0)
 			{
 				return "";
@@ -1504,7 +1515,7 @@ class CheckPart extends PartSQL
 					this.hasSubStr, this.removeFirst(partStr), currentBuf);
 			return this.buildParentCheck(resultStr, currentCheck.parent);
 		}
-		String partStr = part == null ? "" : part.getSQL();
+		String partStr = part == null ? "" : part.getScript();
 		if (part != null && partStr.trim().length() == 0)
 		{
 			if (currentCheck.buf == null)
@@ -1607,7 +1618,7 @@ class CheckPart extends PartSQL
 		return part.substring(begin);
 	}
 
-	public PartSQL copy(boolean clear, DaoManager manager)
+	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		return this;
 	}
@@ -1617,7 +1628,7 @@ class CheckPart extends PartSQL
 		return 0;
 	}
 
-	public String getSQL()
+	public String getScript()
 	{
 		return "";
 	}
@@ -1678,33 +1689,33 @@ class CheckContainer
 
 }
 
-class NormalSQL extends PartSQL
+class NormalScript extends PartScript
 {
-	private final String sql;
+	private final String script;
 
-	public NormalSQL(String sql)
+	public NormalScript(String script)
 	{
-		if (sql == null)
+		if (script == null)
 		{
 			throw new NullPointerException();
 		}
-		// 这里的sql大部分是intern处理过的字符串的字串
-		this.sql = sql;
+		// 这里的脚本大部分是intern处理过的字符串的字串
+		this.script = script;
 	}
 
-	public PartSQL copy(boolean clear, DaoManager manager)
+	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		return this;
 	}
 
 	public int getLength()
 	{
-		return this.sql.length();
+		return this.script.length();
 	}
 
-	public String getSQL()
+	public String getScript()
 	{
-		return this.sql;
+		return this.script;
 	}
 
 }

@@ -128,9 +128,9 @@ public class ParameterManager
 			Iterator itr = partList.iterator();
 			while (itr.hasNext())
 			{
-				PartSQL ps = (PartSQL) itr.next();
+				PartScript ps = (PartScript) itr.next();
 				ps.initialize(factory);
-				temp.append(ps.getSQL());
+				temp.append(ps.getScript());
 			}
 			if (!template.equals(temp.toString()))
 			{

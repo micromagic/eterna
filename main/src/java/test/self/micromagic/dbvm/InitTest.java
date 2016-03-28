@@ -22,7 +22,7 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.digester2.ContainerManager;
-import self.micromagic.eterna.digester2.dom.DocumentCreater;
+import self.micromagic.eterna.digester2.dom.DocumentTool;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.StringTool;
@@ -35,7 +35,7 @@ public class InitTest extends TestCase
 	public void testInit1()
 			throws Exception
 	{
-		Document doc = DocumentCreater.createDoc(
+		Document doc = DocumentTool.createDoc(
 				this.getClass().getResourceAsStream("testdb/version2.xml"));
 		Element e = (Element) doc.getRootElement().element("table").elements("column").get(1);
 		System.out.println(e.attributeValue("name"));

@@ -33,7 +33,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 
-import self.micromagic.eterna.digester2.dom.DocumentCreater;
+import self.micromagic.eterna.digester2.dom.DocumentTool;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.ResManager;
 import self.micromagic.util.StringTool;
@@ -237,7 +237,7 @@ public class Digester
 	void parse(InputStream in)
 			throws DocumentException, IOException
 	{
-		this.parse(DocumentCreater.createDoc(in, true, true));
+		this.parse(DocumentTool.createDoc(in, true, true));
 	}
 
 	/**
@@ -249,7 +249,7 @@ public class Digester
 	void parse(Reader in)
 			throws DocumentException, IOException
 	{
-		this.parse(DocumentCreater.createDoc(in, true, true));
+		this.parse(DocumentTool.createDoc(in, true, true));
 	}
 
 	/**

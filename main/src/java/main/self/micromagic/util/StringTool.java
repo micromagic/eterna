@@ -510,6 +510,86 @@ public class StringTool
 	}
 
 	/**
+	 * 检查字符串的起始部分是否为需要的字符, 如果不是则添加这些字符.
+	 *
+	 * @param str    被检查的字符串
+	 * @param begin  起始部分的字符串
+	 * @return  如果被检查的字符串为null, 则返回null, 否则返回处理后的字符串
+	 */
+	public static String checkBegin(String str, String begin)
+	{
+		if (str == null)
+		{
+			return null;
+		}
+		if (str.startsWith(begin))
+		{
+			return str;
+		}
+		return begin.concat(str);
+	}
+
+	/**
+	 * 检查字符串的结束部分是否为需要的字符, 如果不是则添加这些字符.
+	 *
+	 * @param str  被检查的字符串
+	 * @param end  结束部分的字符串
+	 * @return  如果被检查的字符串为null, 则返回null, 否则返回处理后的字符串
+	 */
+	public static String checkEnd(String str, String end)
+	{
+		if (str == null)
+		{
+			return null;
+		}
+		if (str.endsWith(end))
+		{
+			return str;
+		}
+		return str.concat(end);
+	}
+
+	/**
+	 * 检查字符串的起始部分是否为指定的字符, 如果是则将其去除.
+	 *
+	 * @param str    被检查的字符串
+	 * @param begin  起始部分的字符串
+	 * @return  如果被检查的字符串为null, 则返回null, 否则返回处理后的字符串
+	 */
+	public static String removeBegin(String str, String begin)
+	{
+		if (str == null)
+		{
+			return null;
+		}
+		if (str.startsWith(begin))
+		{
+			return str.substring(begin.length());
+		}
+		return str;
+	}
+
+	/**
+	 * 检查字符串的结束部分是否为指定的字符, 如果是则将其去除.
+	 *
+	 * @param str  被检查的字符串
+	 * @param end  结束部分的字符串
+	 * @return  如果被检查的字符串为null, 则返回null, 否则返回处理后的字符串
+	 */
+	public static String removeEnd(String str, String end)
+	{
+		if (str == null)
+		{
+			return null;
+		}
+		if (str.endsWith(end))
+		{
+			return str.substring(0, str.length() - end.length());
+		}
+		return str;
+	}
+
+	/**
 	 * 将字符串数组<code>arr</code>用链接符<code>link</code>链接成一个字符串. <p>
 	 *
 	 * @param arr    要链接的字符串数组

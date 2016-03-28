@@ -22,15 +22,36 @@ import java.io.Reader;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
+import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
 /**
- * dom4j文档对象的创建者.
+ * dom4j文档对象的工具.
  */
-public class DocumentCreater
+public class DocumentTool
 {
-	private DocumentCreater()
+	private DocumentTool()
 	{
+	}
+
+	/**
+	 * 获取节点的body文本.
+	 *
+	 * @param trim  是否以trim方式获取文本.
+	 */
+	public static String getElementText(Element element)
+	{
+		return getElementText(element, true);
+	}
+
+	/**
+	 * 获取节点的body文本.
+	 *
+	 * @param trim  是否以trim方式获取文本.
+	 */
+	public static String getElementText(Element element, boolean trim)
+	{
+		return element == null ? null : trim ? element.getTextTrim() : element.getText();
 	}
 
 	/**

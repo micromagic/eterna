@@ -26,7 +26,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
-import self.micromagic.eterna.digester2.dom.DocumentCreater;
+import self.micromagic.eterna.digester2.dom.DocumentTool;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -86,7 +86,7 @@ public class ViewTool
 			grammerManager = new GrammerManager();
 			InputStream in = ViewTool.class.getClassLoader().getResourceAsStream(
 					"self/micromagic/eterna/view/grammer.xml");
-			grammerManager.init(DocumentCreater.createDoc(in));
+			grammerManager.init(DocumentTool.createDoc(in));
 			Utility.addFieldPropertyManager(CHECK_GRAMMER_FLAG, ViewTool.class, "checkGrammer");
 		}
 		catch (Exception ex)

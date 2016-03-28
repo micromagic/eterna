@@ -37,6 +37,7 @@ import self.micromagic.util.ref.ObjectRef;
 /**
  * 模板条件构造器.
  *
+ * <pre>
  * 可设置的属性有
  * template           构造的条件的模板
  * param_count        模板中的参数个数, 默认值为"?"的个数
@@ -57,6 +58,7 @@ import self.micromagic.util.ref.ObjectRef;
  * tamplet    ([C0] like ? or [C1] like ?)
  * column     col1,col2
  * result     (col1 like ? or col2 like ?)
+ * </pre>
  */
 public class TemplateBuilder extends AbstractGenerator
 		implements ConditionBuilder

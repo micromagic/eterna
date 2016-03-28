@@ -234,7 +234,7 @@ public abstract class AbstractDao extends AbstractGenerator
 			throw new EternaException(this.getType() + " [" + this.getName()
 					+ "] not initialized.");
 		}
-		return this.daoManager.getPreparedSQL();
+		return this.daoManager.getPreparedScript();
 	}
 
 	/**
@@ -248,7 +248,7 @@ public abstract class AbstractDao extends AbstractGenerator
 			throw new EternaException(this.getType() + " [" + this.getName()
 					+ "] not initialized.");
 		}
-		return this.daoManager.getTempPreparedSQL(indexs, subParts);
+		return this.daoManager.getTempPreparedScript(indexs, subParts);
 	}
 
 	public void setPreparedSQL(String sql)
