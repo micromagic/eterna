@@ -17,9 +17,12 @@
 package self.micromagic.eterna.share;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import junit.framework.TestCase;
+import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.sub.TestClass;
 import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ByteConverter;
@@ -41,6 +44,32 @@ public class ToolTest extends TestCase
 		System.out.println(r);
 	}
 
+	public void testGetCheckEmptyAttrs()
+	{
+		Set checkSet = new HashSet();
+		checkSet.add("a");
+		checkSet.add("b");
+
+		Set result, tmp;
+		EternaFactory share = makeEmptyFactory(null);
+		share.setAttribute(Tool.ATTR_CHECK_EMPTY_TAG, "a,b");
+		result = Tool.getCheckEmptyAttrs(share);
+		assertEquals(checkSet, result);
+
+		EternaFactory sub = makeEmptyFactory(share.getFactoryContainer());
+		tmp = Tool.getCheckEmptyAttrs(sub);
+		assertTrue(result == tmp);
+		sub.setAttribute(Tool.ATTR_CHECK_EMPTY_TAG, "c;b");
+		result = Tool.getCheckEmptyAttrs(sub);
+		checkSet.add("c");
+		assertEquals(checkSet, result);
+
+		sub.setAttribute(Tool.ATTR_CHECK_EMPTY_TAG, "c;b=0");
+		result = Tool.getCheckEmptyAttrs(sub);
+		checkSet.remove("b");
+		assertEquals(checkSet, result);
+	}
+
 	public void testMakeAllAttrTypeDefMap()
 			throws Exception
 	{
@@ -54,6 +83,88 @@ public class ToolTest extends TestCase
 		assertNull(share.get("t2"));
 		assertTrue(result.get("t1") != share.get("t1"));
 		assertTrue(result.get("t3") == share.get("t3"));
+	}
+
+	public void testGetCaptionTranslateMap()
+	{
+		Map result, tmp;
+		EternaFactory share = makeEmptyFactory(null);
+		share.setAttribute(Tool.CAPTION_TRANSLATE_TAG, "a=1;b=2");
+		result = Tool.getCaptionTranslateMap(share);
+		assertEquals(2, result.size());
+		assertEquals("1", result.get("a"));
+		assertEquals("2", result.get("b"));
+
+		EternaFactory sub = makeEmptyFactory(share.getFactoryContainer());
+		tmp = Tool.getCaptionTranslateMap(sub);
+		assertTrue(result == tmp);
+		sub.setAttribute(Tool.CAPTION_TRANSLATE_TAG, "c=3");
+		result = Tool.getCaptionTranslateMap(sub);
+		assertEquals(3, result.size());
+		assertEquals("1", result.get("a"));
+		assertEquals("2", result.get("b"));
+		assertEquals("3", result.get("c"));
+
+		share = makeEmptyFactory(null);
+		share.setAttribute(Tool.CAPTION_TRANSLATE_TAG, "a=1;b=2");
+		sub = makeEmptyFactory(share.getFactoryContainer());
+		tmp = Tool.getCaptionTranslateMap(sub);
+		result = Tool.getCaptionTranslateMap(share);
+		assertTrue(result == tmp);
+
+		assertEquals("2", Tool.translateCaption(sub, "b"));
+		assertNull(Tool.translateCaption(sub, "c"));
+		sub.setAttribute(Tool.CAPTION_TRANSLATE_TAG, "c=3;b=new");
+		assertEquals("3", Tool.translateCaption(sub, "c"));
+		assertEquals("new", Tool.translateCaption(sub, "b"));
+	}
+
+	public void testGetAllAttrTypeDefMap0()
+			throws Exception
+	{
+		Map result, tmp;
+		EternaFactory share = makeEmptyFactory(null);
+		share.setAttribute(Tool.ATTR_TYPE_DEF_FLAG, "a=String;b=int");
+		result = (Map) PrivateAccessor.invoke(
+				Tool.class, "getAllAttrTypeDefMap0", new Object[]{share});
+		assertEquals(1, result.size());
+		tmp = (Map) result.get(Tool.ALL_OBJ_TYPE);
+		assertEquals(2, tmp.size());
+		assertTrue(tmp.containsKey("a"));
+		assertTrue(tmp.containsKey("b"));
+
+		EternaFactory sub = makeEmptyFactory(share.getFactoryContainer());
+		tmp = (Map) PrivateAccessor.invoke(
+				Tool.class, "getAllAttrTypeDefMap0", new Object[]{sub});
+		assertTrue(result == tmp);
+		sub.setAttribute(Tool.ATTR_TYPE_DEF_FLAG, "c=long");
+		result = (Map) PrivateAccessor.invoke(
+				Tool.class, "getAllAttrTypeDefMap0", new Object[]{sub});
+		assertEquals(1, result.size());
+		tmp = (Map) result.get(Tool.ALL_OBJ_TYPE);
+		assertEquals(3, tmp.size());
+		assertTrue(tmp.containsKey("a"));
+		assertTrue(tmp.containsKey("b"));
+		assertTrue(tmp.containsKey("c"));
+
+		share = makeEmptyFactory(null);
+		share.setAttribute(Tool.ATTR_TYPE_DEF_FLAG, "a=String;b=int");
+		sub = makeEmptyFactory(share.getFactoryContainer());
+		tmp = (Map) PrivateAccessor.invoke(
+				Tool.class, "getAllAttrTypeDefMap0", new Object[]{sub});
+		result = (Map) PrivateAccessor.invoke(
+				Tool.class, "getAllAttrTypeDefMap0", new Object[]{share});
+		assertTrue(result == tmp);
+	}
+
+	public static EternaFactory makeEmptyFactory(FactoryContainer share)
+	{
+		String id = share == null ? "test" : share.getId() + ".sub";
+		FactoryContainer container = ContainerManager.createFactoryContainer(id,
+				"cp:/self/micromagic/eterna/digester2/empty.xml",
+				null, null, null, Tool.class.getClassLoader(), share, false);
+		container.reInit();
+		return (EternaFactory) container.getFactory();
 	}
 
 	public void testGetValueConverter()

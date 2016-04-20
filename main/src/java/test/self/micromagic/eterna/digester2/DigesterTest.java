@@ -174,6 +174,11 @@ public class DigesterTest extends TestCase
 		assertNull(entity.getItem(1).getCaption());
 		assertEquals("ID00002", entity.getItem(2).getName());
 
+		entity = f.getEntity("e6");
+		assertEquals(1, entity.getItemCount());
+		assertEquals("", entity.getItem(0).getAttribute("builder"));
+		assertNull(entity.getItem(0).getAttribute("pattern"));
+
 		entity = f.getEntity("tmp_e_7");
 		assertEquals(3, entity.getItemCount());
 		assertEquals("ID00003", entity.getItem(2).getName());

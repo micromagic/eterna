@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.expression.AbstractOneSpecial;
 import self.micromagic.expression.SpecialCreater;
 import self.micromagic.expression.SpecialOpt;
 import self.micromagic.util.Utility;
@@ -15,12 +14,22 @@ import self.micromagic.util.Utility;
 /**
  * 抛出异常操作的创建者.
  */
-public class ThrowCreater extends AbstractOneSpecial
-		implements SpecialCreater
+public class ThrowCreater
+		implements SpecialCreater, SpecialOpt
 {
 	private static final Log log = Utility.createLog("eterna.expression");
 
-	protected Constructor constructor;
+	protected Constructor constructorEx;
+	protected Constructor constructorStr;
+
+	public Object exec(Object[] args)
+	{
+		if (args == null || args.length == 0)
+		{
+			return this.exec(null, args);
+		}
+		return this.exec(args[0], args);
+	}
 
 	protected Object exec(Object obj, Object[] args)
 	{
@@ -34,16 +43,16 @@ public class ThrowCreater extends AbstractOneSpecial
 		}
 		if (obj instanceof Exception)
 		{
-			if (this.constructor != null)
+			if (this.constructorEx != null)
 			{
 				Object tmp = null;
 				try
 				{
-					tmp = this.constructor.newInstance(new Object[]{obj});
+					tmp = this.constructorEx.newInstance(new Object[]{obj});
 				}
 				catch (Exception ex)
 				{
-					log.error("Error in constructor exception [" + this.constructor + "].", ex);
+					log.error("Error in constructor exception [" + this.constructorEx + "].", ex);
 				}
 				if (tmp != null)
 				{
@@ -52,7 +61,24 @@ public class ThrowCreater extends AbstractOneSpecial
 			}
 			throw new EternaException((Exception) obj);
 		}
-		return null;
+		String msg = obj == null ? "" : obj.toString();
+		if (this.constructorStr != null)
+		{
+			Object tmp = null;
+			try
+			{
+				tmp = this.constructorStr.newInstance(new Object[]{msg});
+			}
+			catch (Exception ex)
+			{
+				log.error("Error in constructor exception [" + this.constructorEx + "].", ex);
+			}
+			if (tmp != null)
+			{
+				throw (RuntimeException) tmp;
+			}
+		}
+		throw new EternaException(msg);
 	}
 
 	public SpecialOpt create(String name, Object[] args)
@@ -83,17 +109,39 @@ public class ThrowCreater extends AbstractOneSpecial
 			if (RuntimeException.class.isAssignableFrom(c))
 			{
 				Constructor[] arr = c.getConstructors();
+				ThrowCreater result = null;
 				for (int i = 0; i < arr.length; i++)
 				{
 					Class[] types = arr[i].getParameterTypes();
-					if (types.length == 1 && types[0].isAssignableFrom(Exception.class))
+					if (types.length == 1)
 					{
-						ThrowCreater r = new ThrowCreater();
-						r.constructor = arr[i];
-						return r;
+						if (types[0].isAssignableFrom(Exception.class))
+						{
+							if (result == null)
+							{
+								result = new ThrowCreater();
+							}
+							result.constructorEx = arr[i];
+						}
+						else if (types[0] == String.class)
+						{
+							if (result == null)
+							{
+								result = new ThrowCreater();
+							}
+							result.constructorStr = arr[i];
+						}
 					}
 				}
-				log.warn("Not found suitable constructor for [" + ClassGenerator.getClassName(c) + "].");
+				if (result == null)
+				{
+					log.warn("Not found suitable constructor for ["
+							+ ClassGenerator.getClassName(c) + "].");
+				}
+				else
+				{
+					return result;
+				}
 			}
 			else
 			{

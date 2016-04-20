@@ -60,6 +60,12 @@
 				<item name="i2" type="int"/>
 				<item2 type="double"/>
 			</entity>
+			<entity name="e6">
+				<item name="c1" type="int">
+					<attribute name="pattern" value=""/>
+					<attribute name="builder" value=""/>
+				</item>
+			</entity>
 			
 			<format name="f1" type="Date">
 				<pattern>yyyy</pattern>
@@ -294,6 +300,7 @@
 		<permission-set className="self.micromagic.eterna.security.TestPermissionSetCreater"/>
 
 		<attributes>
+			<attribute name="attribute.check.empty" value="builder=0,pattern"/>
 			<attribute name="1" value="a"/>
 			<attribute name="attribute.type.def">
 				item/v=boolean;

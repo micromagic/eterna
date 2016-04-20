@@ -124,11 +124,30 @@ public class ExprToolTest extends TestCase
 
 		expression = createExp("throw($ex, \"tmp.None\")");
 		expression = createExp("throw($ex, \"java.lang.Throwable\")");
-		expression = createExp("throw($ex, \"java.lang.IllegalArgumentException\")");
+		expression = createExp("throw(\"str\", \"java.lang.IllegalArgumentException\")");
+		try
+		{
+			expression.getResult(data);
+			fail();
+		}
+		catch (IllegalArgumentException ex)
+		{
+			assertEquals("str", ex.getMessage());
+		}
 
 		expression = createExp("throw(\"java.lang.RuntimeException\")");
 		expression.tryGetResult(getted);
 		assertFalse(getted.value);
+		try
+		{
+			expression.getResult(data);
+			fail();
+		}
+		catch (EternaException ex)
+		{
+			assertTrue(ex.getClass() == EternaException.class);
+			assertEquals("java.lang.RuntimeException", ex.getMessage());
+		}
 
 		data.clearData();
 	}

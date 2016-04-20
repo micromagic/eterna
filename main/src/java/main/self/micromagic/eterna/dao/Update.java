@@ -33,4 +33,11 @@ public interface Update extends Dao
 	 */
 	int executeUpdate(Connection conn) throws EternaException, SQLException;
 
+	/**
+	 * 获取前一次executeUpdate方法的执行结果.
+	 *
+	 * @return  前一次的执行结果, 如果返回-1表示未执行或执行的是execute方法
+	 */
+	int getExecutedResult() throws EternaException;
+
 }

@@ -178,13 +178,15 @@ public class QueryImpl extends AbstractQuery
 			ResultReaderManager readerManager = this.getReaderManager0(rs);
 			List readerList = readerManager.getReaderList(this.getPermission0());
 			List tmpList = qh.readResults(rs, readerList);
-			ResultIteratorImpl ritr = new ResultIteratorImpl(readerManager, readerList, this);
+			ResultIteratorImpl ritr = new ResultIteratorImpl(
+					readerManager, readerList, this);
 			result = ritr;
 			ListIterator litr = tmpList.listIterator();
 			int rowNum = 1;
 			while (litr.hasNext())
 			{
-				ResultRow row = this.readResults(readerManager, (Object[]) litr.next(), ritr, rowNum++);
+				ResultRow row = this.readResults(
+						readerManager, (Object[]) litr.next(), ritr, rowNum++);
 				litr.set(row);
 			}
 			ritr.setResult(tmpList);
@@ -236,7 +238,8 @@ public class QueryImpl extends AbstractQuery
 						Element nowNode = data.getCurrentNode();
 						if (nowNode != null)
 						{
-							AppDataLogExecute.printObject(nowNode.addElement(this.getType() + "-result"), result);
+							AppDataLogExecute.printObject(
+									nowNode.addElement(this.getType() + "-result"), result);
 						}
 					}
 				}

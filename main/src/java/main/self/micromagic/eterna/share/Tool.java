@@ -18,20 +18,21 @@ package self.micromagic.eterna.share;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.BeanTool;
-import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ConverterFinder;
 import self.micromagic.util.converter.ValueConverter;
 import self.micromagic.util.ref.StringRef;
@@ -47,23 +48,9 @@ public class Tool
 	public static final Log log = Utility.createLog("eterna.share");
 
 	/**
-	 * 存放翻译字典配置的属性名.
-	 */
-	public static final String CAPTION_TRANSLATE_TAG = "caption.translate";
-	/**
-	 * 存放生成的翻译字典的属性名.
-	 */
-	public static final String CAPTION_TRANSLATE_MAP_TAG = "caption.translate.map";
-	/**
-	 * 存放用于标识是否为当前工厂的属性名.
-	 */
-	public static final String CAPTION_TRANSLATE_MAP_FACTORY_TAG = "caption.translate.map.factory";
-
-	/**
 	 * 标识后面是模式字符串的前缀.
 	 */
 	public static final String PATTERN_PREFIX = "pattern:";
-
 	/**
 	 * 在arrtibute中设置使用格式化模式的名称.
 	 */
@@ -83,23 +70,75 @@ public class Tool
 	}
 
 	/**
+	 * 存放需要检查哪些属性值为空的属性名. <p>
+	 * 目前只对item的属性生效.
+	 */
+	public static final String ATTR_CHECK_EMPTY_TAG = "attribute.check.empty";
+
+	/**
+	 * 获取需要检查属性值为空的属性名称集合.
+	 */
+	public static Set getCheckEmptyAttrs(EternaFactory factory)
+	{
+		Object checkObj = factory.getAttribute(ATTR_CHECK_EMPTY_TAG);
+		if (checkObj == null || checkObj instanceof Set)
+		{
+			return (Set) checkObj;
+		}
+		String namesDef = (String) checkObj;
+		Set baseSet = null;
+		EternaFactory share = factory.getShareFactory();
+		if (share != null)
+		{
+			baseSet = getCheckEmptyAttrs(share);
+			// 如果没在当前工厂定义, 则再获取一次则会变成map
+			checkObj = factory.getAttribute(ATTR_CHECK_EMPTY_TAG);
+			if (checkObj instanceof Set)
+			{
+				return (Set) checkObj;
+			}
+		}
+		Set namesSet = baseSet == null ? new HashSet() : new HashSet(baseSet);
+		String[] arr = StringTool.separateString(
+				Utility.resolveDynamicPropnames(namesDef), ",;", true);
+		for (int i = 0; i < arr.length; i++)
+		{
+			int index = arr[i].indexOf('=');
+			if (index != -1)
+			{
+				String name = arr[i].substring(0, index).trim();
+				String flag = arr[i].substring(index + 1).trim();
+				if (BooleanConverter.toBoolean(flag))
+				{
+					namesSet.add(name);
+				}
+				else
+				{
+					namesSet.remove(name);
+				}
+			}
+			else
+			{
+				namesSet.add(arr[i]);
+			}
+		}
+		factory.setAttribute(ATTR_CHECK_EMPTY_TAG, namesSet);
+		return namesSet;
+	}
+
+	/**
+	 * 存放翻译字典配置的属性名.
+	 */
+	public static final String CAPTION_TRANSLATE_TAG = "caption.translate";
+
+	/**
 	 * 根据标题翻译列表的配置进行翻译.
 	 */
 	public static String translateCaption(EternaFactory factory, String name)
 			throws EternaException
 	{
-		Map translateMap = (Map) factory.getAttribute(CAPTION_TRANSLATE_MAP_TAG);
-		Object checkFactory = factory.getAttribute(CAPTION_TRANSLATE_MAP_FACTORY_TAG);
-		if (translateMap == null || checkFactory != factory)
-		{
-			// 获取的工厂不是当前工厂, 则要生成翻译字典表
-			translateMap = getCaptionTranslateMap(factory);
-			if (translateMap == null)
-			{
-				return null;
-			}
-		}
-		return (String) translateMap.get(name);
+		Map translateMap = getCaptionTranslateMap(factory);
+		return translateMap == null ? null : (String) translateMap.get(name);
 	}
 
 	/**
@@ -108,59 +147,37 @@ public class Tool
 	public static synchronized Map getCaptionTranslateMap(EternaFactory factory)
 			throws EternaException
 	{
-		String translateStr = (String) factory.getAttribute(CAPTION_TRANSLATE_TAG);
-		if (translateStr == null)
+		Object checkObj = factory.getAttribute(CAPTION_TRANSLATE_TAG);
+		if (checkObj == null || checkObj instanceof Map)
 		{
-			return null;
+			return (Map) checkObj;
 		}
-		Map translateMap = (Map) factory.getAttribute(CAPTION_TRANSLATE_MAP_TAG);
-		Object checkFactory = factory.getAttribute(CAPTION_TRANSLATE_MAP_FACTORY_TAG);
-		if (translateMap == null || checkFactory != factory)
+		String translateDef = (String) checkObj;
+		Map baseMap = null;
+		EternaFactory share = factory.getShareFactory();
+		if (share != null)
 		{
-			// 获取的工厂不是当前工厂, 则要生成翻译字典表
-			EternaFactory share = factory.getShareFactory();
-			boolean needTranslate = true;
-			if (share != null)
+			baseMap = getCaptionTranslateMap(share);
+			// 如果没在当前工厂定义, 则再获取一次则会变成map
+			checkObj = factory.getAttribute(CAPTION_TRANSLATE_TAG);
+			if (checkObj instanceof Map)
 			{
-				String shareStr = (String) share.getAttribute(CAPTION_TRANSLATE_TAG);
-				if (shareStr != null)
-				{
-					if (shareStr == translateStr)
-					{
-						translateMap = getCaptionTranslateMap(share);
-						needTranslate = false;
-					}
-					else
-					{
-						translateMap = new HashMap(getCaptionTranslateMap(share));
-					}
-				}
+				return (Map) checkObj;
 			}
-			if (translateMap == null)
-			{
-				translateMap = new HashMap();
-			}
-			if (needTranslate)
-			{
-				String[] tmps = StringTool.separateString(
-						Utility.resolveDynamicPropnames(translateStr), ";", true);
-				for (int i = 0; i < tmps.length; i++)
-				{
-					int index = tmps[i].indexOf('=');
-					if (index != -1)
-					{
-						translateMap.put(tmps[i].substring(0, index).trim(),
-								tmps[i].substring(index + 1).trim());
-					}
-				}
-				factory.setAttribute(CAPTION_TRANSLATE_MAP_TAG, Collections.unmodifiableMap(translateMap));
-			}
-			else
-			{
-				factory.setAttribute(CAPTION_TRANSLATE_MAP_TAG, translateMap);
-			}
-			factory.setAttribute(CAPTION_TRANSLATE_MAP_FACTORY_TAG, factory);
 		}
+		Map translateMap = baseMap == null ? new HashMap() : new HashMap(baseMap);
+		String[] tmps = StringTool.separateString(
+				Utility.resolveDynamicPropnames(translateDef), ";", true);
+		for (int i = 0; i < tmps.length; i++)
+		{
+			int index = tmps[i].indexOf('=');
+			if (index != -1)
+			{
+				translateMap.put(tmps[i].substring(0, index).trim(),
+						tmps[i].substring(index + 1).trim());
+			}
+		}
+		factory.setAttribute(CAPTION_TRANSLATE_TAG, translateMap);
 		return translateMap;
 	}
 
@@ -171,7 +188,7 @@ public class Tool
 	/**
 	 * 所有对象类型的标识.
 	 */
-	private static final String ALL_OBJ_TYPE = "$all";
+	public static final String ALL_OBJ_TYPE = "$all";
 
 	/**
 	 * 实现类的前缀.
@@ -238,38 +255,26 @@ public class Tool
 	 */
 	private static synchronized Map getAllAttrTypeDefMap0(EternaFactory factory)
 	{
-		Map typeMap = (Map) factory.getFactoryContainer().getAttribute(ATTR_TYPE_DEF_FLAG);
-		if (typeMap == null)
+		Object checkObj = factory.getAttribute(ATTR_TYPE_DEF_FLAG);
+		if (checkObj == null || checkObj instanceof Map)
 		{
-			String defStr = (String) factory.getAttribute(ATTR_TYPE_DEF_FLAG);
-			if (defStr == null)
-			{
-				return null;
-			}
-			EternaFactory share = factory.getShareFactory();
-			if (share != null)
-			{
-				String shareStr = (String) share.getAttribute(ATTR_TYPE_DEF_FLAG);
-				if (shareStr != null)
-				{
-					if (shareStr == defStr)
-					{
-						// 如果定义字符串与共享工厂中的相同, 这直接获取共享工厂中的
-						typeMap = getAllAttrTypeDefMap0(share);
-					}
-					else
-					{
-						typeMap = makeAllAttrTypeDefMap(
-								defStr, getAllAttrTypeDefMap0(share));
-					}
-				}
-			}
-			if (typeMap == null)
-			{
-				typeMap = makeAllAttrTypeDefMap(defStr, null);
-			}
-			factory.getFactoryContainer().setAttribute(ATTR_TYPE_DEF_FLAG, typeMap);
+			// 为null或类型为map可直接返回
+			return (Map) checkObj;
 		}
+		EternaFactory share = factory.getShareFactory();
+		Map baseMap = null;
+		if (share != null)
+		{
+			baseMap = getAllAttrTypeDefMap0(share);
+			// 如果没在当前工厂定义, 则再获取一次则会变成map
+			checkObj = factory.getAttribute(ATTR_TYPE_DEF_FLAG);
+			if (checkObj instanceof Map)
+			{
+				return (Map) checkObj;
+			}
+		}
+		Map typeMap = makeAllAttrTypeDefMap((String) checkObj, baseMap);
+		factory.setAttribute(ATTR_TYPE_DEF_FLAG, typeMap);
 		return typeMap;
 	}
 
@@ -615,12 +620,6 @@ public class Tool
 			}
 		}
 		return null;
-	}
-
-	static
-	{
-		// 设置重新初始化时需要清理的属性名
-		ContainerManager.addContainerAttributeClearName(ATTR_TYPE_DEF_FLAG);
 	}
 
 }

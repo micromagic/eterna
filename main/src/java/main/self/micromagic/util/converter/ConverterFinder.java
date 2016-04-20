@@ -21,9 +21,9 @@ import java.io.Reader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 import self.micromagic.cg.BeanTool;
 
@@ -213,6 +213,9 @@ public class ConverterFinder
 		converter = new LocaleConverter();
 		converter.setNeedThrow(true);
 		converterCache.put(Locale.class, converter);
+		converter = new MapConverter();
+		converter.setNeedThrow(true);
+		converterCache.put(Map.class, converter);
 
 		Iterator itr = converterCache.entrySet().iterator();
 		while (itr.hasNext())

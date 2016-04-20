@@ -33,6 +33,13 @@ import self.micromagic.util.logging.TimeLogger;
 public class UpdateImpl extends BaseDao
 		implements Update
 {
+	private int executedResult = -1;
+
+	public int getExecutedResult()
+	{
+		return this.executedResult;
+	}
+
 	public Class getObjectType()
 	{
 		return this.getClass();
@@ -61,6 +68,7 @@ public class UpdateImpl extends BaseDao
 		TimeLogger startTime = new TimeLogger();
 		Statement stmt = null;
 		Throwable error = null;
+		this.executedResult = -1;
 		try
 		{
 			if (this.hasActiveParam())
@@ -112,7 +120,7 @@ public class UpdateImpl extends BaseDao
 		TimeLogger startTime = new TimeLogger();
 		Statement stmt = null;
 		Throwable error = null;
-		int result = -1;
+		int result = this.executedResult = -1;
 		try
 		{
 			if (this.hasActiveParam())
@@ -127,6 +135,7 @@ public class UpdateImpl extends BaseDao
 				stmt = conn.createStatement();
 				result = stmt.executeUpdate(this.getPreparedScript());
 			}
+			this.executedResult = result;
 			return result;
 		}
 		catch (EternaException ex)
@@ -161,7 +170,8 @@ public class UpdateImpl extends BaseDao
 						Element nowNode = data.getCurrentNode();
 						if (nowNode != null)
 						{
-							AppDataLogExecute.printObject(nowNode.addElement(this.getType() + "-result"), new Integer(result));
+							AppDataLogExecute.printObject(
+									nowNode.addElement(this.getType() + "-result"), new Integer(result));
 						}
 					}
 				}

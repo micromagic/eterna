@@ -23,6 +23,7 @@
 -->
 <eterna-config>
 	<factory>
+
 		<objs>
 
 			<prepare name="strBegin" type="String" pattern="$%"/>
@@ -102,10 +103,13 @@
 			<constant name="version_script" value="T_SYS_VERSION_SCRIPT" />
 
 		</objs>
+
 		<attributes>
 
 			<!-- 数据库的操作语句是否可多行 -->
 			<attribute name="db.script.mutipleLine" value="true"/>
+			<!-- item的属性中需要检查值是否为空的名称列表 -->
+			<attribute name="attribute.check.empty" value="format,pattern,builder"/>
 
 		</attributes>
 		

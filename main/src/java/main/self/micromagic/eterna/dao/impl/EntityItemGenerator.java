@@ -16,13 +16,18 @@
 
 package self.micromagic.eterna.dao.impl;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
 
 public class EntityItemGenerator extends AbstractGenerator
@@ -40,9 +45,32 @@ public class EntityItemGenerator extends AbstractGenerator
 		this.initialized = true;
 		EternaFactory factory = entity.getFactory();
 		this.attributes.convertType(factory, "item");
+		this.checkEmptyAttrs(factory);
 		if (this.permissionConfig != null)
 		{
 			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
+		}
+	}
+
+	/**
+	 * 根据配置的名称列表检查是否有值为空的属性并将其去除.
+	 */
+	protected void checkEmptyAttrs(EternaFactory factory)
+	{
+		Set names = Tool.getCheckEmptyAttrs(factory);
+		if (names != null)
+		{
+			int count = names.size();
+			Iterator itr = names.iterator();
+			for (int i = 0; i < count; i++)
+			{
+				String name = (String) itr.next();
+				Object tmp = this.attributes.getAttribute(name);
+				if (tmp != null && StringTool.isEmpty(tmp))
+				{
+					this.attributes.removeAttribute(name);
+				}
+			}
 		}
 	}
 

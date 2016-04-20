@@ -16,13 +16,15 @@
 
 package self.micromagic.util.converter;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-import self.micromagic.util.StringTool;
-import self.micromagic.util.ref.ObjectRef;
-import self.micromagic.cg.BeanTool;
 import self.micromagic.cg.BeanMap;
+import self.micromagic.cg.BeanTool;
+import self.micromagic.eterna.dao.ResultRow;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.container.ValueContainerMap;
+import self.micromagic.util.ref.ObjectRef;
 
 public class MapConverter extends ObjectConverter
 {
@@ -95,6 +97,10 @@ public class MapConverter extends ObjectConverter
 		if (value instanceof String)
 		{
 			return this.convertToMap((String) value);
+		}
+		if (value instanceof ResultRow)
+		{
+			return ValueContainerMap.createResultRowMap((ResultRow) value);
 		}
 		Object tmpObj = this.changeByPropertyEditor(value);
 		if (tmpObj instanceof Map)
