@@ -199,7 +199,7 @@ public class EntityImpl extends AbstractGenerator
 	 */
 	public static void addItems(EternaFactory factory, EntityRef ref, Container handler)
 	{
-		Entity entity = factory.getEntity(ref.getEntityName());
+		Entity entity = ref.getEntity(factory);
 		Map excludeSet = null, includeMap = null;
 		if (!StringTool.isEmpty(ref.getInclude()))
 		{

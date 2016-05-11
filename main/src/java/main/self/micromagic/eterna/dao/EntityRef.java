@@ -17,6 +17,7 @@
 package self.micromagic.eterna.dao;
 
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 
 /**
  * 对一个实体对象的引用.
@@ -27,6 +28,13 @@ public interface EntityRef
 	 * 获取引用的实体对象名称.
 	 */
 	String getEntityName() throws EternaException;
+
+	/**
+	 * 获取轻易的实体对象.
+	 *
+	 * @param factory  获取实体对象所需要的工厂.
+	 */
+	Entity getEntity(EternaFactory factory) throws EternaException;
 
 	/**
 	 * 获取需要包含的实体中的元素列表.

@@ -311,14 +311,31 @@ class StandardAttrGetter
 	public Object get(Element el)
 	{
 		String r = el.attributeValue(this.flag);
+		boolean emptyStr = false;
+		if (this.checkEmpty && StringTool.isEmpty(r))
+		{
+			emptyStr = r != null;
+			r = null;
+		}
 		if (r == null && (this.mustExists || this.defaultValue != null))
 		{
 			if (this.defaultValue != null)
 			{
-				return this.defaultValue;
+				r = this.defaultValue;
 			}
-			throw new ParseException("Not found attribute [" + this.flag
-					+ "] at tag [" + el.getName() + "].");
+			else
+			{
+				if (emptyStr)
+				{
+					throw new ParseException("The attribute [" + this.flag
+							+ "] at tag [" + el.getName() + "] is empty.");
+				}
+				else
+				{
+					throw new ParseException("Not found attribute [" + this.flag
+							+ "] at tag [" + el.getName() + "].");
+				}
+			}
 		}
 		if (this.resolve)
 		{

@@ -16,7 +16,10 @@
 
 package self.micromagic.eterna.dao.impl;
 
+import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityRef;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 
 /**
  * 对一个实体对象的引用.
@@ -32,6 +35,12 @@ public class EntityRefImpl
 	public void setEntityName(String name)
 	{
 		this.entityName = name;
+	}
+
+	public Entity getEntity(EternaFactory factory)
+			throws EternaException
+	{
+		return factory.getEntity(this.getEntityName());
 	}
 
 	public String getInclude()

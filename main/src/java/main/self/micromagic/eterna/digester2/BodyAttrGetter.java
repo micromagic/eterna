@@ -170,7 +170,12 @@ public class BodyAttrGetter
 			{
 				throw new ParseException("Both arrtibute [" + this.attrTag + "] and "
 						+ (this.bodyTag != null ? "[" + this.bodyTag + "]'s " : "")
-						+ "body are both setted value.");
+						+ "body are setted value.");
+			}
+			if (this.checkEmpty && StringTool.isEmpty(aText) && this.mustExists)
+			{
+				throw new ParseException("The attribute [" + this.attrTag
+						+ "] for tag [" + el.getName() + "] is empty.");
 			}
 			bText = aText;
 		}
