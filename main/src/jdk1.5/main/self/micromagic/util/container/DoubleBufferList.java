@@ -27,6 +27,10 @@ public class DoubleBufferList<T>
 	 * 需要触发的监听者.
 	 */
 	private Listener listener;
+	/**
+	 * 是否要触发监听的动作.
+	 */
+	private boolean needFire;
 
 	/**
 	 * 构造一个双缓冲列表.
@@ -59,6 +63,7 @@ public class DoubleBufferList<T>
 		this.exporterList = new OneBufferList<T>(initSize, checkSize);
 		this.receiverList = new OneBufferList<T>(initSize, checkSize);
 		this.listener = listener;
+		this.needFire = listener != null;
 	}
 
 	/**
@@ -72,8 +77,9 @@ public class DoubleBufferList<T>
 		synchronized (this)
 		{
 			if (this.listener != null && this.receiverList.isEmpty()
-					&& this.listener.needFire())
+					&& this.listener.needFire(this))
 			{
+				this.needFire = false;
 				fireFlag = true;
 			}
 			this.receiverList.add(obj);
@@ -99,8 +105,9 @@ public class DoubleBufferList<T>
 		synchronized (this)
 		{
 			if (this.listener != null && this.receiverList.isEmpty()
-					&& this.listener.needFire())
+					&& this.listener.needFire(this))
 			{
+				this.needFire = false;
 				fireFlag = true;
 			}
 			this.receiverList.addAll(objs);
@@ -113,11 +120,11 @@ public class DoubleBufferList<T>
 
 	/**
 	 * 获取已添加的对象列表. <p>
-	 * 此方法应该由消费者调用.
+	 * 此方法应该由消费者调用, 返回的是一个只读列表.
 	 *
-	 * @return  给消费者的列表.
+	 * @return  给消费者的列表, 如果没有任何对象, 则返回null
 	 */
-	public Collection<T> getList()
+	public Collection<T> getObjects()
 	{
 		synchronized (this)
 		{
@@ -126,6 +133,7 @@ public class DoubleBufferList<T>
 				if (this.listener != null)
 				{
 					this.listener.afterEmpty(this);
+					this.needFire = true;
 				}
 				return null;
 			}
@@ -138,26 +146,49 @@ public class DoubleBufferList<T>
 	}
 
 	/**
+	 * 是否需要触发监听的动作.
+	 */
+	public boolean needFireAction()
+	{
+		return this.needFire;
+	}
+
+	/**
 	 * 添加时如果队列为空时, 需要触发的监听者.
 	 */
 	public interface Listener
 	{
 		/**
-		 * 是否需要触发监听的动作.
+		 * 是否需要触发监听的动作. <p>
+		 * 如果返回为true, 则会立刻出发监听动作.
+		 * 此方法是在list的同步锁中被调用的.
+		 * 默认可以直接返回list.needFireAction()的值.
+		 *
+		 * @param list  对应的双缓冲列表
+		 *
+		 * @see DoubleBufferList#needFireAction()
 		 */
-		public boolean needFire();
+		public boolean needFire(DoubleBufferList<?> list);
 
 		/**
-		 * 执行监听的动作.
+		 * 执行监听的动作. <p>
+		 * 调用此方法时, 是执行了needFire(DoubleBufferList)方法之后,
+		 * 此时list.needFireAction()的值应为false.
 		 *
 		 * @param list  触发监听动作的双缓冲列表
+		 *
+		 * @see #needFire(DoubleBufferList)
+		 * @see DoubleBufferList#needFireAction()
 		 */
 		public void action(DoubleBufferList<?> list);
 
 		/**
-		 * 获取的数据列表为空时触发的动作.
+		 * 获取的数据列表为空时触发的动作. <p>
+		 * 此方法是在list的同步锁中被调用的.
+		 * 在此方法执行之后list.needFireAction()的值应为true.
 		 *
 		 * @param list  获取数据的双缓冲列表
+		 * @see DoubleBufferList#needFireAction()
 		 */
 		public void afterEmpty(DoubleBufferList<?> list);
 
@@ -193,7 +224,7 @@ class OneBufferList<T>
 	public OneBufferList(int initSize, boolean checkSize)
 	{
 		this.needCheckSize = checkSize;
-		this.objs = new Object[initSize <= 0 ? 8 : initSize];
+		this.objs = new Object[initSize <= 0 ? 10 : initSize];
 	}
 
 	public boolean add(T o)
@@ -287,7 +318,7 @@ class OneBufferList<T>
 		this.count = 0;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked"})
 	public T get(int index)
 	{
 		if (index >= this.count)
