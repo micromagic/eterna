@@ -30,9 +30,9 @@ public interface EntityRef
 	String getEntityName() throws EternaException;
 
 	/**
-	 * 获取轻易的实体对象.
+	 * 获取引用的实体对象.
 	 *
-	 * @param factory  获取实体对象所需要的工厂.
+	 * @param factory  获取实体对象所需要的工厂
 	 */
 	Entity getEntity(EternaFactory factory) throws EternaException;
 

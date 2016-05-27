@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import self.micromagic.dbvm.impl.CommonUpdate;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
@@ -173,13 +174,13 @@ public class TableDesc extends AbstractObject
 			{
 				u.setSubScript(1, buf.toString(), m);
 			}
-			u.execute(conn);
-			this.exec(paramList, conn);
 			if (!StringTool.isEmpty(this.desc))
 			{
-				u.setSubScript(1, this.comment.getComment(this));
-				u.execute(conn);
+				Update tmp = this.factory.createUpdate(COMMON_EXEC);
+				tmp.setSubScript(1, this.comment.getComment(this));
+				paramList.add(tmp);
 			}
+			this.execWithList(u, paramList, conn);
 		}
 		else if (this.optType == OPT_TYPE_MODIFY)
 		{
@@ -191,12 +192,6 @@ public class TableDesc extends AbstractObject
 				u.execute(conn);
 			}
 			this.execColumnModify(u, conn);
-			if (this.desc != null)
-			{
-				// 修改时注释需要判空
-				u.setSubScript(1, this.comment.getComment(this));
-				u.execute(conn);
-			}
 		}
 	}
 
@@ -223,8 +218,14 @@ public class TableDesc extends AbstractObject
 			{
 				update.setSubScript(1, buf.toString(), m);
 			}
-			update.execute(conn);
-			this.exec(paramList, conn);
+			if (this.desc != null)
+			{
+				// 修改时注释需要判空
+				Update tmp = this.factory.createUpdate(COMMON_EXEC);
+				tmp.setSubScript(1, this.comment.getComment(this));
+				paramList.add(tmp);
+			}
+			this.execWithList(update, paramList, conn);
 		}
 	}
 
@@ -264,17 +265,52 @@ public class TableDesc extends AbstractObject
 	/**
 	 * 执行列表中的操作.
 	 */
-	private void exec(List list, Connection conn)
+	private void execWithList(Update main, List list, Connection conn)
 			throws SQLException
 	{
+		Exception err = null;
+		try
+		{
+			main.execute(conn);
+		}
+		catch (Exception ex)
+		{
+			err = ex;
+			// 如果出错, 接下来的执行设置为记录模式
+			CommonUpdate.setLogScript(true);
+		}
 		Iterator itr = list.iterator();
 		while (itr.hasNext())
 		{
 			Object obj = itr.next();
 			if (obj instanceof Update)
 			{
-				((Update) obj).execute(conn);
+				try
+				{
+					((Update) obj).execute(conn);
+				}
+				catch (Exception ex)
+				{
+					if (err == null)
+					{
+						err = ex;
+					}
+					// 如果出错, 接下来的执行设置为记录模式
+					CommonUpdate.setLogScript(true);
+				}
 			}
+		}
+		if (err != null)
+		{
+			if (err instanceof SQLException)
+			{
+				throw (SQLException) err;
+			}
+			if (err instanceof RuntimeException)
+			{
+				throw (RuntimeException) err;
+			}
+			throw new EternaException(err);
 		}
 	}
 

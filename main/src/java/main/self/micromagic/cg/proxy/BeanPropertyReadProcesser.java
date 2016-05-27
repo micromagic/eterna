@@ -151,8 +151,8 @@ public class BeanPropertyReadProcesser
 				tmpResName = "arrayTypePrimitiveGet";
 			}
 			BeanTool.printRes(tmpResName, this.paramCache, 0, bodyCode).appendln();
-			Object defObj = BeanTool.createPropertyProcesser("P_arr_" + pName, this.beanClass,
-					UnitProcesser.BeanProperty.class, BeanPropertyReader.class,
+			Object defObj = BeanTool.createPropertyProcesser(true, "P_arr_" + pName,
+					this.beanClass, UnitProcesser.BeanProperty.class, BeanPropertyReader.class,
 					beginCode, bodyCode.toString(), endCode, imports);
 			arrInit.append("this.").append(BeanTool.PROCESSER_ARRAY_NAME).append('[').append(i)
 					.append("] = new ").append(ClassGenerator.getClassName(defObj.getClass()))

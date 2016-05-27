@@ -55,15 +55,7 @@ public class BeanMap extends AbstractMap
 	BeanMap(Object beanObj, String namePrefix, BeanDescriptor beanDescriptor)
 	{
 		this.beanObj = beanObj;
-		this.beanType = beanObj.getClass();
-		this.namePrefix = StringTool.isEmpty(namePrefix) ? "" : namePrefix;
-		this.beanDescriptor = beanDescriptor;
-		this.converterManager = beanDescriptor.getConverterManager();
-	}
-
-	BeanMap(Class beanType, String namePrefix, BeanDescriptor beanDescriptor)
-	{
-		this.beanType = beanType;
+		this.beanType = beanDescriptor.getBeanType();
 		this.namePrefix = StringTool.isEmpty(namePrefix) ? "" : namePrefix;
 		this.beanDescriptor = beanDescriptor;
 		this.converterManager = beanDescriptor.getConverterManager();

@@ -221,7 +221,27 @@ public class BeanTool
 		{
 			prefix = "";
 		}
-		return new BeanMap(beanType, prefix, bd);
+		return new BeanMap(null, prefix, bd);
+	}
+
+	/**
+	 * 获得bean和map的转换工具.
+	 *
+	 * @param bean    要和map进行转换的bean
+	 * @param prefix  属性名词前缀
+	 * @param bd      bean的描述对象
+	 */
+	public static BeanMap getBeanMap(Object bean, String prefix, BeanDescriptor bd)
+	{
+		if (bd == null)
+		{
+			return null;
+		}
+		if (prefix == null)
+		{
+			prefix = "";
+		}
+		return new BeanMap(bean, prefix, bd);
 	}
 
 	/**
@@ -393,8 +413,8 @@ public class BeanTool
 				CellDescriptor tmpBMC = null;
 				try
 				{
-					BeanPropertyReader tmpBPR = (BeanPropertyReader) createPropertyProcesser("P_init",
-							beanClass, UnitProcesser.BeanProperty.class, BeanPropertyReader.class,
+					BeanPropertyReader tmpBPR = (BeanPropertyReader) createPropertyProcesser(false,
+							"P_init", beanClass, UnitProcesser.BeanProperty.class, BeanPropertyReader.class,
 							beginCode, bodyCode, endCode, imports);
 					((UnitProcesser.BeanProperty) tmpBPR).setMember(beanClass.getConstructor(new Class[0]));
 					tmpBMC = new CellDescriptor();
@@ -403,17 +423,18 @@ public class BeanTool
 					tmpBMC.setCellType(beanClass);
 					tmpBMC.setBeanType(true);
 				}
-				catch (RuntimeException ex)
+				catch (Throwable ex)
 				{
-					throw ex;
+					if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_INFO)
+					{
+						CG.log.warn("Error in make init for [" + ClassGenerator.getClassName(beanClass) + "].", ex);
+					}
 				}
-				catch (Throwable ex) {}
-
 				bd = new BeanDescriptor(beanClass, psInfo, tmpBMC);
 			}
 			catch (Throwable ex)
 			{
-				CG.log.error("Error in create MapToBean.", ex);
+				CG.log.error("Error in create bean map for [" + ClassGenerator.getClassName(beanClass) + "].", ex);
 				if (ex instanceof RuntimeException)
 				{
 					throw (RuntimeException) ex;
@@ -905,13 +926,14 @@ public class BeanTool
 	static Object createPropertyProcesser(String suffix, Class beanClass, Class interfaceClass,
 			String beginCode, String bodyCode, String endCode, String[] imports)
 	{
-		return createPropertyProcesser(suffix, beanClass, null, interfaceClass,
+		return createPropertyProcesser(true, suffix, beanClass, null, interfaceClass,
 				beginCode, bodyCode, endCode, imports);
 	}
 
 	/**
 	 * 生成一个属性的处理类.
 	 *
+	 * @param logError        是否需要记录出错日志
 	 * @param suffix          生成类名的后缀
 	 * @param beanClass       bean类
 	 * @param superClass      需要继承的类
@@ -922,7 +944,7 @@ public class BeanTool
 	 * @param imports         要引入的包
 	 * @return  返回相应的处理类
 	 */
-	public static Object createPropertyProcesser(String suffix, Class beanClass, Class superClass,
+	public static Object createPropertyProcesser(boolean logError, String suffix, Class beanClass, Class superClass,
 			Class interfaceClass, String beginCode, String bodyCode, String endCode, String[] imports)
 	{
 		ClassGenerator cg = ClassGenerator.createClassGenerator(
@@ -939,7 +961,7 @@ public class BeanTool
 		}
 		catch (Throwable ex)
 		{
-			if (ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
+			if (logError && ClassGenerator.COMPILE_LOG_TYPE > CG.COMPILE_LOG_TYPE_ERROR)
 			{
 				CG.log.error("Error in create bean processer.", ex);
 			}

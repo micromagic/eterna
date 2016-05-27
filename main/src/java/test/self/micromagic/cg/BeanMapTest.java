@@ -34,6 +34,13 @@ import self.micromagic.util.ref.StringRef;
 
 public class BeanMapTest extends TestCase
 {
+	public void testNoneConstructionBean()
+	{
+		//Utility.setProperty(CG.COMPILE_LOG_PROPERTY, "2");
+		BeanMap bm = BeanTool.getBeanMap(new NoneConstructionBean("t"));
+		assertEquals("t", bm.get("name"));
+	}
+
 	public void testArrayBeanCollection()
 	{
 		//Utility.setProperty(CG.COMPILE_TYPE_PROPERTY, "ant");
@@ -389,6 +396,17 @@ public class BeanMapTest extends TestCase
 		public java.util.Date birth;
 		public String comeDate;
 		public int gradeYear;
+
+	}
+
+	public static class NoneConstructionBean
+	{
+		public String name;
+
+		public NoneConstructionBean(String name)
+		{
+			this.name = name;
+		}
 
 	}
 
