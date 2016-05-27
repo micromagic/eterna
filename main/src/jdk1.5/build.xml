@@ -52,6 +52,7 @@
 		</javac>
 		<javac debug="true" debuglevel="${debuglevel}" destdir="${out}" 
 				encoding="${encoding}" source="1.5" target="1.5" includeantruntime="on">
+			<compilerarg value="-Xlint:unchecked"/>
 			<src path="${jdkv1.5}/main" />
 			<classpath refid="lib_1.5" />
 		</javac>
