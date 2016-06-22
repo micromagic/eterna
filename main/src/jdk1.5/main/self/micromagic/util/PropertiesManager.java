@@ -71,6 +71,11 @@ public class PropertiesManager
 	public static final String CHILD_PROPERTIES = "_child.properties";
 
 	/**
+	 * 存放优先使用父配置的名称列表的属性.
+	 */
+	public static final String PARENT_FIRST_NAMES = "_parentFirst.propertyNames";
+
+	/**
 	 * 设置是否需要将defaultProperties的值作为默认值.
 	 * 当本配置管理器中的值不存在时, 会再读取defaultProperties中的值. 如果
 	 * 父配置管理器中设置为true, 那当前的值就会默认为false.
@@ -81,7 +86,8 @@ public class PropertiesManager
 	public static final String NEED_DEFAULT = "_need.default";
 
 	/**
-	 * 日志的名称.
+	 * 日志的名称. <p>
+	 * 这里需要在运行时再调用Utility对象, 以免在初始化的时候循环引用.
 	 */
 	private static final String LOGGER_NAME = "eterna.util";
 
@@ -180,15 +186,15 @@ public class PropertiesManager
 		}
 		this.propResource = resource;
 		this.addPropertyListener(this.defaultPL);
-		if (needLoad)
-		{
-			this.reload();
-		}
-		// 初始化时不重载父配置管理器, 所以滞后设置parent
 		this.parent = parent;
 		if (this.parent != null)
 		{
+			// 将监听器绑定到parent上
 			this.parent.addPropertyListener(new ParentPropertyListener(this));
+		}
+		if (needLoad)
+		{
+			this.reload(false, null);
 		}
 	}
 
@@ -306,6 +312,7 @@ public class PropertiesManager
 			{
 				this.systemDefault = BooleanConverter.toBoolean(sd);
 			}
+			this.checkParentFirst(temp);
 			this.changeProperties(temp, null);
 		}
 		catch (Throwable ex)
@@ -316,6 +323,36 @@ public class PropertiesManager
 			if (msg != null)
 			{
 				msg.setString(preMsg + "Reload properties error:" + ex.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * 检查并去除父配置优先的属性.
+	 */
+	private void checkParentFirst(Properties props)
+	{
+		String names = (String) props.remove(PARENT_FIRST_NAMES);
+		if (this.parent == null || StringTool.isEmpty(names))
+		{
+			return;
+		}
+		String[] nameArr;
+		try
+		{
+			nameArr = StringTool.separateString(names, ',', true, true);
+		}
+		catch (Exception ex)
+		{
+			Utility.createLog(LOGGER_NAME).error("Error in get parent first names.", ex);
+			return;
+		}
+		for (int i = 0; i < nameArr.length; i++)
+		{
+			String name = nameArr[i];
+			if (!StringTool.isEmpty(name) && this.parent.getProperty(name) != null)
+			{
+				props.remove(name);
 			}
 		}
 	}
@@ -898,6 +935,13 @@ public class PropertiesManager
 				String dName = tempStr.substring(startIndex + prefixLength, endIndex);
 				try
 				{
+					String defValue = null;
+					int defIndex = dName.indexOf(':');
+					if (defIndex != -1)
+					{
+						defValue = dName.substring(defIndex + 1);
+						dName = dName.substring(0, defIndex);
+					}
 					String pValue = null;
 					if (bindRes != null)
 					{
@@ -907,13 +951,15 @@ public class PropertiesManager
 							pValue = String.valueOf(obj);
 						}
 					}
-					if (!onlyRes)
+					if (!onlyRes && pValue == null)
 					{
-						if (pValue == null)
-						{
-							// 如果bindRes为null或其中不存在需要的值, 则到当前的属性管理器中查找
-							pValue = this.getProperty(dName);
-						}
+						// 如果bindRes为null或其中不存在需要的值, 则到当前的属性管理器中查找
+						pValue = this.getProperty(dName);
+					}
+					if (pValue == null && defValue != null)
+					{
+						// 如果存在默认值, 则设置默认值
+						pValue = defValue;
 					}
 					if (pValue != null)
 					{
@@ -1519,234 +1565,6 @@ public class PropertiesManager
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * 自动配置绑定时的出错信息.
-	 */
-	public static class BindingError
-	{
-		private final Class<?> c;
-		private final Member m;
-		private final String code;
-		private final String msg;
-		private final boolean fieldType;
-
-		BindingError(Class<?> c, Member m, String code, String msg)
-		{
-			this.c = c;
-			this.m = m;
-			this.code = code;
-			this.msg = msg;
-			this.fieldType = m instanceof Field;
-		}
-
-		/**
-		 * 获取与配置绑定的类.
-		 */
-		public Class<?> getType()
-		{
-			return this.c;
-		}
-
-		/**
-		 * 获取与配置绑定的成员.
-		 */
-		public Member getMember()
-		{
-			return this.m;
-		}
-
-		/**
-		 * 获取与配置绑定的成员是否为属性.
-		 * true表示为属性, false表示为方法.
-		 */
-		public boolean isField()
-		{
-			return this.fieldType;
-		}
-
-		/**
-		 * 获取错误信息的代码.
-		 */
-		public String getCode()
-		{
-			return this.code;
-		}
-
-		/**
-		 * 获取错误的信息.
-		 */
-		public String getMessage()
-		{
-			return this.msg;
-		}
-
-		@Override
-		public String toString()
-		{
-			if (this.strValue == null)
-			{
-				this.strValue = "BindingError:{class:" + this.c.getCanonicalName() + ", ";
-				if (this.fieldType)
-				{
-					this.strValue += "field:" + this.m.getName() + ", type:"
-							+ ((Field) this.m).getType().getCanonicalName();
-				}
-				else
-				{
-					this.strValue += "method:" + this.m.getName();
-				}
-				this.strValue += ", code:" + this.code + ", message:[" + this.msg + "]}";
-			}
-			return this.strValue;
-		}
-		private String strValue;
-
-	}
-
-	/**
-	 * 与配置管理器绑定的类成员的信息.
-	 */
-	public static class BindingInfo
-	{
-		private final Class<?> c;
-		private final Member m;
-		private final String configName;
-		private final String configValue;
-		private final String description;
-		private final String defaultValue;
-		private final boolean fieldType;
-
-		BindingInfo(Class<?> c, Member m, String name, String value, String description,
-				String defaultValue)
-		{
-			this.c = c;
-			this.m = m;
-			this.configName = name;
-			this.configValue = value;
-			this.description = description;
-			this.fieldType = m instanceof Field;
-			this.defaultValue = defaultValue;
-		}
-
-		/**
-		 * 获取与配置绑定的类.
-		 */
-		public Class<?> getType()
-		{
-			return this.c;
-		}
-
-		/**
-		 * 获取与配置绑定的成员.
-		 */
-		public Member getMember()
-		{
-			return this.m;
-		}
-
-		/**
-		 * 获取与配置绑定的成员是否为属性.
-		 * true表示为属性, false表示为方法.
-		 */
-		public boolean isField()
-		{
-			return this.fieldType;
-		}
-
-		/**
-		 * 获取属性中的值.
-		 * 只有当绑定的成员类型为属性时才有效, 如果绑定
-		 * 的为方法, 那只会返回null.
-		 */
-		public Object getFieldValue()
-		{
-			if (!this.fieldType)
-			{
-				return null;
-			}
-			try
-			{
-				Field f = (Field) this.m;
-				Object r;
-				if (!f.isAccessible())
-				{
-					f.setAccessible(true);
-					r = f.get(null);
-					f.setAccessible(false);
-				}
-				else
-				{
-					r = f.get(null);
-				}
-				return r;
-			}
-			catch (Throwable ex)
-			{
-				return null;
-			}
-		}
-
-		/**
-		 * 获取绑定的配置名称.
-		 */
-		public String getConfigName()
-		{
-			return this.configName;
-		}
-
-		/**
-		 * 获取配置的值.
-		 */
-		public String getConfigValue()
-		{
-			return this.configValue;
-		}
-
-		/**
-		 * 获取配置的默认值.
-		 */
-		public String getDefaultValue()
-		{
-			return this.defaultValue;
-		}
-
-		/**
-		 * 获取与配置绑定的描述.
-		 */
-		public String getDescription()
-		{
-			return this.description;
-		}
-
-		@Override
-		public String toString()
-		{
-			if (this.strValue == null)
-			{
-				this.strValue = "BindingInfo:{config:[" + this.configName + "], value:["
-						+ this.configValue + "], class:" + this.c.getCanonicalName() + ", ";
-				if (this.fieldType)
-				{
-					this.strValue += "field:" + this.m.getName() + ", type:"
-							+ ((Field) this.m).getType().getCanonicalName()
-							+ ", val:[" + this.getFieldValue() + "]";
-				}
-				else
-				{
-					this.strValue += "method:" + this.m.getName();
-				}
-				if (this.defaultValue != null)
-				{
-					this.strValue += ", default:[" + this.defaultValue + "]";
-				}
-				this.strValue += ", description:[" + this.description + "]}";
-			}
-			return this.strValue;
-		}
-		private String strValue;
-
 	}
 
 }
