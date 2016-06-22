@@ -37,6 +37,16 @@ public interface ValueConverter
 	void setNeedThrow(boolean need);
 
 	/**
+	 * 是否需要将空字符串转换成null.
+	 */
+	boolean isEmptyToNull();
+
+	/**
+	 * 设置是否需要将空字符串转换成null.
+	 */
+	void setEmptyToNull(boolean emptyToNull);
+
+	/**
 	 * 获得<code>PropertyEditor</code>对象, 值转换器会使用它来进行转换.
 	 */
 	PropertyEditor getPropertyEditor();

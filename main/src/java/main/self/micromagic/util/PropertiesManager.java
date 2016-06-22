@@ -71,6 +71,11 @@ public class PropertiesManager
 	public static final String CHILD_PROPERTIES = "_child.properties";
 
 	/**
+	 * 存放优先使用父配置的名称列表的属性.
+	 */
+	public static final String PARENT_FIRST_NAMES = "_parentFirst.propertyNames";
+
+	/**
 	 * 设置是否需要将defaultProperties的值作为默认值.
 	 * 当本配置管理器中的值不存在时, 会再读取defaultProperties中的值. 如果
 	 * 父配置管理器中设置为true, 那当前的值就会默认为false.
@@ -81,7 +86,8 @@ public class PropertiesManager
 	public static final String NEED_DEFAULT = "_need.default";
 
 	/**
-	 * 日志的名称.
+	 * 日志的名称. <p>
+	 * 这里需要在运行时再调用Utility对象, 以免在初始化的时候循环引用.
 	 */
 	private static final String LOGGER_NAME = "eterna.util";
 
@@ -180,15 +186,15 @@ public class PropertiesManager
 		}
 		this.propResource = resource;
 		this.addPropertyListener(this.defaultPL);
-		if (needLoad)
-		{
-			this.reload();
-		}
-		// 初始化时不重载父配置管理器, 所以滞后设置parent
 		this.parent = parent;
 		if (this.parent != null)
 		{
+			// 将监听器绑定到parent上
 			this.parent.addPropertyListener(new ParentPropertyListener(this));
+		}
+		if (needLoad)
+		{
+			this.reload(false, null);
 		}
 	}
 
@@ -306,6 +312,7 @@ public class PropertiesManager
 			{
 				this.systemDefault = BooleanConverter.toBoolean(sd);
 			}
+			this.checkParentFirst(temp);
 			this.changeProperties(temp, null);
 		}
 		catch (Throwable ex)
@@ -316,6 +323,36 @@ public class PropertiesManager
 			if (msg != null)
 			{
 				msg.setString(preMsg + "Reload properties error:" + ex.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * 检查并去除父配置优先的属性.
+	 */
+	private void checkParentFirst(Properties props)
+	{
+		String names = (String) props.remove(PARENT_FIRST_NAMES);
+		if (this.parent == null || StringTool.isEmpty(names))
+		{
+			return;
+		}
+		String[] nameArr;
+		try
+		{
+			nameArr = StringTool.separateString(names, ',', true, true);
+		}
+		catch (Exception ex)
+		{
+			Utility.createLog(LOGGER_NAME).error("Error in get parent first names.", ex);
+			return;
+		}
+		for (int i = 0; i < nameArr.length; i++)
+		{
+			String name = nameArr[i];
+			if (!StringTool.isEmpty(name) && this.parent.getProperty(name) != null)
+			{
+				props.remove(name);
 			}
 		}
 	}
@@ -898,6 +935,13 @@ public class PropertiesManager
 				String dName = tempStr.substring(startIndex + prefixLength, endIndex);
 				try
 				{
+					String defValue = null;
+					int defIndex = dName.indexOf(':');
+					if (defIndex != -1)
+					{
+						defValue = dName.substring(defIndex + 1);
+						dName = dName.substring(0, defIndex);
+					}
 					String pValue = null;
 					if (bindRes != null)
 					{
@@ -907,13 +951,15 @@ public class PropertiesManager
 							pValue = String.valueOf(obj);
 						}
 					}
-					if (!onlyRes)
+					if (!onlyRes && pValue == null)
 					{
-						if (pValue == null)
-						{
-							// 如果bindRes为null或其中不存在需要的值, 则到当前的属性管理器中查找
-							pValue = this.getProperty(dName);
-						}
+						// 如果bindRes为null或其中不存在需要的值, 则到当前的属性管理器中查找
+						pValue = this.getProperty(dName);
+					}
+					if (pValue == null && defValue != null)
+					{
+						// 如果存在默认值, 则设置默认值
+						pValue = defValue;
 					}
 					if (pValue != null)
 					{

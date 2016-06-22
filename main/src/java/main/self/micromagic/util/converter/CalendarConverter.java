@@ -27,7 +27,7 @@ import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class CalendarConverter extends ObjectConverter
+public class CalendarConverter extends AbstractNumericalConverter
 {
 	private DateFormat[] dateFormats;
 
@@ -128,7 +128,7 @@ public class CalendarConverter extends ObjectConverter
 
 	public Calendar convertToCalendar(String value, DateFormat[] formats)
 	{
-		if (value == null)
+		if (value == null || (this.emptyToNull && value.length() == 0))
 		{
 			return null;
 		}

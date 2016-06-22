@@ -12,17 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-_parent.properties=dResParent.txt
-_child.properties=${chileRes}
+_parentFirst.propertyNames=p5,p6
+_parent.properties=parent1.txt
 
-dName1 = a\=${value1}
 
-dName2 = a\=${value2:x}
-
-value1 = 1.${dot1}
-
-dot1 = 013
-
-dot2 = b
-
-dName3 = a\=${value3}
+p5=1
+p6=2
+p7=3

@@ -26,7 +26,7 @@ import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class TimestampConverter extends ObjectConverter
+public class TimestampConverter extends AbstractNumericalConverter
 {
 	private DateFormat dateFormat;
 
@@ -108,7 +108,7 @@ public class TimestampConverter extends ObjectConverter
 
 	public java.sql.Timestamp convertToTimestamp(String value, DateFormat format)
 	{
-		if (value == null)
+		if (value == null || (this.emptyToNull && value.length() == 0))
 		{
 			return null;
 		}

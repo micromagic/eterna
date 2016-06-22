@@ -16,11 +16,12 @@
 
 package self.micromagic.util.converter;
 
-import self.micromagic.util.ref.StringRef;
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.StringRef;
 
-public class CharacterConverter extends ObjectConverter
+public class CharacterConverter extends AbstractNumericalConverter
 {
 	private static StringConverter stringConverter = new StringConverter();
 	private static Character DEFAULT_VALUE = new Character((char) 0);
@@ -90,6 +91,10 @@ public class CharacterConverter extends ObjectConverter
 		{
 			return value;
 		}
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Character(this.convertToChar(value));
@@ -113,6 +118,10 @@ public class CharacterConverter extends ObjectConverter
 
 	public Object convert(String value)
 	{
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Character(this.convertToChar(value));

@@ -459,7 +459,7 @@ public class AppDataLogExecute extends AbstractExecute
 				{
 					Element vNode = parent.addElement("value");
 					vNode.addAttribute("index", Integer.toString(i + 1));
-					printResultRow(vNode, row);
+					this.printResultRow(vNode, row);
 				}
 			}
 			if (rowCount > printCount)
@@ -514,7 +514,7 @@ public class AppDataLogExecute extends AbstractExecute
 			}
 			else if (value instanceof ResultRow)
 			{
-				printResultRow(parent, (ResultRow) value);
+				this.printResultRow(parent, (ResultRow) value);
 			}
 			else if (value instanceof SearchManager)
 			{
@@ -614,7 +614,7 @@ public class AppDataLogExecute extends AbstractExecute
 			}
 			else if (value instanceof SessionCache.Property)
 			{
-				printObject(parent, ((SessionCache.Property) value).getValue());
+				this.printObject(parent, ((SessionCache.Property) value).getValue());
 			}
 			else if (value instanceof Iterator)
 			{
@@ -647,6 +647,7 @@ public class AppDataLogExecute extends AbstractExecute
 			else if (value instanceof Date)
 			{
 				parent.addAttribute("type", "Date");
+				parent.addAttribute("millis", Long.toString(((Date) value).getTime()));
 				parent.addAttribute("value", FormatTool.formatFullDate(value));
 			}
 			else if (value instanceof Calendar)

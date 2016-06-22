@@ -68,6 +68,18 @@ public abstract class AbstractResultIterator
 	{
 	}
 
+	/**
+	 * 检查resultItr是否已初始化.
+	 */
+	private void checkResultItr()
+	{
+		if (this.resultItr == null)
+		{
+			String name = this.readerManager == null ? "<unknow>" : this.readerManager.getName();
+			throw new EternaException("The result iterator [" + name + "] hasn't initialized.");
+		}
+	}
+
 	public ResultMetaData getMetaData()
 			throws SQLException, EternaException
 	{
@@ -175,9 +187,13 @@ public abstract class AbstractResultIterator
 	{
 	}
 
-	protected void copy(ResultIterator copyObj)
+	/**
+	 * 将当前对象中的属性复制到另一个对象中.
+	 */
+	protected void copyTo(ResultIterator copyObj)
 			throws EternaException
 	{
+		this.checkResultItr();
 		AbstractResultIterator other = (AbstractResultIterator) copyObj;
 		other.result = this.result;
 		other.resultItr = this.resultItr;

@@ -29,12 +29,16 @@ import java.util.WeakHashMap;
 import self.micromagic.util.container.SynHashMap;
 import self.micromagic.util.container.ThreadCache;
 
+/**
+ * 处理格式化的工具. <p>
+ * 如: 对日期或数字的格式化输出, 或将字符串解析成日期或数字.
+ */
 public class FormatTool
 {
 	/**
 	 * 完整的日期类型的格式化.
 	 */
-	public static final DateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S Z");
+	public static final DateFormat fullDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z");
 
 	private static final DateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

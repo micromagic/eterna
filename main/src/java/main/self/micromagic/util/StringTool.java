@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.coder.StringCoder;
 import self.micromagic.util.converter.BooleanConverter;
 
 /**
@@ -357,7 +358,6 @@ public class StringTool
 		return separateString(str, delimiter, false);
 	}
 
-
 	/**
 	 * 根据指定的分隔符<code>delimiter</code>分割一个字符串
 	 * <code>str</code>. <p>
@@ -435,37 +435,91 @@ public class StringTool
 		return (String[]) list.toArray(new String[list.size()]);
 	}
 
-	/*
-	原来旧的实现
-	public static String[] separateString(String str, String delimiter, boolean trim)
+	/**
+	 * 根据指定的分隔符<code>separator</code>分割一个字符串
+	 * <code>str</code>. <p>
+	 * 注: 如果有多个相连的分隔符不会作为一个处理.
+	 *
+	 * @param str         要进行分割的字符串
+	 * @param separator   分隔符
+	 * @param trim        是否要对分割出来的每个字符串进行去除空格处理
+	 * @param checkQuote  是否要检查有没有用双引号引起来的字符串
+	 * @return  分割后的字符串所组成的数组
+	 */
+	public static String[] separateString(String str, char separator, boolean trim, boolean checkQuote)
 	{
 		if (str == null)
 		{
 			return null;
 		}
-
-		StringTokenizer st = new StringTokenizer(str, delimiter);
-		int count = st.countTokens();
+		int count = str.length();
 		if (count == 0)
 		{
 			return EMPTY_STRING_ARRAY;
 		}
 
-		String[] bolck = new String[count];
-		for (int i = 0; i < count; i++)
+		QuoteStrCoder coder = null;
+		List list = new ArrayList();
+		int i = 0;
+		int begin = 0;
+		boolean hasSeparator = false;
+		while (i < count)
 		{
-			bolck[i] = st.nextToken();
-		}
-		if (trim)
-		{
-			for (int i = 0; i < count; i++)
+			char tmp = str.charAt(i);
+			if (checkQuote && tmp == '\"')
 			{
-				bolck[i] = bolck[i].trim();
+				if (str.substring(begin, i).trim().length() > 0)
+				{
+					// 引号的使用方式不对
+					throw new IllegalArgumentException("Error string with quote [" + str + "].");
+				}
+				if (coder == null)
+				{
+					coder = new QuoteStrCoder();
+				}
+				String tmpStr = coder.decodeString(str, i + 1);
+				int tmpIndex = coder.getTotalIndex() + 1;
+				hasSeparator = false;
+				while (tmpIndex < count)
+				{
+					char next = str.charAt(tmpIndex++);
+					if (next > ' ')
+					{
+						if (next == separator)
+						{
+							hasSeparator = true;
+							break;
+						}
+						else
+						{
+							// 引号的使用方式不对
+							throw new IllegalArgumentException("Error string with quote [" + str + "].");
+						}
+					}
+				}
+				begin = i = tmpIndex;
+				list.add(tmpStr);
+				continue;
 			}
+			if (tmp == separator)
+			{
+				hasSeparator = true;
+				list.add(trim ? str.substring(begin, i).trim() : str.substring(begin, i));
+				begin = i + 1;
+			}
+			i++;
 		}
-		return bolck;
+		if (begin < count)
+		{
+			list.add(trim ? str.substring(begin).trim() : str.substring(begin));
+		}
+		else if (hasSeparator)
+		{
+			list.add("");
+		}
+
+		return (String[]) list.toArray(new String[list.size()]);
 	}
-	*/
 
 	/**
 	 * 将<code>src</code>字符串中的所有<code>oldStr</code>替换为
@@ -1034,6 +1088,30 @@ class StringAppenderWriter extends Writer
 
 	public void close()
 	{
+	}
+
+}
+
+class QuoteStrCoder extends StringCoder
+{
+	public QuoteStrCoder()
+	{
+		super('\\');
+	}
+
+	public int getTotalIndex()
+	{
+		return this.totalIndex;
+	}
+
+	protected void decodeChar(Writer out, char c)
+			throws IOException
+	{
+		if (c == '\"')
+		{
+			throw BREAK_FLAG;
+		}
+		super.decodeChar(out, c);
 	}
 
 }

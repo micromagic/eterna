@@ -21,11 +21,12 @@ import java.text.NumberFormat;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class DoubleConverter extends ObjectConverter
+public class DoubleConverter extends AbstractNumericalConverter
 {
 	private static Double DEFAULT_VALUE = new Double(0.0);
 
@@ -143,6 +144,10 @@ public class DoubleConverter extends ObjectConverter
 		{
 			return value;
 		}
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Double(this.convertToDouble(value));
@@ -166,6 +171,10 @@ public class DoubleConverter extends ObjectConverter
 
 	public Object convert(String value)
 	{
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Double(this.convertToDouble(value));

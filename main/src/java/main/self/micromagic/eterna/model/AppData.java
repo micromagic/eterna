@@ -44,6 +44,7 @@ import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.XMLWriter;
 
 import self.micromagic.eterna.share.Tool;
@@ -435,17 +436,25 @@ public class AppData
 			logs = logDocument.getRootElement().element("logs");
 		}
 
-		if (logs.elements().size() > 256)
+		if (logs.nodeCount() > 256)
 		{
 			// 当节点过多时, 清除最先添加的几个节点
-			Iterator itr = logs.elementIterator();
+			Iterator itr = logs.nodeIterator();
 			try
 			{
-				for (int i = 0; i < 128; i++)
+				for (int i = 0; i < 230; i++)
 				{
 					itr.next();
-					itr.remove();
 				}
+				Element newLogs = DocumentHelper.createElement("logs");
+				while (itr.hasNext())
+				{
+					newLogs.add((Node) itr.next());
+				}
+				Element root = logs.getParent();
+				root.remove(logs);
+				root.add(newLogs);
+				logs = newLogs;
 			}
 			catch (Exception ex)
 			{

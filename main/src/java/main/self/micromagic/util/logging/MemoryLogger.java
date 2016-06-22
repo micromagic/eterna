@@ -26,6 +26,7 @@ import java.util.Map;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.XMLWriter;
 
 import self.micromagic.cg.ClassGenerator;
@@ -112,17 +113,25 @@ public class MemoryLogger
 			this.logNodes = root.addElement("logs");
 		}
 
-		if (this.logNodes.elements().size() > 2048)
+		if (this.logNodes.nodeCount() > 2048)
 		{
 			// 当节点过多时, 清除最先添加的几个节点
-			Iterator itr = this.logNodes.elementIterator();
+			Iterator itr = this.logNodes.nodeIterator();
 			try
 			{
 				for (int i = 0; i < 1536; i++)
 				{
 					itr.next();
-					itr.remove();
 				}
+				Element newLogs = DocumentHelper.createElement("logs");
+				while (itr.hasNext())
+				{
+					newLogs.add((Node) itr.next());
+				}
+				Element root = this.logNodes.getParent();
+				root.remove(this.logNodes);
+				root.add(newLogs);
+				this.logNodes = newLogs;
 			}
 			catch (Exception ex)
 			{

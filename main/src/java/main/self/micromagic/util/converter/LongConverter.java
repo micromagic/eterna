@@ -21,11 +21,12 @@ import java.text.NumberFormat;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class LongConverter extends ObjectConverter
+public class LongConverter extends AbstractNumericalConverter
 {
 	private static Long DEFAULT_VALUE = new Long(0L);
 
@@ -147,6 +148,10 @@ public class LongConverter extends ObjectConverter
 		{
 			return value;
 		}
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Long(this.convertToLong(value));
@@ -170,6 +175,10 @@ public class LongConverter extends ObjectConverter
 
 	public Object convert(String value)
 	{
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Long(this.convertToLong(value));

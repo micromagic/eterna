@@ -16,10 +16,57 @@
 
 package self.micromagic.util;
 
+import java.util.Arrays;
+
 import junit.framework.TestCase;
 
 public class StringToolTest extends TestCase
 {
+	public void testSeparateString2()
+	{
+		String[] arr = {"a", "", "b", ""};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("a,,b,", ',', true, false)));
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("a,,b,", ',', true, true)));
+		arr = new String[]{"a", "", "b", "", ""};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("a ,  ,b ,  ,  ", ',', true, false)));
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("a ,  ,b ,  ,  ", ',', true, true)));
+		arr = new String[]{"a  b"};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("   a  b   ", ',', true, false)));
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("   a  b   ", ',', true, true)));
+		arr = new String[]{""};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("       ", ',', true, false)));
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("       ", ',', true, true)));
+		arr = new String[0];
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("", ',', true, false)));
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString("", ',', true, true)));
+		arr = new String[]{"\"a", "b \""};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString(" \"a,b \"  ", ',', true, false)));
+
+		arr = new String[]{"a,b "};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString(" \"a,b \"  ", ',', true, true)));
+		arr = new String[]{"a,b ", ""};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString(" \"a,b \"  ,", ',', true, true)));
+		arr = new String[]{"a,b "};
+		assertEquals(Arrays.asList(arr), Arrays.asList(StringTool.separateString(" \"a,b \"", ',', true, true)));
+
+		try
+		{
+			StringTool.separateString(" \"a,b \"x,", ',', true, true);
+		}
+		catch (RuntimeException ex)
+		{
+			System.out.println(ex);
+		}
+		try
+		{
+			StringTool.separateString(" \"a,b \",1\"\"", ',', true, true);
+		}
+		catch (RuntimeException ex)
+		{
+			System.out.println(ex);
+		}
+	}
+
 	public void testCheck()
 	{
 		assertEquals("/a", StringTool.checkBegin("a", "/"));

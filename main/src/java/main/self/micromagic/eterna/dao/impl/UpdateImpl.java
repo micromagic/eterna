@@ -33,12 +33,11 @@ import self.micromagic.util.logging.TimeLogger;
 public class UpdateImpl extends BaseDao
 		implements Update
 {
-	private int executedResult = -1;
-
 	public int getExecutedResult()
 	{
 		return this.executedResult;
 	}
+	private int executedResult = -1;
 
 	public Class getObjectType()
 	{
@@ -83,11 +82,6 @@ public class UpdateImpl extends BaseDao
 				stmt = conn.createStatement();
 				stmt.execute(this.getPreparedScript());
 			}
-		}
-		catch (EternaException ex)
-		{
-			error = ex;
-			throw ex;
 		}
 		catch (SQLException ex)
 		{
@@ -137,11 +131,6 @@ public class UpdateImpl extends BaseDao
 			}
 			this.executedResult = result;
 			return result;
-		}
-		catch (EternaException ex)
-		{
-			error = ex;
-			throw ex;
 		}
 		catch (SQLException ex)
 		{

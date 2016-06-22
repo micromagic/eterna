@@ -21,12 +21,17 @@ import self.micromagic.eterna.share.EternaException;
 public interface ModifiableResultRow extends ResultRow
 {
 	/**
+	 * 判断当前行<code>ResultRow</code>对象是否被修改过.
+	 */
+	boolean isModified() throws EternaException;
+
+	/**
 	 * 在当前行<code>ResultRow</code>对象中指定列的值.
 	 *
 	 * @param columnIndex  第一列数是1, 第二列是2, ...
 	 * @param v            要设置的值
 	 */
-	public void setValue(int columnIndex, Object v) throws EternaException;
+	void setValue(int columnIndex, Object v) throws EternaException;
 
 	/**
 	 * 在当前行<code>ResultRow</code>对象中指定列的值.
@@ -34,6 +39,6 @@ public interface ModifiableResultRow extends ResultRow
 	 * @param columnName  列的名称
 	 * @param v           要设置的值
 	 */
-	public void setValue(String columnName, Object v) throws EternaException;
+	void setValue(String columnName, Object v) throws EternaException;
 
 }

@@ -20,6 +20,7 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -38,6 +39,20 @@ public class FormatTest extends TestCase
 		assertEquals("dfdfds", t.patterns[1]);
 		assertEquals("df", t.patterns[2]);
 		assertEquals("", t.patterns[3]);
+	}
+
+	public void testFullDate()
+			throws Exception
+	{
+		System.out.println(FormatTool.formatFullDate(new Date()));
+		Thread.sleep(173L);
+		System.out.println(FormatTool.formatFullDate(new Date()));
+		Thread.sleep(173L);
+		System.out.println(FormatTool.formatFullDate(new Date()));
+		Thread.sleep(173L);
+		System.out.println(FormatTool.formatFullDate(new Date()));
+		Thread.sleep(173L);
+		System.out.println(FormatTool.formatFullDate(new Date()));
 	}
 
 	static final DateFormat datetimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

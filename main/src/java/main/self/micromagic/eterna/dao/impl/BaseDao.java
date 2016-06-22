@@ -33,6 +33,7 @@ import java.util.Iterator;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.XMLWriter;
 
 import self.micromagic.coder.Base64;
@@ -134,17 +135,25 @@ public abstract class BaseDao extends AbstractDao
 			Element root = logDocument.addElement("eterna");
 			logs = root.addElement("logs");
 		}
-		if (logs.elements().size() > 2048)
+		if (logs.nodeCount() > 2048)
 		{
 			// 当节点过多时, 清除最先添加的几个节点
-			Iterator itr = logs.elementIterator();
+			Iterator itr = logs.nodeIterator();
 			try
 			{
 				for (int i = 0; i < 1536; i++)
 				{
 					itr.next();
-					itr.remove();
 				}
+				Element newLogs = DocumentHelper.createElement("logs");
+				while (itr.hasNext())
+				{
+					newLogs.add((Node) itr.next());
+				}
+				Element root = logs.getParent();
+				root.remove(logs);
+				root.add(newLogs);
+				logs = newLogs;
 			}
 			catch (Exception ex)
 			{

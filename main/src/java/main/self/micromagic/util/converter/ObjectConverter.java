@@ -49,6 +49,15 @@ public class ObjectConverter
 		this.needThrow = need;
 	}
 
+	public boolean isEmptyToNull()
+	{
+		return false;
+	}
+
+	public void setEmptyToNull(boolean emptyToNull)
+	{
+	}
+
 	public int getConvertType(StringRef typeName)
 	{
 		if (typeName != null)

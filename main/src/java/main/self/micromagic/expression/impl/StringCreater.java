@@ -104,7 +104,7 @@ public class StringCreater
 				break;
 			}
 			char tmp = text.charAt(begin.value + index);
-			if (tmp <= '7' && tmp >= 0)
+			if (tmp <= '7' && tmp >= '0')
 			{
 				cArr[index++] = tmp;
 				leftCount--;

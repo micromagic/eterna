@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package self.micromagic.util;
+package self.micromagic.util.logging;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +33,11 @@ import org.apache.commons.logging.LogConfigurationException;
 import org.apache.commons.logging.LogFactory;
 
 import self.micromagic.cg.ClassGenerator;
+import self.micromagic.util.FormatTool;
+import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 import self.micromagic.util.container.SynHashMap;
-import self.micromagic.util.logging.LoggerListener;
-import self.micromagic.util.logging.MemoryLogger;
 
 /**
  * 配置说明:

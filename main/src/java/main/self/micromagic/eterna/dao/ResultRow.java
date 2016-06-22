@@ -74,6 +74,17 @@ public interface ResultRow
 	/**
 	 * 在当前行<code>ResultRow</code>对象中取出格式化后指定的列.
 	 *
+	 * @param columnIndex  参数的索引值, 第一个是1, 第二个是2, ....
+	 * @param old          是否获取原始值(即未修改的值)
+	 * @return 格式化后的数据.
+	 *
+	 * @exception SQLException 假如访问数据库时出错
+	 */
+	Object getFormated(int columnIndex, boolean old) throws SQLException, EternaException;
+
+	/**
+	 * 在当前行<code>ResultRow</code>对象中取出格式化后指定的列.
+	 *
 	 * @param columnName  参数的名称.
 	 * @return 格式化后的数据.
 	 *

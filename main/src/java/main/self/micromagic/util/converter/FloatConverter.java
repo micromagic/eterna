@@ -16,13 +16,14 @@
 
 package self.micromagic.util.converter;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class FloatConverter extends ObjectConverter
+public class FloatConverter extends AbstractNumericalConverter
 {
 	private static Float DEFAULT_VALUE = new Float(0.0F);
 
@@ -120,6 +121,10 @@ public class FloatConverter extends ObjectConverter
 		{
 			return value;
 		}
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Float(this.convertToFloat(value));
@@ -143,6 +148,10 @@ public class FloatConverter extends ObjectConverter
 
 	public Object convert(String value)
 	{
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Float(this.convertToFloat(value));

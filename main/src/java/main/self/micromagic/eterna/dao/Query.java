@@ -227,6 +227,13 @@ public interface Query extends Dao
 			throws EternaException, SQLException;
 
 	/**
+	 * 获取前一次executeQuery或executeQueryHoldConnection方法的执行结果.
+	 *
+	 * @return  前一次的执行结果, 如果返回null表示未执行或执行出错
+	 */
+	ResultIterator getExecutedResult() throws EternaException;
+
+	/**
 	 * 总记录数的相关信息.
 	 */
 	static final class TotalCountInfo

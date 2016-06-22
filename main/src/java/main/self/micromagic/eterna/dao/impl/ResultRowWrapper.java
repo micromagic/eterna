@@ -68,7 +68,13 @@ class ResultRowWrapper
 	public Object getFormated(int columnIndex)
 			throws SQLException, EternaException
 	{
-		return this.base.getFormated(columnIndex);
+		return this.base.getFormated(columnIndex, false);
+	}
+
+	public Object getFormated(int columnIndex, boolean old)
+			throws SQLException, EternaException
+	{
+		return this.base.getFormated(columnIndex, old);
 	}
 
 	public Object getFormated(String columnName)
@@ -292,6 +298,12 @@ class ModifiableResultRowWrapper extends ResultRowWrapper
 		this.base = base;
 	}
 	private final ModifiableResultRow base;
+
+	public boolean isModified()
+			throws EternaException
+	{
+		return this.base.isModified();
+	}
 
 	public void setValue(int columnIndex, Object v)
 			throws EternaException

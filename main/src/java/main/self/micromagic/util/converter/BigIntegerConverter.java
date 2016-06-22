@@ -27,7 +27,7 @@ import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class BigIntegerConverter extends ObjectConverter
+public class BigIntegerConverter extends AbstractNumericalConverter
 {
 	private NumberFormat numberFormat;
 
@@ -121,7 +121,7 @@ public class BigIntegerConverter extends ObjectConverter
 
 	public BigInteger convertToBigInteger(String value, NumberFormat format)
 	{
-		if (value == null)
+		if (value == null || (this.emptyToNull && value.length() == 0))
 		{
 			return null;
 		}
@@ -196,4 +196,3 @@ public class BigIntegerConverter extends ObjectConverter
 	}
 
 }
-

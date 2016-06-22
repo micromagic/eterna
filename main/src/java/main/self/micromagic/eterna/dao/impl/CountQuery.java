@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.dom4j.Element;
-
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.dao.Query;
@@ -38,7 +36,6 @@ import self.micromagic.eterna.dao.reader.ObjectReader;
 import self.micromagic.eterna.dao.reader.ReaderFactory;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.model.AppData;
-import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.EternaException;
@@ -95,6 +92,12 @@ class CountQuery
 		return DAO_TYPE_COUNT;
 	}
 
+	public ResultIterator getExecutedResult()
+	{
+		return this.executedResult;
+	}
+	private ResultIterator executedResult;
+
 	public ResultIterator executeQuery(Connection conn)
 			throws EternaException, SQLException
 	{
@@ -103,6 +106,7 @@ class CountQuery
 		ResultSet rs = null;
 		Throwable error = null;
 		ResultIterator result = null;
+		this.executedResult = null;
 		try
 		{
 			if (this.hasActiveParam())
@@ -117,7 +121,6 @@ class CountQuery
 				stmt = conn.createStatement();
 				rs = stmt.executeQuery(this.getPreparedScript());
 			}
-
 			rs.next();
 			Object[] values = new Object[]{new Integer(rs.getInt(1))};
 			CountResultIterator critr = new CountResultIterator(readerManager, this);
@@ -125,13 +128,8 @@ class CountQuery
 			ArrayList results = new ArrayList(2);
 			results.add(rowSet);
 			critr.setResult(results);
-			result = critr;
+			this.executedResult = result = critr;
 			return critr;
-		}
-		catch (EternaException ex)
-		{
-			error = ex;
-			throw ex;
 		}
 		catch (SQLException ex)
 		{
@@ -152,18 +150,7 @@ class CountQuery
 		{
 			if (BaseDao.log(this, startTime, error, conn))
 			{
-				if (result != null)
-				{
-					AppData data = AppData.getCurrentData();
-					if (data.getLogType() > 0)
-					{
-						Element nowNode = data.getCurrentNode();
-						if (nowNode != null)
-						{
-							AppDataLogExecute.printObject(nowNode.addElement(this.getType() + "-result"), result);
-						}
-					}
-				}
+				QueryImpl.logResult(this.getType(), result);
 			}
 			if (rs != null)
 			{
@@ -507,7 +494,7 @@ class CountResultIterator extends AbstractResultIterator
 			throws EternaException
 	{
 		CountResultIterator ritr = new CountResultIterator();
-		super.copy(ritr);
+		super.copyTo(ritr);
 		return ritr;
 	}
 

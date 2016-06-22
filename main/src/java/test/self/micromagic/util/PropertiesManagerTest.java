@@ -65,12 +65,35 @@ public class PropertiesManagerTest extends TestCase
 		nowPM = null;
 	}
 
+	public void testParentFirst()
+	{
+		ClassLoader loader = this.getClass().getClassLoader();
+		PropertiesManager pm1 = new PropertiesManager("conf/pFirst1.txt", loader);
+		assertEquals("1", pm1.getProperty("p5"));
+		assertEquals("2", pm1.getProperty("p6"));
+		assertEquals("3", pm1.getProperty("p7"));
+
+		PropertiesManager parent = new PropertiesManager("conf/main1.txt", loader);
+		PropertiesManager pm2 = new PropertiesManager("conf/pFirst1.txt", loader, parent);
+		assertEquals("e", pm2.getProperty("p5"));
+		assertEquals("f", pm2.getProperty("p6"));
+		assertEquals("3", pm2.getProperty("p7"));
+	}
+
 	public void testDynamicRes()
 	{
 		PropertiesManager pm = new PropertiesManager(
 				ContainerManager.createResource("cp:/conf/dResMain.txt"), null, false);
 		pm.reload();
 		assertEquals("1", pm.getProperty("testValue"));
+
+		assertEquals("a=1.013", pm.getResolvedProperty("dName1"));
+		assertEquals("a=x", pm.getResolvedProperty("dName2"));
+		pm.setProperty("value2", "y");
+		assertEquals("a=y", pm.getResolvedProperty("dName2"));
+		pm.setProperty("value2", "${dot2}");
+		assertEquals("a=b", pm.getResolvedProperty("dName2"));
+		assertEquals("a=${value3}", pm.getResolvedProperty("dName3"));
 	}
 
 	public void testBindDefaultValue()

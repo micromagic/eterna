@@ -17,18 +17,18 @@
 package self.micromagic.util.converter;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.IOException;
 
-import self.micromagic.eterna.share.TypeManager;
+import org.apache.commons.fileupload.FileItem;
+
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.MemoryStream;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
-
-import org.apache.commons.fileupload.FileItem;
 
 public class StreamConverter extends ObjectConverter
 {

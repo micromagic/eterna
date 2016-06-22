@@ -53,6 +53,7 @@ public class ResultRowImpl implements ModifiableResultRow
 	private static final Object NULL_FLAG = new Object();
 
 	private final Object[] values;
+	private Object[] oldValues;
 	private final Permission permission;
 	private final ResultMetaData metaData;
 	private final ResultIterator resultIterator;
@@ -98,9 +99,19 @@ public class ResultRowImpl implements ModifiableResultRow
 		return this.rowNum;
 	}
 
+	public boolean isModified()
+	{
+		return this.oldValues != null;
+	}
+
 	public void setValue(int columnIndex, Object v)
 			throws EternaException
 	{
+		if (this.oldValues == null)
+		{
+			this.oldValues = new Object[this.values.length];
+			System.arraycopy(this.values, 0, this.oldValues, 0, this.values.length);
+		}
 		this.wasNull = v == null;
 		this.values[columnIndex - 1] = v;
 		this.formateds[columnIndex - 1] = null;
@@ -154,7 +165,7 @@ public class ResultRowImpl implements ModifiableResultRow
 		{
 			return this.getObject(columnIndex);
 		}
-		return this.getFormated(columnIndex);
+		return this.getFormated(columnIndex, false);
 	}
 
 	public Object getSmartValue(String columnName, boolean notThrow)
@@ -169,73 +180,68 @@ public class ResultRowImpl implements ModifiableResultRow
 	}
 
 	public Object getFormated(int columnIndex)
+			throws SQLException, EternaException
+	{
+		return this.getFormated(columnIndex, false);
+	}
+
+	public Object getFormated(int columnIndex, boolean old)
 			throws EternaException
 	{
 		int cIndex = columnIndex - 1;
-		if (this.values[cIndex] == null)
+		Object v;
+		Object tmp;
+		if (old)
 		{
-			this.wasNull = true;
-			Object tmp = this.formateds[cIndex];
+			v = this.oldValues != null ? this.oldValues[cIndex] : this.values[cIndex];
+			tmp = null;
+		}
+		else
+		{
+			v = this.values[cIndex];
+			this.wasNull = v == null;
+			tmp = this.formateds[cIndex];
 			if (tmp != null)
 			{
 				return tmp == NULL_FLAG ? null : tmp;
 			}
-			ResultReader reader = this.metaData.getColumnReader(columnIndex);
-			ResultFormat format = reader.getFormat();
-			if (format != null)
-			{
-				try
-				{
-					tmp = format.format(null, this, reader, this.permission);
-				}
-				catch (Exception ex)
-				{
-					  DaoManager.log.warn(this.getFormatErrMsg(columnIndex), ex);
-				}
-				if (tmp == null)
-				{
-					tmp = format.useEmptyString() ? "" : NULL_FLAG;
-				}
-			}
-			else
-			{
-				tmp = "";
-			}
-			this.formateds[cIndex] = tmp;
-			return tmp == NULL_FLAG ? null : tmp;
-		}
-		this.wasNull = false;
-		Object tmp = this.formateds[cIndex];
-		if (tmp != null)
-		{
-			return tmp == NULL_FLAG ? null : tmp;
 		}
 		ResultReader reader = this.metaData.getColumnReader(columnIndex);
 		ResultFormat format = reader.getFormat();
 		if (format == null)
 		{
-			tmp = strConvert.convertToString(this.values[cIndex]);
-			if (tmp == null)
+			if (v == null)
 			{
 				tmp = "";
+			}
+			else
+			{
+				tmp = strConvert.convertToString(this.values[cIndex]);
+				if (tmp == null)
+				{
+					tmp = "";
+				}
 			}
 		}
 		else
 		{
 			try
 			{
-				tmp = format.format(this.values[cIndex], this, reader, this.permission);
+				tmp = format.format(v, this, reader, this.permission);
 			}
 			catch (Exception ex)
 			{
-				  DaoManager.log.warn(this.getFormatErrMsg(columnIndex), ex);
+				DaoManager.log.warn(this.getFormatErrMsg(columnIndex), ex);
 			}
 			if (tmp == null)
 			{
 				tmp = format.useEmptyString() ? "" : NULL_FLAG;
 			}
 		}
-		this.formateds[cIndex] = tmp;
+		if (!old)
+		{
+			this.formateds[cIndex] = tmp;
+		}
 		return tmp == NULL_FLAG ? null : tmp;
 	}
 
@@ -243,7 +249,7 @@ public class ResultRowImpl implements ModifiableResultRow
 			throws EternaException
 	{
 		int index = this.metaData.findColumn(columnName, false);
-		return this.getFormated(index);
+		return this.getFormated(index, false);
 	}
 
 	private String getFormatErrMsg(int columnIndex)

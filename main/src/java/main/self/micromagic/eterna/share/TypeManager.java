@@ -222,14 +222,20 @@ public class TypeManager
 
 	static
 	{
+		typeMap.put("None", Utility.INTEGER_MINUS1);
 		typeMap.put("none", Utility.INTEGER_MINUS1);
+		typeMap.put("Null", Utility.INTEGER_0);
 		typeMap.put("null", Utility.INTEGER_0);
 		typeMap.put("String", Utility.INTEGER_1);
 		typeMap.put("string", Utility.INTEGER_1);
+		typeMap.put("Integer", Utility.INTEGER_2);
+		typeMap.put("Int", Utility.INTEGER_2);
 		typeMap.put("int", Utility.INTEGER_2);
+		typeMap.put("Double", Utility.INTEGER_3);
 		typeMap.put("double", Utility.INTEGER_3);
 		typeMap.put("Bytes", Utility.INTEGER_4);
 		typeMap.put("bytes", Utility.INTEGER_4);
+		typeMap.put("Boolean", Utility.INTEGER_5);
 		typeMap.put("boolean", Utility.INTEGER_5);
 		typeMap.put("Date", Utility.INTEGER_6);
 		typeMap.put("date", Utility.INTEGER_6);
@@ -237,11 +243,15 @@ public class TypeManager
 		typeMap.put("timestamp", Utility.INTEGER_7);
 		typeMap.put("Datetime", Utility.INTEGER_7); // 兼容Datetime的设置
 		typeMap.put("datetime", Utility.INTEGER_7); // 兼容Datetime的设置
+		typeMap.put("Long", Utility.INTEGER_8);
 		typeMap.put("long", Utility.INTEGER_8);
 		typeMap.put("Time", Utility.INTEGER_9);
 		typeMap.put("time", Utility.INTEGER_9);
+		typeMap.put("Short", Utility.INTEGER_10);
 		typeMap.put("short", Utility.INTEGER_10);
+		typeMap.put("Byte", Utility.INTEGER_11);
 		typeMap.put("byte", Utility.INTEGER_11);
+		typeMap.put("Float", Utility.INTEGER_12);
 		typeMap.put("float", Utility.INTEGER_12);
 		typeMap.put("Object", Utility.INTEGER_13);
 		typeMap.put("object", Utility.INTEGER_13);

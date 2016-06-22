@@ -27,7 +27,7 @@ import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class DecimalConverter extends ObjectConverter
+public class DecimalConverter extends AbstractNumericalConverter
 {
 	private NumberFormat numberFormat;
 
@@ -121,7 +121,7 @@ public class DecimalConverter extends ObjectConverter
 
 	public BigDecimal convertToDecimal(String value, NumberFormat format)
 	{
-		if (value == null)
+		if (value == null || (this.emptyToNull && value.length() == 0))
 		{
 			return null;
 		}

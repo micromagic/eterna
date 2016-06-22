@@ -16,13 +16,14 @@
 
 package self.micromagic.util.converter;
 
-import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
-public class ShortConverter extends ObjectConverter
+public class ShortConverter extends AbstractNumericalConverter
 {
 	private static Short DEFAULT_VALUE = new Short((short) 0);
 
@@ -120,6 +121,10 @@ public class ShortConverter extends ObjectConverter
 		{
 			return value;
 		}
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Short(this.convertToShort(value));
@@ -143,6 +148,10 @@ public class ShortConverter extends ObjectConverter
 
 	public Object convert(String value)
 	{
+		if (this.emptyToNull && StringTool.isEmpty(value))
+		{
+			return null;
+		}
 		try
 		{
 			return new Short(this.convertToShort(value));
@@ -163,4 +172,5 @@ public class ShortConverter extends ObjectConverter
 			}
 		}
 	}
+
 }

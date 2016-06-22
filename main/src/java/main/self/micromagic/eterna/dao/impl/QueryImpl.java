@@ -135,6 +135,12 @@ public class QueryImpl extends AbstractQuery
 	}
 	private Query countQuery;
 
+	public ResultIterator getExecutedResult()
+	{
+		return this.executedResult;
+	}
+	private ResultIterator executedResult;
+
 	public ResultIterator executeQuery(Connection conn)
 			throws EternaException, SQLException
 	{
@@ -144,6 +150,7 @@ public class QueryImpl extends AbstractQuery
 		ResultSet rs = null;
 		Throwable error = null;
 		ResultIterator result = null;
+		this.executedResult = null;
 		try
 		{
 			if (this.hasActiveParam())
@@ -180,7 +187,6 @@ public class QueryImpl extends AbstractQuery
 			List tmpList = qh.readResults(rs, readerList);
 			ResultIteratorImpl ritr = new ResultIteratorImpl(
 					readerManager, readerList, this);
-			result = ritr;
 			ListIterator litr = tmpList.listIterator();
 			int rowNum = 1;
 			while (litr.hasNext())
@@ -204,12 +210,8 @@ public class QueryImpl extends AbstractQuery
 				ritr.realRecordCount = count;
 				ritr.realRecordCountAvailable = true;
 			}
+			this.executedResult = result = ritr;
 			return ritr;
-		}
-		catch (EternaException ex)
-		{
-			error = ex;
-			throw ex;
 		}
 		catch (SQLException ex)
 		{
@@ -230,19 +232,7 @@ public class QueryImpl extends AbstractQuery
 		{
 			if (log(this, startTime, error, conn))
 			{
-				if (result != null)
-				{
-					AppData data = AppData.getCurrentData();
-					if (data.getLogType() > 0)
-					{
-						Element nowNode = data.getCurrentNode();
-						if (nowNode != null)
-						{
-							AppDataLogExecute.printObject(
-									nowNode.addElement(this.getType() + "-result"), result);
-						}
-					}
-				}
+				logResult(this.getType(), result);
 			}
 			if (rs != null)
 			{
@@ -262,6 +252,7 @@ public class QueryImpl extends AbstractQuery
 		Statement stmt = null;
 		Throwable error = null;
 		ResultIterator result = null;
+		this.executedResult = null;
 		try
 		{
 			int totalCount = -1;
@@ -308,15 +299,10 @@ public class QueryImpl extends AbstractQuery
 			{
 				rsitr.setTotalCount(totalCount);
 			}
-			result = rsitr;
+			this.executedResult = result = rsitr;
 			// 查询执行完成, 表示已接管了数据库链接的控制, 可以设置链接接管标志
 			AppData.getCurrentData().addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "1");
 			return result;
-		}
-		catch (EternaException ex)
-		{
-			error = ex;
-			throw ex;
 		}
 		catch (SQLException ex)
 		{
@@ -337,20 +323,29 @@ public class QueryImpl extends AbstractQuery
 		{
 			if (log(this, startTime, error, conn))
 			{
-				if (result != null)
-				{
-					AppData data = AppData.getCurrentData();
-					if (data.getLogType() > 0)
-					{
-						Element nowNode = data.getCurrentNode();
-						if (nowNode != null)
-						{
-							AppDataLogExecute.printObject(nowNode.addElement(this.getType() + "-result"), result);
-						}
-					}
-				}
+				logResult(this.getType(), result);
 			}
 			// 这里需要保持连接，所以stmt不关闭
+		}
+	}
+
+	/**
+	 * 将查询的结果记录到日志中.
+	 */
+	protected static void logResult(String type, ResultIterator result)
+	{
+		if (result != null)
+		{
+			AppData data = AppData.getCurrentData();
+			if (data.getLogType() > 0)
+			{
+				Element nowNode = data.getCurrentNode();
+				if (nowNode != null)
+				{
+					AppDataLogExecute.printObject(
+							nowNode.addElement(type.concat("-result")), result);
+				}
+			}
 		}
 	}
 
@@ -412,14 +407,14 @@ class ResultIteratorImpl extends AbstractResultIterator
 			throws EternaException
 	{
 		ResultIteratorImpl ritr = new ResultIteratorImpl();
-		this.copy(ritr);
+		this.copyTo(ritr);
 		return ritr;
 	}
 
-	protected void copy(ResultIterator copyObj)
+	protected void copyTo(ResultIterator copyObj)
 			throws EternaException
 	{
-		super.copy(copyObj);
+		super.copyTo(copyObj);
 		ResultIteratorImpl ritr = (ResultIteratorImpl) copyObj;
 		ritr.realRecordCount = this.realRecordCount;
 		ritr.recordCount = this.recordCount;

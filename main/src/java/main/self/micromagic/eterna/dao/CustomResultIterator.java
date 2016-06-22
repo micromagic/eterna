@@ -34,6 +34,7 @@ public class CustomResultIterator extends AbstractResultIterator
 	private int recordCount = 0;
 	private final Permission permission;
 	private int rowNum;
+	private int totalCount = -1;
 
 	public CustomResultIterator(Entity entity, Permission permission)
 			throws EternaException
@@ -61,6 +62,10 @@ public class CustomResultIterator extends AbstractResultIterator
 		{
 			throw new EternaException("The values count must same as the ResultReaderManager's readers count.");
 		}
+		if (this.resultItr != null)
+		{
+			throw new EternaException("The custom result iterator has initialized, can't create row.");
+		}
 		try
 		{
 			this.rowNum++;
@@ -74,6 +79,14 @@ public class CustomResultIterator extends AbstractResultIterator
 		}
 	}
 
+	/**
+	 * 设置总记录数.
+	 */
+	public void setTotalCount(int totalCount)
+	{
+		this.totalCount = totalCount;
+	}
+
 	public void finishCreateRow()
 	{
 		this.resultItr = this.result.iterator();
@@ -82,7 +95,7 @@ public class CustomResultIterator extends AbstractResultIterator
 
 	public int getTotalCount()
 	{
-		return this.recordCount;
+		return this.totalCount < 0 ? this.recordCount : this.totalCount;
 	}
 
 	public int getCount()
@@ -97,23 +110,24 @@ public class CustomResultIterator extends AbstractResultIterator
 
 	public boolean hasMoreRecord()
 	{
-		return false;
+		return this.totalCount > this.recordCount;
 	}
 
 	public ResultIterator copy()
 			throws EternaException
 	{
 		CustomResultIterator ritr = new CustomResultIterator(this.permission);
-		this.copy(ritr);
+		this.copyTo(ritr);
 		return ritr;
 	}
 
-	protected void copy(ResultIterator copyObj)
+	protected void copyTo(ResultIterator copyObj)
 			throws EternaException
 	{
-		super.copy(copyObj);
+		super.copyTo(copyObj);
 		CustomResultIterator ritr = (CustomResultIterator) copyObj;
 		ritr.recordCount = this.recordCount;
+		ritr.totalCount = this.totalCount;
 	}
 
 }
