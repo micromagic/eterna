@@ -31,7 +31,8 @@ class TimeLogger$NanoTime
 
 	public long getMillionSecond(long time)
 	{
-		return time / 1000000L;
+		// 加上500000用于四舍五入
+		return (time + 500000L) / 1000000L;
 	}
 
 	public String formatMillionSecond(long time, int precision)
