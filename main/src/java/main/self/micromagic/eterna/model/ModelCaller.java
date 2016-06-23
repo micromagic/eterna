@@ -16,33 +16,41 @@
 
 package self.micromagic.eterna.model;
 
-import java.sql.SQLException;
-import java.sql.Connection;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
-import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.DataSourceManager;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.util.ref.ObjectRef;
 
-public interface ModelCaller
+public interface ModelCaller extends EternaObject
 {
-	public static final String DEFAULT_MODEL_TAG = "self.micromagic.default.model";
-	public static final String DEFAULT_MODEL_NAME = "index";
+	/**
+	 * 请求的属性中存放默认模块名称的键值.
+	 */
+	String DEFAULT_ATTR_MODEL_TAG = "eterna.defaultModel";
 
 	/**
-	 * @deprecated
-	 * @see DataSourceManager#DATA_SOURCE_MAP
+	 * 默认的模块名称.
 	 */
-	public static final String DATA_SOURCE_MAP = DataSourceManager.DATA_SOURCE_MAP;
+	String DEFAULT_MODEL_NAME = "index";
 
 	/**
-	 * @deprecated
-	 * @see DataSourceManager#DEFAULT_DATA_SOURCE_NAME
+	 * 在对象的属性中设置存放model名称的标签的属性名称.
 	 */
-	public static final String DEFAULT_DATA_SOURCE_NAME = DataSourceManager.DEFAULT_DATA_SOURCE_NAME;
+	String MODEL_NAME_TAG_FLAG = "modelName.tag";
 
-	void initModelCaller(EternaFactory factory) throws EternaException;
+	/**
+	 * 默认参数中存放模块名称的键值.
+	 */
+	String DEFAULT_MODEL_NAME_TAG = "model";
+
+	/**
+	 * 获取参数中存放模块名称的键值.
+	 */
+	String getModelNameTag();
 
 	Connection getConnection(Model model) throws SQLException, EternaException;
 

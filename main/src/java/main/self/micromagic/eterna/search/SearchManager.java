@@ -76,7 +76,7 @@ public interface SearchManager
 	/**
 	 * 默认的查询相关的配置属性.
 	 */
-	static final SearchAttributes DEFAULT_PROPERTIES = new SearchAttributes(null);
+	static final SearchAttributes DEFAULT_ATTRIBUTES = new SearchAttributes(null);
 
 	/**
 	 * 获得当前所在的页号.
@@ -147,12 +147,7 @@ public interface SearchManager
 	/**
 	 * 获取本SearchManager的配置属性.
 	 */
-	SearchAttributes getAttributes();
-
-	/**
-	 * 设置本SearchManager的配置属性.
-	 */
-	void setAttributes(SearchAttributes attributes);
+	SearchAttributes getSearchAttributes();
 
 	/**
 	 * 根据条件的名称获取某个构造好的条件.

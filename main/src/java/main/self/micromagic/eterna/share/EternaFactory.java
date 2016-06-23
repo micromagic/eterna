@@ -32,7 +32,6 @@ import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
-import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.security.PermissionSetCreater;
 import self.micromagic.eterna.security.UserManager;
@@ -202,6 +201,11 @@ public interface EternaFactory extends Factory
 	String SEARCH_ATTRIBUTES_FLAG = "search.attributes";
 
 	/**
+	 * 在工厂的对象中设置搜索管理者创建器的名称.
+	 */
+	String SEARCH_MANAGER_GENERATOR_NAME = "searchManager.generator";
+
+	/**
 	 * 获得一个ConditionBuilder类, 用于构成一个查询条件.
 	 *
 	 * @param name       ConditionBuilder的名称.
@@ -230,9 +234,6 @@ public interface EternaFactory extends Factory
 	 */
 	Search createSearch(int id) throws EternaException;
 
-	void registerSearchManager(SearchManagerGenerator generator)
-			throws EternaException;
-
 	SearchManager createSearchManager() throws EternaException;
 
 	SearchAttributes getSearchAttributes()
@@ -242,15 +243,13 @@ public interface EternaFactory extends Factory
 	//----------------------------------  model  --------------------------------------
 
 	/**
-	 * 在factory的属性中设置存放model名称的标签的属性名称.
+	 * 在工厂的对象中设置模块调用者的名称.
 	 */
-	String MODEL_NAME_TAG_FLAG = "model.name.tag";
+	String MODEL_CALLER_NAME = "model.caller";
 
 	String getModelNameTag() throws EternaException;
 
 	ModelCaller getModelCaller() throws EternaException;
-
-	void setModelCaller(ModelCaller mc)throws EternaException;
 
 	/**
 	 * 获取一个model的export对象.

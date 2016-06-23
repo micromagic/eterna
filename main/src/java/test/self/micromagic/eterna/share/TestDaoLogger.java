@@ -16,20 +16,37 @@
 
 package self.micromagic.eterna.share;
 
-/**
- * 扩展对象查找者.
- */
-public interface ExtObjectFinder
-{
-	/**
-	 * 根据指定的名称查找一个对象.
-	 */
-	Object findObject(String name);
+import java.sql.Connection;
+import java.sql.SQLException;
 
-	/**
-	 * 根据指定的名称判断一个对象是否为单例. <p>
-	 * 如果对象不存在则返回null.
-	 */
-	Boolean isSingleton(String name);
+import org.dom4j.Element;
+
+import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.DaoLogger;
+import self.micromagic.util.logging.TimeLogger;
+
+public class TestDaoLogger
+		implements DaoLogger
+{
+
+	public boolean initialize(EternaFactory factory)
+	{
+		return false;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	public String getName()
+	{
+		return this.name;
+	}
+	private String name;
+
+	public void log(Dao base, Element node, TimeLogger usedTime, Throwable error, Connection conn)
+			throws EternaException, SQLException
+	{
+	}
 
 }

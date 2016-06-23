@@ -14,23 +14,27 @@
  * limitations under the License.
  */
 
-package self.micromagic.eterna.search;
+package self.micromagic.eterna.share;
 
-import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaObject;
-import self.micromagic.eterna.share.Generator;
+import self.micromagic.eterna.search.SearchAttributes;
+import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.impl.SearchManagerImpl;
 
-/**
- * @author micromagic@sina.com
- */
-public interface SearchManagerGenerator extends Generator, EternaObject
+public class TestSearchManager extends SearchManagerImpl
 {
-	SearchManager createSearchManager(EternaFactory factory) throws EternaException;
+	public TestSearchManager()
+	{
+		super();
+	}
 
-	/**
-	 * 获取本SearchManagerGenerator的配置属性.
-	 */
-	SearchAttributes getSearchAttributes() throws EternaException;
+	public TestSearchManager(SearchAttributes attrs, EternaFactory factory)
+	{
+		super(attrs, factory);
+	}
+
+	public SearchManager createSearchManager(EternaFactory factory)
+	{
+		return new TestSearchManager(this.getSearchAttributes(), factory);
+	}
 
 }

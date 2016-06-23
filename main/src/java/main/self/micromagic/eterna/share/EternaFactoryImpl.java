@@ -69,15 +69,26 @@ import self.micromagic.util.converter.IntegerConverter;
 public class EternaFactoryImpl extends AbstractFactory
 		implements EternaFactory
 {
+	// 日志
 	protected static final Log log = Tool.log;
 
 	/**
-	 * 当前是否在执行初始化.
+	 * 初始化标志-未初始化.
 	 */
-	private boolean inInit;
+	protected static final int INIT_FLAG_NONE = 0;
+	/**
+	 * 初始化标志-正在初始化.
+	 */
+	protected static final int INIT_FLAG_RUNNING = 1;
+	/**
+	 * 初始化标志-初始化完成.
+	 */
+	protected static final int INIT_FLAG_FINISH = 3;
+
+	// 初始化标志
+	private int initFlag;
 
 	private EternaFactory shareEternaFactory;
-	private boolean initialized;
 	private UserManager userManager;
 	private PermissionSetCreater permissionSetCreater;
 	private DataSourceManager dataSourceManager;
@@ -112,7 +123,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		else if (um != null)
 		{
-			if (this.initialized)
+			if (this.initFlag > INIT_FLAG_NONE)
 			{
 				um.initUserManager(this);
 			}
@@ -138,7 +149,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		else if (creater != null)
 		{
-			if (this.initialized)
+			if (this.initFlag > INIT_FLAG_NONE)
 			{
 				creater.initialize(this);
 			}
@@ -168,7 +179,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		else if (dsm != null)
 		{
-			if (this.initialized)
+			if (this.initFlag > INIT_FLAG_NONE)
 			{
 				dsm.initialize(this);
 			}
@@ -205,7 +216,7 @@ public class EternaFactoryImpl extends AbstractFactory
 	public Object setAttribute(String name, Object value)
 			throws EternaException
 	{
-		if (!this.initialized)
+		if (this.initFlag == INIT_FLAG_NONE)
 		{
 			// 未初始化完成时, 需要检查工厂属性是否被重复设置了
 			if (super.hasAttribute(name))
@@ -223,10 +234,9 @@ public class EternaFactoryImpl extends AbstractFactory
 	public boolean initialize(FactoryContainer factoryContainer, Factory shareFactory)
 			throws EternaException
 	{
-		if (!this.initialized)
+		if (this.initFlag == INIT_FLAG_NONE)
 		{
-			this.inInit = true;
-			this.initialized = true;
+			this.initFlag = INIT_FLAG_RUNNING;
 			try
 			{
 				this.init0(factoryContainer, shareFactory);
@@ -234,7 +244,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			}
 			finally
 			{
-				this.inInit = false;
+				this.initFlag = INIT_FLAG_FINISH;
 			}
 		}
 		return false;
@@ -275,7 +285,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		else
 		{
-			this.dataSourceManager = getDataSourceFromCache();
+			this.dataSourceManager = this.getDataSourceFromCache();
 			if (this.dataSourceManager != null)
 			{
 				ParseException.setContextInfo(null, "dataSourceManager", "");
@@ -290,17 +300,10 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.userManager.initUserManager(this);
 		}
 
-		// 初始化, model-caller
-		// model-caller不能使用共享工厂中的对象.
-		ParseException.setContextInfo(null, "modelCaller", "");
-		if (this.modelCaller == null)
-		{
-			this.modelCaller = new ModelCallerImpl();
-		}
-		this.modelCaller.initModelCaller(this);
-
-		// 初始化, dao-logger
-		this.initDaoLogger();
+		// 初始化各个配置
+		this.initDaoLoggerConfig();
+		this.initSearchConfig();
+		this.initModelConfig();
 
 		// 初始化注册的对象
 		int size = this.objectList.size();
@@ -329,51 +332,6 @@ public class EternaFactoryImpl extends AbstractFactory
 		List temp = new ArrayList(this.objectList.size() + leaveSize);
 		temp.addAll(this.objectList);
 		this.objectList = temp;
-	}
-
-	/**
-	 * 初始化日志记录器.
-	 */
-	private void initDaoLogger()
-	{
-		int pCount = 0;
-		String[] names = this.getObjectNames(DaoLogger.class);
-		if (this.shareEternaFactory != null)
-		{
-			pCount = this.shareEternaFactory.getDaoLoggerCount();
-		}
-		if (names.length > 0 || pCount > 0)
-		{
-			ArrayList tmpArr = new ArrayList();
-			this.daoLoggerIndexMap = new HashMap(2);
-			for (int i = 0; i < pCount; i++)
-			{
-				DaoLogger l = this.shareEternaFactory.getDaoLogger(i);
-				this.daoLoggerIndexMap.put(l.getName(), Utility.createInteger(i));
-				tmpArr.add(l);
-			}
-			for (int i = 0; i < names.length; i++)
-			{
-				Integer oldI = (Integer) this.daoLoggerIndexMap.get(names[i]);
-				if (oldI != null)
-				{
-					tmpArr.set(oldI.intValue(), this.createObject(names[i]));
-				}
-				else
-				{
-					int tmpI = tmpArr.size();
-					tmpArr.add(this.createObject(names[i]));
-					this.daoLoggerIndexMap.put(names[i], Utility.createInteger(tmpI));
-				}
-			}
-			int tmpCount = tmpArr.size();
-			if (tmpCount > MAX_DAO_LOGGER_COUNT)
-			{
-				throw new EternaException("Too many dao logger [" + tmpCount + "].");
-			}
-			this.daoLoggers = new DaoLogger[tmpCount];
-			tmpArr.toArray(this.daoLoggers);
-		}
 	}
 
 	public DataSourceManager getDataSourceFromCache()
@@ -422,34 +380,99 @@ public class EternaFactoryImpl extends AbstractFactory
 
 	//----------------------------------  dao  --------------------------------------
 
-	private Map daoLoggerIndexMap;
-	private DaoLogger[] daoLoggers;
+	/**
+	 * 初始化日志记录器的配置.
+	 */
+	private void initDaoLoggerConfig()
+	{
+		int pCount = 0;
+		String[] names = this.getObjectNames(DaoLogger.class);
+		if (this.shareEternaFactory != null)
+		{
+			pCount = this.shareEternaFactory.getDaoLoggerCount();
+		}
+		// 如果本工厂没有设置日志, 则直接使用共享工厂的
+		if (names.length > 0)
+		{
+			ArrayList tmpArr = new ArrayList();
+			Map daoLoggerIndexMap = new HashMap(2);
+			for (int i = 0; i < pCount; i++)
+			{
+				DaoLogger l = this.shareEternaFactory.getDaoLogger(i);
+				daoLoggerIndexMap.put(l.getName(), Utility.createInteger(i));
+				tmpArr.add(l);
+			}
+			for (int i = 0; i < names.length; i++)
+			{
+				Integer oldI = (Integer) daoLoggerIndexMap.get(names[i]);
+				if (oldI != null)
+				{
+					tmpArr.set(oldI.intValue(), this.createObject(names[i]));
+				}
+				else
+				{
+					int tmpI = tmpArr.size();
+					tmpArr.add(this.createObject(names[i]));
+					daoLoggerIndexMap.put(names[i], Utility.createInteger(tmpI));
+				}
+			}
+			int tmpCount = tmpArr.size();
+			if (tmpCount > MAX_DAO_LOGGER_COUNT)
+			{
+				throw new EternaException("Too many dao logger [" + tmpCount + "].");
+			}
+			DaoLogger[] daoLoggers = new DaoLogger[tmpCount];
+			tmpArr.toArray(daoLoggers);
+			this.daoLoggerConfig = new DaoLoggerConfig(daoLoggerIndexMap, daoLoggers);
+		}
+		else if (this.shareEternaFactory instanceof EternaFactoryImpl)
+		{
+			EternaFactoryImpl tmp = (EternaFactoryImpl) this.shareEternaFactory;
+			this.daoLoggerConfig = tmp.daoLoggerConfig;
+		}
+	}
+	private DaoLoggerConfig daoLoggerConfig;
 
 	public DaoLogger getDaoLogger(int index)
 			throws EternaException
 	{
+		if (this.daoLoggerConfig == null && this.shareEternaFactory != null)
+		{
+			return this.shareEternaFactory.getDaoLogger(index);
+		}
 		if (index < 0 || index >= this.getDaoLoggerCount())
 		{
 			String msg = "Error dao logger index [" + index
 					+ "], logger count is [" + this.getDaoLoggerCount() + "].";
 			throw new EternaException(msg);
 		}
-		return this.daoLoggers[index];
+		return this.daoLoggerConfig.daoLoggers[index];
 	}
 
 	public int getDaoLoggerIndex(String name)
 	{
-		if (this.daoLoggerIndexMap == null)
+		if (this.daoLoggerConfig == null)
 		{
-			return -1;
+			if (this.shareEternaFactory == null)
+			{
+				return -1;
+			}
+			return this.shareEternaFactory.getDaoLoggerIndex(name);
 		}
-		Integer i = (Integer) this.daoLoggerIndexMap.get(name);
-		return i == null ? -1 : i.intValue();
+		return this.daoLoggerConfig.getDaoLoggerIndex(name);
 	}
 
 	public int getDaoLoggerCount()
 	{
-		return this.daoLoggers == null ? 0 : this.daoLoggers.length;
+		if (this.daoLoggerConfig == null)
+		{
+			if (this.shareEternaFactory == null)
+			{
+				return 0;
+			}
+			return this.shareEternaFactory.getDaoLoggerCount();
+		}
+		return this.daoLoggerConfig.daoLoggers.length;
 	}
 
 	public String getConstantValue(String name)
@@ -510,8 +533,33 @@ public class EternaFactoryImpl extends AbstractFactory
 
 	//----------------------------------  search  --------------------------------------
 
+	/**
+	 * 初始化搜索的配置.
+	 */
+	private void initSearchConfig()
+	{
+		if (this.isObjectExists(SEARCH_MANAGER_GENERATOR_NAME, false))
+		{
+			this.searchManagerGenerator = (SearchManagerGenerator) this.createObject(
+					SEARCH_MANAGER_GENERATOR_NAME);
+			return;
+		}
+		String attrs = (String) super.getAttribute(SEARCH_ATTRIBUTES_FLAG);
+		if (attrs == null && this.shareEternaFactory instanceof EternaFactoryImpl)
+		{
+			// 如果本工厂没有设置搜索配置, 则直接使用共享工厂的
+			EternaFactoryImpl tmp = (EternaFactoryImpl) this.shareEternaFactory;
+			this.searchManagerGenerator = tmp.searchManagerGenerator;
+		}
+		else
+		{
+			SearchManagerImpl tmp = new SearchManagerImpl();
+			tmp.setFactory(this);
+			tmp.initialize(this);
+			this.searchManagerGenerator = tmp;
+		}
+	}
 	private SearchManagerGenerator searchManagerGenerator;
-	private SearchAttributes searchAttributes;
 
 	public ConditionBuilder getConditionBuilder(String name)
 			throws EternaException
@@ -537,106 +585,77 @@ public class EternaFactoryImpl extends AbstractFactory
 		return (Search) this.createObject(id);
 	}
 
-	public void registerSearchManager(SearchManagerGenerator generator)
-			throws EternaException
-	{
-		if (generator == null)
-		{
-			throw new NullPointerException();
-		}
-		if (this.searchManagerGenerator != null)
-		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate SearchManagerGenerator.");
-			}
-		}
-		else
-		{
-			if (this.initialized)
-			{
-				generator.setFactory(this);
-			}
-			this.searchManagerGenerator = generator;
-		}
-	}
-
 	public SearchManager createSearchManager()
 			throws EternaException
 	{
-		if (this.searchManagerGenerator == null)
+		if (this.searchManagerGenerator != null)
 		{
-			this.searchManagerGenerator = new SearchManagerImpl();
-			this.searchManagerGenerator.setFactory(this);
+			return this.searchManagerGenerator.createSearchManager(this);
 		}
-		SearchManager searchManager = this.searchManagerGenerator.createSearchManager();
-		searchManager.setAttributes(this.getSearchAttributes());
-		return searchManager;
+		throw new EternaException("The search config hasn't initialized.");
 	}
 
 	public SearchAttributes getSearchAttributes()
 			throws EternaException
 	{
-		String attrs = (String) super.getAttribute(SEARCH_ATTRIBUTES_FLAG);
-		if (attrs != null)
+		if (this.searchManagerGenerator != null)
 		{
-			Map attrMap = StringTool.string2Map(attrs, ",", ':', true, false, null, null);
-			this.searchAttributes = new SearchAttributes(attrMap);
+			return this.searchManagerGenerator.getSearchAttributes();
 		}
-		else if (this.shareEternaFactory != null)
+		if (this.shareEternaFactory != null)
 		{
-			this.searchAttributes = this.shareEternaFactory.getSearchAttributes();
+			return this.shareEternaFactory.getSearchAttributes();
 		}
-		else
-		{
-			this.searchAttributes = new SearchAttributes(null);
-		}
-		return this.searchAttributes;
+		throw new EternaException("The search config hasn't initialized.");
 	}
 
 
 	//----------------------------------  model  --------------------------------------
 
-	private String modelNameTag;
+	/**
+	 * 初始化模块的配置.
+	 */
+	private void initModelConfig()
+	{
+		if (this.isObjectExists(MODEL_CALLER_NAME, false))
+		{
+			this.modelCaller = (ModelCaller) this.createObject(MODEL_CALLER_NAME);
+		}
+		else if (this.shareEternaFactory == null || this.getObjectNames(Model.class).length > 0)
+		{
+			// 存在模块对象, 则不能使用共享工厂中的
+			ParseException.setContextInfo(null, MODEL_CALLER_NAME, "");
+			ModelCallerImpl tmp = new ModelCallerImpl();
+			tmp.setName(MODEL_CALLER_NAME);
+			tmp.setFactory(this);
+			tmp.initialize(this);
+			this.modelCaller = tmp;
+		}
+		else if (this.shareEternaFactory instanceof EternaFactoryImpl)
+		{
+			EternaFactoryImpl tmp = (EternaFactoryImpl) this.shareEternaFactory;
+			this.modelCaller = tmp.modelCaller;
+		}
+	}
 	private ModelCaller modelCaller;
 
 	public String getModelNameTag()
 			throws EternaException
 	{
-		if (this.modelNameTag == null)
-		{
-			this.modelNameTag = (String) this.getAttribute(MODEL_NAME_TAG_FLAG);
-			if (this.modelNameTag == null)
-			{
-				this.modelNameTag = "model";
-			}
-		}
-		return this.modelNameTag;
+		return this.getModelCaller().getModelNameTag();
 	}
 
 	public ModelCaller getModelCaller()
 	{
-		return this.modelCaller;
-	}
-
-	public void setModelCaller(ModelCaller mc)
-		throws EternaException
-	{
 		if (this.modelCaller != null)
 		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate ModelCaller.");
-			}
+			return this.modelCaller;
 		}
-		else if (mc != null)
+		if (this.shareEternaFactory != null)
 		{
-			if (this.initialized)
-			{
-				mc.initModelCaller(this);
-			}
-			this.modelCaller = mc;
+			return this.shareEternaFactory.getModelCaller();
 		}
+		throw new EternaException("The model config hasn't initialized.");
 	}
 
 	public ModelExport getModelExport(String exportName)
@@ -784,7 +803,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.objectList.set(id, container);
 		}
 		this.objectMap.put(name, container);
-		if (this.initialized)
+		if (this.initFlag > INIT_FLAG_NONE)
 		{
 			initObject(true, this, container);
 		}
@@ -889,12 +908,52 @@ public class EternaFactoryImpl extends AbstractFactory
 		{
 			throw new EternaException("Not found object id:" + id + ".");
 		}
-		return container.create(this.inInit, this);
+		return container.create(this.initFlag == INIT_FLAG_RUNNING, this);
+	}
+
+	public boolean isObjectExists(Object key, boolean checkOther)
+	{
+		if (checkOther && key instanceof String)
+		{
+			Object obj = this.createExtObject((String) key);
+			if (obj != null)
+			{
+				return true;
+			}
+		}
+		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
+		if (container == null)
+		{
+			if (checkOther && this.shareFactory != null)
+			{
+				return this.shareFactory.isObjectExists(key, checkOther);
+			}
+			return false;
+		}
+		return true;
 	}
 
 	public boolean isSingleton(Object key)
 			throws EternaException
 	{
+		if (key instanceof String)
+		{
+			String n = (String) key;
+			int index = n.indexOf(':');
+			if (index != -1)
+			{
+				String fName = FactoryContainer.EXT_PREFIX.concat(n.substring(0, index));
+				ExtObjectFinder finder = getExtFinder(this, fName);
+				if (finder != null)
+				{
+					Boolean b = finder.isSingleton(n.substring(index + 1));
+					if (b != null)
+					{
+						return b.booleanValue();
+					}
+				}
+			}
+		}
 		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
 		if (container == null)
 		{
@@ -912,20 +971,10 @@ public class EternaFactoryImpl extends AbstractFactory
 	{
 		if (key instanceof String)
 		{
-			String n = (String) key;
-			int index = n.indexOf(':');
-			if (index != -1)
+			Object obj = this.createExtObject((String) key);
+			if (obj != null)
 			{
-				String fName = FactoryContainer.EXT_PREFIX.concat(n.substring(0, index));
-				ExtObjectFinder finder = getExtFinder(this, fName);
-				if (finder != null)
-				{
-					Object obj = finder.findObject(n.substring(index + 1));
-					if (obj != null)
-					{
-						return obj;
-					}
-				}
+				return obj;
 			}
 		}
 		ObjectContainer container = (ObjectContainer) this.objectMap.get(key);
@@ -937,7 +986,30 @@ public class EternaFactoryImpl extends AbstractFactory
 			}
 			throw new ParseException("Not found object [" + key + "].");
 		}
-		return container.create(this.inInit, this);
+		return container.create(this.initFlag == INIT_FLAG_RUNNING, this);
+	}
+
+	/**
+	 * 创建一个扩展对象.
+	 */
+	private Object createExtObject(String key)
+	{
+		String n = key;
+		int index = n.indexOf(':');
+		if (index != -1)
+		{
+			String fName = FactoryContainer.EXT_PREFIX.concat(n.substring(0, index));
+			ExtObjectFinder finder = getExtFinder(this, fName);
+			if (finder != null)
+			{
+				Object obj = finder.findObject(n.substring(index + 1));
+				if (obj != null)
+				{
+					return obj;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -992,15 +1064,37 @@ public class EternaFactoryImpl extends AbstractFactory
 }
 
 /**
+ * 日志记录器的配置对象.
+ */
+class DaoLoggerConfig
+{
+	public DaoLoggerConfig(Map daoLoggerIndexMap, DaoLogger[] daoLoggers)
+	{
+		this.daoLoggerIndexMap = daoLoggerIndexMap;
+		this.daoLoggers = daoLoggers;
+	}
+	final Map daoLoggerIndexMap;
+	final DaoLogger[] daoLoggers;
+
+	public int getDaoLoggerIndex(String name)
+	{
+		Integer i = (Integer) this.daoLoggerIndexMap.get(name);
+		return i == null ? -1 : i.intValue();
+	}
+
+}
+
+/**
  * 存放对象的容器.
  */
 abstract class ObjectContainer
 {
-	ObjectContainer(int id)
+	protected boolean initialized;
+
+	protected ObjectContainer(int id)
 	{
 		this.id = id;
 	}
-	protected boolean initialized;
 
 	/**
 	 * 获取对象的编号.

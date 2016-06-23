@@ -621,7 +621,7 @@ public class SearchImpl extends AbstractGenerator
 			ritr = query.executeQuery(conn);
 		}
 		SearchResult result = new SearchResult(this.name, this.queryName, ritr,
-				countRitr, maxRow, pageNum, orderConfig, manager.getAttributes());
+				countRitr, maxRow, pageNum, orderConfig, manager.getSearchAttributes());
 		if (log.isDebugEnabled())
 		{
 			log.debug("End execute query:" + System.currentTimeMillis());

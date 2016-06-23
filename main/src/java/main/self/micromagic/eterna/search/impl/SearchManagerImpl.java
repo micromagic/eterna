@@ -46,6 +46,7 @@ import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.search.SearchParam;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.DataPrinter;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -59,7 +60,7 @@ public class SearchManagerImpl extends AbstractGenerator
 {
 	static final String SEARCHMANAGER_DEALED_PREFIX = "ETERNA_SEARCHMANAGER_DEALED:";
 
-	private transient SearchAttributes attributes = DEFAULT_PROPERTIES;
+	private transient SearchAttributes attributes;
 
 	private transient String preparedCondition = "";
 	private transient PreparerManager generatedPM = null;
@@ -74,6 +75,40 @@ public class SearchManagerImpl extends AbstractGenerator
 
 	public SearchManagerImpl()
 	{
+		this.attributes = DEFAULT_ATTRIBUTES;
+	}
+
+	protected SearchManagerImpl(SearchAttributes attrs, EternaFactory factory)
+	{
+		this.attributes = attrs;
+		this.factory = factory;
+	}
+
+	public boolean initialize(EternaFactory factory)
+	{
+		if (this.attributes == DEFAULT_ATTRIBUTES)
+		{
+			String attrs = (String) factory.getAttribute(EternaFactory.SEARCH_ATTRIBUTES_FLAG);
+			if (attrs != null)
+			{
+				Map attrMap = StringTool.string2Map(attrs, ",", ':', true, false, null, null);
+				this.attributes = new SearchAttributes(attrMap);
+			}
+			else
+			{
+				EternaFactory shareFactory = factory.getShareFactory();
+				if (shareFactory != null)
+				{
+					SearchAttributes tmp = shareFactory.getSearchAttributes();
+					if (tmp != null)
+					{
+						this.attributes = tmp;
+					}
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	public int getPageNum()
@@ -820,14 +855,14 @@ public class SearchManagerImpl extends AbstractGenerator
 		return result;
 	}
 
-	public SearchAttributes getAttributes()
+	public SearchAttributes getSearchAttributes()
 	{
 		return this.attributes;
 	}
 
-	public void setAttributes(SearchAttributes attributes)
+	public void setSearchAttributes(SearchAttributes attributes)
 	{
-		this.attributes = attributes == null ? DEFAULT_PROPERTIES : attributes;
+		this.attributes = attributes == null ? DEFAULT_ATTRIBUTES : attributes;
 	}
 
 	public ConditionInfo getCondition(String name)
@@ -897,13 +932,13 @@ public class SearchManagerImpl extends AbstractGenerator
 	public Object create()
 			throws EternaException
 	{
-		return this.createSearchManager();
+		return this.createSearchManager((EternaFactory) this.factory);
 	}
 
-	public SearchManager createSearchManager()
+	public SearchManager createSearchManager(EternaFactory factory)
 			throws EternaException
 	{
-		return new SearchManagerImpl();
+		return new SearchManagerImpl(this.attributes, factory);
 	}
 
 	public void print(DataPrinter p, Writer out, Object bean)

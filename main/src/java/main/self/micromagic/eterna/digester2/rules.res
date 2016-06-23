@@ -69,11 +69,47 @@ method:{setAttribute,name,$body(attr=value,i=1)}
 ## objs
 objs
 sub:{
-	query,update,format,prepare,entity,constant,daoLogger,
+	object,entity,
+	query,update,format,prepare,constant,daoLogger,
 	search,builderList,builder,
 	model,export,
 	dataPrinter,stringCoder,typicalComponent,view,function,resource
 }
+
+
+## object
+object
+same:{name}
+log:{name}
+create:{generator}
+attr:{name}
+sub:{attribute}
+stack:{registerObject,n:0,g:0}
+
+
+## entity
+entity
+same:{name}
+log:{name}
+create:{generator,${entity}}
+attr:{name,order(m=0,i=0)}
+sub:{attributes,item,entityRef}
+stack:{registerObject,n:0,g:1}
+
+
+## item
+item
+log:{$}
+create:{generator,${entityItem}}
+attr:{name,colName(m=0):columnName,type(m=0,i=0):typeName,caption(m=0),permission(m=0)}
+sub:{attribute}
+stack:{addItem,n:0,g:1}
+
+
+## entityRef
+entity-ref
+${entityRefConfig}
+stack:{addEntityRef,n:0,g:0}
 
 
 ## daoLogger
@@ -82,6 +118,7 @@ same:{name}
 log:{name}
 create:{generator}
 attr:{name}
+sub:{attribute}
 stack:{registerObject,n:0,g:0}
 
 
@@ -112,31 +149,6 @@ create:{generator,${prepare}}
 attr:{name,type,$body(attr=pattern,body=pattern,m=0):pattern}
 sub:{attribute}
 stack:{registerObject,n:0,g:1}
-
-
-## entity
-entity
-same:{name}
-log:{name}
-create:{generator,${entity}}
-attr:{name,order(m=0,i=0)}
-sub:{attributes,item,entityRef}
-stack:{registerObject,n:0,g:1}
-
-
-## item
-item
-log:{$}
-create:{generator,${entityItem}}
-attr:{name,colName(m=0):columnName,type(m=0,i=0):typeName,caption(m=0),permission(m=0)}
-sub:{attribute}
-stack:{addItem,n:0,g:1}
-
-
-## entityRef
-entity-ref
-${entityRefConfig}
-stack:{addEntityRef,n:0,g:0}
 
 
 ## query

@@ -28,47 +28,62 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import self.micromagic.eterna.share.EternaException;
+import org.dom4j.Element;
+
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ModelCaller;
 import self.micromagic.eterna.model.ModelExport;
+import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.DataSourceManager;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.View;
-import self.micromagic.util.Utility;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 import self.micromagic.util.ref.ObjectRef;
 
-import org.dom4j.Element;
-
-public class ModelCallerImpl
+public class ModelCallerImpl extends AbstractGenerator
 		implements ModelCaller
 {
 	private EternaFactory factory;
-	private Map dataSourceMap = null;
-	private DataSource defaultDataSource = null;
-	private String defaultDataSourceName = null;
+	private String modelNameTag = DEFAULT_MODEL_NAME_TAG;
+	private Map dataSourceMap;
+	private DataSource defaultDataSource;
+	private String defaultDataSourceName;
 
 	public ModelCallerImpl()
 	{
 	}
 
-	public void initModelCaller(EternaFactory factory)
+	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		this.factory = factory;
-		DataSourceManager dsm = factory.getDataSourceManager();
-		if (dsm != null)
+		if (this.factory == null)
 		{
-			this.dataSourceMap = dsm.getDataSourceMap();
-			this.defaultDataSource = dsm.getDefaultDataSource();
-			this.defaultDataSourceName = dsm.getDefaultDataSourceName();
-			return;
+			this.factory = factory;
+			String tag = (String) this.getAttribute(MODEL_NAME_TAG_FLAG);
+			if (!StringTool.isEmpty(tag))
+			{
+				this.modelNameTag = tag;
+			}
+			DataSourceManager dsm = factory.getDataSourceManager();
+			if (dsm != null)
+			{
+				this.dataSourceMap = dsm.getDataSourceMap();
+				this.defaultDataSource = dsm.getDefaultDataSource();
+				this.defaultDataSourceName = dsm.getDefaultDataSourceName();
+			}
+			return false;
 		}
-		this.dataSourceMap = null;
+		return true;
+	}
+
+	public String getModelNameTag()
+	{
+		return this.modelNameTag;
 	}
 
 	public Connection getConnection(Model model)
@@ -208,17 +223,17 @@ public class ModelCallerImpl
 	{
 		if (data.modelName == null)
 		{
-			data.modelName = data.getRequestParameter(factory.getModelNameTag());
+			data.modelName = data.getRequestParameter(this.getModelNameTag());
 			if (data.modelName == null)
 			{
-				data.modelName = (String) data.getRequestAttributeMap().get(DEFAULT_MODEL_TAG);
+				data.modelName = (String) data.getRequestAttributeMap().get(DEFAULT_ATTR_MODEL_TAG);
 			}
 		}
 
 		Model model = null;
 		try
 		{
-			model = factory.createModel(data.modelName);
+			model = this.factory.createModel(data.modelName);
 		}
 		catch (EternaException ex)
 		{
@@ -512,6 +527,11 @@ public class ModelCallerImpl
 			}
 		}
 		return buf.toString();
+	}
+
+	public Object create()
+	{
+		return this;
 	}
 
 }

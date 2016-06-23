@@ -77,6 +77,14 @@ public interface Factory
 	String[] getObjectNames(Class type);
 
 	/**
+	 * 判断某个对象是否存在.
+	 *
+	 * @param key         对象的名称
+	 * @param checkOther  是否需要在其他工厂中检查对象
+	 */
+	boolean isObjectExists(Object key, boolean checkOther) throws EternaException;
+
+	/**
 	 * 判断某个对象是否为单例.
 	 */
 	boolean isSingleton(Object key) throws EternaException;
