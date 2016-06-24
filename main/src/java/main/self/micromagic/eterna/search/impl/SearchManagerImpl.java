@@ -60,7 +60,7 @@ public class SearchManagerImpl extends AbstractGenerator
 {
 	static final String SEARCHMANAGER_DEALED_PREFIX = "ETERNA_SEARCHMANAGER_DEALED:";
 
-	private transient SearchAttributes attributes;
+	private transient SearchAttributes searchAttributes;
 
 	private transient String preparedCondition = "";
 	private transient PreparerManager generatedPM = null;
@@ -75,24 +75,24 @@ public class SearchManagerImpl extends AbstractGenerator
 
 	public SearchManagerImpl()
 	{
-		this.attributes = DEFAULT_ATTRIBUTES;
+		this.searchAttributes = DEFAULT_ATTRIBUTES;
 	}
 
 	protected SearchManagerImpl(SearchAttributes attrs, EternaFactory factory)
 	{
-		this.attributes = attrs;
+		this.searchAttributes = attrs;
 		this.factory = factory;
 	}
 
 	public boolean initialize(EternaFactory factory)
 	{
-		if (this.attributes == DEFAULT_ATTRIBUTES)
+		if (this.searchAttributes == DEFAULT_ATTRIBUTES)
 		{
 			String attrs = (String) factory.getAttribute(EternaFactory.SEARCH_ATTRIBUTES_FLAG);
 			if (attrs != null)
 			{
 				Map attrMap = StringTool.string2Map(attrs, ",", ':', true, false, null, null);
-				this.attributes = new SearchAttributes(attrMap);
+				this.searchAttributes = new SearchAttributes(attrMap);
 			}
 			else
 			{
@@ -102,7 +102,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					SearchAttributes tmp = shareFactory.getSearchAttributes();
 					if (tmp != null)
 					{
-						this.attributes = tmp;
+						this.searchAttributes = tmp;
 					}
 				}
 			}
@@ -123,7 +123,7 @@ public class SearchManagerImpl extends AbstractGenerator
 
 	public String getOrderConfig(AppData data)
 	{
-		return data.getRequestParameter(this.attributes.orderConfigTag);
+		return data.getRequestParameter(this.searchAttributes.orderConfigTag);
 	}
 
 	public boolean hasQueryType(AppData data)
@@ -132,22 +132,22 @@ public class SearchManagerImpl extends AbstractGenerator
 		Map raMap = data.getRequestAttributeMap();
 		if (raMap.get(FORCE_DEAL_CONDITION) != null)
 		{
-			temp = this.attributes.queryTypeReset;
+			temp = this.searchAttributes.queryTypeReset;
 		}
 		else
 		{
 			temp = (String) raMap.get(FORCE_QUERY_TYPE);
 			if (temp == null)
 			{
-				temp = data.getRequestParameter(this.attributes.queryTypeTag);
+				temp = data.getRequestParameter(this.searchAttributes.queryTypeTag);
 			}
 			if (temp == null)
 			{
-				temp = this.attributes.defaultQueryType;
+				temp = this.searchAttributes.defaultQueryType;
 			}
 		}
-		return this.attributes.queryTypeReset.equals(temp)
-				|| this.attributes.queryTypeClear.equals(temp);
+		return this.searchAttributes.queryTypeReset.equals(temp)
+				|| this.searchAttributes.queryTypeClear.equals(temp);
 	}
 
 	public int getConditionVersion()
@@ -181,9 +181,9 @@ public class SearchManagerImpl extends AbstractGenerator
 				Search.ATTR_SEARCH_PARAM);
 		if (sParam != null)
 		{
-			if (sParam.pageNum >= this.attributes.pageStart)
+			if (sParam.pageNum >= this.searchAttributes.pageStart)
 			{
-				this.pageNum = sParam.pageNum - this.attributes.pageStart;
+				this.pageNum = sParam.pageNum - this.searchAttributes.pageStart;
 			}
 			if (sParam.pageSize > 0)
 			{
@@ -201,16 +201,16 @@ public class SearchManagerImpl extends AbstractGenerator
 		}
 		try
 		{
-			String pn = data.getRequestParameter(this.attributes.pageNumTag);
+			String pn = data.getRequestParameter(this.searchAttributes.pageNumTag);
 			if (pn != null)
 			{
-				this.pageNum = Integer.parseInt(pn) - this.attributes.pageStart;
+				this.pageNum = Integer.parseInt(pn) - this.searchAttributes.pageStart;
 			}
 		}
 		catch (Exception ex) {}
 		try
 		{
-			String ps = data.getRequestParameter(this.attributes.pageSizeTag);
+			String ps = data.getRequestParameter(this.searchAttributes.pageSizeTag);
 			if (ps != null)
 			{
 				int tmpI = Integer.parseInt(ps);
@@ -223,25 +223,25 @@ public class SearchManagerImpl extends AbstractGenerator
 			String temp;
 			if (raMap.get(FORCE_DEAL_CONDITION) != null)
 			{
-				temp = this.attributes.queryTypeReset;
+				temp = this.searchAttributes.queryTypeReset;
 			}
 			else
 			{
 				temp = (String) raMap.get(FORCE_QUERY_TYPE);
 				if (temp == null)
 				{
-					temp = data.getRequestParameter(this.attributes.queryTypeTag);
+					temp = data.getRequestParameter(this.searchAttributes.queryTypeTag);
 				}
 				if (temp == null)
 				{
-					temp = this.attributes.defaultQueryType;
+					temp = this.searchAttributes.defaultQueryType;
 				}
 			}
-			if (this.attributes.queryTypeReset.equals(temp))
+			if (this.searchAttributes.queryTypeReset.equals(temp))
 			{
 				this.conditionVersion++;
 				this.resetConditionSearch = search;
-				String xml = data.getRequestParameter(this.attributes.querySettingTag);
+				String xml = data.getRequestParameter(this.searchAttributes.querySettingTag);
 				if (log.isDebugEnabled())
 				{
 					log.debug("The xml:" + xml);
@@ -258,7 +258,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					this.setConditionValues(data, search, saveCondition, false);
 				}
 			}
-			else if (this.attributes.queryTypeClear.equals(temp))
+			else if (this.searchAttributes.queryTypeClear.equals(temp))
 			{
 				this.conditionVersion++;
 				this.preparedCondition = null;
@@ -481,15 +481,15 @@ public class SearchManagerImpl extends AbstractGenerator
 	{
 		if (param.queryType == null)
 		{
-			param.queryType = this.attributes.defaultQueryType;
+			param.queryType = this.searchAttributes.defaultQueryType;
 		}
-		if (this.attributes.queryTypeReset.equals(param.queryType))
+		if (this.searchAttributes.queryTypeReset.equals(param.queryType))
 		{
 			this.conditionVersion++;
 			this.resetConditionSearch = search;
 			this.setConditionValues0(param, search, saveCondition);
 		}
-		else if (this.attributes.queryTypeClear.equals(param.queryType))
+		else if (this.searchAttributes.queryTypeClear.equals(param.queryType))
 		{
 			this.conditionVersion++;
 			this.preparedCondition = null;
@@ -857,12 +857,12 @@ public class SearchManagerImpl extends AbstractGenerator
 
 	public SearchAttributes getSearchAttributes()
 	{
-		return this.attributes;
+		return this.searchAttributes;
 	}
 
 	public void setSearchAttributes(SearchAttributes attributes)
 	{
-		this.attributes = attributes == null ? DEFAULT_ATTRIBUTES : attributes;
+		this.searchAttributes = attributes == null ? DEFAULT_ATTRIBUTES : attributes;
 	}
 
 	public ConditionInfo getCondition(String name)
@@ -938,7 +938,7 @@ public class SearchManagerImpl extends AbstractGenerator
 	public SearchManager createSearchManager(EternaFactory factory)
 			throws EternaException
 	{
-		return new SearchManagerImpl(this.attributes, factory);
+		return new SearchManagerImpl(this.searchAttributes, factory);
 	}
 
 	public void print(DataPrinter p, Writer out, Object bean)

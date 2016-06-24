@@ -54,6 +54,7 @@ public class InitSearchConfigTest extends TestCase
 		assertEquals("num", share.getSearchAttributes().pageNumTag);
 		assertTrue(f.createSearchManager() instanceof TestSearchManager);
 		assertFalse(share.createSearchManager() instanceof TestSearchManager);
+		assertEquals(0, f.findObjectId(EternaFactory.SEARCH_MANAGER_GENERATOR_NAME));
 	}
 
 	private static int index = 100;

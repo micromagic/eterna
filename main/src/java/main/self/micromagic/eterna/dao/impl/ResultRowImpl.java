@@ -53,12 +53,12 @@ public class ResultRowImpl implements ModifiableResultRow
 	private static final Object NULL_FLAG = new Object();
 
 	private final Object[] values;
-	private Object[] oldValues;
 	private final Permission permission;
 	private final ResultMetaData metaData;
 	private final ResultIterator resultIterator;
 	private final int rowNum;
 
+	private Object[] oldValues;
 	private final Object[] formateds;
 	private boolean wasNull;
 
@@ -82,6 +82,7 @@ public class ResultRowImpl implements ModifiableResultRow
 	ResultRowImpl(ResultRowImpl old, ResultIterator newItr)
 	{
 		this.values = old.values;
+		this.oldValues = old.oldValues;
 		this.formateds = old.formateds;
 		this.permission = old.permission;
 		this.resultIterator = newItr;
@@ -194,7 +195,12 @@ public class ResultRowImpl implements ModifiableResultRow
 		if (old)
 		{
 			v = this.oldValues != null ? this.oldValues[cIndex] : this.values[cIndex];
-			tmp = null;
+			// 未修改过的值可以直接使用缓存的格式化结果
+			tmp = v == this.values[cIndex] ? this.formateds[cIndex] : null;
+			if (tmp != null)
+			{
+				return tmp == NULL_FLAG ? null : tmp;
+			}
 		}
 		else
 		{

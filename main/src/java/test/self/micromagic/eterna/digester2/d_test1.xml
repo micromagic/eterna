@@ -295,9 +295,9 @@
 				<attribute name="ESCAPES_JSON">'=;/=;a=(a);</attribute>
 			</string-coder>
 
+			<object name="permissionSet.generator" generator="self.micromagic.eterna.security.TestPermissionSetCreater"/>
+			
 		</objs>
-
-		<permission-set className="self.micromagic.eterna.security.TestPermissionSetCreater"/>
 
 		<attributes>
 			<attribute name="attribute.check.empty" value="builder=0,pattern"/>

@@ -22,53 +22,27 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.util.StringTool;
 
-public class PermissionSetCreaterImpl
-		implements PermissionSetCreater
+public class PermissionSetImpl
+		implements PermissionSet, PermissionSetGenerator
 {
-	public boolean initialize(EternaFactory factory)
-			throws EternaException
+	public PermissionSetImpl()
 	{
-		if (this.factory == null)
-		{
-			this.factory = factory;
-			return false;
-		}
-		return true;
-	}
-	private EternaFactory factory;
-
-	public EternaFactory getFactory()
-			throws EternaException
-	{
-		return this.factory;
+		this.permissionConfig = null;
+		this.permissionNames = null;
 	}
 
-	public PermissionSet createPermissionSet(String permission)
-	{
-		if (!StringTool.isEmpty(permission))
-		{
-			return new PermissionSetImpl(permission, this.factory);
-		}
-		return null;
-	}
-
-}
-
-class PermissionSetImpl
-		implements PermissionSet
-{
-	public PermissionSetImpl(String permissionConfig, EternaFactory factory)
+	private PermissionSetImpl(String permissionConfig, EternaFactory factory)
 	{
 		this.permissionConfig = permissionConfig;
 		this.permissionNames = StringTool.separateString(permissionConfig, ",", true);
 		Arrays.sort(this.permissionNames);
-		this.initialize(factory);
+		this.initialize0(factory);
 	}
 	private final String permissionConfig;
 	private int[] permissionIds;
 	private final String[] permissionNames;
 
-	private void initialize(EternaFactory factory)
+	private void initialize0(EternaFactory factory)
 			throws EternaException
 	{
 		UserManager um = factory.getUserManager();
@@ -80,6 +54,15 @@ class PermissionSetImpl
 				this.permissionIds[i] = um.getPermissionId(this.permissionNames[i]);
 			}
 		}
+	}
+
+	public PermissionSet createPermissionSet(String permission, EternaFactory factory)
+	{
+		if (!StringTool.isEmpty(permission))
+		{
+			return new PermissionSetImpl(permission, factory);
+		}
+		return null;
 	}
 
 	/**
@@ -192,5 +175,22 @@ class PermissionSetImpl
 	{
 		return this.permissionConfig;
 	}
+
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		return false;
+	}
+
+	public String getName()
+	{
+		return this.name;
+	}
+
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+	private String name;
 
 }

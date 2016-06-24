@@ -21,7 +21,7 @@
 
 		<objs>
 
-			<dao-logger name="t1" generator="self.micromagic.eterna.share.TestDaoLogger"/>
+			<object name="t1" generator="self.micromagic.eterna.share.TestDaoLogger"/>
 
 		</objs>
 

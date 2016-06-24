@@ -38,7 +38,7 @@ public interface ResultRow
 	 * 如果未设置, 则以getObject方式获取值.
 	 *
 	 * @param columnIndex  参数的索引值, 第一个是1, 第二个是2, ....
-	 * @return 格式化后的数据.
+	 * @return 格式化后的数据或原始值
 	 *
 	 * @see #getFormated(int)
 	 * @see #getObject(int)
@@ -50,10 +50,10 @@ public interface ResultRow
 	 * 如果指定的列设置了format, 则以getFormated方式获取值.
 	 * 如果未设置, 则以getObject方式获取值.
 	 *
-	 * @param columnName  参数的名称.
+	 * @param columnName  参数的名称
 	 * @param notThrow    设为<code>true<code>时, 当对应名称的reader不存在时
 	 *                    不会抛出异常, 而只是返回null
-	 * @return 格式化后的数据.
+	 * @return 格式化后的数据或原始值
 	 *
 	 * @see #getFormated(String)
 	 * @see #getObject(String)
@@ -65,7 +65,7 @@ public interface ResultRow
 	 * 在当前行<code>ResultRow</code>对象中取出格式化后指定的列.
 	 *
 	 * @param columnIndex  参数的索引值, 第一个是1, 第二个是2, ....
-	 * @return 格式化后的数据.
+	 * @return 格式化后的数据
 	 *
 	 * @exception SQLException 假如访问数据库时出错
 	 */
@@ -76,7 +76,7 @@ public interface ResultRow
 	 *
 	 * @param columnIndex  参数的索引值, 第一个是1, 第二个是2, ....
 	 * @param old          是否获取原始值(即未修改的值)
-	 * @return 格式化后的数据.
+	 * @return 格式化后的数据
 	 *
 	 * @exception SQLException 假如访问数据库时出错
 	 */
@@ -85,8 +85,8 @@ public interface ResultRow
 	/**
 	 * 在当前行<code>ResultRow</code>对象中取出格式化后指定的列.
 	 *
-	 * @param columnName  参数的名称.
-	 * @return 格式化后的数据.
+	 * @param columnName  参数的名称
+	 * @return 格式化后的数据
 	 *
 	 * @exception SQLException 假如访问数据库时出错
 	 */

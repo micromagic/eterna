@@ -18,11 +18,12 @@ package self.micromagic.eterna.security;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.EternaObject;
 
 /**
  * 权限集合的创建器.
  */
-public interface PermissionSetCreater
+public interface PermissionSetGenerator extends EternaObject
 {
 	/**
 	 * 执行初始化.
@@ -33,13 +34,8 @@ public interface PermissionSetCreater
 	boolean initialize(EternaFactory factory) throws EternaException;
 
 	/**
-	 * 获取创建器所在的工厂.
-	 */
-	EternaFactory getFactory() throws EternaException;
-
-	/**
 	 * 根据给出的权限配置字符串创建一个权限集合.
 	 */
-	public PermissionSet createPermissionSet(String permission);
+	public PermissionSet createPermissionSet(String permission, EternaFactory factory);
 
 }

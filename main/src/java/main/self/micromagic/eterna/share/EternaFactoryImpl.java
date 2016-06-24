@@ -53,8 +53,8 @@ import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.search.SearchManagerGenerator;
 import self.micromagic.eterna.search.impl.SearchManagerImpl;
 import self.micromagic.eterna.security.PermissionSet;
-import self.micromagic.eterna.security.PermissionSetCreater;
-import self.micromagic.eterna.security.PermissionSetCreaterImpl;
+import self.micromagic.eterna.security.PermissionSetGenerator;
+import self.micromagic.eterna.security.PermissionSetImpl;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
@@ -90,7 +90,6 @@ public class EternaFactoryImpl extends AbstractFactory
 
 	private EternaFactory shareEternaFactory;
 	private UserManager userManager;
-	private PermissionSetCreater permissionSetCreater;
 	private DataSourceManager dataSourceManager;
 
 
@@ -134,28 +133,38 @@ public class EternaFactoryImpl extends AbstractFactory
 	public PermissionSet createPermissionSet(String permission)
 			throws EternaException
 	{
-		return this.permissionSetCreater.createPermissionSet(permission);
+		if (this.permissionSetGenerator != null)
+		{
+			return this.permissionSetGenerator.createPermissionSet(permission, this);
+		}
+		throw new EternaException("The permission config hasn't initialized.");
 	}
 
-	public void setPermissionSetCreater(PermissionSetCreater creater)
-			throws EternaException
+	/**
+	 * 初始化权限的配置.
+	 */
+	private void initPermissionConfig()
 	{
-		if (this.permissionSetCreater != null)
+		if (this.isObjectExists(PERMISSION_SET_GENERATOR_NAME, false))
 		{
-			if (ContainerManager.getSuperInitLevel() == 0)
-			{
-				log.warn("Duplicate PermissionSetCreater.");
-			}
+			this.permissionSetGenerator = (PermissionSetGenerator) this.createObject(
+					PERMISSION_SET_GENERATOR_NAME);
+			return;
 		}
-		else if (creater != null)
+		if (this.shareEternaFactory instanceof EternaFactoryImpl)
 		{
-			if (this.initFlag > INIT_FLAG_NONE)
-			{
-				creater.initialize(this);
-			}
-			this.permissionSetCreater = creater;
+			// 如果本工厂没有设置搜索配置, 则直接使用共享工厂的
+			EternaFactoryImpl tmp = (EternaFactoryImpl) this.shareEternaFactory;
+			this.searchManagerGenerator = tmp.searchManagerGenerator;
+		}
+		else
+		{
+			PermissionSetImpl tmp = new PermissionSetImpl();
+			tmp.initialize(this);
+			this.permissionSetGenerator = tmp;
 		}
 	}
+	private PermissionSetGenerator permissionSetGenerator;
 
 	public DataSourceManager getDataSourceManager()
 			throws EternaException
@@ -269,14 +278,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			Tool.registerBean(beans);
 		}
 
-		// 初始化, PermissionSetCreater
-		ParseException.setContextInfo(null, "permissionSetCreater", "");
-		if (this.permissionSetCreater == null)
-		{
-			this.permissionSetCreater = new PermissionSetCreaterImpl();
-		}
-		this.permissionSetCreater.initialize(this);
-
 		// 初始化, dataSourceManager
 		if (this.dataSourceManager != null)
 		{
@@ -301,6 +302,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 
 		// 初始化各个配置
+		this.initPermissionConfig();
 		this.initDaoLoggerConfig();
 		this.initSearchConfig();
 		this.initModelConfig();
@@ -1089,21 +1091,38 @@ class DaoLoggerConfig
  */
 abstract class ObjectContainer
 {
-	protected boolean initialized;
-
 	protected ObjectContainer(int id)
 	{
-		this.id = id;
+		// 编号的最低位用于保存是否已初始化
+		this.id = id << 1;
 	}
+	private int id;
 
 	/**
 	 * 获取对象的编号.
 	 */
 	public int getId()
 	{
-		return this.id;
+		return this.id >> 1;
 	}
-	private final int id;
+
+	/**
+	 * 是否已初始化.
+	 *
+	 * @param chage  是否需要将初始化标志设为true
+	 */
+	protected boolean isInitialized(boolean change)
+	{
+		if ((this.id & 1) == 1)
+		{
+			return true;
+		}
+		if (change)
+		{
+			this.id |= 1;
+		}
+		return false;
+	}
 
 	/**
 	 * 获取对象的名称.
@@ -1172,11 +1191,10 @@ class NormalObjectCon extends ObjectContainer
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (this.isInitialized(true))
 		{
 			return true;
 		}
-		this.initialized = true;
 		return false;
 	}
 
@@ -1221,17 +1239,16 @@ class EternaObjectCon extends ObjectContainer
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (this.isInitialized(true))
 		{
 			return true;
 		}
-		this.initialized = true;
 		return this.obj.initialize(factory);
 	}
 
 	public Object create(boolean needInit, EternaFactory factory)
 	{
-		if (needInit && !this.initialized)
+		if (needInit && !this.isInitialized(false))
 		{
 			EternaFactoryImpl.initObject(true, factory, this);
 		}
@@ -1253,11 +1270,8 @@ class EternaCreaterCon extends ObjectContainer
 	{
 		super(id);
 		this.obj = obj;
-		this.singleton = this.obj.isSingleton();
 	}
 	private final EternaCreater obj;
-	private Object instance;
-	private final boolean singleton;
 
 	public String getName()
 	{
@@ -1266,7 +1280,7 @@ class EternaCreaterCon extends ObjectContainer
 
 	public boolean isSingleton()
 	{
-		return this.singleton;
+		return this.obj.isSingleton();
 	}
 
 	public Class getType()
@@ -1277,25 +1291,20 @@ class EternaCreaterCon extends ObjectContainer
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (this.isInitialized(true))
 		{
 			return true;
 		}
-		this.initialized = true;
 		return this.obj.initialize(factory);
 	}
 
 	public Object create(boolean needInit, EternaFactory factory)
 	{
-		if (this.instance != null)
-		{
-			return this.instance;
-		}
-		if (needInit && !this.initialized)
+		if (needInit && !this.isInitialized(false))
 		{
 			EternaFactoryImpl.initObject(true, factory, this);
 		}
-		return this.singleton ? this.instance = this.obj.create() : this.obj.create();
+		return this.obj.create();
 	}
 
 	public void destroy()

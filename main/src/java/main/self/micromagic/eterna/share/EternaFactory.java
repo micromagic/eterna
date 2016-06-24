@@ -33,7 +33,6 @@ import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchAttributes;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.security.PermissionSet;
-import self.micromagic.eterna.security.PermissionSetCreater;
 import self.micromagic.eterna.security.UserManager;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.DataPrinter;
@@ -47,6 +46,11 @@ import self.micromagic.eterna.view.View;
  */
 public interface EternaFactory extends Factory
 {
+	/**
+	 * 在工厂的对象中设置权限集合创建器的名称.
+	 */
+	String PERMISSION_SET_GENERATOR_NAME = "permissionSet.generator";
+
 	/**
 	 * 获得本eterna工厂的共享工厂.
 	 */
@@ -85,11 +89,6 @@ public interface EternaFactory extends Factory
 	 * @param permission  权限配置字符串
 	 */
 	PermissionSet createPermissionSet(String permission) throws EternaException;
-
-	/**
-	 * 设置权限集合创建器.
-	 */
-	void setPermissionSetCreater(PermissionSetCreater creater) throws EternaException;
 
 	/**
 	 * 获得一个DataSourceManager对象.

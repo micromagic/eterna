@@ -24,7 +24,7 @@ sub:{factory}
 factory
 log:{$factory}
 create:{type,${factory},1}
-sub:{include,objs,permissionSet,factoryAttributes}
+sub:{include,objs,factoryAttributes}
 
 
 ## include
@@ -40,13 +40,6 @@ method:{registerInclude}
 param
 log:{$include.param}
 method:{addParam,name(i=0),$body(attr=value)}
-
-
-## permissionSet
-permission-set
-log:{$permissionSet}
-create:{className}
-stack:{setPermissionSetCreater,n:0,g:0}
 
 
 ## factoryAttributes
@@ -70,7 +63,7 @@ method:{setAttribute,name,$body(attr=value,i=1)}
 objs
 sub:{
 	object,entity,
-	query,update,format,prepare,constant,daoLogger,
+	query,update,format,prepare,constant,
 	search,builderList,builder,
 	model,export,
 	dataPrinter,stringCoder,typicalComponent,view,function,resource
@@ -110,16 +103,6 @@ stack:{addItem,n:0,g:1}
 entity-ref
 ${entityRefConfig}
 stack:{addEntityRef,n:0,g:0}
-
-
-## daoLogger
-dao-logger
-same:{name}
-log:{name}
-create:{generator}
-attr:{name}
-sub:{attribute}
-stack:{registerObject,n:0,g:0}
 
 
 ## constant

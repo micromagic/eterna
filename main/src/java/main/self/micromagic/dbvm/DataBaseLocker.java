@@ -355,11 +355,11 @@ public class DataBaseLocker
 			c = Class.forName("java.lang.management.RuntimeMXBean");
 			m = c.getMethod("getName", new Class[0]);
 			name = String.valueOf(m.invoke(runtime, new Object[0]));
-			name += ":" + address;
+			name += "@" + address;
 		}
 		catch (Throwable ex)
 		{
-			name = (new UID()) + ":" + address;
+			name = (new UID()) + "@" + address;
 		}
 		return name;
 	}

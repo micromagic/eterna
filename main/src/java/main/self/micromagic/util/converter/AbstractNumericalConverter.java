@@ -31,7 +31,7 @@ public class AbstractNumericalConverter extends ObjectConverter
 	 * 配置中设置是否需要在转换成数值型时将空字符串作为null的标识.
 	 */
 	public static final String NUMERICAL_EMPTY_TO_NULL_FLAG
-			= "eterna.converter.numerical.emptyToNull";
+			= "converter.numerical.emptyToNull";
 
 	/**
 	 * 是否需要在转换成数值型时将空字符串作为null的全局配置.
