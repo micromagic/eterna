@@ -82,7 +82,7 @@ public class FactoryContainerImpl extends AbstractFactoryContainer
 	public synchronized void reInit(StringRef msg)
 	{
 		this.initialized = false;
-		this.initErrMsg = null;
+		this.initErrObj = null;
 		FactoryContainer oldC = ContainerManager.getCurrentContainer();
 		Factory oldF = ContainerManager.getCurrentFactory();
 		ConfigResource oldR = ContainerManager.getCurrentResource();
@@ -121,7 +121,7 @@ public class FactoryContainerImpl extends AbstractFactoryContainer
 			}
 			Digester.log.error("Error in initialize [" + this.getId() + "].", ex);
 			String tmpMsg = ParseException.getMessage(ex);
-			this.initErrMsg = tmpMsg;
+			this.initErrObj = new EternaException(tmpMsg, ex);
 			if (msg != null)
 			{
 				if (msg.getString() != null)
@@ -391,13 +391,12 @@ public class FactoryContainerImpl extends AbstractFactoryContainer
 				if (!this.initialized)
 				{
 					// 同步状态下再次检查是否已初始化
-					String msg = "The factory container [" + this.getId()
-							+ "] hasn't initialized.";
-					if (!StringTool.isEmpty(this.initErrMsg))
+					if (this.initErrObj != null)
 					{
-						msg += " Error message:" + this.initErrMsg + ".";
+						throw this.initErrObj;
 					}
-					throw new EternaException(msg);
+					throw new EternaException(
+							"The factory container [" + this.getId() + "] hasn't initialized.");
 				}
 				f = this.factory;
 			}
@@ -405,7 +404,7 @@ public class FactoryContainerImpl extends AbstractFactoryContainer
 		return f;
 	}
 	private Factory factory;
-	private String initErrMsg;
+	private EternaException initErrObj;
 
 	private void checkReload()
 	{

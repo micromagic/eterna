@@ -26,7 +26,7 @@ import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.util.logging.TimeLogger;
 
 /**
- * 用于记录特殊的SQL日志.
+ * 用于记录特殊的数据操作日志.
  */
 public interface DaoLogger extends EternaObject
 {

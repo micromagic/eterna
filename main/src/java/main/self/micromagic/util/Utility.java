@@ -30,6 +30,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import self.micromagic.util.converter.AbstractNumericalConverter;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.logging.Jdk14Factory;
 import self.micromagic.util.ref.StringRef;
 
@@ -43,9 +45,15 @@ public class Utility
 	public static final String CHARSET_TAG = "_charset";
 
 	/**
-	 * 配置在处理文本的动态属性时, 是否要显示处理失败的信息
+	 * 在配置文件中设置是否要显示处理失败信息的键值. <p>
+	 * 在处理文本的动态属性时, 是否要显示处理失败的信息.
 	 */
 	public static final String SHOW_RDP_FAIL_PROPERTY = "show.rdp.fail";
+
+	/**
+	 * 在配置文件中设置是否需要强制使用JDK的日志的键值.
+	 */
+	public static final String USE_JDK_LOG_FLAG = "useJdkLog";
 
 	public static final Integer INTEGER_MINUS1 = new Integer(-1);
 	public static final Integer INTEGER_0 = new Integer(0);
@@ -92,7 +100,11 @@ public class Utility
 		try
 		{
 			propertiesManager = new PropertiesManager(false);
-			propertiesManager.reload(true, null, new String[]{StringTool.USE_QUICK_APPEND_FLAG});
+			String[] names = {
+				StringTool.USE_QUICK_APPEND_FLAG, USE_JDK_LOG_FLAG,
+				AbstractNumericalConverter.NUMERICAL_EMPTY_TO_NULL_FLAG
+			};
+			propertiesManager.reload(true, null, names);
 		}
 		catch (Throwable ex)
 		{
@@ -137,7 +149,7 @@ public class Utility
 
 	public static Log createLog(String name)
 	{
-		if ("true".equalsIgnoreCase(propertiesManager.getProperty(USE_JDK_LOG_FLAG)))
+		if (BooleanConverter.toBoolean(propertiesManager.getProperty(USE_JDK_LOG_FLAG)))
 		{
 			return new Jdk14Factory().getInstance(name);
 		}
@@ -146,7 +158,6 @@ public class Utility
 			return LogFactory.getLog(name);
 		}
 	}
-	public static final String USE_JDK_LOG_FLAG = "useJdkLog";
 
 	/**
 	 * 从当前线程的上下文环境中获取ClassLoader, 如果不存在则给出Utility类

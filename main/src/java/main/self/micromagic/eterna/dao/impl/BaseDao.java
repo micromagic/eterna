@@ -260,7 +260,7 @@ public abstract class BaseDao extends AbstractDao
 			throws SQLException, EternaException
 	{
 		logNode.addAttribute("name", base.getName());
-		logNode.addAttribute("time", FormatTool.getCurrentDatetimeString());
+		logNode.addAttribute("finishTime", FormatTool.getCurrentDatetimeString());
 		logNode.addAttribute("usedTime", usedTime.formatPassTime(false));
 		if (error != null)
 		{
@@ -279,18 +279,19 @@ public abstract class BaseDao extends AbstractDao
 	 * @param usedTime  数据操作执行用时, 请使用formatPassTime方法格式化后的时间
 	 * @param error     执行时出现的异常
 	 * @param conn      执行此数据操作使用的数据库连接
-	 * @return  是否成功记录了数据操作日志
+	 * @return  运行日志中记录本次数据操作的节点, 如果没有记录在运行日志中, 则返回null
 	 * @see TimeLogger#formatPassTime(boolean)
 	 */
-	protected static boolean log(Dao base, TimeLogger usedTime, Throwable error, Connection conn)
+	protected static Element log(Dao base, TimeLogger usedTime, Throwable error, Connection conn)
 			throws SQLException, EternaException
 	{
 		int logType = base.getLogType();
 		if (logType == 0 || logType == -1)
 		{
-			return false;
+			return null;
 		}
 		Element theLog;
+		Element runtimeNode = null;
 		if ((logType & DAO_LOG_TYPE_SAVE) != 0)
 		{
 			theLog = createLogNode(base.getType());
@@ -300,7 +301,8 @@ public abstract class BaseDao extends AbstractDao
 				Element nowNode = data.getCurrentNode();
 				if (nowNode != null)
 				{
-					log(base, usedTime, error, nowNode.addElement(base.getType()));
+					runtimeNode = nowNode.addElement(base.getType());
+					log(base, usedTime, error, runtimeNode);
 				}
 			}
 		}
@@ -342,7 +344,7 @@ public abstract class BaseDao extends AbstractDao
 				log.info("Dao log:\n".concat(theLog.asXML()));
 			}
 		}
-		return (logType & DAO_LOG_TYPE_SAVE) != 0;
+		return runtimeNode;
 	}
 
 	/**
@@ -351,10 +353,10 @@ public abstract class BaseDao extends AbstractDao
 	 * @param usedTime  数据操作执行用时, 请使用formatPassTime方法格式化后的时间
 	 * @param error     执行时出现的异常
 	 * @param conn      执行此数据操作使用的数据库连接
-	 * @return  是否成功记录了数据操作日志
+	 * @return  运行日志中记录本次数据操作的节点, 如果没有记录在运行日志中, 则返回null
 	 * @see TimeLogger#formatPassTime(boolean)
 	 */
-	protected boolean log(TimeLogger usedTime, Throwable error, Connection conn)
+	protected Element log(TimeLogger usedTime, Throwable error, Connection conn)
 			throws SQLException, EternaException
 	{
 		return log(this, usedTime, error, conn);

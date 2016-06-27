@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.dao.Query;
@@ -148,9 +150,10 @@ class CountQuery
 		}
 		finally
 		{
-			if (BaseDao.log(this, startTime, error, conn))
+			Element node = BaseDao.log(this, startTime, error, conn);
+			if (node != null)
 			{
-				QueryImpl.logResult(this.getType(), result);
+				QueryImpl.logResult(node, this.getType(), result);
 			}
 			if (rs != null)
 			{

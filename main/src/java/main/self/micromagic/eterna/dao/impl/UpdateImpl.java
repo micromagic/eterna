@@ -24,7 +24,6 @@ import java.sql.Statement;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.dao.Update;
-import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -149,21 +148,11 @@ public class UpdateImpl extends BaseDao
 		}
 		finally
 		{
-			if (log(this, startTime, error, conn))
+			Element node = log(this, startTime, error, conn);
+			if (node != null && result != -1)
 			{
-				if (result != -1)
-				{
-					AppData data = AppData.getCurrentData();
-					if (data.getLogType() > 0)
-					{
-						Element nowNode = data.getCurrentNode();
-						if (nowNode != null)
-						{
-							AppDataLogExecute.printObject(
-									nowNode.addElement(this.getType() + "-result"), new Integer(result));
-						}
-					}
-				}
+				Element resultNode = node.addElement(this.getType() + "-result");
+				AppDataLogExecute.printObject(resultNode, new Integer(result));
 			}
 			if (stmt != null)
 			{

@@ -230,9 +230,10 @@ public class QueryImpl extends AbstractQuery
 		}
 		finally
 		{
-			if (log(this, startTime, error, conn))
+			Element node = log(this, startTime, error, conn);
+			if (node != null)
 			{
-				logResult(this.getType(), result);
+				logResult(node, this.getType(), result);
 			}
 			if (rs != null)
 			{
@@ -321,9 +322,10 @@ public class QueryImpl extends AbstractQuery
 		}
 		finally
 		{
-			if (log(this, startTime, error, conn))
+			Element node = log(this, startTime, error, conn);
+			if (node != null)
 			{
-				logResult(this.getType(), result);
+				logResult(node, this.getType(), result);
 			}
 			// 这里需要保持连接，所以stmt不关闭
 		}
@@ -332,20 +334,12 @@ public class QueryImpl extends AbstractQuery
 	/**
 	 * 将查询的结果记录到日志中.
 	 */
-	protected static void logResult(String type, ResultIterator result)
+	protected static void logResult(Element parent, String type, ResultIterator result)
 	{
 		if (result != null)
 		{
-			AppData data = AppData.getCurrentData();
-			if (data.getLogType() > 0)
-			{
-				Element nowNode = data.getCurrentNode();
-				if (nowNode != null)
-				{
-					AppDataLogExecute.printObject(
-							nowNode.addElement(type.concat("-result")), result);
-				}
-			}
+			Element node = parent.addElement(type.concat("-result"));
+			AppDataLogExecute.printObject(node, result);
 		}
 	}
 

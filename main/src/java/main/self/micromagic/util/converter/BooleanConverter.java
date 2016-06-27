@@ -26,6 +26,14 @@ import self.micromagic.util.ref.StringRef;
 public class BooleanConverter extends AbstractNumericalConverter
 {
 	/**
+	 * 将一个字符串转换成boolean.
+	 */
+	public static boolean toBoolean(String str)
+	{
+		return str != null && ("1".equals(str) || "true".equalsIgnoreCase(str));
+	}
+
+	/**
 	 * 将一个对象转换成boolean.
 	 */
 	public static boolean toBoolean(Object obj)
@@ -133,7 +141,7 @@ public class BooleanConverter extends AbstractNumericalConverter
 			{
 				return ((Boolean) tmpObj).booleanValue();
 			}
-			return "true".equalsIgnoreCase(value) || "1".equals(value);
+			return "1".equals(value) || "true".equalsIgnoreCase(value);
 		}
 		for (int i = 0; i < trueValues.length; i++)
 		{

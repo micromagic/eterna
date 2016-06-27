@@ -19,10 +19,6 @@ package self.micromagic.eterna.dao;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import self.micromagic.eterna.dao.CustomResultIterator;
-import self.micromagic.eterna.dao.Dao;
-import self.micromagic.eterna.dao.Query;
-import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.impl.QueryImpl;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.logging.TimeLogger;
@@ -78,7 +74,7 @@ public class EmptyQuery extends QueryImpl
 		}
 		finally
 		{
-			log(new TimeLogger(), null, conn);
+			this.log(new TimeLogger(), null, conn);
 		}
 	}
 

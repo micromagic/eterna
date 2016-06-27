@@ -116,6 +116,10 @@ public class ParseException extends EternaException
 			return msg;
 		}
 		StringAppender temp = StringTool.createStringAppender(msg.length() + 32);
+		if (!StringTool.isEmpty(ci.containerName))
+		{
+			temp.append("ID:[").append(ci.containerName).append("]; ");
+		}
 		if (!StringTool.isEmpty(ci.config))
 		{
 			temp.append("Config:{").append(ci.config).append("}; ");

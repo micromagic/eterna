@@ -79,7 +79,18 @@ public class ConverterFinder
 		ValueConverter vc = (ValueConverter) converterCache.get(c);
 		if (vc == null)
 		{
-			return null;
+			// 如果为空但类型是boolean或int, 则说明在初始化过程中又调用了此方法, 所以直接构造一个
+			if (c == int.class)
+			{
+				vc = new IntegerConverter();
+				vc.setNeedThrow(true);
+			}
+			else if (c == boolean.class)
+			{
+				vc = new BooleanConverter();
+				vc.setNeedThrow(true);
+			}
+			return vc;
 		}
 		return copy ? vc.copy() : vc;
 	}
@@ -128,6 +139,27 @@ public class ConverterFinder
 	}
 
 	/**
+	 * 判断finder是否已初始化完成.
+	 */
+	static boolean isInitialized()
+	{
+		return initialized;
+	}
+	private static boolean initialized;
+
+	/**
+	 * 重新初始化转换器的缓存.
+	 */
+	static void reInitCache()
+	{
+		Map converter = new HashMap();
+		Map withoutThrow = new HashMap();
+		initCache(converter, withoutThrow);
+		converterCache = converter;
+		withoutThrowCache = withoutThrow;
+	}
+
+	/**
 	 * 默认的ValueConverter对象缓存.
 	 */
 	private static Map converterCache = new HashMap();
@@ -137,95 +169,104 @@ public class ConverterFinder
 	 */
 	private static Map withoutThrowCache = new HashMap();
 
-	static
+	/**
+	 * 初始化转换器的缓存.
+	 */
+	private static void initCache(Map converter, Map withoutThrow)
 	{
-		ValueConverter converter;
+		ValueConverter tmp;
 
-		converter = new BooleanConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(boolean.class, converter);
-		converterCache.put(Boolean.class, converter);
-		converter = new ByteConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(byte.class, converter);
-		converterCache.put(Byte.class, converter);
-		converter = new CharacterConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(char.class, converter);
-		converterCache.put(Character.class, converter);
-		converter = new ShortConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(short.class, converter);
-		converterCache.put(Short.class, converter);
-		converter = new IntegerConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(int.class, converter);
-		converterCache.put(Integer.class, converter);
-		converter = new LongConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(long.class, converter);
-		converterCache.put(Long.class, converter);
-		converter = new FloatConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(float.class, converter);
-		converterCache.put(Float.class, converter);
-		converter = new DoubleConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(double.class, converter);
-		converterCache.put(Double.class, converter);
+		tmp = new BooleanConverter();
+		tmp.setNeedThrow(true);
+		converter.put(boolean.class, tmp);
+		converter.put(Boolean.class, tmp);
+		tmp = new ByteConverter();
+		tmp.setNeedThrow(true);
+		converter.put(byte.class, tmp);
+		converter.put(Byte.class, tmp);
+		tmp = new CharacterConverter();
+		tmp.setNeedThrow(true);
+		converter.put(char.class, tmp);
+		converter.put(Character.class, tmp);
+		tmp = new ShortConverter();
+		tmp.setNeedThrow(true);
+		converter.put(short.class, tmp);
+		converter.put(Short.class, tmp);
+		tmp = new IntegerConverter();
+		tmp.setNeedThrow(true);
+		converter.put(int.class, tmp);
+		converter.put(Integer.class, tmp);
+		tmp = new LongConverter();
+		tmp.setNeedThrow(true);
+		converter.put(long.class, tmp);
+		converter.put(Long.class, tmp);
+		tmp = new FloatConverter();
+		tmp.setNeedThrow(true);
+		converter.put(float.class, tmp);
+		converter.put(Float.class, tmp);
+		tmp = new DoubleConverter();
+		tmp.setNeedThrow(true);
+		converter.put(double.class, tmp);
+		converter.put(Double.class, tmp);
 
-		converter = new ObjectConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(Object.class, converter);
-		converter = new StringConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(String.class, converter);
-		converter = new BigIntegerConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(BigInteger.class, converter);
-		converter = new DecimalConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(BigDecimal.class, converter);
-		converter = new BytesConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(byte[].class, converter);
-		converter = new TimeConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(java.sql.Time.class, converter);
-		converter = new DateConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(java.sql.Date.class, converter);
-		converter = new TimestampConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(java.sql.Timestamp.class, converter);
-		converter = new UtilDateConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(java.util.Date.class, converter);
-		converter = new CalendarConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(java.util.Calendar.class, converter);
-		converter = new StreamConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(InputStream.class, converter);
-		converter = new ReaderConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(Reader.class, converter);
-		converter = new LocaleConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(Locale.class, converter);
-		converter = new MapConverter();
-		converter.setNeedThrow(true);
-		converterCache.put(Map.class, converter);
+		tmp = new ObjectConverter();
+		tmp.setNeedThrow(true);
+		converter.put(Object.class, tmp);
+		tmp = new StringConverter();
+		tmp.setNeedThrow(true);
+		converter.put(String.class, tmp);
+		tmp = new BigIntegerConverter();
+		tmp.setNeedThrow(true);
+		converter.put(BigInteger.class, tmp);
+		tmp = new DecimalConverter();
+		tmp.setNeedThrow(true);
+		converter.put(BigDecimal.class, tmp);
+		tmp = new BytesConverter();
+		tmp.setNeedThrow(true);
+		converter.put(byte[].class, tmp);
+		tmp = new TimeConverter();
+		tmp.setNeedThrow(true);
+		converter.put(java.sql.Time.class, tmp);
+		tmp = new DateConverter();
+		tmp.setNeedThrow(true);
+		converter.put(java.sql.Date.class, tmp);
+		tmp = new TimestampConverter();
+		tmp.setNeedThrow(true);
+		converter.put(java.sql.Timestamp.class, tmp);
+		tmp = new UtilDateConverter();
+		tmp.setNeedThrow(true);
+		converter.put(java.util.Date.class, tmp);
+		tmp = new CalendarConverter();
+		tmp.setNeedThrow(true);
+		converter.put(java.util.Calendar.class, tmp);
+		tmp = new StreamConverter();
+		tmp.setNeedThrow(true);
+		converter.put(InputStream.class, tmp);
+		tmp = new ReaderConverter();
+		tmp.setNeedThrow(true);
+		converter.put(Reader.class, tmp);
+		tmp = new LocaleConverter();
+		tmp.setNeedThrow(true);
+		converter.put(Locale.class, tmp);
+		tmp = new MapConverter();
+		tmp.setNeedThrow(true);
+		converter.put(Map.class, tmp);
 
-		Iterator itr = converterCache.entrySet().iterator();
+		Iterator itr = converter.entrySet().iterator();
 		while (itr.hasNext())
 		{
 			Map.Entry entry = (Map.Entry) itr.next();
 			ValueConverter vc = (ValueConverter) entry.getValue();
 			vc = vc.copy();
 			vc.setNeedThrow(false);
-			withoutThrowCache.put(entry.getKey(), vc);
+			withoutThrow.put(entry.getKey(), vc);
 		}
+	}
+
+	static
+	{
+		initCache(converterCache, withoutThrowCache);
+		initialized = true;
 	}
 
 }

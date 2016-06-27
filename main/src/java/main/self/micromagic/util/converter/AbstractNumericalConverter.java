@@ -18,6 +18,7 @@ package self.micromagic.util.converter;
 
 import org.apache.commons.logging.Log;
 
+import self.micromagic.util.PropertiesManager;
 import self.micromagic.util.Utility;
 
 public class AbstractNumericalConverter extends ObjectConverter
@@ -42,12 +43,11 @@ public class AbstractNumericalConverter extends ObjectConverter
 	{
 		try
 		{
-			Utility.addFieldPropertyManager(NUMERICAL_EMPTY_TO_NULL_FLAG,
-					AbstractNumericalConverter.class, "NUMERICAL_EMPTY_TO_NULL");
+			initPropertyManager(Utility.getPropertiesManager());
 		}
 		catch (Throwable ex)
 		{
-			log.warn("Error in init numerical empty to null.", ex);
+			log.warn("Error in init numerical converter.", ex);
 		}
 	}
 
@@ -55,7 +55,6 @@ public class AbstractNumericalConverter extends ObjectConverter
 	{
 		this.emptyToNull = NUMERICAL_EMPTY_TO_NULL;
 	}
-
 	protected boolean emptyToNull;
 
 	public boolean isEmptyToNull()
@@ -66,6 +65,31 @@ public class AbstractNumericalConverter extends ObjectConverter
 	public void setEmptyToNull(boolean emptyToNull)
 	{
 		this.emptyToNull = emptyToNull;
+	}
+
+	/**
+	 * 初始化属性管理者.
+	 */
+	public static void initPropertyManager(PropertiesManager pm)
+	{
+		if (BooleanConverter.toBoolean(pm.getProperty(NUMERICAL_EMPTY_TO_NULL_FLAG)))
+		{
+			NUMERICAL_EMPTY_TO_NULL = true;
+		}
+		try
+		{
+			pm.addFieldPropertyManager(NUMERICAL_EMPTY_TO_NULL_FLAG,
+					AbstractNumericalConverter.class, "NUMERICAL_EMPTY_TO_NULL");
+		}
+		catch (Throwable ex)
+		{
+			AbstractNumericalConverter.log.warn("Error in bind empty to null field.", ex);
+		}
+		if (ConverterFinder.isInitialized())
+		{
+			// 如果finder已经初始化了, 则需要重新初始化
+			ConverterFinder.reInitCache();
+		}
 	}
 
 }
