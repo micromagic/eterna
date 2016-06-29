@@ -16,6 +16,8 @@
 
 package self.micromagic.util.converter;
 
+import java.util.Date;
+
 import junit.framework.TestCase;
 import self.micromagic.util.Utility;
 
@@ -26,7 +28,7 @@ public class EmptyToNullTest extends TestCase
 	{
 		BooleanConverter c0 = new BooleanConverter();
 		assertTrue(c0.isEmptyToNull());
-		ValueConverter c1 = ConverterFinder.findConverter(boolean.class);
+		ValueConverter c1 = ConverterFinder.findConverter(Date.class);
 		assertTrue(c1.isEmptyToNull());
 		BooleanConverter c2 = new BooleanConverter();
 		assertTrue(c2.isEmptyToNull());

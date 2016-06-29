@@ -361,7 +361,7 @@ public class TemplateBuilder extends AbstractGenerator
 		}
 		else
 		{
-			String[] tmpArr = StringTool.separateString(colName, VALUE_SPLIT, true);
+			String[] tmpArr = StringTool.separateString(colName, VALUE_SPLIT.charAt(0), true, true);
 			String[] colNames = new String[this.nameSub ? tmpArr.length : this.maxIndex + 1];
 			Arrays.fill(colNames, "");
 			System.arraycopy(tmpArr, 0, colNames, 0, Math.min(tmpArr.length, colNames.length));

@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -401,10 +402,34 @@ class ClassPathResource extends AbstractResource
 		int index = url.indexOf(':');
 		if (index == -1 || index <= 1)
 		{
-			// 如果字符串中没有protocol或只是盘符, 默认添上file
-			url = "file:".concat(url);
+			// 如果字符串中没有protocol或只是盘符, 通过file来构造url
+			try
+			{
+				url = (new File(url)).toURL().toString();
+			}
+			catch (IOException ex)
+			{
+				url = "file:".concat(url);
+			}
 		}
 		return url;
+	}
+
+	private static File makeFileByURL(URL url)
+	{
+		String path = url.getFile();
+		if (path.indexOf('%') != -1)
+		{
+			try
+			{
+				path = URLDecoder.decode(path, "UTF-8");
+			}
+			catch (IOException ex)
+			{
+				return null;
+			}
+		}
+		return new File(path);
 	}
 
 	public ConfigResource[] listResources(boolean recursive)
@@ -426,18 +451,19 @@ class ClassPathResource extends AbstractResource
 				String protocol = res.getProtocol();
 				if ("file".equals(protocol))
 				{
-					File file = new File(res.getFile());
-					this.findResources(result, file, recursive, tmpRoot);
+					File file = makeFileByURL(res);
+					if (file != null && file.isDirectory())
+					{
+						this.findResources(result, file, recursive, tmpRoot);
+					}
+					else
+					{
+						Digester.log.error("The res [" + res + "] isn't directory.");
+					}
 				}
 				else if ("jar".equals(protocol) || "zip".equals(protocol))
 				{
-					String tmp = res.toString();
-					int index = tmp.indexOf('!');
-					tmp = checkProtocol(tmp.substring(4 /* jar: or zip: */, index));
-					URL tmpRes = new URL(tmp);
-					ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
-					this.findResources(result, stream, recursive, tmpRoot);
-					stream.close();
+					this.readZip(res, result, recursive, tmpRoot);
 				}
 				else
 				{
@@ -455,13 +481,7 @@ class ClassPathResource extends AbstractResource
 					String protocol = res.getProtocol();
 					if ("jar".equals(protocol) || "zip".equals(protocol))
 					{
-						String tmp = res.toString();
-						int index = tmp.indexOf('!');
-						tmp = checkProtocol(tmp.substring(4 /* jar: or zip: */, index));
-						URL tmpRes = new URL(tmp);
-						ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
-						this.findResources(result, stream, recursive, tmpRoot);
-						stream.close();
+						this.readZip(res, result, recursive, tmpRoot);
 					}
 				}
 			}
@@ -482,11 +502,15 @@ class ClassPathResource extends AbstractResource
 			throw new EternaException(ex);
 		}
 	}
-	private void findResources(Map result, ZipInputStream zipStream,
-			boolean recursive, String parent)
+	private void readZip(URL res, Map result, boolean recursive, String parent)
 			throws IOException
 	{
-		ZipEntry entry = zipStream.getNextEntry();
+		String tmp = res.toString();
+		int index = tmp.indexOf('!');
+		tmp = checkProtocol(tmp.substring(4 /* jar: or zip: */, index));
+		URL tmpRes = new URL(tmp);
+		ZipInputStream stream = new ZipInputStream(tmpRes.openStream());
+		ZipEntry entry = stream.getNextEntry();
 		while (entry != null)
 		{
 			String name = entry.getName();
@@ -495,8 +519,9 @@ class ClassPathResource extends AbstractResource
 				// name > parent 不要包含parent目录
 				this.dealEntryName(result, parent, name, recursive);
 			}
-			entry = zipStream.getNextEntry();
+			entry = stream.getNextEntry();
 		}
+		stream.close();
 	}
 	/**
 	 * 将zip中的路径信息添加的结果集中.
