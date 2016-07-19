@@ -35,7 +35,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 
 	private final ValueContainerMap vcm;
 	private final ValueContainer vContainer;
-	private Map entryMap = null;
+	private Map entryMap;
 	private boolean keepEntry = true;
 
 	public ValueContainerMapEntrySet(ValueContainerMap vcm, ValueContainer vContainer)

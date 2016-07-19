@@ -31,6 +31,7 @@ import self.micromagic.eterna.dao.ParameterGenerator;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.Generator;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
@@ -50,6 +51,11 @@ public class ParameterGroup
 	 * 在parameter的arrtibute中设置使用caption的名称.
 	 */
 	public static final String CAPTION_FLAG = "caption";
+
+	/**
+	 * 在EntityItem的arrtibute中设置构造ParameterGenerator对象的名称.
+	 */
+	public static final String GENERATOR_FLAG = "parameter.generator";
 
 	private boolean initialized;
 
@@ -146,7 +152,20 @@ public class ParameterGroup
 	 */
 	static ParameterGenerator item2Parameter(EntityItem item, String tableAlias)
 	{
-		ParameterGeneratorImpl pg = new ParameterGeneratorImpl();
+		ParameterGenerator pg;
+		Object generator = item.getAttribute(GENERATOR_FLAG);
+		if (generator instanceof Generator)
+		{
+			pg = (ParameterGenerator) ((Generator) generator).create();
+		}
+		else if (generator instanceof ParameterGenerator)
+		{
+			pg = (ParameterGenerator) generator;
+		}
+		else
+		{
+			pg = new ParameterGeneratorImpl();
+		}
 		pg.setName(item.getName());
 		String colName = item.getColumnName();
 		if (tableAlias != null)
