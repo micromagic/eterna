@@ -50,4 +50,10 @@ public interface ValueContainer
 	 */
 	Enumeration getKeys();
 
+	/**
+	 * 获取键及值构成的一个数组. <p>
+	 * 偶数位置的为键, 奇数位置为值.
+	 */
+	Object[] getKeyValuePairs();
+
 }

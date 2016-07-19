@@ -341,6 +341,11 @@ public class CookieContainer extends AbstractContainerSetting
 		return new IteratorEnumeration(this.cookieMap.keySet().iterator());
 	}
 
+	public Object[] getKeyValuePairs()
+	{
+		return null;
+	}
+
 	/**
 	 * 对被压缩的字符串进行解压操作.
 	 */

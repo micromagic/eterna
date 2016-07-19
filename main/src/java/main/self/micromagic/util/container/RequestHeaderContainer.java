@@ -225,4 +225,9 @@ public class RequestHeaderContainer extends AbstractContainerSetting
 		return this.request.getHeaderNames();
 	}
 
+	public Object[] getKeyValuePairs()
+	{
+		return null;
+	}
+
 }

@@ -30,6 +30,9 @@ import self.micromagic.util.Utility;
 class ValueContainerMapEntrySet extends AbstractSet
 		implements Set
 {
+	// 值为空的标记对象
+	private static final Object NULL_VALUE = new Object();
+
 	private final ValueContainerMap vcm;
 	private final ValueContainer vContainer;
 	private Map entryMap = null;
@@ -53,12 +56,25 @@ class ValueContainerMapEntrySet extends AbstractSet
 			return result;
 		}
 		result = new HashMap();
-		MapEntry entry;
-		Enumeration e = this.vContainer.getKeys();
-		while (e.hasMoreElements())
+		Object[] keyAndValues = this.vContainer.getKeyValuePairs();
+		if (keyAndValues != null)
 		{
-			entry = new MapEntry(e.nextElement());
-			result.put(entry.getKey(), entry);
+			for (int i = 0; i < keyAndValues.length; i += 2)
+			{
+				Object key = keyAndValues[i];
+				MapEntry entry = new MapEntry(key, keyAndValues[i + 1]);
+				result.put(key, entry);
+			}
+		}
+		else
+		{
+			Enumeration e = this.vContainer.getKeys();
+			while (e.hasMoreElements())
+			{
+				Object key = e.nextElement();
+				MapEntry entry = new MapEntry(key);
+				result.put(key, entry);
+			}
 		}
 		if (this.keepEntry)
 		{
@@ -97,8 +113,8 @@ class ValueContainerMapEntrySet extends AbstractSet
 	 */
 	public boolean containsKey(Object key)
 	{
-		Map tmpMap = null;
-		if ((tmpMap = this.entryMap) == null)
+		Map tmpMap = this.entryMap;
+		if (tmpMap == null)
 		{
 			return this.vContainer.containsKey(key);
 		}
@@ -118,8 +134,8 @@ class ValueContainerMapEntrySet extends AbstractSet
 		if (o != null && (o instanceof Map.Entry))
 		{
 			Map.Entry entry = (Map.Entry) o;
-			Map tmpMap = null;
-			if ((tmpMap = this.entryMap) != null)
+			Map tmpMap = this.entryMap;
+			if (tmpMap != null)
 			{
 				Object value = tmpMap.get(entry.getKey());
 				if (value != null)
@@ -162,8 +178,8 @@ class ValueContainerMapEntrySet extends AbstractSet
 
 	protected Object addEntry(Map.Entry entry)
 	{
-		Map tmpMap;
-		if ((tmpMap = this.entryMap) != null)
+		Map tmpMap = this.entryMap;
+		if (tmpMap != null)
 		{
 			return tmpMap.put(entry.getKey(), entry);
 		}
@@ -183,8 +199,8 @@ class ValueContainerMapEntrySet extends AbstractSet
 
 	protected Object removeEntry(Map.Entry entry)
 	{
-		Map tmpMap = null;
-		if ((tmpMap = this.entryMap) != null)
+		Map tmpMap = this.entryMap;
+		if (tmpMap != null)
 		{
 			return tmpMap.remove(entry.getKey());
 		}
@@ -285,7 +301,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 		public MapEntry(Object key, Object value)
 		{
 			this(key);
-			this.value = value;
+			this.value = value == null ? NULL_VALUE : value;
 		}
 
 		public Object getKey()
@@ -297,15 +313,17 @@ class ValueContainerMapEntrySet extends AbstractSet
 		{
 			if (this.value == null)
 			{
-				this.value = ValueContainerMapEntrySet.this.vContainer.getValue(this.key);
+				Object v = ValueContainerMapEntrySet.this.vContainer.getValue(this.key);
+				this.value = v == null ? NULL_VALUE : v;;
+				return v;
 			}
-			return this.value;
+			return this.value == NULL_VALUE ? null : this.value;
 		}
 
 		public Object setValue(Object value)
 		{
 			Object oldValue = this.getValue();
-			this.value = value;
+			this.value = value == null ? NULL_VALUE : value;
 			ValueContainerMapEntrySet.this.vContainer.setValue(this.key, value);
 			return oldValue;
 		}
@@ -324,7 +342,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 				Object otherKey = ((Map.Entry) obj).getKey();
 				Object otherValue = ((Map.Entry) obj).getValue();
 				return Utility.objectEquals(this.key, otherKey)
-						&& Utility.objectEquals(this.value, otherValue);
+						&& Utility.objectEquals(this.getValue(), otherValue);
 			}
 			return false;
 		}
@@ -335,7 +353,7 @@ class ValueContainerMapEntrySet extends AbstractSet
 			{
 				StringAppender buf = StringTool.createStringAppender(32);
 				buf.append("Entry[key:").append(this.key)
-						.append(",value:").append(this.value).append(']');
+						.append(",value:").append(this.getValue()).append(']');
 				this.toStringValue = buf.toString();
 			}
 			return this.toStringValue;
