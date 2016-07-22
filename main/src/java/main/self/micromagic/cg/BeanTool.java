@@ -187,7 +187,18 @@ public class BeanTool
 		{
 			return null;
 		}
-		Class beanClass = bean.getClass();
+		Object obj;
+		Class beanClass;
+		if (bean instanceof Class)
+		{
+			beanClass = (Class) bean;
+			obj = null;
+		}
+		else
+		{
+			beanClass = bean.getClass();
+			obj = bean;
+		}
 		BeanDescriptor bd = getBeanDescriptor(beanClass);
 		if (bd == null)
 		{
@@ -197,7 +208,7 @@ public class BeanTool
 		{
 			prefix = "";
 		}
-		return new BeanMap(bean, prefix, bd);
+		return new BeanMap(obj, prefix, bd);
 	}
 
 	/**

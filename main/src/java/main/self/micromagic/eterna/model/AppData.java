@@ -107,8 +107,8 @@ public class AppData
 	 */
 	public Object[] globalVars;
 
+	private String appId;
 	public int position;
-	private String app_id = null;
 	public String contextRoot = "";
 	public String modelName;
 	public ServletRequest request;
@@ -500,7 +500,7 @@ public class AppData
 
 	public void clearData()
 	{
-		this.app_id = null;
+		this.appId = null;
 		this.clearStack();
 		this.dataMap.clear();
 		this.maps[AppData.DATA_MAP] = this.dataMap;
@@ -512,8 +512,13 @@ public class AppData
 		{
 			this.caches[i] = null;
 		}
+		this.varCache = null;
 		this.modelVars = null;
 		this.globalVars = null;
+		this.position = 0;
+		this.contextRoot = "";
+		this.modelName = null;
+		this.export = null;
 		// 恢复App日志状态并清空
 		this.logType = APP_LOG_TYPE;
 		if (this.nodeStack != null)
@@ -574,12 +579,12 @@ public class AppData
 
 	public String getAppId()
 	{
-		if (this.app_id == null)
+		if (this.appId == null)
 		{
-			this.app_id = Long.toString(System.currentTimeMillis(), 32).toUpperCase() + "_"
+			this.appId = Long.toString(System.currentTimeMillis(), 32).toUpperCase() + "_"
 					+ Integer.toString(System.identityHashCode(this), 32).toUpperCase();
 		}
-		return this.app_id;
+		return this.appId;
 	}
 
 	/**
