@@ -76,9 +76,9 @@ public class EternaDefine extends InitBaseTag
 			AppData nowData = new AppData();
 			ThreadCache.getInstance().setProperty(AppData.CACHE_NAME, nowData);
 			nowData.position = AppData.POSITION_SERVLET;
-			nowData.response = this.pageContext.getResponse();
-			nowData.request = req;
-			nowData.servletConfig = this.pageContext.getServletConfig();
+			nowData.objs[AppData.SERVLET_RESPONSE_INDEX] = this.pageContext.getResponse();
+			nowData.objs[AppData.SERVLET_REQUEST_INDEX] = req;
+			nowData.objs[AppData.CONFIG_INDEX] = this.pageContext.getServletConfig();
 			nowData.maps[AppData.REQUEST_ATTRIBUTE_MAP] = ValueContainerMap.createRequestAttributeMap(req);
 			Map paramMap = null;
 			if (this.param != null)

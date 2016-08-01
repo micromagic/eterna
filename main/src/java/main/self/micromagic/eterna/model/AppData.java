@@ -25,16 +25,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.portlet.ActionRequest;
-import javax.portlet.ActionResponse;
-import javax.portlet.PortletConfig;
-import javax.portlet.PortletContext;
-import javax.portlet.RenderRequest;
-import javax.portlet.RenderResponse;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,13 +48,47 @@ import self.micromagic.util.container.ThreadCache;
 import self.micromagic.util.logging.TimeLogger;
 
 /**
- * @author micromagic@sina.com
+ * 用于在线程中传递数据的对象.
  */
 public class AppData
 {
-	public static final String APP_LOG_PROPERTY = "eterna.app.logType";
-	public static final String CACHE_NAME = "eterna.model.APP_DATA";
+	/**
+	 * 日志.
+	 */
 	public static final Log log = Tool.log;
+
+	/**
+	 * 用于配置线程日志级别的键值.
+	 */
+	public static final String APP_LOG_PROPERTY = "eterna.app.logType";
+
+	/**
+	 * 用于配置需要存放对象个数的键值.
+	 */
+	public static final String OBJECT_COUNT_PROPERTY = "eterna.app.objectCount";
+
+	/**
+	 * 对象列表中存放request对象的索引值.
+	 */
+	public static final int SERVLET_REQUEST_INDEX = 0;
+	/**
+	 * 对象列表中存放response对象的索引值.
+	 */
+	public static final int SERVLET_RESPONSE_INDEX = 1;
+	/**
+	 * 对象列表中存放配置对象的索引值.
+	 */
+	public static final int CONFIG_INDEX = 2;
+
+	/**
+	 * 线程缓存中放置此对象的名称.
+	 */
+	public static final String CACHE_NAME = "eterna.model.APP_DATA";
+
+	/**
+	 * 可存放对象的个数.
+	 */
+	public static final int OBJECT_COUNT;
 
 	public static final int POSITION_NONE = 0;
 	public static final int POSITION_ALL = -1;
@@ -111,15 +138,6 @@ public class AppData
 	public int position;
 	public String contextRoot = "";
 	public String modelName;
-	public ServletRequest request;
-	public ServletResponse response;
-	public FilterConfig filterConfig;
-	public ServletConfig servletConfig;
-	public RenderRequest renderRequest;
-	public RenderResponse renderResponse;
-	public ActionRequest actionRequest;
-	public ActionResponse actionResponse;
-	public PortletConfig portletConfig;
 	public ModelExport export;
 	private int logType = APP_LOG_TYPE;
 
@@ -133,6 +151,7 @@ public class AppData
 	 */
 	public final Map dataMap = new HashMap();
 
+	public final Object[] objs;
 	public final Object[] caches = new Object[23];
 	public final Map[] maps = new Map[4];
 	public final ArrayList stack = new ArrayList();
@@ -152,10 +171,18 @@ public class AppData
 		{
 			log.error("Error in init app log type.", ex);
 		}
+		int count = 3;
+		try
+		{
+			count = Integer.parseInt(Utility.getProperty(OBJECT_COUNT_PROPERTY));
+		}
+		catch (Exception ex) {}
+		OBJECT_COUNT = count < 3 ? 3 : count;
 	}
 
 	public AppData()
 	{
+		this.objs = new Object[OBJECT_COUNT];
 		this.maps[DATA_MAP] = this.dataMap;
 	}
 
@@ -512,6 +539,10 @@ public class AppData
 		{
 			this.caches[i] = null;
 		}
+		for (int i = 0; i < this.objs.length; i++)
+		{
+			this.objs[i] = null;
+		}
 		this.varCache = null;
 		this.modelVars = null;
 		this.globalVars = null;
@@ -621,9 +652,10 @@ public class AppData
 
 	public HttpServletRequest getHttpServletRequest()
 	{
-		if (this.request instanceof HttpServletRequest)
+		Object req = this.objs[SERVLET_REQUEST_INDEX];
+		if (req instanceof HttpServletRequest)
 		{
-			return (HttpServletRequest) this.request;
+			return (HttpServletRequest) req;
 		}
 		return null;
 	}
@@ -681,31 +713,24 @@ public class AppData
 
 	public HttpServletResponse getHttpServletResponse()
 	{
-		if (this.request instanceof HttpServletRequest)
+		Object resp = this.objs[SERVLET_RESPONSE_INDEX];
+		if (resp instanceof HttpServletResponse)
 		{
-			return (HttpServletResponse) this.response;
+			return (HttpServletResponse) resp;
 		}
 		return null;
 	}
 
 	public ServletContext getServletContext()
 	{
-		if (this.servletConfig != null)
+		Object config = this.objs[CONFIG_INDEX];
+		if (config instanceof ServletConfig)
 		{
-			return this.servletConfig.getServletContext();
+			return ((ServletConfig) config).getServletContext();
 		}
-		if (this.filterConfig != null)
+		if (config instanceof FilterConfig)
 		{
-			return this.filterConfig.getServletContext();
-		}
-		return null;
-	}
-
-	public PortletContext getPortletContext()
-	{
-		if (this.portletConfig != null)
-		{
-			return this.portletConfig.getPortletContext();
+			return ((FilterConfig) config).getServletContext();
 		}
 		return null;
 	}
@@ -715,17 +740,14 @@ public class AppData
 	 */
 	public String getInitParameter(String name)
 	{
-		if (this.portletConfig != null)
+		Object config = this.objs[CONFIG_INDEX];
+		if (config instanceof ServletConfig)
 		{
-			return this.portletConfig.getInitParameter(name);
+			return ((ServletConfig) config).getInitParameter(name);
 		}
-		if (this.servletConfig != null)
+		if (config instanceof FilterConfig)
 		{
-			return this.servletConfig.getInitParameter(name);
-		}
-		if (this.filterConfig != null)
-		{
-			return this.filterConfig.getInitParameter(name);
+			return ((FilterConfig) config).getInitParameter(name);
 		}
 		return null;
 	}
@@ -736,13 +758,10 @@ public class AppData
 	public OutputStream getOutputStream()
 			throws IOException
 	{
-		if (this.renderResponse != null)
+		Object resp = this.objs[SERVLET_RESPONSE_INDEX];
+		if (resp instanceof ServletResponse)
 		{
-			return this.renderResponse.getPortletOutputStream();
-		}
-		if (this.response != null)
-		{
-			return this.response.getOutputStream();
+			return ((ServletResponse) resp).getOutputStream();
 		}
 		return null;
 	}
