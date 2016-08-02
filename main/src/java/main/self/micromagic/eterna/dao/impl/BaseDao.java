@@ -148,7 +148,9 @@ public abstract class BaseDao extends AbstractDao
 				Element newLogs = DocumentHelper.createElement("logs");
 				while (itr.hasNext())
 				{
-					newLogs.add((Node) itr.next());
+					Node tmp = (Node) itr.next();
+					tmp.setParent(null);
+					newLogs.add(tmp);
 				}
 				Element root = logs.getParent();
 				root.remove(logs);

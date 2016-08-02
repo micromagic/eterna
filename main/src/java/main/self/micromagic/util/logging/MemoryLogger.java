@@ -126,7 +126,9 @@ public class MemoryLogger
 				Element newLogs = DocumentHelper.createElement("logs");
 				while (itr.hasNext())
 				{
-					newLogs.add((Node) itr.next());
+					Node tmp = (Node) itr.next();
+					tmp.setParent(null);
+					newLogs.add(tmp);
 				}
 				Element root = this.logNodes.getParent();
 				root.remove(this.logNodes);

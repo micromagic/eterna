@@ -171,13 +171,14 @@ public class AppData
 		{
 			log.error("Error in init app log type.", ex);
 		}
-		int count = 3;
+		int minCount = 3;
+		int count = minCount;
 		try
 		{
 			count = Integer.parseInt(Utility.getProperty(OBJECT_COUNT_PROPERTY));
 		}
 		catch (Exception ex) {}
-		OBJECT_COUNT = count < 3 ? 3 : count;
+		OBJECT_COUNT = count < minCount ? minCount : count;
 	}
 
 	public AppData()
@@ -476,7 +477,9 @@ public class AppData
 				Element newLogs = DocumentHelper.createElement("logs");
 				while (itr.hasNext())
 				{
-					newLogs.add((Node) itr.next());
+					Node tmp = (Node) itr.next();
+					tmp.setParent(null);
+					newLogs.add(tmp);
 				}
 				Element root = logs.getParent();
 				root.remove(logs);
