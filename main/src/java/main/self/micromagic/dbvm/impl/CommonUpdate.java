@@ -18,20 +18,47 @@ package self.micromagic.dbvm.impl;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import self.micromagic.dbvm.VersionManager;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.impl.UpdateImpl;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.util.container.ThreadCache;
 
 /**
  * 公共执行器的实现类, 用于处理执行时的日志记录.
  */
 public class CommonUpdate extends UpdateImpl
 {
+	/**
+	 * 线程缓存中存放线程信息的名称.
+	 */
+	public static final String THREAD_INFO_NAME = "dbvm.update.threadInfo";
+
+	/**
+	 * 初始化线程信息.
+	 */
+	public static void initThreadInfo(Update insert, int version, long timeFix)
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		cache.setProperty(THREAD_INFO_NAME, new UpdateThreadInfo(insert, version, timeFix));
+	}
+
+	/**
+	 * 清除线程信息.
+	 */
+	public static void clearThreadInfo()
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		cache.removeProperty(THREAD_INFO_NAME);
+	}
+
+	private static UpdateThreadInfo getThreadInfo()
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		return (UpdateThreadInfo) cache.getProperty(THREAD_INFO_NAME);
+	}
+
 	public Object create()
 			throws EternaException
 	{
@@ -43,116 +70,83 @@ public class CommonUpdate extends UpdateImpl
 	public void execute(Connection conn)
 			throws EternaException, SQLException
 	{
-		this.log(this.getPreparedScript());
-		boolean success = false;
-		try
-		{
-			if (!logScriptMode)
-			{
-				super.execute(conn);
-				success = true;
-			}
-		}
-		finally
-		{
-			if (success && !logScriptMode)
-			{
-				executedScript.add(this.getPreparedScript());
-			}
-			else
-			{
-				leftScript.add(this.getPreparedScript());
-			}
-		}
+		this.executeWithInfo(conn, false, getThreadInfo());
 	}
 
 	public int executeUpdate(Connection conn)
 			throws EternaException, SQLException
 	{
-		this.log(this.getPreparedScript());
+		return this.executeWithInfo(conn, true, getThreadInfo());
+	}
+
+	private int executeWithInfo(Connection conn, boolean needResult, UpdateThreadInfo info)
+			throws EternaException, SQLException
+	{
+		String script = this.getPreparedScript();
+		boolean hasParam = this.hasActiveParam();
 		boolean success = false;
+		int result = -1;
+		long now = System.currentTimeMillis() + info.timeFix;
 		try
 		{
-			if (!logScriptMode)
+			if (!info.hasError)
 			{
-				int r = super.executeUpdate(conn);
+				if (needResult)
+				{
+					result = super.executeUpdate(conn);
+				}
+				else
+				{
+					super.execute(conn);
+				}
 				success = true;
-				return r;
 			}
-			return 0;
+			return result;
 		}
 		finally
 		{
-			if (success && !logScriptMode)
+			if (success)
 			{
-				executedScript.add(this.getPreparedScript());
+				String msg = "exec sql:".concat(script);
+				VersionManager.log(msg, null);
+				info.insert.setObject("executed", new Byte((byte) 1));
 			}
 			else
 			{
-				leftScript.add(this.getPreparedScript());
+				info.hasError = true;
+				info.insert.setObject("executed", new Byte((byte) 0));
+			}
+			info.insert.setObject("execTime", new java.sql.Timestamp(now));
+			info.insert.setObject("hasParam", hasParam ? new Byte((byte) 1) : new Byte((byte) 0));
+			info.insert.setString("scriptText", script);
+			info.insert.setObject("scriptIndex", new Integer(info.index++));
+			if (info.version >= 3)
+			{
+				info.insert.execute(conn);
 			}
 		}
 	}
 
-	private void log(String sql)
-	{
-		if (!logScriptMode)
-		{
-			// 不记录脚本模式才输出日志
-			String msg = "exec sql:".concat(sql);
-			VersionManager.log(msg, null);
-		}
-		//System.out.println(msg);
-	}
+}
 
-	public static void saveScript(Update insert, Connection conn)
-			throws SQLException
-	{
-		insert.setObject("executed", new Byte((byte) 1));
-		saveScript0(executedScript, insert, conn);
-		insert.setObject("executed", new Byte((byte) 0));
-		saveScript0(leftScript, insert, conn);
-	}
-	private static void saveScript0(List scripts, Update insert, Connection conn)
-			throws SQLException
-	{
-		int index = 1;
-		Iterator itr = scripts.iterator();
-		while (itr.hasNext())
-		{
-			insert.setObject("scriptText", itr.next());
-			insert.setObject("scriptIndex", new Integer(index++));
-			insert.execute(conn);
-		}
-	}
+/**
+ * 更新过程中的线程信息.
+ */
+class UpdateThreadInfo
+{
+	final Update insert;
+	final int version;
+	final long timeFix;
+	int index;
+	boolean hasError;
 
-	/**
-	 * 设置是否为记录脚本的模式.
-	 */
-	public static void setLogScript(boolean mode)
+	public UpdateThreadInfo(Update insert, int version, long timeFix)
 	{
-		logScriptMode = mode;
+		this.version = version;
+		this.insert = insert;
+		this.timeFix = timeFix;
+		this.index = 1;
 	}
-	private static boolean logScriptMode;
-
-	/**
-	 * 清除所有的脚本.
-	 */
-	public static void clearScript()
-	{
-		executedScript.clear();
-		leftScript.clear();
-		logScriptMode = false;
-	}
-
-	/**
-	 * 已执行的脚本.
-	 */
-	private static List executedScript = new LinkedList();
-
-	/**
-	 * 未执行的脚本.
-	 */
-	private static List leftScript = new LinkedList();
 
 }
+

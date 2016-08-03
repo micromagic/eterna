@@ -26,7 +26,7 @@ sub:{config,eterna,table,index,data}
 data
 log:{$data}
 create:{,self.micromagic.dbvm.DataDesc}
-attr:{$body:script,$serial(pattern=DBVM000000):name}
+attr:{$body:script,$serial(pattern=DBVM000000):name,$element:element}
 stack:{registerObject,n:0,g:0}
 
 
@@ -36,7 +36,7 @@ log:{$table}
 create:{,self.micromagic.dbvm.TableDesc}
 attr:{
 	$serial(pattern=DBVM000000):name,name(i=0):tableName,newName(m=0),
-	opt(m=0,i=0):optName,desc(m=0,i=0)
+	opt(m=0,i=0):optName,desc(m=0,i=0),$element:element
 }
 sub:{tableColumn}
 stack:{registerObject,n:0,g:0}
@@ -58,8 +58,8 @@ index
 log:{$index}
 create:{,self.micromagic.dbvm.IndexDesc}
 attr:{
-	$serial(pattern=DBVM000000):name,name(i=0):indexName,tableName(i=0),
-	opt(m=0,i=0):optName,desc(m=0,i=0),type(m=0,i=0),ref(m=0,i=0):refName
+	$serial(pattern=DBVM000000):name,name(i=0):indexName,tableName(i=0),opt(m=0,i=0):optName,
+	desc(m=0,i=0),type(m=0,i=0),ref(m=0,i=0):refName,$element:element
 }
 sub:{indexColumn,refColumn}
 stack:{registerObject,n:0,g:0}

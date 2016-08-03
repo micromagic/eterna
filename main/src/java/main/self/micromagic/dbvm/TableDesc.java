@@ -23,7 +23,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import self.micromagic.dbvm.impl.CommonUpdate;
+import org.dom4j.Element;
+
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
@@ -276,8 +277,6 @@ public class TableDesc extends AbstractObject
 		catch (Exception ex)
 		{
 			err = ex;
-			// 如果出错, 接下来的执行设置为记录模式
-			CommonUpdate.setLogScript(true);
 		}
 		Iterator itr = list.iterator();
 		while (itr.hasNext())
@@ -295,8 +294,6 @@ public class TableDesc extends AbstractObject
 					{
 						err = ex;
 					}
-					// 如果出错, 接下来的执行设置为记录模式
-					CommonUpdate.setLogScript(true);
 				}
 			}
 		}
@@ -313,5 +310,16 @@ public class TableDesc extends AbstractObject
 			throw new EternaException(err);
 		}
 	}
+
+	public Element getElement()
+	{
+		return this.element;
+	}
+
+	public void setElement(Element element)
+	{
+		this.element = element;
+	}
+	private Element element;
 
 }

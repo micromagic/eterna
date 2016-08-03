@@ -19,11 +19,18 @@ package self.micromagic.dbvm;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.dom4j.Element;
+
 /**
  * 数据库操作的描述.
  */
 public interface OptDesc
 {
+	/**
+	 * 获取操作的定义.
+	 */
+	Element getElement();
+
 	/**
 	 * 执行描述所定义的数据库操作.
 	 */

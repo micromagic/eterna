@@ -19,6 +19,8 @@ package self.micromagic.dbvm;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.dom4j.Element;
+
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -65,5 +67,16 @@ public class DataDesc extends AbstractObject
 	{
 		return this.factory;
 	}
+
+	public Element getElement()
+	{
+		return this.element;
+	}
+
+	public void setElement(Element element)
+	{
+		this.element = element;
+	}
+	private Element element;
 
 }

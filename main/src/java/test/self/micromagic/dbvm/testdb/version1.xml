@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dbVersion>
-	
+
 	<!-- 版本信息表 -->
 	<table name="T01" desc="表1">
 		<column name="versionName" type="String(300)" desc="版本名称" nullable="false"/>

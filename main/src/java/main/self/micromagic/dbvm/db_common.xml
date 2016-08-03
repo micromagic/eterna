@@ -22,8 +22,56 @@
 	<factory>
 		<objs>
 
-			<!-- 添加版本更新的执行脚本 -->
-			<update name="addVersionScript">
+			<!-- 获取版本信息 v3 -->
+			<query name="getVersionInfo">
+				<prepared-sql noLine="true">
+					select versionValue, errInfo, step, optStatus
+					from #const(version_info) where versionName = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+				</parameters>
+				<readers>
+					<reader name="versionValue" type="int" />
+					<reader name="errInfo" type="String" />
+					<reader name="step" type="int" />
+					<reader name="optStatus" type="String" />
+				</readers>
+			</query>
+			<!-- 添加步骤信息 v3 -->
+			<update name="addStepInfo">
+				<prepared-sql noLine="true">
+					insert into #const(version_info) (versionName, versionValue, lastModified)
+					values (?, 1, #const(now))
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+				</parameters>
+			</update>
+			<!-- 设置步骤信息 v3 -->
+			<update name="setStepInfo">
+				<prepared-sql noLine="true">
+					update #const(version_info) set lastModified = #const(now), step = ?, optStatus = ?
+					where versionName = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="step" type="int" />
+					<parameter name="optStatus" type="String" />
+					<parameter name="versionName" type="String" />
+				</parameters>
+			</update>
+			<!-- 清除步骤脚本 v3 -->
+			<update name="clearStepScript">
+				<prepared-sql noLine="true">
+					delete from #const(version_script)
+					where versionName = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+				</parameters>
+			</update>
+			<!-- 添加步骤更新的执行脚本 v3 -->
+			<update name="addStepScript">
 				<prepared-sql noLine="true">
 					insert into #const(version_script) (#auto[insertN])
 					values (#auto[insertV])
@@ -31,10 +79,26 @@
 				<parameters>
 					<parameter name="versionName" type="String" />
 					<parameter name="versionValue" type="int" />
-					<parameter name="executed" type="byte" />
-					<parameter name="scriptText" type="String" />
+					<parameter name="step" type="int" />
 					<parameter name="scriptIndex" type="int" />
 					<parameter name="execTime" type="Datetime" />
+					<parameter name="executed" type="byte" />
+					<parameter name="hasParam" type="byte" />
+					<parameter name="scriptText" type="String" />
+				</parameters>
+			</update>
+			<!-- 添加步骤的出错信息 v3 -->
+			<update name="addStepError">
+				<prepared-sql noLine="true">
+					insert into #const(version_opt_log) (optTime, #auto[insertN])
+					values (#const(now), #auto[insertV])
+				</prepared-sql>
+				<parameters>
+					<parameter name="versionName" type="String" />
+					<parameter name="versionValue" type="int" />
+					<parameter name="step" type="int" />
+					<parameter name="optMessage" type="String" />
+					<parameter name="optContent" type="String" />
 				</parameters>
 			</update>
 

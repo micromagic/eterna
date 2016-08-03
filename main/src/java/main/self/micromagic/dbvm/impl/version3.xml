@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+
+	<!-- 版本操作日志表 -->
+	<table name="#const(version_opt_log)" desc="版本操作日志表">
+		<column name="versionName" type="String(300)" desc="版本名称"/>
+		<column name="versionValue" type="int" desc="版本值"/>
+		<column name="step" type="int" desc="步骤"/>
+		<column name="scriptIndex" type="int" desc="脚本的顺序"/>
+		<column name="optMessage" type="String(1000)" desc="操作信息"/>
+		<column name="optContent" type="Clob" desc="操作内容"/>
+		<column name="optUser" type="String(100)" desc="操作者"/>
+		<column name="optTime" type="Datetime" desc="操作时间"/>
+	</table>
+
+	<!-- 修改 版本信息表 -->
+	<table name="#const(version_info)" opt="modify">
+		<column name="step" type="int" desc="步骤"/>
+		<column name="optStatus" type="String(20)" desc="操作状态"/>
+	</table>
+
+	<!-- 修改 脚本信息表 -->
+	<table name="#const(version_script)" opt="modify">
+		<column name="step" type="int" desc="步骤"/>
+		<column name="hasParam" type="byte" desc="是否有参数"/>
+	</table>
+
+</dbVersion>

@@ -99,6 +99,8 @@
 			<constant name="version_info" value="T_SYS_VERSION_INFO" />
 			<!-- 存放数据库版本日志的表名 -->
 			<constant name="version_log" value="T_SYS_VERSION_LOG" />
+			<!-- 存放数据库版本操作日志的表名 -->
+			<constant name="version_opt_log" value="T_SYS_VERSION_OPT_LOG" />
 			<!-- 存放数据库版本更新时脚本的表名 -->
 			<constant name="version_script" value="T_SYS_VERSION_SCRIPT" />
 

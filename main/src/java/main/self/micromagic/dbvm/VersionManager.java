@@ -47,6 +47,33 @@ import self.micromagic.util.ref.StringRef;
 public class VersionManager
 {
 	/**
+	 * 操作状态-步骤开始.
+	 */
+	public static final String OPT_STATUS_BEGIN = "BEGIN";
+	/**
+	 * 操作状态-步骤完成.
+	 */
+	public static final String OPT_STATUS_DONE = "DONE";
+	/**
+	 * 操作状态-版本完成.
+	 */
+	public static final String OPT_STATUS_FINISH = "FINISH";
+
+	/**
+	 * 没有版本表的版本值.
+	 */
+	private static final int VERSION_VALUE_NONE = -1;
+	/**
+	 * 出错的版本值.
+	 */
+	private static final int VERSION_VALUE_ERROR = -2;
+
+	/**
+	 * 版本2.
+	 */
+	private static final int V2 = 2;
+
+	/**
 	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
 	 *
 	 * @param conn         数据库连接, 注: 执行完毕后此连接会被关闭
@@ -68,6 +95,19 @@ public class VersionManager
 	 */
 	public boolean doCheck(Connection conn, String packagePath, ClassLoader loader)
 	{
+		ConfigResource res = ContainerManager.createClassPathResource(packagePath, loader);
+		return this.doCheck(conn, res, loader);
+	}
+
+	/**
+	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
+	 *
+	 * @param conn    数据库连接, 注: 执行完毕后此连接会被关闭
+	 * @param res     版本信息所在的配置资源路径
+	 * @param loader  版本信息所属的classloader
+	 */
+	public boolean doCheck(Connection conn, ConfigResource res, ClassLoader loader)
+	{
 		if (loader == null)
 		{
 			loader = Thread.currentThread().getContextClassLoader();
@@ -84,7 +124,7 @@ public class VersionManager
 			DataBaseLocker.lock(conn, VERSION_LOCK_NAME, null, true);
 			synchronized (VersionManager.class)
 			{
-				result = this.checkVersion0(conn, packagePath, loader);
+				result = this.checkVersion0(conn, res, loader);
 			}
 			success = true;
 		}
@@ -112,31 +152,31 @@ public class VersionManager
 		return result;
 	}
 
-	private boolean checkVersion0(Connection conn, String packagePath, ClassLoader loader)
+	private boolean checkVersion0(Connection conn, ConfigResource res, ClassLoader loader)
 			throws Exception
 	{
-		ConfigResource res = ContainerManager.createClassPathResource(packagePath, loader);
 		String vName = StringTool.isEmpty(this.versionNamePrefix) ? res.getName()
 				: this.versionNamePrefix.concat(res.getName());
 		String dbName = conn.getMetaData().getDatabaseProductName();
 		EternaFactory f = DataBaseLocker.getFactory(dbName);
 		int version = getVersionValue(conn, vName, f);
-		if (version == -2)
+		if (version == VERSION_VALUE_ERROR)
 		{
 			// 版本有错误直接退出
 			return false;
 		}
-		if (version == -1)
+		if (version == VERSION_VALUE_NONE)
 		{
-			// 版本信息为-1, 表示没有版本表, 需要创建版本表
-			upperVersion(conn, DataBaseLocker.CONFIG_PREFIX + "impl/version1.xml",
-					ETERNA_VERSION_TABLE, 1, VersionManager.class.getClassLoader());
+			// 没有版本表, 需要创建版本表
+			this.upperVersion(conn, DataBaseLocker.CONFIG_PREFIX + "impl/version1.xml",
+					ETERNA_VERSION_TABLE, 1, 0, VersionManager.class.getClassLoader());
 			version = 0;
 		}
-		int tVersion = getVersionValue(conn, ETERNA_VERSION_TABLE, f);
-		if (tVersion < eternaMaxVersion)
+		int tmpEternaVersion = getVersionValue(conn, ETERNA_VERSION_TABLE, f);
+		this.currentEternaVersion = tmpEternaVersion;
+		if (tmpEternaVersion < MAX_ETERNA_VERSION)
 		{
-			if (tVersion == -2)
+			if (tmpEternaVersion == VERSION_VALUE_ERROR)
 			{
 				log.error("Version tables has error.");
 				return false;
@@ -145,19 +185,25 @@ public class VersionManager
 			ClassLoader tmpLoader = VersionManager.class.getClassLoader();
 			ConfigResource tmp = ContainerManager.createClassPathResource(
 					DataBaseLocker.CONFIG_PREFIX + "impl/", tmpLoader);
-			checkVersion0(conn, tVersion + 1, ETERNA_VERSION_TABLE, tmp, tmpLoader);
+			this.checkVersion0(f, conn, tmpEternaVersion + 1, ETERNA_VERSION_TABLE,
+					tmp, tmpLoader, true);
 		}
-		version++;
-		checkVersion0(conn, version, vName, res, loader);
+		this.checkVersion0(f, conn, version + 1, vName, res, loader, false);
 		return true;
 	}
-	private static void checkVersion0(Connection conn, int version, String vName,
-			ConfigResource packagePath, ClassLoader loader)
+	private void checkVersion0(EternaFactory factory, Connection conn, int version, String vName,
+			ConfigResource res, ClassLoader loader, boolean eternaVersion)
 			throws Exception
 	{
+		int beginStep = this.getStepIndex(conn, vName, factory);
+		if (beginStep > 0)
+		{
+			// 存在未执行的步骤, 需要降一个版本
+			version--;
+		}
 		// 循环执行更新到最新版本
 		String versionFile = "version".concat(version + ".xml");
-		ConfigResource vRes = packagePath.getResource(versionFile);
+		ConfigResource vRes = res.getResource(versionFile);
 		InputStream tmpStream = vRes.getAsStream();
 		while (tmpStream != null)
 		{
@@ -166,22 +212,20 @@ public class VersionManager
 				tmpStream.close();
 			}
 			catch (IOException ex) {}
-			try
+			this.upperVersion(conn, vRes.getConfig(), vName, version, beginStep, loader);
+			if (eternaVersion)
 			{
-				upperVersion(conn, vRes.getConfig(), vName, version, loader);
-			}
-			finally
-			{
-				CommonUpdate.clearScript();
+				this.currentEternaVersion = version;
 			}
 			version++;
+			beginStep = 0;
 			versionFile = "version".concat(version + ".xml");
-			vRes = packagePath.getResource(versionFile);
+			vRes = res.getResource(versionFile);
 			tmpStream = vRes.getAsStream();
 		}
 	}
-	private static void upperVersion(Connection conn, String config, String vName,
-			int version, ClassLoader loader)
+	private void upperVersion(Connection conn, String config, String vName,
+			int version, int beginStep, ClassLoader loader)
 			throws Exception
 	{
 		log.info("Begin " + vName + " up to " + version + ". --------------------");
@@ -200,7 +244,7 @@ public class VersionManager
 		String errMsg = null;
 		try
 		{
-			success = upperVersion0(conn, config, vName, version, loader, f);
+			success = this.upperVersion0(conn, config, vName, version, beginStep, loader, f);
 		}
 		catch (Exception ex)
 		{
@@ -209,6 +253,7 @@ public class VersionManager
 		}
 		finally
 		{
+			c.destroy();
 			if (success)
 			{
 				log.info("End   " + vName + " up to " + version + ". --------------------");
@@ -221,49 +266,124 @@ public class VersionManager
 					errMsg = "Other error.";
 				}
 			}
-			// 更新版本信息后提交
-			addVersionLog(conn, vName, version, errMsg, f);
-			conn.commit();
-			if (!success)
-			{
-				// 如果没有执行成功, 添加脚本信息
-				Update insert = (Update) f.createObject("addVersionScript");
-				insert.setString("versionName", vName);
-				insert.setObject("versionValue", Utility.createInteger(version));
-				insert.setObject("execTime", new java.sql.Timestamp(System.currentTimeMillis()));
-				CommonUpdate.saveScript(insert, conn);
-				conn.commit();
-			}
+			this.addVersionLog(conn, vName, version, errMsg, f);
 		}
 	}
-	private static boolean upperVersion0(Connection conn, String config, String vName,
-			int version, ClassLoader loader, Factory factory)
+	private boolean upperVersion0(Connection conn, String config, String vName,
+			int version, int beginStep, ClassLoader loader, Factory factory)
 			throws Exception
 	{
 		String[] names = factory.getObjectNames(OptDesc.class);
-		Exception err = null;
-		for (int i = 0; i < names.length; i++)
+		int index = beginStep > 0 ? beginStep - 1 : 0;
+		Update insert = (Update) factory.createObject("addStepScript");
+		long timeFix = DataBaseLocker.getDataBaseTime(conn).getTime() - System.currentTimeMillis();
+		try
 		{
-			Object obj = factory.createObject(names[i]);
-			if (obj instanceof OptDesc)
+			for (; index < names.length; index++)
 			{
-				try
+				Object obj = factory.createObject(names[index]);
+				if (obj instanceof OptDesc)
 				{
-					((OptDesc) obj).exec(conn);
-				}
-				catch (Exception ex)
-				{
-					err = ex;
-					// 如果出错, 接下来的执行设置为记录模式
-					CommonUpdate.setLogScript(true);
+					int step = index + 1;
+					try
+					{
+						insert.setString("versionName", vName);
+						insert.setObject("versionValue", Utility.createInteger(version));
+						insert.setObject("step", Utility.createInteger(step));
+						CommonUpdate.initThreadInfo(insert, this.currentEternaVersion, timeFix);
+						this.setStepInfo(conn, vName, factory, step, OPT_STATUS_BEGIN);
+						((OptDesc) obj).exec(conn);
+						this.setStepInfo(conn, vName, factory, step, OPT_STATUS_DONE);
+					}
+					catch (Exception ex)
+					{
+						this.addStepError(conn, vName, version, step, ex, factory, (OptDesc) obj);
+						String msg = "Error in [" + vName + "]'s version ["
+								+ version + "] step [" + step + "].";
+						log.error(msg, ex);
+						throw ex;
+					}
 				}
 			}
 		}
-		if (err != null)
+		finally
 		{
-			throw err;
+			CommonUpdate.clearThreadInfo();
 		}
+		this.setStepInfo(conn, vName, factory, -1, OPT_STATUS_FINISH);
 		return true;
+	}
+
+	/**
+	 * 添加步骤的出错信息.
+	 */
+	private void addStepError(Connection conn, String vName, int version, int step,
+			Throwable error, Factory factory, OptDesc opt)
+			throws SQLException
+	{
+		if (this.currentEternaVersion <= V2)
+		{
+			return;
+		}
+		Update insert = (Update) factory.createObject("addStepError");
+		insert.setString("versionName", vName);
+		insert.setObject("versionValue", Utility.createInteger(version));
+		insert.setObject("step", Utility.createInteger(step));
+		insert.setString("optMessage", error.toString());
+		insert.setString("optContent", opt.getElement().asXML());
+		insert.executeUpdate(conn);
+		conn.commit();
+	}
+
+	private void setStepInfo(Connection conn, String vName, Factory factory,
+			int step, String optStatus)
+			throws SQLException
+	{
+		if (this.currentEternaVersion <= V2)
+		{
+			return;
+		}
+		Update u = (Update) factory.createObject("setStepInfo");
+		u.setObject("step", step == -1 ? null : Utility.createInteger(step));
+		u.setString("optStatus", optStatus);
+		u.setString("versionName", vName);
+		u.execute(conn);
+		if (optStatus == OPT_STATUS_BEGIN || optStatus == OPT_STATUS_DONE)
+		{
+			u = (Update) factory.createObject("clearStepScript");
+			u.setString("versionName", vName);
+			u.executeUpdate(conn);
+		}
+		conn.commit();
+	}
+
+	/**
+	 * 获取当前应该执行哪一步.
+	 */
+	private int getStepIndex(Connection conn, String vName, Factory factory)
+			throws SQLException
+	{
+		if (this.currentEternaVersion <= V2)
+		{
+			return 0;
+		}
+		Query q = (Query) factory.createObject("getVersionInfo");
+		q.setString("versionName", vName);
+		ResultIterator ritr = q.executeQuery(conn);
+		if (ritr.hasNext())
+		{
+			ResultRow row = ritr.nextRow();
+			int step = row.getInt("step");
+			String optStatus = row.getString("optStatus");
+			return OPT_STATUS_DONE.equalsIgnoreCase(optStatus) ? step + 1 : step;
+		}
+		else
+		{
+			Update u = (Update) factory.createObject("addStepInfo");
+			u.setString("versionName", vName);
+			u.executeUpdate(conn);
+		}
+		return 0;
 	}
 
 	/**
@@ -272,7 +392,7 @@ public class VersionManager
 	private static int getVersionValue(Connection conn, String vName, Factory factory)
 	{
 		Query q = (Query) factory.createObject("getVersionValue");
-		int version = -1;
+		int version = VERSION_VALUE_NONE;
 		try
 		{
 			q.setString("versionName", vName);
@@ -286,7 +406,7 @@ public class VersionManager
 				{
 					log.warn("The db [" + vName + "] can't upper, because has error: "
 							+ errInfo + ".");
-					return -2;
+					return VERSION_VALUE_ERROR;
 				}
 			}
 			else
@@ -301,13 +421,13 @@ public class VersionManager
 	/**
 	 * 添加版本更新日志及设置版本记录.
 	 */
-	private static void addVersionLog(Connection conn, String vName, int version,
+	private void addVersionLog(Connection conn, String vName, int version,
 			String errInfo, Factory factory)
 			throws SQLException
 	{
 		Integer v = Utility.createInteger(version);
 		Update u;
-		if (version == 1)
+		if (version == 1 && this.currentEternaVersion <= V2)
 		{
 			u = (Update) factory.createObject("addVersionValue");
 		}
@@ -315,15 +435,20 @@ public class VersionManager
 		{
 			u = (Update) factory.createObject("setVersionValue");
 		}
-		u.setString("versionName", vName);
-		u.setString("errInfo", errInfo);
-		u.setObject("versionValue", v);
-		u.execute(conn);
+		if (this.currentEternaVersion <= V2 || errInfo != null)
+		{
+			// 大于2版本时, 版本信息已记录, 只有出错时才需要修改
+			u.setString("versionName", vName);
+			u.setString("errInfo", errInfo);
+			u.setObject("versionValue", v);
+			u.executeUpdate(conn);
+		}
 		u = (Update) factory.createObject("addVersionLog");
 		u.setString("versionName", vName);
 		u.setString("errInfo", errInfo);
 		u.setObject("versionValue", v);
-		u.execute(conn);
+		u.executeUpdate(conn);
+		conn.commit();
 	}
 
 	/**
@@ -349,14 +474,19 @@ public class VersionManager
 	private static final String VERSION_LOCK_NAME = "eterna.version.lock";
 
 	/**
-	 * 版本系统表的当前最高版本.
+	 * 版本系统表的最高版本.
 	 */
-	private static final int eternaMaxVersion = 2;
+	private static final int MAX_ETERNA_VERSION = 3;
 
 	/**
 	 * 版本系统表的版本标识.
 	 */
 	private static final String ETERNA_VERSION_TABLE = "__eterna_version_table";
+
+	/**
+	 * 当前版本系统表的版本.
+	 */
+	private int currentEternaVersion;
 
 	/**
 	 * 记录版本更新时的日志.

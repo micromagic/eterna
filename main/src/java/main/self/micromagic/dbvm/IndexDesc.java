@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.dom4j.Element;
+
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -155,5 +157,16 @@ public class IndexDesc extends AbstractObject
 		u.setSubScript(1, this.indexDefiner.getIndexDefine(this, null));
 		u.execute(conn);
 	}
+
+	public Element getElement()
+	{
+		return this.element;
+	}
+
+	public void setElement(Element element)
+	{
+		this.element = element;
+	}
+	private Element element;
 
 }
