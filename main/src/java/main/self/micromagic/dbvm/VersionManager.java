@@ -33,7 +33,6 @@ import self.micromagic.eterna.digester2.ConfigResource;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.digester2.Digester;
 import self.micromagic.eterna.share.EternaException;
-import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Factory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.ResManager;
@@ -158,7 +157,7 @@ public class VersionManager
 		String vName = StringTool.isEmpty(this.versionNamePrefix) ? res.getName()
 				: this.versionNamePrefix.concat(res.getName());
 		String dbName = conn.getMetaData().getDatabaseProductName();
-		EternaFactory f = DataBaseLocker.getFactory(dbName);
+		Factory f = DataBaseLocker.getFactory(dbName);
 		int version = getVersionValue(conn, vName, f);
 		if (version == VERSION_VALUE_ERROR)
 		{
@@ -191,7 +190,7 @@ public class VersionManager
 		this.checkVersion0(f, conn, version + 1, vName, res, loader, false);
 		return true;
 	}
-	private void checkVersion0(EternaFactory factory, Connection conn, int version, String vName,
+	private void checkVersion0(Factory factory, Connection conn, int version, String vName,
 			ConfigResource res, ClassLoader loader, boolean eternaVersion)
 			throws Exception
 	{
@@ -239,7 +238,7 @@ public class VersionManager
 		{
 			throw new EternaException(msg.getString());
 		}
-		EternaFactory f = (EternaFactory) c.getFactory();
+		Factory f = c.getFactory();
 		boolean success = false;
 		String errMsg = null;
 		try
@@ -270,15 +269,15 @@ public class VersionManager
 		}
 	}
 	private boolean upperVersion0(Connection conn, String config, String vName,
-			int version, int beginStep, ClassLoader loader, EternaFactory factory)
+			int version, int beginStep, ClassLoader loader, Factory factory)
 			throws Exception
 	{
 		int index = beginStep > 0 ? beginStep - 1 : 0;
+		int count = factory.getObjectCount();
 		Update insert = (Update) factory.createObject("addStepScript");
 		long timeFix = DataBaseLocker.getDataBaseTime(conn).getTime() - System.currentTimeMillis();
 		try
 		{
-			int count = factory.getObjectCount();
 			for (; index < count; index++)
 			{
 				Object obj;

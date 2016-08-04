@@ -72,6 +72,16 @@ public interface Factory
 	Object createObject(Object key) throws EternaException;
 
 	/**
+	 * 根据给出的编号创建对象.
+	 */
+	Object createObject(int id) throws EternaException;
+
+	/**
+	 * 查询已注册的对象的编号.
+	 */
+	int findObjectId(Object key) throws EternaException;
+
+	/**
 	 * 获取某种类型的对象的所有名称.
 	 */
 	String[] getObjectNames(Class type) throws EternaException;

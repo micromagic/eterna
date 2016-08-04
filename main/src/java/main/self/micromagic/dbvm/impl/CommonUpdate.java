@@ -122,7 +122,14 @@ public class CommonUpdate extends UpdateImpl
 			info.insert.setObject("scriptIndex", new Integer(info.index++));
 			if (info.version >= 3)
 			{
-				info.insert.execute(conn);
+				try
+				{
+					info.insert.execute(conn);
+				}
+				catch (Exception ex)
+				{
+					VersionManager.log("Error in log script [" + script + "].", ex);
+				}
 			}
 		}
 	}
@@ -149,4 +156,3 @@ class UpdateThreadInfo
 	}
 
 }
-

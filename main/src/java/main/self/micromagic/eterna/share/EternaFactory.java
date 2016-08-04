@@ -57,16 +57,6 @@ public interface EternaFactory extends Factory
 	EternaFactory getShareFactory() throws EternaException;
 
 	/**
-	 * 根据给出的编号创建对象.
-	 */
-	Object createObject(int id) throws EternaException;
-
-	/**
-	 * 查询已注册的对象的编号.
-	 */
-	int findObjectId(Object key) throws EternaException;
-
-	/**
 	 * 注销一个已注册的对象.
 	 */
 	void deregisterObject(Object key) throws EternaException;

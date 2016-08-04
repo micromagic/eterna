@@ -39,9 +39,15 @@ public class TypeDefiner
 		this.types[TypeManager.TYPE_LONG] = new TypeDefineDesc("long");
 		this.types[TypeManager.TYPE_DOUBLE] = new TypeDefineDesc("double");
 		this.types[TypeManager.TYPE_STRING] = new CommonString("String");
-		this.types[TypeManager.TYPE_TIMPSTAMP] = new TypeDefineDesc("Datetime");
-		this.types[TypeManager.TYPE_BLOB] = new TypeDefineDesc("Blob");
-		this.types[TypeManager.TYPE_CLOB] = new TypeDefineDesc("Clob");
+		TypeDefineDesc date = new TypeDefineDesc("Datetime");
+		this.types[TypeManager.TYPE_TIMPSTAMP] = date;
+		this.types[TypeManager.TYPE_DATE] = date;
+		TypeDefineDesc blob = new TypeDefineDesc("Blob");
+		this.types[TypeManager.TYPE_BLOB] = blob;
+		this.types[TypeManager.TYPE_STREAM] = blob;
+		TypeDefineDesc clob = new TypeDefineDesc("Clob");
+		this.types[TypeManager.TYPE_CLOB] = clob;
+		this.types[TypeManager.TYPE_BIGSTRING] = clob;
 	}
 	private final TypeDefineDesc[] types
 			= new TypeDefineDesc[TypeManager.TYPES_COUNT];
