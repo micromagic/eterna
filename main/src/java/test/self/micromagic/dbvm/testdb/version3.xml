@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dbVersion>
 
-	<data>insert into #const(tmp) values ('abcdef', 3.5)</data>
+	<script>insert into #const(tmp) values ('abcdef', 3.5)</script>
 
 	<table name="T01" desc="表1 ext" opt="modify">
 		<column name="test2" type="String(20)" desc="错误信息2"/>
 	</table>
-	
+
 	<table name="T02" desc="表2" opt="modify">
+		<column name="value" type="double(3,3)" default="3.14" opt="modify"/>
 		<column name="test" type="String(3)" desc="信息" opt="modify"/>
 	</table>
 

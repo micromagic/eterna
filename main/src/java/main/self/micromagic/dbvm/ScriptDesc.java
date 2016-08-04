@@ -29,9 +29,9 @@ import self.micromagic.util.StringTool;
 
 
 /**
- * 数据库操作定义的描述.
+ * 执行数据库脚本操作定义的描述.
  */
-public class DataDesc extends AbstractObject
+public class ScriptDesc extends AbstractObject
 		implements OptDesc, EternaObject, ConstantDef
 {
 	/**

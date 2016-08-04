@@ -239,7 +239,7 @@ public class VersionManager
 		{
 			throw new EternaException(msg.getString());
 		}
-		Factory f = c.getFactory();
+		EternaFactory f = (EternaFactory) c.getFactory();
 		boolean success = false;
 		String errMsg = null;
 		try
@@ -270,18 +270,27 @@ public class VersionManager
 		}
 	}
 	private boolean upperVersion0(Connection conn, String config, String vName,
-			int version, int beginStep, ClassLoader loader, Factory factory)
+			int version, int beginStep, ClassLoader loader, EternaFactory factory)
 			throws Exception
 	{
-		String[] names = factory.getObjectNames(OptDesc.class);
 		int index = beginStep > 0 ? beginStep - 1 : 0;
 		Update insert = (Update) factory.createObject("addStepScript");
 		long timeFix = DataBaseLocker.getDataBaseTime(conn).getTime() - System.currentTimeMillis();
 		try
 		{
-			for (; index < names.length; index++)
+			int count = factory.getObjectCount();
+			for (; index < count; index++)
 			{
-				Object obj = factory.createObject(names[index]);
+				Object obj;
+				try
+				{
+					obj = factory.createObject(index);
+				}
+				catch (EternaException ex)
+				{
+					// 如果中间有对象不存在则继续下一个
+					continue;
+				}
 				if (obj instanceof OptDesc)
 				{
 					int step = index + 1;

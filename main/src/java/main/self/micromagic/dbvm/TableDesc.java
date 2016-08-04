@@ -192,6 +192,12 @@ public class TableDesc extends AbstractObject
 				u.setSubScript(1, s);
 				u.execute(conn);
 			}
+			if (this.desc != null)
+			{
+				// 修改时注释需要判空
+				u.setSubScript(1, this.comment.getComment(this));
+				u.execute(conn);
+			}
 			this.execColumnModify(u, conn);
 		}
 	}
@@ -218,13 +224,6 @@ public class TableDesc extends AbstractObject
 			else
 			{
 				update.setSubScript(1, buf.toString(), m);
-			}
-			if (this.desc != null)
-			{
-				// 修改时注释需要判空
-				Update tmp = this.factory.createUpdate(COMMON_EXEC);
-				tmp.setSubScript(1, this.comment.getComment(this));
-				paramList.add(tmp);
 			}
 			this.execWithList(update, paramList, conn);
 		}

@@ -19,13 +19,20 @@
 dbVersion
 log:{$dbVersion}
 create:{,${factory},1}
-sub:{config,eterna,table,index,data}
+sub:{table,index,script,config,eterna,data}
 
 
+## script
+script
+log:{$script}
+create:{,self.micromagic.dbvm.ScriptDesc}
+attr:{$body:script,$serial(pattern=DBVM000000):name,$element:element}
+stack:{registerObject,n:0,g:0}
+# @deprecated
 ## data
 data
 log:{$data}
-create:{,self.micromagic.dbvm.DataDesc}
+create:{,self.micromagic.dbvm.ScriptDesc}
 attr:{$body:script,$serial(pattern=DBVM000000):name,$element:element}
 stack:{registerObject,n:0,g:0}
 

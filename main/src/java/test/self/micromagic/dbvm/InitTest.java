@@ -50,8 +50,8 @@ public class InitTest extends TestCase
 		ColumnDesc columnDesc = (ColumnDesc) tableDesc.columns.get(0);
 		System.out.println(columnDefiner.getColumnDefine(tableDesc, columnDesc, null));
 
-		names = f.getObjectNames(DataDesc.class);
-		DataDesc dataDesc = (DataDesc) f.createObject(names[0]);
+		names = f.getObjectNames(ScriptDesc.class);
+		ScriptDesc dataDesc = (ScriptDesc) f.createObject(names[0]);
 		System.out.println(names[0] + ":" + dataDesc.script);
 		assertTrue(dataDesc.script.endsWith(" now()"));
 	}
@@ -61,8 +61,8 @@ public class InitTest extends TestCase
 		EternaFactory f = initTestFactory("test02.xml");
 		String[] names;
 
-		names = f.getObjectNames(DataDesc.class);
-		DataDesc dataDesc = (DataDesc) f.createObject(names[0]);
+		names = f.getObjectNames(ScriptDesc.class);
+		ScriptDesc dataDesc = (ScriptDesc) f.createObject(names[0]);
 		System.out.println(names[0] + ":" + dataDesc.script);
 		assertEquals("set c1,= now()", dataDesc.script);
 	}
