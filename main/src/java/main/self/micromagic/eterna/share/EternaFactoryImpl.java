@@ -1057,6 +1057,11 @@ public class EternaFactoryImpl extends AbstractFactory
 		return names;
 	}
 
+	public int getObjectCount()
+	{
+		return this.objectList.size();
+	}
+
 	// 存放对象的容器
 	private final Map objectMap = new HashMap();
 	private List objectList = new ArrayList();

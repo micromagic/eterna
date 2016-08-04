@@ -74,7 +74,12 @@ public interface Factory
 	/**
 	 * 获取某种类型的对象的所有名称.
 	 */
-	String[] getObjectNames(Class type);
+	String[] getObjectNames(Class type) throws EternaException;
+
+	/**
+	 * 获取工厂中注册的对象个数.
+	 */
+	int getObjectCount() throws EternaException;
 
 	/**
 	 * 判断某个对象是否存在.
