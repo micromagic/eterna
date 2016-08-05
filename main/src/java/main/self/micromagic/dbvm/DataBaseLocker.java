@@ -63,7 +63,8 @@ public class DataBaseLocker
 	}
 
 	/**
-	 * 释放连接所对应的数据库.
+	 * 释放连接所对应的数据库. <p>
+	 * 注: 释放锁时会提交事务.
 	 *
 	 * @param conn      数据库连接
 	 * @param lockName  数据库锁的名称
@@ -76,7 +77,7 @@ public class DataBaseLocker
 		Update modify = f.createUpdate("modifyLockInfo");
 		modify.setString("lockValue1", RELEASED_VALUE);
 		modify.setString("lockName", lockName);
-		String nowLockValue = getRuntimeName() + ":" + conn.hashCode();
+		String nowLockValue = makeLockValue(conn);
 		modify.setString("lockValue2", nowLockValue);
 		modify.setIgnore("userId");
 		modify.executeUpdate(conn);
@@ -84,7 +85,35 @@ public class DataBaseLocker
 	}
 
 	/**
-	 * 锁住连接所对应的数据库.
+	 * 刷新锁数据库的时间.
+	 *
+	 * @param conn      数据库连接
+	 * @param lockName  数据库锁的名称
+	 * @return  刷新时间是否成功
+	 */
+	public static boolean flushLockTime(Connection conn, String lockName)
+	{
+		try
+		{
+			String dbName = conn.getMetaData().getDatabaseProductName();
+			EternaFactory f = getFactory(dbName);
+			Update modify = f.createUpdate("modifyLockInfo");
+			String nowLockValue = makeLockValue(conn);
+			modify.setString("lockValue2", nowLockValue);
+			modify.setString("lockName", lockName);
+			modify.setIgnore("userId");
+			modify.setIgnore("lockValue1");
+			return modify.executeUpdate(conn) > 0;
+		}
+		catch (Exception ex)
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * 锁住连接所对应的数据库. <p>
+	 * 注: 同一个名称的锁不能同时用在事务锁和跨事务锁上.
 	 *
 	 * @param conn             数据库连接
 	 * @param lockName         数据库锁的名称
@@ -108,7 +137,8 @@ public class DataBaseLocker
 	}
 
 	/**
-	 * 锁住连接所对应的数据库.
+	 * 锁住连接所对应的数据库. <p>
+	 * 注: 如果是跨事务的锁, 可能会提交或回滚事务.
 	 *
 	 * @param conn             数据库连接
 	 * @param lockName         数据库锁的名称
@@ -119,12 +149,29 @@ public class DataBaseLocker
 			boolean overTransaction)
 			throws SQLException, EternaException
 	{
+		lock(conn, lockName, userId, overTransaction, defaultMaxWaitTime);
+	}
+
+	/**
+	 * 锁住连接所对应的数据库. <p>
+	 * 注: 如果是跨事务的锁, 可能会提交或回滚事务.
+	 *
+	 * @param conn             数据库连接
+	 * @param lockName         数据库锁的名称
+	 * @param userId           当前登录的用户名
+	 * @param overTransaction  是否要添加一个跨事务的锁
+	 * @param maxWaitTime      强行获取锁的最大等待时间(毫秒)
+	 */
+	public static void lock(Connection conn, String lockName, String userId,
+			boolean overTransaction, long maxWaitTime)
+			throws SQLException, EternaException
+	{
 		String dbName = conn.getMetaData().getDatabaseProductName();
 		EternaFactory f = getFactory(dbName);
 		Query query = f.createQuery("getLockInfo");
 		query.setString("lockName", lockName);
 		Update modify = f.createUpdate("modifyLockInfo");
-		String nowLockValue = getRuntimeName() + ":" + conn.hashCode();
+		String nowLockValue = makeLockValue(conn);
 		modify.setString("userId", userId);
 		if (overTransaction)
 		{
@@ -178,7 +225,7 @@ public class DataBaseLocker
 				{
 					Update update = f.createUpdate("addLockInfo");
 					update.setString("lockName", lockName);
-					update.setString("lockValue", nowLockValue);
+					update.setString("lockValue", overTransaction ? nowLockValue : null);
 					update.setString("userId", userId);
 					if (update.executeUpdate(conn) == 0)
 					{
@@ -264,6 +311,14 @@ public class DataBaseLocker
 		}
 	}
 
+	/**
+	 * 创建数据库锁的值.
+	 */
+	private static String makeLockValue(Connection conn)
+	{
+		return getRuntimeName().concat(":".concat(Integer.toString(conn.hashCode())));
+	}
+
 	static FactoryContainer getContainer(String dbName)
 	{
 		FactoryContainer c = (FactoryContainer) containerCache.get(dbName);
@@ -318,12 +373,12 @@ public class DataBaseLocker
 	private static final String RELEASED_VALUE = "<released>";
 
 	/**
-	 * 最大等待时间, 15min.
+	 * 默认的最大等待时间, 15min.
 	 */
-	private static long maxWaitTime =  15 * 60 * 1000L;
+	private static long defaultMaxWaitTime =  15 * 60 * 1000L;
 
 	/**
-	 * 设置获取锁的最大等待时间.
+	 * 设置强行获取锁的默认最大等待时间.
 	 */
 	public static void setMaxWaitTime(long time)
 	{
@@ -331,7 +386,7 @@ public class DataBaseLocker
 		{
 			return;
 		}
-		maxWaitTime = time;
+		defaultMaxWaitTime = time;
 	}
 
 	/**

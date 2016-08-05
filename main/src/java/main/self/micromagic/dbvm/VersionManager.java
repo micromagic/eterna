@@ -59,6 +59,11 @@ public class VersionManager
 	public static final String OPT_STATUS_FINISH = "FINISH";
 
 	/**
+	 * 版本系统表的最高版本.
+	 */
+	private static final int MAX_ETERNA_VERSION = 3;
+
+	/**
 	 * 没有版本表的版本值.
 	 */
 	private static final int VERSION_VALUE_NONE = -1;
@@ -71,6 +76,32 @@ public class VersionManager
 	 * 版本2.
 	 */
 	private static final int V2 = 2;
+
+	/**
+	 * 刷新数据库锁的时间间隔, 5秒.
+	 */
+	private static final long FLUSH_LOCK_GAP = 6000L;
+
+
+	/**
+	 * 用于数据库版本升级的锁.
+	 */
+	private static final String VERSION_LOCK_NAME = "eterna.version.lock";
+
+	/**
+	 * 版本系统表的版本标识.
+	 */
+	private static final String ETERNA_VERSION_TABLE = "__eterna_version_table";
+
+	/**
+	 * 当前版本系统表的版本.
+	 */
+	private int currentEternaVersion;
+
+	/**
+	 * 前一次刷新锁的时间.
+	 */
+	private long preFlushLockTime;
 
 	/**
 	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
@@ -120,7 +151,9 @@ public class VersionManager
 		try
 		{
 			conn.setAutoCommit(false);
-			DataBaseLocker.lock(conn, VERSION_LOCK_NAME, null, true);
+			// 最大等待时间需比间隔扩大5倍
+			DataBaseLocker.lock(conn, VERSION_LOCK_NAME, null, true, FLUSH_LOCK_GAP * 5L);
+			this.preFlushLockTime = System.currentTimeMillis();
 			synchronized (VersionManager.class)
 			{
 				result = this.checkVersion0(conn, res, loader);
@@ -361,6 +394,18 @@ public class VersionManager
 			u = (Update) factory.createObject("clearStepScript");
 			u.setString("versionName", vName);
 			u.executeUpdate(conn);
+			if (optStatus == OPT_STATUS_BEGIN)
+			{
+				long now = System.currentTimeMillis();
+				if (this.preFlushLockTime + FLUSH_LOCK_GAP < now)
+				{
+					this.preFlushLockTime = now;
+					if (!DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME))
+					{
+						log.error("Flush lock time error for version [" + vName + "].");
+					}
+				}
+			}
 		}
 		conn.commit();
 	}
@@ -475,26 +520,6 @@ public class VersionManager
 		this.versionNamePrefix = prefix;
 	}
 	private String versionNamePrefix;
-
-	/**
-	 * 用于数据库版本升级的锁.
-	 */
-	private static final String VERSION_LOCK_NAME = "eterna.version.lock";
-
-	/**
-	 * 版本系统表的最高版本.
-	 */
-	private static final int MAX_ETERNA_VERSION = 3;
-
-	/**
-	 * 版本系统表的版本标识.
-	 */
-	private static final String ETERNA_VERSION_TABLE = "__eterna_version_table";
-
-	/**
-	 * 当前版本系统表的版本.
-	 */
-	private int currentEternaVersion;
 
 	/**
 	 * 记录版本更新时的日志.
