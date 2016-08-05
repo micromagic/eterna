@@ -125,6 +125,8 @@ public class CommonUpdate extends UpdateImpl
 				try
 				{
 					info.insert.execute(conn);
+					// 每句执行后都提交, 这样强制中断后对不支持DDL事务的更容易恢复
+					conn.commit();
 				}
 				catch (Exception ex)
 				{
