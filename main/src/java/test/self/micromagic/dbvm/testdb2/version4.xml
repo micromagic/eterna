@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+
+	<!-- 版本信息表 -->
+	<table name="T03" desc="表3.2" opt="modify">
+		<column name="versionName" type="String(320)" desc="版本名称2" opt="modify" />
+		<column name="test" type="String(20)" desc="错误
+		信息"/>
+		<!-- <column name="versionValue" type="int" /> -->
+	</table>
+
+	<script>insert into T03 (versionName, versionValue, test) values ('a', 1, 'ok?')</script>
+
+</dbVersion>

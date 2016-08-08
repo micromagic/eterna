@@ -71,6 +71,8 @@ public class InitTest extends TestCase
 			throws Exception
 	{
 		VersionManager.checkVersion(ConnectionTool.getConnection(),
+				"cp:/self/micromagic/dbvm/testdb2/", null);
+		VersionManager.checkVersion(ConnectionTool.getConnection(),
 				"cp:/self/micromagic/dbvm/testdb/", null);
 	}
 

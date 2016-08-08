@@ -42,21 +42,24 @@
 			<update name="addStepInfo">
 				<prepared-sql noLine="true">
 					insert into #const(version_info) (versionName, versionValue, lastModified)
-					values (?, 1, #const(now))
+					values (?, ?, #const(now))
 				</prepared-sql>
 				<parameters>
 					<parameter name="versionName" type="String" />
+					<parameter name="versionValue" type="String" />
 				</parameters>
 			</update>
 			<!-- 设置步骤信息 v3 -->
 			<update name="setStepInfo">
 				<prepared-sql noLine="true">
-					update #const(version_info) set lastModified = #const(now), step = ?, optStatus = ?
+					update #const(version_info) set lastModified = #const(now), step = ?, optStatus = ?,
+							versionValue = ?
 					where versionName = ?
 				</prepared-sql>
 				<parameters>
 					<parameter name="step" type="int" />
 					<parameter name="optStatus" type="String" />
+					<parameter name="versionValue" type="String" />
 					<parameter name="versionName" type="String" />
 				</parameters>
 			</update>
