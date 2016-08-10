@@ -36,6 +36,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Factory;
 import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.util.ResManager;
+import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.ref.StringRef;
@@ -376,8 +377,10 @@ public class VersionManager
 		insert.setString("versionName", vName);
 		insert.setObject("versionValue", Utility.createInteger(version));
 		insert.setObject("step", Utility.createInteger(step));
-		insert.setString("optMessage", error.toString());
 		insert.setString("optContent", opt.getElement().asXML());
+		StringAppender buf = StringTool.createStringAppender(128);
+		buf.append(error.getClass()).appendln().append(error.getMessage());
+		insert.setString("optMessage", buf.toString());
 		insert.executeUpdate(conn);
 		conn.commit();
 	}
