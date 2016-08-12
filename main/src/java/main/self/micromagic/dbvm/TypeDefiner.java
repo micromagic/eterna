@@ -20,6 +20,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.ref.IntegerRef;
 
 /**
  * 数据库列类型的定义者.
@@ -33,11 +34,12 @@ public class TypeDefiner
 	}
 	private void init()
 	{
+		this.types[TypeManager.TYPE_BOOLEAN] = new TypeDefineDesc("boolean");
 		this.types[TypeManager.TYPE_INTEGER] = new TypeDefineDesc("int");
 		this.types[TypeManager.TYPE_SHORT] = new TypeDefineDesc("short");
 		this.types[TypeManager.TYPE_BYTE] = new TypeDefineDesc("byte");
 		this.types[TypeManager.TYPE_LONG] = new TypeDefineDesc("long");
-		this.types[TypeManager.TYPE_DOUBLE] = new TypeDefineDesc("double");
+		this.types[TypeManager.TYPE_DOUBLE] = new ComminDouble("double", "numeric");
 		this.types[TypeManager.TYPE_STRING] = new CommonString("String");
 		TypeDefineDesc date = new TypeDefineDesc("Datetime");
 		this.types[TypeManager.TYPE_TIMPSTAMP] = date;
@@ -120,6 +122,42 @@ class CommonString extends TypeDefineDesc
 	{
 		int ext = TypeManager.getTypeExtend(type, null);
 		return this.define.concat("(" + ext + ")");
+	}
+
+}
+
+class ComminDouble extends TypeDefineDesc
+{
+	public ComminDouble(String constName, String extName)
+	{
+		super(constName);
+		this.extName = extName;
+	}
+	private final String extName;
+
+	public void init(EternaFactory factory)
+	{
+		super.init(factory);
+		this.extDefine = factory.getConstantValue(this.extName);
+	}
+	private String extDefine;
+
+	/**
+	 * 获取类型的定义.
+	 */
+	public String getDefine(int type)
+	{
+		IntegerRef sub = new IntegerRef();
+		int ext = TypeManager.getTypeExtend(type, sub);
+		if (ext > 0)
+		{
+			if (sub.value > 0)
+			{
+				return this.extDefine.concat("(" + ext + "," + sub + ")");
+			}
+			return this.extDefine.concat("(" + ext + ")");
+		}
+		return this.define;
 	}
 
 }

@@ -7,6 +7,9 @@
 		<column name="versionValue" type="int" desc="版本值" nullable="false"/>
 		<column name="errInfo" type="String(1000)" desc="错误信息"/>
 		<column name="lastModified" type="Datetime" desc="最后修改时间"/>
+		<column name="valid" type="boolean" desc="是否有效"/>
+		<column name="num1" type="double" desc="数字1"/>
+		<column name="num2" type="double(5,3)" desc="数字2"/>
 	</table>
 
 

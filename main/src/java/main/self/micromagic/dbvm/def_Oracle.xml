@@ -25,12 +25,15 @@
 	
 		<objs>
 
-			<constant name="int" value="NUMBER(9)" />
+			<constant name="boolean" value="VARCHAR2(1)" />
+			<constant name="int" value="NUMBER(10)" />
 			<constant name="short" value="NUMBER(5)" />
 			<constant name="byte" value="NUMBER(2)" />
-			<constant name="long" value="NUMBER(18)" />
+			<constant name="long" value="NUMBER(19)" />
 			<constant name="double" value="NUMBER" />
+			<constant name="numeric" value="NUMBER" />
 			<constant name="String" value="VARCHAR2" />
+			<constant name="Date" value="DATE" />
 			<constant name="Datetime" value="DATE" />
 			<constant name="Blob" value="BLOB" />
 			<constant name="Clob" value="CLOB" />

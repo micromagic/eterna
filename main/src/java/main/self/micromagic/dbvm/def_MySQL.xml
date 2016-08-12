@@ -25,13 +25,16 @@
 
 		<objs>
 
+			<constant name="boolean" value="VARCHAR(1)" />
 			<constant name="int" value="INT" />
 			<constant name="short" value="SMALLINT" />
 			<constant name="byte" value="TINYINT" />
 			<constant name="long" value="BIGINT" />
 			<constant name="double" value="DOUBLE" />
+			<constant name="numeric" value="NUMERIC" />
 			<constant name="String" value="VARCHAR" />
-			<constant name="Datetime" value="TIMESTAMP" />
+			<constant name="Date" value="DATE" />
+			<constant name="Datetime" value="DATETIME" />
 			<constant name="Blob" value="BLOB" />
 			<constant name="Clob" value="TEXT" />
 

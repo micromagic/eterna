@@ -25,7 +25,6 @@
 		<column-def className="self.micromagic.dbvm.impl.OracleColumn"/>
 		<index-def className="self.micromagic.dbvm.impl.OracleIndex"/>
 		<type-def className="self.micromagic.dbvm.TypeDefiner">
-			<type-desc constName="double" className="self.micromagic.dbvm.impl.OracleDouble"/>
 		</type-def>
 
 	</config>
