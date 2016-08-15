@@ -102,6 +102,7 @@
 					<parameter name="step" type="int" />
 					<parameter name="optMessage" type="String" />
 					<parameter name="optContent" type="String" />
+					<parameter name="optUser" type="String" />
 				</parameters>
 			</update>
 

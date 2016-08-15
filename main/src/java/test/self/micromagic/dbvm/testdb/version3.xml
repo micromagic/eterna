@@ -8,11 +8,11 @@
 	</table>
 
 	<table name="T02" desc="表2" opt="modify">
-		<column name="value" type="double(3,3)" default="3.14" opt="modify"/>
+		<column name="value" type="double(6,3)" default="3.14" opt="modify"/>
 		<column name="test" type="String(3)" desc="信息" opt="modify"/>
 	</table>
 
-	<table name="T03" desc="表3">
+	<table name="T02_new" desc="新 表3">
 		<column name="test" type="String(3)" desc="信息"/>
 	</table>
 

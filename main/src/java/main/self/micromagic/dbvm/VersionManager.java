@@ -381,6 +381,7 @@ public class VersionManager
 		StringAppender buf = StringTool.createStringAppender(128);
 		buf.append(error.getClass()).appendln().append(error.getMessage());
 		insert.setString("optMessage", buf.toString());
+		insert.setString("optUser", DataBaseLocker.getRuntimeName());
 		insert.executeUpdate(conn);
 		conn.commit();
 	}
