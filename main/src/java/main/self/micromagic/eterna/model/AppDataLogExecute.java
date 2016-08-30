@@ -448,21 +448,25 @@ public class AppDataLogExecute extends AbstractExecute
 			int rowCount = ritr.getCount();
 			parent.addAttribute("rowCount", Integer.toString(rowCount));
 			int printCount = 5;
-			if (rowCount < printCount)
+			boolean hasMore = true;
+			if (rowCount != -1 && rowCount < printCount)
 			{
+				hasMore = false;
 				printCount = rowCount;
 			}
-			for (int i = 0; i < printCount; i++)
+			for (int i = 1; i <= printCount; i++)
 			{
-				ResultRow row = ritr.preFetch(i + 1);
-				if (row != null)
+				ResultRow row = ritr.preFetch(i);
+				if (row == null)
 				{
-					Element vNode = parent.addElement("value");
-					vNode.addAttribute("index", Integer.toString(i + 1));
-					this.printResultRow(vNode, row);
+					hasMore = false;
+					break;
 				}
+				Element vNode = parent.addElement("value");
+				vNode.addAttribute("index", Integer.toString(i));
+				this.printResultRow(vNode, row);
 			}
-			if (rowCount > printCount)
+			if (rowCount > printCount || (hasMore && ritr.preFetch(printCount + 1) != null))
 			{
 				Element vNode = parent.addElement("value");
 				vNode.addAttribute("type", "more");
