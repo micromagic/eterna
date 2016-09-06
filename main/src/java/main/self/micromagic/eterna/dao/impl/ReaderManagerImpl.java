@@ -96,6 +96,7 @@ public class ReaderManagerImpl
 	protected ReaderManagerImpl(ReaderManagerImpl other)
 	{
 		this.initialized = true;
+		this.factory = other.factory;
 		this.nonePermission = other.nonePermission;
 		this.colNameSensitive = other.colNameSensitive;
 
