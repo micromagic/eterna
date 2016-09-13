@@ -79,6 +79,18 @@
 					<parameter name="lockValue2" type="String" />
 				</parameters>
 			</update>
+			<!-- 修改数据库锁信息 -->
+			<update name="flushLockTime">
+				<prepared-sql noLine="true">
+					update #const(db_lock_table) set lockTime = ?
+					where lockName = ? and lockValue = ?
+				</prepared-sql>
+				<parameters>
+					<parameter name="lockTime" type="Datetime" />
+					<parameter name="lockName" type="String" />
+					<parameter name="lockValue" type="String" />
+				</parameters>
+			</update>
 
 		</objs>
 	</factory>

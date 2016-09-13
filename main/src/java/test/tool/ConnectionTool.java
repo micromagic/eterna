@@ -27,7 +27,8 @@ public class ConnectionTool
 			throws Exception
 	{
 		Class.forName("org.h2.Driver");
-		Connection conn = DriverManager.getConnection("jdbc:h2:~/vTest", "sa", "sa");
+		Connection conn = DriverManager.getConnection(
+				"jdbc:h2:tcp://localhost/~/vTest", "sa", "sa");
 		return conn;
 	}
 

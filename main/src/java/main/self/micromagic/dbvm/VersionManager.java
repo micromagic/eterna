@@ -79,9 +79,13 @@ public class VersionManager
 	private static final int V2 = 2;
 
 	/**
-	 * 刷新数据库锁的时间间隔, 5秒.
+	 * 数据库锁的等待时间, 37秒.
 	 */
-	private static final long FLUSH_LOCK_GAP = 6000L;
+	private static final long FLUSH_LOCK_GAP = 37 * 1000L;
+	/**
+	 * 需要锁定时间的延长值.
+	 */
+	private static final long BEGIN_LOCK_TIME_PLUS = 21 * 3600 * 1000L;
 
 
 	/**
@@ -98,11 +102,6 @@ public class VersionManager
 	 * 当前版本系统表的版本.
 	 */
 	private int currentEternaVersion;
-
-	/**
-	 * 前一次刷新锁的时间.
-	 */
-	private long preFlushLockTime;
 
 	/**
 	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
@@ -152,9 +151,7 @@ public class VersionManager
 		try
 		{
 			conn.setAutoCommit(false);
-			// 最大等待时间需比间隔扩大5倍
-			DataBaseLocker.lock(conn, VERSION_LOCK_NAME, null, true, FLUSH_LOCK_GAP * 5L);
-			this.preFlushLockTime = System.currentTimeMillis();
+			DataBaseLocker.lock(conn, VERSION_LOCK_NAME, null, true, FLUSH_LOCK_GAP);
 			synchronized (VersionManager.class)
 			{
 				result = this.checkVersion0(conn, res, loader);
@@ -339,13 +336,16 @@ public class VersionManager
 						insert.setObject("versionValue", Utility.createInteger(version));
 						insert.setObject("step", Utility.createInteger(step));
 						CommonUpdate.initThreadInfo(insert, this.currentEternaVersion, timeFix);
-						this.setStepInfo(conn, factory, vName, version, step, OPT_STATUS_BEGIN);
+						this.setStepInfo(conn, factory, vName, version, step,
+								OPT_STATUS_BEGIN, timeFix);
 						((OptDesc) obj).exec(conn);
-						this.setStepInfo(conn, factory, vName, version, step, OPT_STATUS_DONE);
+						this.setStepInfo(conn, factory, vName, version, step,
+								OPT_STATUS_DONE, timeFix);
 					}
 					catch (Exception ex)
 					{
-						this.addStepError(conn, vName, version, step, ex, factory, (OptDesc) obj);
+						this.addStepError(conn, vName, version, step, ex, factory,
+								(OptDesc) obj, timeFix);
 						String msg = "Error in [" + vName + "]'s version ["
 								+ version + "] step [" + step + "].";
 						log.error(msg, ex);
@@ -358,7 +358,7 @@ public class VersionManager
 		{
 			CommonUpdate.clearThreadInfo();
 		}
-		this.setStepInfo(conn, factory, vName, version, -1, OPT_STATUS_FINISH);
+		this.setStepInfo(conn, factory, vName, version, -1, OPT_STATUS_FINISH, 0L);
 		return true;
 	}
 
@@ -366,13 +366,14 @@ public class VersionManager
 	 * 添加步骤的出错信息.
 	 */
 	private void addStepError(Connection conn, String vName, int version, int step,
-			Throwable error, Factory factory, OptDesc opt)
+			Throwable error, Factory factory, OptDesc opt, long timeFix)
 			throws SQLException
 	{
 		if (this.currentEternaVersion <= V2)
 		{
 			return;
 		}
+		flushLockTime(OPT_STATUS_DONE, timeFix, conn);
 		Update insert = (Update) factory.createObject("addStepError");
 		insert.setString("versionName", vName);
 		insert.setObject("versionValue", Utility.createInteger(version));
@@ -387,7 +388,7 @@ public class VersionManager
 	}
 
 	private void setStepInfo(Connection conn,  Factory factory, String vName, int version,
-			int step, String optStatus)
+			int step, String optStatus, long timeFix)
 			throws SQLException
 	{
 		if (this.currentEternaVersion <= V2)
@@ -405,20 +406,28 @@ public class VersionManager
 			u = (Update) factory.createObject("clearStepScript");
 			u.setString("versionName", vName);
 			u.executeUpdate(conn);
-			if (optStatus == OPT_STATUS_BEGIN)
+			if (!flushLockTime(optStatus, timeFix, conn))
 			{
-				long now = System.currentTimeMillis();
-				if (this.preFlushLockTime + FLUSH_LOCK_GAP < now)
-				{
-					this.preFlushLockTime = now;
-					if (!DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME))
-					{
-						log.error("Flush lock time error for version [" + vName + "].");
-					}
-				}
+				log.error("Flush lock time error for version [" + vName + "].");
 			}
 		}
 		conn.commit();
+	}
+
+	private static boolean flushLockTime(String optStatus, long timeFix, Connection conn)
+	{
+		if (optStatus == OPT_STATUS_BEGIN)
+		{
+			// 步骤起始时将锁定时间延长
+			long newTime = System.currentTimeMillis() + timeFix + BEGIN_LOCK_TIME_PLUS;
+			return DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
+		}
+		else
+		{
+			// 步骤结束时将锁定时间变为当前时间
+			long newTime = System.currentTimeMillis() + timeFix;
+			return DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
+		}
 	}
 
 	/**
