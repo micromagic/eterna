@@ -216,6 +216,18 @@ public class AppData
 	}
 
 	/**
+	 * 禁用当前app的运行日志记录.
+	 *
+	 * @return  原先app运行日志的记录方式
+	 */
+	public int disableLog()
+	{
+		int oldType = this.logType;
+		this.logType = 0;
+		return oldType;
+	}
+
+	/**
 	 * 打印app运行日志信息
 	 */
 	public static synchronized void printLog(Writer out, boolean clear)
