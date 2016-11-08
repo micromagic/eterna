@@ -266,6 +266,7 @@ public class VersionManager
 		FactoryContainer share = DataBaseLocker.getContainer(dbName);
 		FactoryContainer c = ContainerManager.createFactoryContainer("v" + version,
 				config, null, getDigester(), null, loader, share, false);
+		IgnoreConfig.clearCurrentConfig();
 		StringRef msg = new StringRef();
 		c.reInit(msg);
 		if (!StringTool.isEmpty(msg.getString()))
@@ -344,12 +345,20 @@ public class VersionManager
 					}
 					catch (Exception ex)
 					{
-						this.addStepError(conn, vName, version, step, ex, factory,
-								(OptDesc) obj, timeFix);
-						String msg = "Error in [" + vName + "]'s version ["
-								+ version + "] step [" + step + "].";
-						log.error(msg, ex);
-						throw ex;
+						boolean ignore = this.addStepError(conn, vName, version, step, ex,
+								factory, (OptDesc) obj, timeFix);
+						if (ignore)
+						{
+							this.setStepInfo(conn, factory, vName, version, step,
+									OPT_STATUS_DONE, timeFix);
+						}
+						else
+						{
+							String msg = "Error in [" + vName + "]'s version ["
+									+ version + "] step [" + step + "].";
+							log.error(msg, ex);
+							throw ex;
+						}
 					}
 				}
 			}
@@ -365,26 +374,32 @@ public class VersionManager
 	/**
 	 * 添加步骤的出错信息.
 	 */
-	private void addStepError(Connection conn, String vName, int version, int step,
+	private boolean addStepError(Connection conn, String vName, int version, int step,
 			Throwable error, Factory factory, OptDesc opt, long timeFix)
 			throws SQLException
 	{
 		if (this.currentEternaVersion <= V2)
 		{
-			return;
+			return false;
 		}
-		flushLockTime(OPT_STATUS_DONE, timeFix, conn);
+		boolean ignore = opt.isIgnoreError(error);
 		Update insert = (Update) factory.createObject("addStepError");
 		insert.setString("versionName", vName);
 		insert.setObject("versionValue", Utility.createInteger(version));
 		insert.setObject("step", Utility.createInteger(step));
 		insert.setString("optContent", opt.getElement().asXML());
 		StringAppender buf = StringTool.createStringAppender(128);
-		buf.append(error.getClass()).appendln().append(error.getMessage());
+		buf.append(ignore ? "WARN: " : "ERROR: ").append(error.getClass())
+				.appendln().append(error.getMessage());
 		insert.setString("optMessage", buf.toString());
 		insert.setString("optUser", DataBaseLocker.getRuntimeName());
 		insert.executeUpdate(conn);
-		conn.commit();
+		if (!ignore)
+		{
+			flushLockTime(OPT_STATUS_DONE, timeFix, conn);
+			conn.commit();
+		}
+		return ignore;
 	}
 
 	private void setStepInfo(Connection conn,  Factory factory, String vName, int version,
@@ -418,7 +433,7 @@ public class VersionManager
 	{
 		if (optStatus == OPT_STATUS_BEGIN)
 		{
-			// 步骤起始时将锁定时间延长
+			// 步骤起始时将锁定时间延长, 这样脚本执行时间过长也不会有问题
 			long newTime = System.currentTimeMillis() + timeFix + BEGIN_LOCK_TIME_PLUS;
 			return DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
 		}

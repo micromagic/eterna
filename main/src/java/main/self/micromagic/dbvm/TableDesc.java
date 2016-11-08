@@ -321,4 +321,9 @@ public class TableDesc extends AbstractObject
 	}
 	private Element element;
 
+	public boolean isIgnoreError(Throwable error)
+	{
+		return false;
+	}
+
 }

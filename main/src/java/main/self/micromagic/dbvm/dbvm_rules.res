@@ -19,7 +19,13 @@
 dbVersion
 log:{$dbVersion}
 create:{,${factory},1}
-sub:{table,index,script,config,eterna,data}
+sub:{table,index,script,config,eterna,data,ignore}
+
+
+## ignore
+ignore
+create:{,self.micromagic.dbvm.IgnoreConfig}
+attr:{sameKey(m=0,i=0):ignoreSameKey}
 
 
 ## script

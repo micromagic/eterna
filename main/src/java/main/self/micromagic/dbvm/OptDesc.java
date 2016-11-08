@@ -27,6 +27,11 @@ import org.dom4j.Element;
 public interface OptDesc
 {
 	/**
+	 * 检查是否为需要忽略的错误.
+	 */
+	boolean isIgnoreError(Throwable error);
+
+	/**
 	 * 获取操作的定义.
 	 */
 	Element getElement();

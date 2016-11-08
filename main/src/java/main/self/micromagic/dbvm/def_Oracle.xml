@@ -43,6 +43,9 @@
 
 			<constant name="rename" value="rename to" />
 
+			<!-- 各类错误码 -->
+			<constant name="EC_sameKey" value="1" />
+
 		</objs>
 	</factory>
 </eterna-config>

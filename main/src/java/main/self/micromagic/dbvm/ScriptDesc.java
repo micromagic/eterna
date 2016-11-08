@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
@@ -34,10 +35,22 @@ import self.micromagic.util.StringTool;
 public class ScriptDesc extends AbstractObject
 		implements OptDesc, EternaObject, ConstantDef
 {
+	// 定义主键重复的常量标识
+	private static final String SAME_KEY_FLAG = "EC_sameKey";
+	// 操作符: INSERT
+	private static final String OPT_INSERT = "insert";
+	// 操作符: INTO
+	private static final String OPT_INTO = "into";
+
 	/**
 	 * 数据操作的脚本.
 	 */
 	public String script;
+
+	public ScriptDesc()
+	{
+		this.ignoreSameKey = IgnoreConfig.getCurrentConfig().isIgnoreSameKey();
+	}
 
 	public void exec(Connection conn)
 			throws SQLException
@@ -56,6 +69,7 @@ public class ScriptDesc extends AbstractObject
 			if (!StringTool.isEmpty(this.script))
 			{
 				this.script = resolveConst(this.script, factory);
+				this.checkIgnore();
 			}
 			return false;
 		}
@@ -78,5 +92,39 @@ public class ScriptDesc extends AbstractObject
 		this.element = element;
 	}
 	private Element element;
+
+	/**
+	 * 检查是否有需要忽略的.
+	 */
+	private void checkIgnore()
+	{
+		if (this.ignoreSameKey)
+		{
+			ScriptParser p = new ScriptParser();
+			ScriptParser.Element[] elements = p.parseScript(this.script, 1);
+			if (elements.length > 2
+					&& OPT_INSERT.equalsIgnoreCase(elements[0].getText())
+					&& OPT_INTO.equalsIgnoreCase(elements[1].getText()))
+			{
+				this.sameKeyCode = Integer.parseInt(
+						this.factory.getConstantValue(SAME_KEY_FLAG));
+			}
+			else
+			{
+				this.ignoreSameKey = false;
+			}
+		}
+	}
+	private boolean ignoreSameKey;
+	private int sameKeyCode;
+
+	public boolean isIgnoreError(Throwable error)
+	{
+		if (this.ignoreSameKey && error instanceof SQLException)
+		{
+			return this.sameKeyCode == ((SQLException) error).getErrorCode();
+		}
+		return false;
+	}
 
 }

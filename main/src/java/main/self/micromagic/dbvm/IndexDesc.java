@@ -169,4 +169,9 @@ public class IndexDesc extends AbstractObject
 	}
 	private Element element;
 
+	public boolean isIgnoreError(Throwable error)
+	{
+		return false;
+	}
+
 }

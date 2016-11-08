@@ -19,9 +19,12 @@
 	</table>
 
 	<table name="TEST_QUERY" desc="查询测试">
-		<column name="name" type="String(20)"/>
+		<column name="name" type="String(20)" nullable="false"/>
 		<column name="value" type="int"/>
 	</table>
+	<index name="KEY_TEST_QUERY" type="key" tableName="TEST_QUERY">
+		<column name="name"/>
+	</index>
 
 	<script>insert into TEST_QUERY values ('a', 1)</script>
 	<script>insert into TEST_QUERY values ('b', 2)</script>
@@ -32,5 +35,15 @@
 	<script>insert into TEST_QUERY values ('g', 7)</script>
 	<!-- test deprecated -->
 	<data>insert into TEST_QUERY values ('h', 8)</data>
+
+	<ignore sameKey="true"/>
+	<script>insert into TEST_QUERY values ('g', 1)</script>
+	<script>insert into TEST_QUERY values ('a', 2)</script>
+	<script>insert into TEST_QUERY values ('g', 3)</script>
+
+	<table name="TEST_QUERY" opt="modify">
+		<column name="newCol" type="String(20)" desc="新增列"/>
+	</table>
+	<script>insert into TEST_QUERY values ('x', 9, 'test')</script>
 
 </dbVersion>
