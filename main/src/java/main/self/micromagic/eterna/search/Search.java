@@ -38,6 +38,11 @@ public interface Search
 	String INPUT_TYPE_FLAG = "inputType";
 
 	/**
+	 * 在item的arrtibute中设置查询列名的名称.
+	 */
+	String SEARCH_COLUMN_FLAG = "searchColumn";
+
+	/**
 	 * 在item的arrtibute中设置默认条件构造器的名称.
 	 */
 	String BUILDER_FLAG = "builder";

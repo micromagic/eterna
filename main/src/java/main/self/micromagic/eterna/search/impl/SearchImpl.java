@@ -842,6 +842,15 @@ public class SearchImpl extends AbstractGenerator
 				hasPrepare = true;
 				condition.prepareName = (String) item.getAttribute(n);
 			}
+			else if (SEARCH_COLUMN_FLAG.equals(n))
+			{
+				String tmpName = (String) item.getAttribute(n);
+				if (!StringTool.isEmpty(tmpName))
+				{
+					// 如果单独设置了查询的列列名, 则需要使用这个名称
+					condition.columnName = tmpName;
+				}
+			}
 			else if (Tool.VISIBLE_FLAG.equals(n))
 			{
 				condition.visible = BooleanConverter.toBoolean(item.getAttribute(n));
