@@ -29,6 +29,7 @@ import java.util.Set;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.IntegerRef;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -224,6 +225,16 @@ public class BeanMap extends AbstractMap
 		{
 			this.createBean();
 		}
+		int size = map.size();
+		if (size <= 1)
+		{
+			if (size == 0)
+			{
+				return 0;
+			}
+			Map.Entry e = (Map.Entry) map.entrySet().iterator().next();
+			return this.setOneValue(e.getKey(), e.getValue());
+		}
 		int settedCount = 0;
 		Iterator cdItr = this.beanDescriptor.getCellIterator();
 		Object bean = this.getBean();
@@ -311,6 +322,25 @@ public class BeanMap extends AbstractMap
 			}
 		}
 		return settedCount;
+	}
+
+	/**
+	 * 设置单个数据.
+	 */
+	private int setOneValue(Object name, Object value)
+	{
+		if (name == null)
+		{
+			return 0;
+		}
+		CellAccessInfo cai = this.getCellAccessInfo(String.valueOf(name), true);
+		if (cai == null)
+		{
+			return 0;
+		}
+		IntegerRef settedCount = new IntegerRef();
+		cai.setValue(value, settedCount);
+		return settedCount.value;
 	}
 
 	/**

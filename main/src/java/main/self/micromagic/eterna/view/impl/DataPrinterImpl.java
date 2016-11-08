@@ -110,7 +110,15 @@ public class DataPrinterImpl extends AbstractGenerator
 				}
 				this.stringCoder.toJsonString(out, keyStr);
 				out.write("\":");
-				this.print(out, value);
+				try
+				{
+					this.print(out, value);
+				}
+				catch (EternaException ex)
+				{
+					Tool.log.error("Error in print [" + key + "]'s value.");
+					throw ex;
+				}
 			}
 		}
 	}

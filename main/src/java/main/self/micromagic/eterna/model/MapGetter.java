@@ -91,7 +91,7 @@ class HeaderGetter
 {
 	public Map getMap(AppData data)
 	{
-		Map r = (Map) data.getSpcialData(SPECIAL_MAP_FLAG, "header");
+		Map r = data.maps[AppData.HEADER_MAP];
 		if (r == null)
 		{
 			if (data.getHttpServletRequest() == null)
@@ -100,10 +100,11 @@ class HeaderGetter
 			}
 			else
 			{
-				r = ValueContainerMap.create(
-						new RequestHeaderContainer(data.getHttpServletRequest(), data.getHttpServletResponse()));
+				RequestHeaderContainer c = new RequestHeaderContainer(
+						data.getHttpServletRequest(), data.getHttpServletResponse());
+				r = ValueContainerMap.create(c);
 			}
-			data.addSpcialData(SPECIAL_MAP_FLAG, "header", r);
+			data.maps[AppData.HEADER_MAP] = r;
 		}
 		return r;
 	}
@@ -128,7 +129,7 @@ class CookieGetter
 {
 	public Map getMap(AppData data)
 	{
-		Map r = (Map) data.getSpcialData(SPECIAL_MAP_FLAG, "cookie");
+		Map r = data.maps[AppData.COOKIE_MAP];
 		if (r == null)
 		{
 			if (data.getHttpServletRequest() == null)
@@ -137,10 +138,11 @@ class CookieGetter
 			}
 			else
 			{
-				r = ValueContainerMap.create(
-						new CookieContainer(data.getHttpServletRequest(), data.getHttpServletResponse()));
+				CookieContainer c = new CookieContainer(
+						data.getHttpServletRequest(), data.getHttpServletResponse());
+				r = ValueContainerMap.create(c);
 			}
-			data.addSpcialData(SPECIAL_MAP_FLAG, "cookie", r);
+			data.maps[AppData.COOKIE_MAP] = r;
 		}
 		return r;
 	}

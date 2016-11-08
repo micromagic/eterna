@@ -171,9 +171,13 @@ public class JavassistCG
 	{
 		try
 		{
-			reBuilder = (ReBuilder) Class.forName(className).newInstance();
+			if (Utility.compareJavaVersion("1.6", 2) >= 0)
+			{
+				// 1.6以上的java才需要设置reBuilder
+				reBuilder = (ReBuilder) Class.forName(className).newInstance();
+			}
 		}
-		catch (Exception ex)
+		catch (Throwable ex)
 		{
 			if (ClassGenerator.COMPILE_LOG_TYPE > COMPILE_LOG_TYPE_ERROR)
 			{

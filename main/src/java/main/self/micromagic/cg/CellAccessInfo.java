@@ -16,6 +16,8 @@
 
 package self.micromagic.cg;
 
+import self.micromagic.util.ref.IntegerRef;
+
 /**
  * 属性的访问信息.
  *
@@ -87,6 +89,20 @@ public class CellAccessInfo
 	 */
 	public Object setValue(Object value)
 	{
+		return this.setValue(value, null);
+	}
+
+	/**
+	 * 设置对应访问信息的值.
+	 * 如果该访问信息的属性单元没有写功能, 则不能设置.
+	 *
+	 * @param value        要设置的值
+	 * @param settedCount  出参, 成功设置了值的属性的个数
+	 * @return   该访问信息中原来的值, 如果该访问信息的属性单元没有读功能,
+	 *           则永远返回<code>null</code>.
+	 */
+	public Object setValue(Object value, IntegerRef settedCount)
+	{
 		if (this.cellDescriptor.writeProcesser != null)
 		{
 			try
@@ -96,7 +112,8 @@ public class CellAccessInfo
 				String prefix = this.beanMap.getPrefix();
 				if (beanObj != null)
 				{
-					if (this.cellDescriptor.readProcesser != null && this.beanMap.isReadBeforeModify())
+					if (this.cellDescriptor.readProcesser != null && settedCount == null
+							&& this.beanMap.isReadBeforeModify())
 					{
 						oldValue = this.cellDescriptor.readProcesser.getBeanValue(
 								this.cellDescriptor, this.indexs, beanObj, prefix, this.beanMap);
@@ -106,8 +123,12 @@ public class CellAccessInfo
 				{
 					beanObj = this.beanMap.createBean();
 				}
-				this.cellDescriptor.writeProcesser.setBeanValue(this.cellDescriptor, this.indexs,
-						beanObj, value, prefix, this.beanMap, null, oldValue);
+				int tmpCount = this.cellDescriptor.writeProcesser.setBeanValue(this.cellDescriptor,
+						this.indexs, beanObj, value, prefix, this.beanMap, null, oldValue);
+				if (settedCount != null)
+				{
+					settedCount.value = tmpCount;
+				}
 				return oldValue;
 			}
 			catch (Throwable ex)

@@ -217,6 +217,33 @@ public class Utility
 	}
 
 	/**
+	 * 比较java版本号. <p>
+	 * 将当前的版本号与version参数进行比较.
+	 *
+	 * @param version  被比较的版本号
+	 * @param count    需要比较的版本位数, 一般为2位
+	 * @return  小于0, 表示当前版本小于version参数指定的版本
+	 *          等于0, 表示当前版本与version参数指定的版本相同
+	 *          大于0, 表示当前版本大于version参数指定的版本
+	 */
+	public static int compareJavaVersion(String version, int count)
+	{
+		String sysVersion = System.getProperty("java.version");
+		String[] sysArr = StringTool.separateString(sysVersion, ".", true);
+		String[] checkArr = StringTool.separateString(version, ".", true);
+		int len = Math.min(Math.min(sysArr.length, checkArr.length), count);
+		for (int i = 0; i < len; i++)
+		{
+			int r = sysArr[i].compareTo(checkArr[i]);
+			if (r != 0)
+			{
+				return r;
+			}
+		}
+		return 0;
+	}
+
+	/**
 	 * 添加一个配置监控者, 当配置的值改变时, 它会自动更新指定类的静态属性成员, 该属性
 	 * 的类型可以是: <code>String</code>, <code>int</code>或<code>boolean</code>.
 	 *

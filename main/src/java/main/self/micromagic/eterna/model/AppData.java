@@ -110,10 +110,15 @@ public class AppData
 	public static final int SESSION_ATTRIBUTE_MAP = 2;
 	public static final String DATA_MAP_NAME = "data";
 	public static final int DATA_MAP = 3;
+	public static final String HEADER_MAP_NAME = "request-header";
+	public static final int HEADER_MAP = 4;
+	public static final String COOKIE_MAP_NAME = "header";
+	public static final int COOKIE_MAP = 5;
 
 	public static final String[] MAP_NAMES = {
 		REQUEST_PARAMETER_MAP_NAME, REQUEST_ATTRIBUTE_MAP_NAME,
-		SESSION_ATTRIBUTE_MAP_NAME, DATA_MAP_NAME
+		SESSION_ATTRIBUTE_MAP_NAME, DATA_MAP_NAME,
+		HEADER_MAP_NAME, COOKIE_MAP_NAME
 	};
 
 	private static int APP_LOG_TYPE = 0;
@@ -153,7 +158,7 @@ public class AppData
 
 	public final Object[] objs;
 	public final Object[] caches = new Object[23];
-	public final Map[] maps = new Map[4];
+	public final Map[] maps = new Map[MAP_NAMES.length];
 	public final ArrayList stack = new ArrayList();
 
 	private final Map spcialMap = new HashMap(2);
@@ -668,7 +673,7 @@ public class AppData
 	public HttpServletRequest getHttpServletRequest()
 	{
 		Object req = this.objs[SERVLET_REQUEST_INDEX];
-		if (req instanceof HttpServletRequest)
+		if (req != null && req instanceof HttpServletRequest)
 		{
 			return (HttpServletRequest) req;
 		}
