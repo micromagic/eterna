@@ -121,12 +121,27 @@ public class DataBaseLocker
 	 */
 	public static boolean flushLockTime(Connection conn, String lockName, long time)
 	{
+		return flushLockTime(conn, lockName, time, conn);
+	}
+
+	/**
+	 * 刷新锁数据库的时间.
+	 *
+	 * @param conn      执行刷新的数据库连接
+	 * @param lockName  数据库锁的名称
+	 * @param time      数据库锁需要刷新到什么时间
+	 * @param lockConn  加锁的数据库连接
+	 * @return  刷新时间是否成功
+	 */
+	static boolean flushLockTime(Connection conn, String lockName, long time,
+			Connection lockConn)
+	{
 		try
 		{
 			String dbName = conn.getMetaData().getDatabaseProductName();
 			EternaFactory f = getFactory(dbName);
 			Update modify = f.createUpdate("flushLockTime");
-			String nowLockValue = makeLockValue(conn);
+			String nowLockValue = makeLockValue(lockConn);
 			modify.setString("lockValue", nowLockValue);
 			modify.setString("lockName", lockName);
 			modify.setObject("lockTime", new java.sql.Timestamp(time));

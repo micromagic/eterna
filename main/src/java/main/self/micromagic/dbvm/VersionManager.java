@@ -39,6 +39,7 @@ import self.micromagic.util.ResManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
+import self.micromagic.util.container.ThreadCache;
 import self.micromagic.util.ref.StringRef;
 
 /**
@@ -81,9 +82,9 @@ public class VersionManager
 	/**
 	 * 数据库锁的等待时间, 37秒.
 	 */
-	private static final long FLUSH_LOCK_GAP = 37 * 1000L;
+	static final long FLUSH_LOCK_GAP = 37 * 1000L;
 	/**
-	 * 需要锁定时间的延长值.
+	 * 需要锁定时间的延长值(21hour).
 	 */
 	private static final long BEGIN_LOCK_TIME_PLUS = 21 * 3600 * 1000L;
 
@@ -91,7 +92,7 @@ public class VersionManager
 	/**
 	 * 用于数据库版本升级的锁.
 	 */
-	private static final String VERSION_LOCK_NAME = "eterna.version.lock";
+	static final String VERSION_LOCK_NAME = "eterna.version.lock";
 
 	/**
 	 * 版本系统表的版本标识.
@@ -314,6 +315,12 @@ public class VersionManager
 		int count = factory.getObjectCount();
 		Update insert = (Update) factory.createObject("addStepScript");
 		long timeFix = DataBaseLocker.getDataBaseTime(conn).getTime() - System.currentTimeMillis();
+		Connection checkConn = this.getLockTimeFlushConnection();
+		LockTimeChecker checker = null;
+		if (checkConn != null)
+		{
+			checker = LockTimeChecker.getCurrentChecker(true, timeFix, checkConn, conn);
+		}
 		try
 		{
 			for (; index < count; index++)
@@ -366,6 +373,10 @@ public class VersionManager
 		finally
 		{
 			CommonUpdate.clearThreadInfo();
+			if (checker != null)
+			{
+				checker.finish();
+			}
 		}
 		this.setStepInfo(conn, factory, vName, version, -1, OPT_STATUS_FINISH, 0L);
 		return true;
@@ -431,18 +442,26 @@ public class VersionManager
 
 	private static boolean flushLockTime(String optStatus, long timeFix, Connection conn)
 	{
-		if (optStatus == OPT_STATUS_BEGIN)
+		boolean result;
+		LockTimeChecker checker = LockTimeChecker.getCurrentChecker(
+				false, timeFix, null, null);
+		if (checker != null)
+		{
+			result = true;
+		}
+		else if (optStatus == OPT_STATUS_BEGIN)
 		{
 			// 步骤起始时将锁定时间延长, 这样脚本执行时间过长也不会有问题
 			long newTime = System.currentTimeMillis() + timeFix + BEGIN_LOCK_TIME_PLUS;
-			return DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
+			result = DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
 		}
 		else
 		{
 			// 步骤结束时将锁定时间变为当前时间
 			long newTime = System.currentTimeMillis() + timeFix;
-			return DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
+			result = DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, newTime);
 		}
+		return result;
 	}
 
 	/**
@@ -559,6 +578,24 @@ public class VersionManager
 	private String versionNamePrefix;
 
 	/**
+	 * 获取刷新锁定时间的数据库连接.
+	 */
+	public Connection getLockTimeFlushConnection()
+	{
+		return this.lockTimeFlushConn;
+	}
+
+	/**
+	 * 设置刷新锁定时间的数据库连接.
+	 * 此连接需要在版本升级完成后自行关闭.
+	 */
+	public void setLockTimeFlushConnection(Connection conn)
+	{
+		this.lockTimeFlushConn = conn;
+	}
+	private Connection lockTimeFlushConn;
+
+	/**
 	 * 记录版本更新时的日志.
 	 */
 	public static void log(String msg, Throwable err)
@@ -606,6 +643,198 @@ public class VersionManager
 		{
 			log.error("Error in init dbvm rules", ex);
 		}
+	}
+
+}
+
+/**
+ * 数据库锁时间的检查线程.
+ */
+class LockTimeChecker
+		implements Runnable
+{
+	/**
+	 * 线程缓存中放置此对象的名称.
+	 */
+	private static final String THREAD_CACHE_FLAG = "eterna.lockTimeChecker";
+
+	/**
+	 * 检查的间隔.
+	 */
+	private static final long CHECK_TIME_GAP = VersionManager.FLUSH_LOCK_GAP / 3;
+
+	/**
+	 * 检查线程结束的延迟时间(20second).
+	 */
+	private static final long FINISH_DELAY = 20 * 1000L;
+
+	// 是否正在运行
+	private boolean running = true;
+	// 前一次锁定的时间
+	private long preLockTime;
+	// 结束检查线程的时间
+	private long finishTime;
+	// 时间偏移修复值
+	private final long timeFix;
+	// 刷新锁定时间的数据库连接
+	private Connection conn;
+	// 加锁的数据库连接
+	private Connection lockConn;
+
+	public LockTimeChecker(long timeFix, Connection conn, Connection lockConn)
+	{
+		this.timeFix = timeFix;
+		this.conn = conn;
+		this.lockConn = lockConn;
+	}
+
+	/**
+	 * 获取当前的检查对象.
+	 */
+	public static LockTimeChecker getCurrentChecker(boolean create, long timeFix,
+			Connection conn, Connection lockConn)
+	{
+		ThreadCache cache = ThreadCache.getInstance();
+		LockTimeChecker tmp = (LockTimeChecker) cache.getProperty(THREAD_CACHE_FLAG);
+		if (create && conn != null && lockConn != null && conn != lockConn)
+		{
+			if (tmp == null)
+			{
+				tmp = createChecker(cache, timeFix, conn, lockConn);
+			}
+			else
+			{
+				synchronized (tmp)
+				{
+					if (!tmp.running)
+					{
+						tmp = createChecker(cache, timeFix, conn, lockConn);
+					}
+					else
+					{
+						tmp.resetLockTime();
+						tmp.initConn(conn, lockConn);
+					}
+				}
+			}
+		}
+		return tmp != null && tmp.running ? tmp : null;
+	}
+
+	/**
+	 * 创建检查对象.
+	 */
+	private static LockTimeChecker createChecker(ThreadCache cache, long timeFix,
+			Connection conn, Connection lockConn)
+	{
+		LockTimeChecker tmp = new LockTimeChecker(timeFix, conn, lockConn);
+		tmp.initConn(conn, lockConn);
+		tmp.resetLockTime();
+		Thread thread = new Thread(tmp, "eterna_dbvm_lockTimeChecker");
+		thread.start();
+		cache.setProperty(THREAD_CACHE_FLAG, tmp);
+		return tmp;
+	}
+
+	/**
+	 * 初始化数据库连接.
+	 */
+	private void initConn(Connection conn, Connection lockConn)
+	{
+		this.conn = conn;
+		this.lockConn = lockConn;
+	}
+
+	/**
+	 * 重置锁定的时间.
+	 */
+	public synchronized void resetLockTime()
+	{
+		this.preLockTime = System.currentTimeMillis();
+		this.finishTime = this.preLockTime + FINISH_DELAY;
+	}
+
+	/**
+	 * 暂时结束检查.
+	 */
+	public synchronized void finish()
+	{
+		this.preLockTime = 0L;
+		this.finishTime = System.currentTimeMillis() + FINISH_DELAY;
+	}
+
+	public void run()
+	{
+		while (this.running)
+		{
+			if (this.preLockTime > 0L)
+			{
+				long waitTime = CHECK_TIME_GAP + this.preLockTime
+						- System.currentTimeMillis();
+				if (waitTime > 10L)
+				{
+					doSleep(waitTime);
+				}
+				else
+				{
+					try
+					{
+						this.doLock();
+					}
+					finally
+					{
+						this.resetLockTime();
+					}
+				}
+			}
+			else
+			{
+				long now = System.currentTimeMillis();
+				if (this.finishTime < now)
+				{
+					synchronized (this)
+					{
+						if (this.finishTime < now)
+						{
+							this.running = false;
+						}
+					}
+				}
+				else
+				{
+					doSleep(CHECK_TIME_GAP);
+				}
+			}
+		}
+	}
+
+	private void doLock()
+	{
+		long begin = System.currentTimeMillis();
+		long newTime = begin + this.timeFix;
+		DataBaseLocker.flushLockTime(this.conn,
+				VersionManager.VERSION_LOCK_NAME, newTime, this.lockConn);
+		if (System.currentTimeMillis() - begin > 1000L)
+		{
+			// 如果执行时间大于1s, 则再执行一次
+			newTime = System.currentTimeMillis() + this.timeFix;
+			DataBaseLocker.flushLockTime(this.conn,
+					VersionManager.VERSION_LOCK_NAME, newTime, this.lockConn);
+		}
+		try
+		{
+			this.conn.commit();
+		}
+		catch (Exception ex) {}
+	}
+
+	private static void doSleep(long time)
+	{
+		try
+		{
+			Thread.sleep(time);
+		}
+		catch (InterruptedException ex) {}
 	}
 
 }

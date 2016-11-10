@@ -16,6 +16,8 @@
 
 package self.micromagic.dbvm;
 
+import java.sql.Connection;
+
 import junit.framework.TestCase;
 
 import org.dom4j.Document;
@@ -72,8 +74,12 @@ public class InitTest extends TestCase
 	{
 		VersionManager.checkVersion(ConnectionTool.getConnection(),
 				"cp:/self/micromagic/dbvm/testdb2/", null);
-		VersionManager.checkVersion(ConnectionTool.getConnection(),
+		VersionManager vm = new VersionManager();
+		Connection tmpConn = ConnectionTool.getConnection();
+		vm.setLockTimeFlushConnection(tmpConn);
+		vm.doCheck(ConnectionTool.getConnection(),
 				"cp:/self/micromagic/dbvm/testdb/", null);
+		tmpConn.close();
 	}
 
 	static EternaFactory initTestFactory(String file)
