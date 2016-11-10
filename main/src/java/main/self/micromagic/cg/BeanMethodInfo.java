@@ -85,11 +85,10 @@ public class BeanMethodInfo
 	 */
 	private BeanMethodInfo(BeanMethodInfo info1, BeanMethodInfo info2)
 	{
-
 		this.name = info1.name;
 		this.type = info1.type == null ? info2.type : info1.type;
 		this.doGet = info1.doGet;
-		if (this.type == boolean.class && this.doGet)
+		if (isBool(this.type) && this.doGet)
 		{
 			if (info1.method == null)
 			{
@@ -160,7 +159,7 @@ public class BeanMethodInfo
 					addBeanMethod(tmpMethodsCache, Introspector.decapitalize(name.substring(3)),
 							method, resultType, true, false);
 				}
-				else if (resultType == boolean.class && name.startsWith(IS_PREFIX))
+				else if (isBool(resultType) && name.startsWith(IS_PREFIX))
 				{
 					// boolean类型的get方法
 					addBeanMethod(tmpMethodsCache, Introspector.decapitalize(name.substring(2)),
@@ -196,6 +195,14 @@ public class BeanMethodInfo
 		result = arrangeMethods(tmpMethodsCache);
 		beanMethodsCache.put(beanClass, result);
 		return result;
+	}
+
+	/**
+	 * 判断所给的类型是否为布尔型.
+	 */
+	private static boolean isBool(Class type)
+	{
+		return type == boolean.class || type == Boolean.class;
 	}
 
 	/**
