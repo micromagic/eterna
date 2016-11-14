@@ -550,11 +550,12 @@ public class AppData
 		this.appId = null;
 		this.clearStack();
 		this.dataMap.clear();
-		this.maps[AppData.DATA_MAP] = this.dataMap;
 		this.spcialMap.clear();
-		this.maps[AppData.REQUEST_ATTRIBUTE_MAP] = null;
-		this.maps[AppData.SESSION_ATTRIBUTE_MAP] = null;
-		this.maps[AppData.REQUEST_PARAMETER_MAP] = null;
+		for (int i = 0; i < this.maps.length; i++)
+		{
+			this.maps[i] = null;
+		}
+		this.maps[AppData.DATA_MAP] = this.dataMap;
 		for (int i = 0; i < this.caches.length; i++)
 		{
 			this.caches[i] = null;
