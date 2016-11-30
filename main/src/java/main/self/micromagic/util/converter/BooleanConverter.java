@@ -30,7 +30,15 @@ public class BooleanConverter extends AbstractNumericalConverter
 	 */
 	public static boolean toBoolean(String str)
 	{
-		return str != null && ("1".equals(str) || "true".equalsIgnoreCase(str));
+		return str != null && isTrue(str);
+	}
+
+	/**
+	 * 判断所给的字符串是否可表示为真.
+	 */
+	private static boolean isTrue(String s)
+	{
+		return "1".equals(s) || "true".equalsIgnoreCase(s) || "t".equalsIgnoreCase(s);
 	}
 
 	/**
@@ -134,6 +142,10 @@ public class BooleanConverter extends AbstractNumericalConverter
 
 	public boolean convertToBoolean(String value, String[] trueValues)
 	{
+		if (value == null)
+		{
+			return false;
+		}
 		if (trueValues == null)
 		{
 			Object tmpObj = this.changeByPropertyEditor(value);
@@ -141,7 +153,7 @@ public class BooleanConverter extends AbstractNumericalConverter
 			{
 				return ((Boolean) tmpObj).booleanValue();
 			}
-			return "1".equals(value) || "true".equalsIgnoreCase(value);
+			return isTrue(value);
 		}
 		for (int i = 0; i < trueValues.length; i++)
 		{

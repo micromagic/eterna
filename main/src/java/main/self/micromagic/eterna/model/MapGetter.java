@@ -19,6 +19,8 @@ package self.micromagic.eterna.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import self.micromagic.util.container.CookieContainer;
 import self.micromagic.util.container.RequestHeaderContainer;
 import self.micromagic.util.container.ValueContainerMap;
@@ -94,14 +96,15 @@ class HeaderGetter
 		Map r = data.maps[AppData.HEADER_MAP];
 		if (r == null)
 		{
-			if (data.getHttpServletRequest() == null)
+			HttpServletRequest req = data.getHttpServletRequest();
+			if (req == null)
 			{
 				r = new HashMap();
 			}
 			else
 			{
 				RequestHeaderContainer c = new RequestHeaderContainer(
-						data.getHttpServletRequest(), data.getHttpServletResponse());
+						req, data.getHttpServletResponse());
 				r = ValueContainerMap.create(c);
 			}
 			data.maps[AppData.HEADER_MAP] = r;
@@ -132,14 +135,15 @@ class CookieGetter
 		Map r = data.maps[AppData.COOKIE_MAP];
 		if (r == null)
 		{
-			if (data.getHttpServletRequest() == null)
+			HttpServletRequest req = data.getHttpServletRequest();
+			if (req == null)
 			{
 				r = new HashMap();
 			}
 			else
 			{
 				CookieContainer c = new CookieContainer(
-						data.getHttpServletRequest(), data.getHttpServletResponse());
+						req, data.getHttpServletResponse());
 				r = ValueContainerMap.create(c);
 			}
 			data.maps[AppData.COOKIE_MAP] = r;
