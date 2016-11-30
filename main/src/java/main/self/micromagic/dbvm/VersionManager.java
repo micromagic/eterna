@@ -77,7 +77,7 @@ public class VersionManager
 	/**
 	 * 版本2.
 	 */
-	private static final int V2 = 2;
+	public static final int V2 = 2;
 
 	/**
 	 * 数据库锁的等待时间, 37秒.
@@ -314,7 +314,9 @@ public class VersionManager
 		int index = beginStep > 0 ? beginStep - 1 : 0;
 		int count = factory.getObjectCount();
 		Update insert = (Update) factory.createObject("addStepScript");
-		long timeFix = DataBaseLocker.getDataBaseTime(conn).getTime() - System.currentTimeMillis();
+		long now = System.currentTimeMillis();
+		long timeFix = DataBaseLocker.getDataBaseTime(conn).getTime() - now;
+		DataBaseLocker.flushLockTime(conn, VERSION_LOCK_NAME, now + timeFix);
 		Connection checkConn = this.getLockTimeFlushConnection();
 		LockTimeChecker checker = null;
 		if (checkConn != null)
@@ -681,11 +683,9 @@ class LockTimeChecker
 	// 加锁的数据库连接
 	private Connection lockConn;
 
-	public LockTimeChecker(long timeFix, Connection conn, Connection lockConn)
+	public LockTimeChecker(long timeFix)
 	{
 		this.timeFix = timeFix;
-		this.conn = conn;
-		this.lockConn = lockConn;
 	}
 
 	/**
@@ -727,10 +727,10 @@ class LockTimeChecker
 	private static LockTimeChecker createChecker(ThreadCache cache, long timeFix,
 			Connection conn, Connection lockConn)
 	{
-		LockTimeChecker tmp = new LockTimeChecker(timeFix, conn, lockConn);
+		LockTimeChecker tmp = new LockTimeChecker(timeFix);
 		tmp.initConn(conn, lockConn);
 		tmp.resetLockTime();
-		Thread thread = new Thread(tmp, "eterna_dbvm_lockTimeChecker");
+		Thread thread = new Thread(tmp, "eterna_dbvm_lockTimeChecker_" + tmp.hashCode());
 		thread.start();
 		cache.setProperty(THREAD_CACHE_FLAG, tmp);
 		return tmp;

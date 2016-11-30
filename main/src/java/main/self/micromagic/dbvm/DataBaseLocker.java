@@ -32,6 +32,7 @@ import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
+import self.micromagic.util.FormatTool;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.StringRef;
 
@@ -145,6 +146,9 @@ public class DataBaseLocker
 			modify.setString("lockValue", nowLockValue);
 			modify.setString("lockName", lockName);
 			modify.setObject("lockTime", new java.sql.Timestamp(time));
+			String msg = "Flush lock [" + lockName + "]=[" + nowLockValue + "]'s time to ["
+					+ FormatTool.formatFullDate(new Long(time)) + "].";
+			VersionManager.log(msg, null);
 			return modify.executeUpdate(conn) > 0;
 		}
 		catch (Exception ex)

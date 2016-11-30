@@ -120,7 +120,7 @@ public class CommonUpdate extends UpdateImpl
 			info.insert.setObject("hasParam", hasParam ? new Byte((byte) 1) : new Byte((byte) 0));
 			info.insert.setString("scriptText", script);
 			info.insert.setObject("scriptIndex", new Integer(info.index++));
-			if (info.version >= 3)
+			if (info.version > VersionManager.V2)
 			{
 				try
 				{
