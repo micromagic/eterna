@@ -480,7 +480,7 @@ public class PropertiesManager
 	{
 		if (onlyCurrent)
 		{
-			return this.properties.contains(key);
+			return this.properties.containsKey(key);
 		}
 		else
 		{
