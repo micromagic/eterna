@@ -18,9 +18,12 @@ package self.micromagic.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.eterna.dao.impl.DaoManager;
+import self.micromagic.eterna.dao.impl.PartScript;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
@@ -223,10 +226,29 @@ public class TemplateBuilder extends AbstractGenerator
 	private void parseTemplate()
 	{
 		this.template = (String) this.getAttribute("template");
+		int tmpParamCount = 0;
 		if (this.template == null)
 		{
 			this.template = "";
 			this.subTemplates = StringTool.EMPTY_STRING_ARRAY;
+		}
+		else
+		{
+			ArrayList partList = new ArrayList();
+			ArrayList paramList = new ArrayList();
+			ArrayList subScriptList = new ArrayList();
+			ArrayList subList = new ArrayList();
+			DaoManager.parse(this.template, true, partList, paramList, subScriptList, subList);
+			StringAppender buf = StringTool.createStringAppender(this.template.length() + 128);
+			Iterator itr = partList.iterator();
+			for (int i = 0; i < partList.size(); i++)
+			{
+				PartScript ps = (PartScript) itr.next();
+				ps.initialize(this.factory);
+				buf.append(ps.getScript());
+			}
+			this.template = new String(buf.toString());
+			tmpParamCount = paramList.size();
 		}
 		String pCount = (String) this.getAttribute("param_count");
 		if (pCount != null)
@@ -235,8 +257,8 @@ public class TemplateBuilder extends AbstractGenerator
 		}
 		else
 		{
-			// 当未设置参数个数时, 通过对?计数来设置
-			this.paramCount = StringTool.countChar(this.template, '?');
+			// 当未设置参数个数时, 获取解析时得到的参数个数
+			this.paramCount = tmpParamCount;
 		}
 
 		String tmp;
