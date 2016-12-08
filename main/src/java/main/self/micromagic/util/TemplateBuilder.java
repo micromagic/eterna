@@ -137,6 +137,7 @@ public class TemplateBuilder extends AbstractGenerator
 			{
 				this.prepare = factory.getPrepare(this.prepareName);
 			}
+			this.parseTemplate();
 			return false;
 		}
 		return true;
@@ -179,7 +180,6 @@ public class TemplateBuilder extends AbstractGenerator
 	public ConditionBuilder createConditionBuilder()
 			throws EternaException
 	{
-		this.parseTemplate();
 		return this;
 	}
 
