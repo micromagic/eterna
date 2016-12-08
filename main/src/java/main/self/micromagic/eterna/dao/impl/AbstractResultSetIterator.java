@@ -206,8 +206,7 @@ public abstract class AbstractResultSetIterator
 		{
 			return;
 		}
-		this.resultSet.close();
-		this.stmt.close();
+		BaseDao.doClose(this.resultSet, this.stmt);
 		if (this.dontClose)
 		{
 			this.closed = true;

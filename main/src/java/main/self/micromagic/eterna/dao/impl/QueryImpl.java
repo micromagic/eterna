@@ -145,7 +145,6 @@ public class QueryImpl extends AbstractQuery
 			throws EternaException, SQLException
 	{
 		TimeLogger startTime = new TimeLogger();
-		QueryHelper qh = this.getQueryHelper(conn);
 		Statement stmt = null;
 		ResultSet rs = null;
 		Throwable error = null;
@@ -153,6 +152,7 @@ public class QueryImpl extends AbstractQuery
 		this.executedResult = null;
 		try
 		{
+			QueryHelper qh = this.getQueryHelper(conn);
 			if (this.hasActiveParam())
 			{
 				PreparedStatement temp;
@@ -202,13 +202,18 @@ public class QueryImpl extends AbstractQuery
 			ritr.hasMoreRecord = qh.isHasMoreRecord();
 			if (qh.needCount())
 			{
-				rs.close();
-				stmt.close();
+				// 计数查询时还需要创建Statement, 这里先将当前的关闭
+				doClose(rs, stmt);
+				// 因为已关闭, 所以将变量设为null, 在最后不用关闭
 				rs = null;
 				stmt = null;
-				int count = this.getCountQuery().executeQuery(conn).nextRow().getInt(1);
-				ritr.realRecordCount = count;
-				ritr.realRecordCountAvailable = true;
+				Query totalCountQuery = this.getCountQuery();
+				if (totalCountQuery != null)
+				{
+					int count = totalCountQuery.executeQuery(conn).nextRow().getInt(1);
+					ritr.realRecordCount = count;
+					ritr.realRecordCountAvailable = true;
+				}
 			}
 			this.executedResult = result = ritr;
 			return ritr;
@@ -230,18 +235,11 @@ public class QueryImpl extends AbstractQuery
 		}
 		finally
 		{
+			doClose(rs, stmt);
 			Element node = log(this, startTime, error, conn);
 			if (node != null)
 			{
 				logResult(node, this.getType(), result);
-			}
-			if (rs != null)
-			{
-				rs.close();
-			}
-			if (stmt != null)
-			{
-				stmt.close();
 			}
 		}
 	}
@@ -260,7 +258,11 @@ public class QueryImpl extends AbstractQuery
 			// 保持链接的查询需要先计算总记录数, 因为链接在之后的查询中需要一直保持
 			if (this.getTotalCountModel() == TOTAL_COUNT_MODEL_COUNT)
 			{
-				totalCount = this.getCountQuery().executeQuery(conn).nextRow().getInt(1);
+				Query totalCountQuery = this.getCountQuery();
+				if (totalCountQuery != null)
+				{
+					totalCount = totalCountQuery.executeQuery(conn).nextRow().getInt(1);
+				}
 			}
 			ResultSet rs;
 			if (this.hasActiveParam())
@@ -334,7 +336,7 @@ public class QueryImpl extends AbstractQuery
 	/**
 	 * 将查询的结果记录到日志中.
 	 */
-	protected static void logResult(Element parent, String type, ResultIterator result)
+	public static void logResult(Element parent, String type, ResultIterator result)
 	{
 		if (result != null)
 		{

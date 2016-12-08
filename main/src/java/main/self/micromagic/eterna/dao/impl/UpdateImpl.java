@@ -99,11 +99,8 @@ public class UpdateImpl extends BaseDao
 		}
 		finally
 		{
+			doClose(null, stmt);
 			log(this, startTime, error, conn);
-			if (stmt != null)
-			{
-				stmt.close();
-			}
 		}
 	}
 
@@ -148,15 +145,12 @@ public class UpdateImpl extends BaseDao
 		}
 		finally
 		{
+			doClose(null, stmt);
 			Element node = log(this, startTime, error, conn);
 			if (node != null && result != -1)
 			{
 				Element resultNode = node.addElement(this.getType() + "-result");
 				AppDataLogExecute.printObject(resultNode, new Integer(result));
-			}
-			if (stmt != null)
-			{
-				stmt.close();
 			}
 		}
 	}

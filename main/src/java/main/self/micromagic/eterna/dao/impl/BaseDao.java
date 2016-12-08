@@ -24,7 +24,9 @@ import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -40,6 +42,7 @@ import self.micromagic.coder.Base64;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.DaoLogger;
 import self.micromagic.eterna.dao.PreparedStatementWrap;
+import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
@@ -194,6 +197,35 @@ public abstract class BaseDao extends AbstractDao
 	}
 
 	/**
+	 * 执行ResultSet及Statement的关闭操作.
+	 */
+	public static void doClose(ResultSet rs, Statement stmt)
+	{
+		if (rs != null)
+		{
+			try
+			{
+				rs.close();
+			}
+			catch (Exception ex)
+			{
+				log.error("Error in close ResultSet [" + rs.getClass() + "].", ex);
+			}
+		}
+		if (stmt != null)
+		{
+			try
+			{
+				stmt.close();
+			}
+			catch (Exception ex)
+			{
+				log.error("Error in close Statement [" + stmt.getClass() + "].", ex);
+			}
+		}
+	}
+
+	/**
 	 * 设置全局的日志类型.
 	 */
 	static void setGlobalLogType(String type)
@@ -270,6 +302,12 @@ public abstract class BaseDao extends AbstractDao
 		}
 		logNode.addElement("script").addText(base.getPreparedScript());
 		Element params = logNode.addElement("parameters");
+		if (base instanceof Query)
+		{
+			Query query = (Query) base;
+			params.addAttribute("startRow", Integer.toString(query.getStartRow()));
+			params.addAttribute("maxCount", Integer.toString(query.getMaxCount()));
+		}
 		PreparedValueReader rpv = new PreparedValueReader(params);
 		base.prepareValues(rpv);
 	}
@@ -284,7 +322,7 @@ public abstract class BaseDao extends AbstractDao
 	 * @return  运行日志中记录本次数据操作的节点, 如果没有记录在运行日志中, 则返回null
 	 * @see TimeLogger#formatPassTime(boolean)
 	 */
-	protected static Element log(Dao base, TimeLogger usedTime, Throwable error, Connection conn)
+	public static Element log(Dao base, TimeLogger usedTime, Throwable error, Connection conn)
 			throws SQLException, EternaException
 	{
 		int logType = base.getLogType();

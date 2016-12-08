@@ -150,18 +150,11 @@ class CountQuery
 		}
 		finally
 		{
+			BaseDao.doClose(rs, stmt);
 			Element node = BaseDao.log(this, startTime, error, conn);
 			if (node != null)
 			{
 				QueryImpl.logResult(node, this.getType(), result);
-			}
-			if (rs != null)
-			{
-				rs.close();
-			}
-			if (stmt != null)
-			{
-				stmt.close();
 			}
 		}
 	}
