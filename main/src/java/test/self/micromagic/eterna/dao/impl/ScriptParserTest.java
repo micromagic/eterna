@@ -24,6 +24,63 @@ import tool.PrivateAccessor;
 
 public class ScriptParserTest extends TestCase
 {
+	public void testCheckNeedQuote()
+	{
+		String name;
+
+		name = "0";
+		assertEquals(true, ScriptParser.checkNeedQuote(name));
+		assertEquals("\"0\"", ScriptParser.checkNameForQuote(name));
+
+		name = "a";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("a", ScriptParser.checkNameForQuote(name));
+
+		name = "z";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("z", ScriptParser.checkNameForQuote(name));
+
+		name = "A";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("A", ScriptParser.checkNameForQuote(name));
+
+		name = "Z";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("Z", ScriptParser.checkNameForQuote(name));
+
+		name = "a0";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("a0", ScriptParser.checkNameForQuote(name));
+
+		name = "Z9";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("Z9", ScriptParser.checkNameForQuote(name));
+
+		name = "0a";
+		assertEquals(true, ScriptParser.checkNeedQuote(name));
+		assertEquals("\"0a\"", ScriptParser.checkNameForQuote(name));
+
+		name = "b_01";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("b_01", ScriptParser.checkNameForQuote(name));
+
+		name = "T_01";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("T_01", ScriptParser.checkNameForQuote(name));
+
+		name = "c.x";
+		assertEquals(true, ScriptParser.checkNeedQuote(name));
+		assertEquals("\"c.x\"", ScriptParser.checkNameForQuote(name));
+
+		name = "order";
+		assertEquals(true, ScriptParser.checkNeedQuote(name));
+		assertEquals("\"order\"", ScriptParser.checkNameForQuote(name));
+
+		name = "order2";
+		assertEquals(false, ScriptParser.checkNeedQuote(name));
+		assertEquals("order2", ScriptParser.checkNameForQuote(name));
+	}
+
 	public void testIsNumber()
 			throws Exception
 	{

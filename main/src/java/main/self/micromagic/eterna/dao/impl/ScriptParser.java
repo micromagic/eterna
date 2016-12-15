@@ -417,6 +417,49 @@ public class ScriptParser
 	}
 
 	/**
+	 * 引号.
+	 */
+	public static final String QUOTE = "\"";
+
+	/**
+	 * 检查名称, 如果需要添加引号则添上.
+	 */
+	public static String checkNameForQuote(String name)
+	{
+		return checkNeedQuote(name) ? QUOTE.concat(name).concat(QUOTE) : name;
+	}
+
+	/**
+	 * 检查名称是否需要添加引号.
+	 */
+	public static boolean checkNeedQuote(String name)
+	{
+		if (StringTool.isEmpty(name))
+		{
+			return false;
+		}
+		if (name.length() <= MAX_KEY_LENGTH
+				&& keys.get(name.toUpperCase()) == Boolean.TRUE)
+		{
+			// 如果是主要关键字, 需要添加引号
+			return true;
+		}
+		int len = name.length();
+		for (int i = 0; i < len; i++)
+		{
+			char c = name.charAt(i);
+			if (c != '_' && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z'))
+			{
+				if (i == 0 || (c < '0' || c > '9'))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 操作字符集合.
 	 */
 	private static BitSet operators = new BitSet();
@@ -425,6 +468,11 @@ public class ScriptParser
 	 * 关键字集合.
 	 */
 	private static Map keys = new HashMap();
+
+	/**
+	 * 关键字的最大长度.
+	 */
+	private static int MAX_KEY_LENGTH = 8;
 
 	static
 	{
@@ -460,10 +508,16 @@ public class ScriptParser
 					if (arr[i].charAt(0) == '*')
 					{
 						keys.put(arr[i].substring(1), Boolean.TRUE);
+						int len = arr[i].length() - 1;
+						if (len > MAX_KEY_LENGTH)
+						{
+							MAX_KEY_LENGTH = len;
+						}
 					}
 					else
 					{
 						keys.put(arr[i], Boolean.FALSE);
+						System.err.println("WID AS " + arr[i] + ", ");
 					}
 				}
 			}

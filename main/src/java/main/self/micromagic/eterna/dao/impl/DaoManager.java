@@ -87,7 +87,7 @@ public class DaoManager
 	/**
 	 * 生成的select部分的别名外需要使用的引号.
 	 */
-	private String nameQuote = "\"";
+	private String nameQuote = ScriptParser.QUOTE;
 
 	private PartScript[] partScripts = new PartScript[0];
 
@@ -362,9 +362,16 @@ public class DaoManager
 								{
 									first = false;
 								}
-								buf.append(readerArray[i].getColumnName()).append(" as ")
-										.append(this.nameQuote).append(readerArray[i].getAlias())
-										.append(this.nameQuote);
+								buf.append(readerArray[i].getColumnName()).append(" as ");
+								String alias = readerArray[i].getAlias();
+								if (ScriptParser.checkNeedQuote(alias))
+								{
+									buf.append(this.nameQuote).append(alias).append(this.nameQuote);
+								}
+								else
+								{
+									buf.append(alias);
+								}
 							}
 						}
 					}
