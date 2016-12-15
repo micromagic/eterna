@@ -517,7 +517,6 @@ public class ScriptParser
 					else
 					{
 						keys.put(arr[i], Boolean.FALSE);
-						System.err.println("WID AS " + arr[i] + ", ");
 					}
 				}
 			}
