@@ -9,6 +9,8 @@ import self.micromagic.cg.ArrayTool;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.expression.SpecialOpt;
+import self.micromagic.util.converter.ConverterFinder;
+import self.micromagic.util.converter.ValueConverter;
 
 /**
  * 合并两个对象.
@@ -16,6 +18,15 @@ import self.micromagic.expression.SpecialOpt;
 public class MergeObject
 		implements SpecialOpt
 {
+	private static ValueConverter mapConverter;
+
+	static
+	{
+		ValueConverter converter = ConverterFinder.findConverter(Map.class, true);
+		converter.setNeedThrow(false);
+		mapConverter = converter;
+	}
+
 	public Object exec(Object[] args)
 	{
 		if (args == null || args.length == 0)
@@ -51,6 +62,14 @@ public class MergeObject
 				if (args[1] instanceof Map)
 				{
 					map.putAll((Map) args[1]);
+				}
+				else if (args[1] != null)
+				{
+					Object srcMap = mapConverter.convert(args[1]);
+					if (srcMap != null)
+					{
+						map.putAll((Map) srcMap);
+					}
 				}
 			}
 			else if ((args.length & 0x1) != 1)

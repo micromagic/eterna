@@ -162,9 +162,13 @@ public class ExprToolTest extends TestCase
 				+ "($map2 := map@{name1:1,name2:2}).nameX := \"abc\";\n"
 				+ "$check2 := ($map3 := map@{}).test1[2][$map2.nameX].name2 := 'c';\n"
 				+ "$checkMap.a := $checkList[1] := 1;\n"
-				+ "merge(map@{name1:1,name2:2}, const map@{name3:3});\n";
+				+ "merge(map@{name1:1,name2:2}, const map@{name3:3});\n"
+				+ "$check3 := merge(map@{}, $bean1);\n"
+				+ "$check4 := merge(map@{a:1}, $bean2);\n";
 		Object[] objs = ExprTool.parseExps(exprs, false);
 		data.modelVars = data.varCache.createCache();
+		setValue("$bean1", new TestBean());
+		setValue("$bean2", new java.util.Date());
 		for (int i = 0; i < objs.length; i++)
 		{
 			((Expression) objs[i]).getResult(data);
@@ -193,6 +197,13 @@ public class ExprToolTest extends TestCase
 		list.add(null);
 		list.add(Utility.INTEGER_1);
 		assertEquals(list, getValue("$checkList"));
+		Map check3 = (Map) getValue("$check3");
+		assertEquals(2, check3.size());
+		assertEquals("abc", check3.get("id"));
+		assertEquals(Utility.INTEGER_2, check3.get("age"));
+		Map check4 = (Map) getValue("$check4");
+		assertEquals(1, check4.size());
+		assertEquals(Utility.INTEGER_1, check4.get("a"));
 		data.clearData();
 	}
 
