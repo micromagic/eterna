@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.search.impl;
 
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
@@ -54,8 +55,12 @@ public class BuilderGenerator extends AbstractGenerator
 	public ConditionBuilder createConditionBuilder()
 			throws EternaException
 	{
+		if (this.operator == null)
+		{
+			throw new ParseException("Not found attribute [operator] in default builder.");
+		}
 		boolean needValue = true;
-		if (this.operator != null && this.operator.trim().toUpperCase().endsWith(" NULL"))
+		if (this.operator.trim().toUpperCase().endsWith(" NULL"))
 		{
 			needValue = false;
 		}

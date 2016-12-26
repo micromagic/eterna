@@ -50,6 +50,11 @@ public class CreaterManager extends AbstractGenerator
 	public Object create()
 			throws EternaException
 	{
+		if (this.type == null)
+		{
+			// 当没有指定类型时, 无法生成需要的参数准备者构造器对象
+			throw new ParseException("Not found attribute [type] in default prepare.");
+		}
 		PreparerCreater creater = createPreparerCreater(this.type, this.name);
 		if (this.pattern != null)
 		{

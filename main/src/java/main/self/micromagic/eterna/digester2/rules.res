@@ -119,7 +119,7 @@ format
 same:{name}
 log:{name}
 create:{generator,${format}}
-attr:{name,type,$body(attr=pattern,body=pattern,m=0):pattern}
+attr:{name,type(m=0),$body(attr=pattern,body=pattern,m=0):pattern}
 sub:{attribute}
 stack:{registerObject,n:0,g:1}
 
@@ -129,7 +129,7 @@ prepare
 same:{name}
 log:{name}
 create:{generator,${prepare}}
-attr:{name,type,$body(attr=pattern,body=pattern,m=0):pattern}
+attr:{name,type(m=0),$body(attr=pattern,body=pattern,m=0):pattern}
 sub:{attribute}
 stack:{registerObject,n:0,g:1}
 

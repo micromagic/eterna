@@ -29,6 +29,7 @@ import java.util.Map;
 import self.micromagic.eterna.dao.ResultFormat;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.ResultRow;
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.security.Permission;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
@@ -57,13 +58,12 @@ public class FormatGenerator extends AbstractGenerator
 	public Object create()
 			throws EternaException
 	{
-		Format format;
 		if (this.formatType == null)
 		{
 			// 当没有指定类型时, 无法生成需要的格式化对象
-			throw new EternaException(
-					"The format's attribute [type] not give.");
+			throw new ParseException("Not found attribute [type] in default format.");
 		}
+		Format format;
 		if (T_NUMBER.equals(this.formatType))
 		{
 			if (this.formatPattern == null)
