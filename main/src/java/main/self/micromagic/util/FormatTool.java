@@ -24,10 +24,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import self.micromagic.util.container.SynHashMap;
 import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.container.WeakIdentityMap;
 
 /**
  * 处理格式化的工具. <p>
@@ -134,7 +134,7 @@ public class FormatTool
 		Map fCache = (Map) cache.getProperty(THREAD_FORMAT_KEY);
 		if (fCache == null)
 		{
-			fCache = new WeakHashMap();
+			fCache = new WeakIdentityMap();
 			cache.setProperty(THREAD_FORMAT_KEY, fCache);
 		}
 		Format result = (Format) fCache.get(format);

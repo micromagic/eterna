@@ -38,7 +38,7 @@ public class ThreadCache
 	/**
 	 * 保存所有创建的线程缓存.
 	 */
-	private static final Map threadCaches = new SynHashMap(32, SynHashMap.WEAK);
+	private static final Map threadCaches = new WeakIdentityMap(32);
 
 
 	private final Map properties;

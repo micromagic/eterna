@@ -126,6 +126,17 @@ public class FormatTest extends TestCase
 			tArr[i].join();
 		}
 
+		// 使用ThreadCache2需要的时间
+		for (int i = 0; i < count; i++)
+		{
+			tArr[i] = new Thread(new T_ThreadCacheTime("cache2." + i));
+			tArr[i].start();
+		}
+		for (int i = 0; i < count; i++)
+		{
+			tArr[i].join();
+		}
+
 		// 使用Clone需要的时间
 		for (int i = 0; i < count; i++)
 		{
@@ -310,6 +321,44 @@ public class FormatTest extends TestCase
 						f = (DateFormat) datetimeFormat.clone();
 						fCache.put(datetimeFormat, f);
 					}
+					if (!s.equals(f.format(c.getTime())))
+					{
+						this.errCount++;
+					}
+				}
+				System.out.println("name:" + this.name + ", "
+						+ (System.currentTimeMillis() - begin) + ", " + this.errCount);
+			}
+			catch (Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+	}
+
+	class T_ThreadCacheTime2
+			implements Runnable
+	{
+		public T_ThreadCacheTime2(String name)
+		{
+			this.name = name;
+		}
+		private final String name;
+
+		private int errCount;
+		public void run()
+		{
+			try
+			{
+				DateFormat tf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				Calendar c = Calendar.getInstance();
+				c.setTime(tf.parse("2015-01-20 11:12:11"));
+				long begin = System.currentTimeMillis();
+				for (int i = 0; i < 100000; i++)
+				{
+					String s = "2015-01-2" + (i % 10) + " 11:12:11";
+					c.set(Calendar.DATE, 20 + (i % 10));
+					DateFormat f = FormatTool.getThreadFormat(datetimeFormat);
 					if (!s.equals(f.format(c.getTime())))
 					{
 						this.errCount++;
