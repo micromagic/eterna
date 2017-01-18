@@ -35,6 +35,15 @@ public interface ResultReader
 	public static final String INPUT_TYPE_FLAG = "inputType";
 
 	/**
+	 * 在工厂的arrtibute中设置关闭检查reader索引使用的名称. <p>
+	 * reader如果是使用别名获取数据的话, 默认会在第一次将别名转换成列索引,
+	 * 之后会以索引值获取数据.
+	 * 如果关闭检查reader索引后, 那将一直使用别名来获取数据.
+	 * 对于使用列索引获取数据的reader, 此配置对其无效.
+	 */
+	public static final String DISABLE_CHECK_INDEX_FLAG = "disableCheckReadIndex";
+
+	/**
 	 * 初始化本reader对象, 系统会在初始化时调用此方法. <p>
 	 * 该方法的主要作用是根据设置的format的名称来初始化format对象.
 	 *

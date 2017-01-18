@@ -32,6 +32,7 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.ValueConverter;
 
 public class ObjectReader
@@ -115,7 +116,8 @@ public class ObjectReader
 		}
 		if (this.columnIndex == -1)
 		{
-			this.checkIndex = true;
+			Object disableFlag = factory.getAttribute(DISABLE_CHECK_INDEX_FLAG);
+			this.checkIndex = !BooleanConverter.toBoolean(disableFlag);
 		}
 		// 检查有没有设置导出时使用的标题, 如果设置了则要尝试翻译
 		String tmpStr = (String) this.getAttribute(PRINT_CAPTION);
