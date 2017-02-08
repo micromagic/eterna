@@ -438,13 +438,12 @@ public class ScriptParser
 		{
 			return false;
 		}
-		if (name.length() <= MAX_KEY_LENGTH
-				&& keys.get(name.toUpperCase()) == Boolean.TRUE)
-		{
-			// 如果是主要关键字, 需要添加引号
-			return true;
-		}
 		int len = name.length();
+		if (len > 2 && name.startsWith(QUOTE) && name.endsWith(QUOTE))
+		{
+			// 已经加上引号的名称就不需要再添加了
+			return false;
+		}
 		for (int i = 0; i < len; i++)
 		{
 			char c = name.charAt(i);
@@ -456,7 +455,35 @@ public class ScriptParser
 				}
 			}
 		}
+		if (len <= MAX_MAIN_KEY_LENGTH && keys.get(name.toUpperCase()) == Boolean.TRUE)
+		{
+			// 如果是主要关键字, 需要添加引号
+			return true;
+		}
 		return false;
+	}
+
+	/**
+	 * 检查名称, 如果是主要关键字, 则添加引号.
+	 */
+	public static String checkNameWithKey(String name)
+	{
+		return isKey(name) == Boolean.TRUE ? QUOTE.concat(name).concat(QUOTE) : name;
+	}
+
+	/**
+	 * 判断所给出的名称是否为关键字.
+	 *
+	 * @return TRUE 为主要关键字, FALSE 为次要关键字, null 不是关键字
+	 */
+	public static Boolean isKey(String name)
+	{
+		if (StringTool.isEmpty(name) || name.startsWith(QUOTE))
+		{
+			// 为空或以引号开始的不会是关键字
+			return null;
+		}
+		return (Boolean) keys.get(name.toUpperCase());
 	}
 
 	/**
@@ -470,9 +497,9 @@ public class ScriptParser
 	private static Map keys = new HashMap();
 
 	/**
-	 * 关键字的最大长度.
+	 * 主要关键字的最大长度.
 	 */
-	private static int MAX_KEY_LENGTH = 8;
+	private static int MAX_MAIN_KEY_LENGTH = 8;
 
 	static
 	{
@@ -509,9 +536,9 @@ public class ScriptParser
 					{
 						keys.put(arr[i].substring(1), Boolean.TRUE);
 						int len = arr[i].length() - 1;
-						if (len > MAX_KEY_LENGTH)
+						if (len > MAX_MAIN_KEY_LENGTH)
 						{
-							MAX_KEY_LENGTH = len;
+							MAX_MAIN_KEY_LENGTH = len;
 						}
 					}
 					else

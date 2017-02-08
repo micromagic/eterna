@@ -823,11 +823,7 @@ public class SearchImpl extends AbstractGenerator
 		}
 		condition.name = item.getName();
 		condition.columnType = item.getType();
-		String colName = item.getColumnName();
-		if (tableAlias != null)
-		{
-			colName = tableAlias.concat(".").concat(colName);
-		}
+		String colName = EntityImpl.getColumnNameWithTableAlias(tableAlias, item.getColumnName());
 		condition.columnName = colName;
 		condition.inputType = "text";
 		condition.attributes = new AttributeManager();

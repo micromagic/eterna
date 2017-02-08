@@ -25,6 +25,7 @@ import org.apache.commons.logging.Log;
 import self.micromagic.eterna.dao.ResultFormat;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.impl.FormatGenerator;
+import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.security.PermissionSet;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
@@ -88,6 +89,11 @@ public class ObjectReader
 		if (this.columnName == null)
 		{
 			this.columnName = this.alias == null ? this.name : this.alias;
+		}
+		this.columnName = ScriptParser.checkNameWithKey(this.columnName);
+		if (this.orderCol != null)
+		{
+			this.orderCol = ScriptParser.checkNameWithKey(this.orderCol);
 		}
 		if (this.formatName != null)
 		{

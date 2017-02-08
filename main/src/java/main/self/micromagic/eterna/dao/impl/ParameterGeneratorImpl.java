@@ -87,7 +87,7 @@ class ParameterImpl
 			int index, String prepareName, String permission, AttributeManager attrs)
 	{
 		this.name = name;
-		this.colName = colName == null ? name : colName;
+		this.colName = ScriptParser.checkNameWithKey(colName == null ? name : colName);
 		this.type = TypeManager.getTypeId(typeName);
 		this.index = index;
 		this.prepareName = prepareName;

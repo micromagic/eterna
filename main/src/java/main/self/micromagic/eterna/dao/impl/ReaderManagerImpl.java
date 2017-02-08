@@ -727,11 +727,7 @@ public class ReaderManagerImpl
 		}
 		reader.setAlias(item.getName());
 		reader.setPermissionSet(item.getPermissionSet());
-		String colName = item.getColumnName();
-		if (tableAlias != null && colName.indexOf('.') == -1)
-		{
-			colName = tableAlias.concat(".").concat(colName);
-		}
+		String colName = EntityImpl.getColumnNameWithTableAlias(tableAlias, item.getColumnName());
 		reader.setColumnName(colName);
 		String[] attrNames = item.getAttributeNames();
 		boolean hasFormat = false;

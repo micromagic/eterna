@@ -17,6 +17,7 @@
 package self.micromagic.eterna.dao.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.OrderManager;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.UnmodifiableIterator;
@@ -219,16 +221,26 @@ public class EntityImpl extends AbstractGenerator
 				}
 			}
 		}
-		if (!StringTool.isEmpty(ref.getExclude()))
+		String excludeStr = ref.getExclude();
+		if (excludeStr != null)
 		{
-			String[] arr = StringTool.separateString(ref.getExclude(), ",", true);
-			excludeSet = new HashMap();
-			for (int i = 0; i < arr.length; i++)
+			// 如果存在exclude属性, 且设置为空的话表示包含所有列
+			if (excludeStr.length() == 0)
 			{
-				excludeSet.put(arr[i], Boolean.TRUE);
+				excludeSet = Collections.EMPTY_MAP;
+			}
+			else
+			{
+				String[] arr = StringTool.separateString(excludeStr, ",", true);
+				excludeSet = new HashMap();
+				for (int i = 0; i < arr.length; i++)
+				{
+					excludeSet.put(arr[i], Boolean.TRUE);
+				}
 			}
 		}
-		String tableAlias = ref.getTableAlias();
+		// 表别名先检查是否要添加引号
+		String tableAlias = ScriptParser.checkNameForQuote(ref.getTableAlias());
 		Iterator tmpItr = entity.getItemIterator();
 		while (tmpItr.hasNext())
 		{
@@ -274,10 +286,10 @@ public class EntityImpl extends AbstractGenerator
 					tmp = (EntityItemGenerator) tmp.create();
 					tmp.merge(item);
 					String colName = tmp.getColumnName();
-					if (!StringTool.isEmpty(tableAlias) && colName.indexOf('.') == -1)
+					String newColName = getColumnNameWithTableAlias(tableAlias, colName);
+					if (newColName != colName)
 					{
-						// 原始列中没有别名, 且设置了表别名, 需要添加表别名
-						tmp.setColumnName(tableAlias.concat(".").concat(colName));
+						tmp.setColumnName(newColName);
 					}
 					item = tmp;
 				}
@@ -293,8 +305,41 @@ public class EntityImpl extends AbstractGenerator
 						+ handler.getType() + " [" + handler.getName() + "].";
 				throw new EternaException(msg);
 			}
-			handler.add(item, ref.getTableAlias());
+			handler.add(item, tableAlias);
 		}
+	}
+
+	/**
+	 * 根据表别名获取列名. <p>
+	 * 如果没有表别名或者不列名前不能添加表别名, 则返回原始列名.
+	 */
+	public static String getColumnNameWithTableAlias(String tableAlias, String colName)
+	{
+		if (!StringTool.isEmpty(tableAlias))
+		{
+			// 原始列中只是单独的列名(关键字列名或不需要添加引号的列名), 且设置了表别名, 需要添加表别名
+			if (ScriptParser.isKey(colName) == Boolean.TRUE)
+			{
+				String tmpAlias = checkTableAliasForQuote(tableAlias);
+				StringAppender buf = StringTool.createStringAppender(
+						tmpAlias.length() + colName.length() + 3);
+				return buf.append(tmpAlias).append('.').append(ScriptParser.QUOTE)
+						.append(colName).append(ScriptParser.QUOTE).toString();
+			}
+			else if (!ScriptParser.checkNeedQuote(colName))
+			{
+				return checkTableAliasForQuote(tableAlias).concat(".").concat(colName);
+			}
+		}
+		return colName;
+	}
+
+	/**
+	 * 检查表别名是否需要添加引号.
+	 */
+	private static String checkTableAliasForQuote(String tableAlias)
+	{
+		return ScriptParser.checkNameForQuote(tableAlias);
 	}
 
 	/**

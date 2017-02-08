@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 
+import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
@@ -95,6 +96,7 @@ class ConditionPropertyImpl
 		this.prepare = CreaterManager.createPreparerCreater(
 				this.columnType, this.prepareName, factory);
 
+		this.columnName = ScriptParser.checkNameWithKey(this.columnName);
 		if (this.columnCaption == null)
 		{
 			this.columnCaption = Tool.translateCaption(factory, this.getName());

@@ -167,11 +167,7 @@ public class ParameterGroup
 			pg = new ParameterGeneratorImpl();
 		}
 		pg.setName(item.getName());
-		String colName = item.getColumnName();
-		if (tableAlias != null)
-		{
-			colName = tableAlias.concat(".").concat(colName);
-		}
+		String colName = EntityImpl.getColumnNameWithTableAlias(tableAlias, item.getColumnName());
 		pg.setColumnName(colName);
 		PermissionSet pSet = item.getPermissionSet();
 		if (pSet != null)

@@ -76,7 +76,7 @@ public class EntityItemGenerator extends AbstractGenerator
 
 	public String getColumnName()
 	{
-		return this.columnName;
+		return this.columnName != null ? this.columnName : this.getName();
 	}
 
 	public int getType()
@@ -112,7 +112,7 @@ public class EntityItemGenerator extends AbstractGenerator
 		{
 			this.type = other.getType();
 		}
-		if (this.columnName == this.getName())
+		if (this.columnName == null)
 		{
 			this.columnName = other.getColumnName();
 		}
@@ -132,10 +132,6 @@ public class EntityItemGenerator extends AbstractGenerator
 
 	public Object create()
 	{
-		if (this.columnName == null)
-		{
-			this.columnName = this.getName();
-		}
 		this.type = TypeManager.getTypeId(this.typeName);
 		return this;
 	}
