@@ -82,14 +82,4 @@ public abstract class AbstractPreparerCreater extends AbstractGenerator
 		return this.baseCreater.createPreparer(v);
 	}
 
-	/**
-	 * 将给出的字符串转换成需要的类型及格式的数据.
-	 */
-	protected abstract Object convertValue(String value) throws EternaException;
-
-	/**
-	 * 将给出的对象转换成需要的类型及格式的数据.
-	 */
-	protected abstract Object convertValue(Object value) throws EternaException;
-
 }
