@@ -31,6 +31,16 @@ class LongCreater extends AbstractNumberCreater
 	}
 	private static final LongConverter convert = new LongConverter();
 
+	public Object convertValue(Object value)
+	{
+		return new Long(convert.convertToLong(value, this.format));
+	}
+
+	public Object convertValue(String value)
+	{
+		return new Long(convert.convertToLong(value, this.format));
+	}
+
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{

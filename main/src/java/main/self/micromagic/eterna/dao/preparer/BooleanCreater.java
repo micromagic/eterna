@@ -38,6 +38,16 @@ class BooleanCreater extends AbstractPreparerCreater
 		this.trueValues = StringTool.separateString(pattern, ";", true);
 	}
 
+	public Object convertValue(Object value)
+	{
+		return convert.convertToBoolean(value, this.trueValues) ? Boolean.TRUE : Boolean.FALSE;
+	}
+
+	public Object convertValue(String value)
+	{
+		return convert.convertToBoolean(value, this.trueValues) ? Boolean.TRUE : Boolean.FALSE;
+	}
+
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{

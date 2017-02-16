@@ -31,6 +31,16 @@ class FloatCreater extends AbstractNumberCreater
 	}
 	private static final DoubleConverter convert = new DoubleConverter();
 
+	public Object convertValue(Object value)
+	{
+		return new Float((float) convert.convertToDouble(value, this.format));
+	}
+
+	public Object convertValue(String value)
+	{
+		return new Float((float) convert.convertToDouble(value, this.format));
+	}
+
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{

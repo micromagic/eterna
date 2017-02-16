@@ -74,24 +74,24 @@ class StringCreater extends AbstractPreparerCreater
 		}
 	}
 
-	public ValuePreparer createPreparer(Object value)
+	public Object convertValue(Object value)
 	{
-		return this.createPreparer(convert.convertToString(value));
+		return this.convertValue(convert.convertToString(value));
 	}
 
-	public ValuePreparer createPreparer(String value)
+	public Object convertValue(String value)
 	{
 		if (this.appendLength == 0)
 		{
 			if (value == null || (value.length() == 0 && this.emptyToNull))
 			{
-				return new StringPreparer(this, null);
+				return null;
 			}
 			if (this.caseType != 0)
 			{
 				value = this.caseType > 0 ? value.toUpperCase() : value.toLowerCase();
 			}
-			return new StringPreparer(this, value);
+			return value;
 		}
 		if (value == null)
 		{
@@ -103,7 +103,17 @@ class StringCreater extends AbstractPreparerCreater
 		}
 		StringAppender buf = StringTool.createStringAppender(value.length() + this.appendLength);
 		buf.append(this.beginStr).append(value).append(this.endStr);
-		return new StringPreparer(this, buf.toString());
+		return buf.toString();
+	}
+
+	public ValuePreparer createPreparer(Object value)
+	{
+		return this.createPreparer(convert.convertToString(value));
+	}
+
+	public ValuePreparer createPreparer(String value)
+	{
+		return new StringPreparer(this, (String) this.convertValue(value));
 	}
 
 }

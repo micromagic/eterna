@@ -31,6 +31,16 @@ class ByteCreater extends AbstractNumberCreater
 	}
 	private static final IntegerConverter convert = new IntegerConverter();
 
+	public Object convertValue(Object value)
+	{
+		return new Byte((byte) convert.convertToInt(value, this.format));
+	}
+
+	public Object convertValue(String value)
+	{
+		return new Byte((byte) convert.convertToInt(value, this.format));
+	}
+
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{

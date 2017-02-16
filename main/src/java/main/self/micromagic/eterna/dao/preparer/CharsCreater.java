@@ -34,6 +34,16 @@ class CharsCreater extends AbstractPreparerCreater
 	}
 	private static final ReaderConverter convert = new ReaderConverter();
 
+	public Object convertValue(Object value)
+	{
+		return convert.convertToReader(value);
+	}
+
+	public Object convertValue(String value)
+	{
+		return convert.convertToReader(value);
+	}
+
 	public ValuePreparer createPreparer(Object value)
 	{
 		return new CharsPreparer(this, convert.convertToReader(value));

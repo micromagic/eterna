@@ -36,6 +36,16 @@ class BytesCreater extends AbstractPreparerCreater
 		this.charset = charset;
 	}
 
+	public Object convertValue(Object value)
+	{
+		return convert.convertToBytes(value, this.charset);
+	}
+
+	public Object convertValue(String value)
+	{
+		return convert.convertToBytes(value, this.charset);
+	}
+
 	public ValuePreparer createPreparer(Object value)
 	{
 		return new BytesPreparer(this, convert.convertToBytes(value, this.charset));

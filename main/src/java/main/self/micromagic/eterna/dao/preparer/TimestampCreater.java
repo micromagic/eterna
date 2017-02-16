@@ -32,6 +32,16 @@ class TimestampCreater extends AbstractDateCreater
 	}
 	private static final TimestampConverter convert = new TimestampConverter();
 
+	protected Object convertValue(Object value, DateFormat format)
+	{
+		return convert.convertToTimestamp(value, format);
+	}
+
+	protected Object convertValue(String value, DateFormat format)
+	{
+		return convert.convertToTimestamp(value, format);
+	}
+
 	public ValuePreparer createPreparer(Object value, DateFormat format, Calendar calendar)
 	{
 		return new TimestampPreparer(this, convert.convertToTimestamp(value, format), calendar);

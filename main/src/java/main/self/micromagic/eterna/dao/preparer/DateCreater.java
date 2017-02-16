@@ -32,6 +32,16 @@ class DateCreater extends AbstractDateCreater
 	}
 	private static final DateConverter convert = new DateConverter();
 
+	public Object convertValue(Object value, DateFormat format)
+	{
+		return convert.convertToDate(value, format);
+	}
+
+	protected Object convertValue(String value, DateFormat format)
+	{
+		return convert.convertToDate(value, format);
+	}
+
 	public ValuePreparer createPreparer(Object value, DateFormat format, Calendar calendar)
 	{
 		return new DatePreparer(this, convert.convertToDate(value, format), calendar);

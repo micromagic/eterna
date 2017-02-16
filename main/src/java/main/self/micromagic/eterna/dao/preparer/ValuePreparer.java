@@ -41,7 +41,8 @@ public interface ValuePreparer
 			throws SQLException;
 
 	/**
-	 * 设置此参数的名称.
+	 * 设置此参数的名称. <p>
+	 * 此名称主要用于日志中的显示, 不会作为对象的标识.
 	 */
 	public void setName(String name);
 

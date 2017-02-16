@@ -102,6 +102,26 @@ abstract class AbstractDateCreater extends AbstractPreparerCreater
 				+ "](" + value.getClass() + ") to " + this.typeName + ".");
 	}
 
+	public Object convertValue(Object value)
+	{
+		if (this.formats == null)
+		{
+			return this.convertValue(value, null);
+		}
+		for (int i = 0; i < this.formats.length; i++)
+		{
+			try
+			{
+				return this.convertValue(value, this.formats[i]);
+			}
+			catch (Throwable ex) {}
+		}
+		throw new ClassCastException("Can't cast [" + value
+				+ "](" + value.getClass() + ") to " + this.typeName + ".");
+	}
+
+	protected abstract Object convertValue(Object value, DateFormat format);
+
 	protected abstract ValuePreparer createPreparer(Object value, DateFormat format, Calendar calendar);
 
 	public ValuePreparer createPreparer(String value)
@@ -134,6 +154,26 @@ abstract class AbstractDateCreater extends AbstractPreparerCreater
 		throw new ClassCastException("Can't cast [" + value
 				+ "](" + value.getClass() + ") to " + this.typeName + ".");
 	}
+
+	public Object convertValue(String value)
+	{
+		if (this.formats == null)
+		{
+			return this.convertValue(value, null);
+		}
+		for (int i = 0; i < this.formats.length; i++)
+		{
+			try
+			{
+				return this.convertValue(value, this.formats[i]);
+			}
+			catch (Throwable ex) {}
+		}
+		throw new ClassCastException("Can't cast [" + value
+				+ "](" + value.getClass() + ") to " + this.typeName + ".");
+	}
+
+	protected abstract Object convertValue(String value, DateFormat format);
 
 	protected abstract ValuePreparer createPreparer(String value, DateFormat format, Calendar calendar);
 

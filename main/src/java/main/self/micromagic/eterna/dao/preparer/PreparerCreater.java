@@ -43,24 +43,40 @@ public interface PreparerCreater extends EternaObject
 	/**
 	 * 获得一个配置的属性.
 	 *
-	 * @param name    属性的名称
-	 * @return        属性的值
+	 * @param name  属性的名称
+	 * @return  属性的值
 	 */
 	Object getAttribute(String name) throws EternaException;
 
 	/**
+	 * 将一个Object类型的值转换成所需要的类型.
+	 *
+	 * @param value  值
+	 * @return  转换后的值
+	 */
+	Object convertValue(Object value) throws EternaException;
+
+	/**
+	 * 将一个String类型的值转换成所需要的类型.
+	 *
+	 * @param value  值
+	 * @return  转换后的值
+	 */
+	Object convertValue(String value) throws EternaException;
+
+	/**
 	 * 根据一个Object类型的值创建一个值准备器.
 	 *
-	 * @param value    值
-	 * @return      值准备器
+	 * @param value  值
+	 * @return  值准备器
 	 */
 	ValuePreparer createPreparer(Object value) throws EternaException;
 
 	/**
 	 * 根据一个String类型的值创建一个值准备器.
 	 *
-	 * @param value    值
-	 * @return      值准备器
+	 * @param value  值
+	 * @return  值准备器
 	 */
 	ValuePreparer createPreparer(String value) throws EternaException;
 

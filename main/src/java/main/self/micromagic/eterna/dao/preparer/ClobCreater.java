@@ -28,14 +28,24 @@ class ClobCreater extends AbstractPreparerCreater
 		super(name);
 	}
 
+	public Object convertValue(Object value)
+	{
+		return value;
+	}
+
+	public Object convertValue(String value)
+	{
+		throw new ClassCastException("Can't cast String to Clob.");
+	}
+
 	public ValuePreparer createPreparer(Object value)
 	{
-		return new ClobPreparer(this, (Clob) value);
+		return new ClobPreparer(this, (Clob) this.convertValue(value));
 	}
 
 	public ValuePreparer createPreparer(String value)
 	{
-		throw new ClassCastException("Can't cast String to Clob.");
+		return new ClobPreparer(this, (Clob) this.convertValue(value));
 	}
 
 }

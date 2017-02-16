@@ -41,6 +41,16 @@ class StreamCreater extends AbstractPreparerCreater
 		this.charset = charset;
 	}
 
+	public Object convertValue(Object value)
+	{
+		return convert.convertToStream(value, this.charset);
+	}
+
+	public Object convertValue(String value)
+	{
+		return convert.convertToStream(value, this.charset);
+	}
+
 	public ValuePreparer createPreparer(Object value)
 	{
 		return new StreamPreparer(this, convert.convertToStream(value, this.charset));

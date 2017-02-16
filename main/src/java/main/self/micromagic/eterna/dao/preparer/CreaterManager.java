@@ -83,12 +83,11 @@ public class CreaterManager extends AbstractGenerator
 		}
 		else
 		{
-			String checkStr = Tool.PATTERN_PREFIX;
-			if (prepareName.startsWith(checkStr))
+			if (prepareName.startsWith(Tool.PATTERN_PREFIX))
 			{
 				return CreaterManager.createPreparerCreater(
 						TypeManager.getPureTypeName(type),
-						prepareName.substring(checkStr.length()), factory);
+						prepareName.substring(Tool.PATTERN_PREFIX.length()), factory);
 			}
 			else
 			{

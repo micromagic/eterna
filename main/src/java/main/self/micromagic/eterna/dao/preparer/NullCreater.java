@@ -60,6 +60,16 @@ class NullCreater implements PreparerCreater
 		return this.factory;
 	}
 
+	public Object convertValue(Object value)
+	{
+		return null;
+	}
+
+	public Object convertValue(String value)
+	{
+		return null;
+	}
+
 	public ValuePreparer createPreparer(Object value)
 	{
 		return new NullPreparer(this, java.sql.Types.JAVA_OBJECT);

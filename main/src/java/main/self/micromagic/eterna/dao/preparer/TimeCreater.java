@@ -32,6 +32,16 @@ class TimeCreater extends AbstractDateCreater
 	}
 	private static final TimeConverter convert = new TimeConverter();
 
+	protected Object convertValue(Object value, DateFormat format)
+	{
+		return convert.convertToTime(value, format);
+	}
+
+	protected Object convertValue(String value, DateFormat format)
+	{
+		return convert.convertToTime(value, format);
+	}
+
 	public ValuePreparer createPreparer(Object value, DateFormat format, Calendar calendar)
 	{
 		return new TimePreparer(this, convert.convertToTime(value, format), calendar);

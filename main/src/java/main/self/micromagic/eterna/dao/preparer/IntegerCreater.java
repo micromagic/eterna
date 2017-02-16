@@ -21,6 +21,7 @@ import java.sql.Types;
 
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.util.Utility;
 import self.micromagic.util.converter.IntegerConverter;
 
 class IntegerCreater extends AbstractNumberCreater
@@ -30,6 +31,16 @@ class IntegerCreater extends AbstractNumberCreater
 		super(name);
 	}
 	private static final IntegerConverter convert = new IntegerConverter();
+
+	public Object convertValue(Object value)
+	{
+		return Utility.createInteger(convert.convertToInt(value, this.format));
+	}
+
+	public Object convertValue(String value)
+	{
+		return Utility.createInteger(convert.convertToInt(value, this.format));
+	}
 
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException

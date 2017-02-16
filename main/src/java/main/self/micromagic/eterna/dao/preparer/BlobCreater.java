@@ -28,14 +28,24 @@ class BlobCreater extends AbstractPreparerCreater
 		super(name);
 	}
 
+	public Object convertValue(Object value)
+	{
+		return value;
+	}
+
+	public Object convertValue(String value)
+	{
+		throw new ClassCastException("Can't cast String to Blob.");
+	}
+
 	public ValuePreparer createPreparer(Object value)
 	{
-		return new BlobPreparer(this, (Blob) value);
+		return new BlobPreparer(this, (Blob) this.convertValue(value));
 	}
 
 	public ValuePreparer createPreparer(String value)
 	{
-		throw new ClassCastException("Can't cast String to Blob.");
+		return new BlobPreparer(this, (Blob) this.convertValue(value));
 	}
 
 }
