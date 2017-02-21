@@ -64,7 +64,8 @@ public class BuilderGenerator extends AbstractGenerator
 		{
 			needValue = false;
 		}
-		ConditionBuilderImpl cb = new ConditionBuilderImpl(this.operator, needValue);
+		ConditionBuilderImpl cb = new ConditionBuilderImpl(
+				this.operator, needValue, this.attributes);
 		cb.prepareName = this.prepare;
 		cb.name = this.name;
 		cb.caption = this.caption == null ? this.name : this.caption;

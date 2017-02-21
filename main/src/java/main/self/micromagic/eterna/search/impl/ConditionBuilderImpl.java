@@ -21,12 +21,12 @@ import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.BuilderResult;
 import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.search.ConditionProperty;
+import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.converter.BooleanConverter;
 
 /**
  * builder的实现类.
@@ -37,13 +37,15 @@ class ConditionBuilderImpl
 	static final String EQUALS_OPT_TAG = "=";
 	static final String LIKE_OPT_TAG = "LIKE";
 
-	public ConditionBuilderImpl(String operator, boolean needValue)
+	public ConditionBuilderImpl(String operator, boolean needValue, AttributeManager attrs)
 	{
 		this.operator = operator;
 		this.needValue = needValue;
+		this.attrs = attrs;
 	}
 	private final String operator;
 	private final boolean needValue;
+	private final AttributeManager attrs;
 	boolean emptyToNull = true;
 
 	public boolean initialize(EternaFactory factory)
@@ -58,14 +60,11 @@ class ConditionBuilderImpl
 		{
 			this.prepare = factory.getPrepare(this.prepareName);
 		}
-		String tStr = (String) this.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
-		if (tStr == null)
+		Boolean b = Tool.checkEmptyToNull(
+				(String) this.getAttribute(Tool.EMPTY_TO_NULL_FLAG), factory);
+		if (b != null)
 		{
-			tStr = (String) factory.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
-		}
-		if (tStr != null)
-		{
-			this.emptyToNull = BooleanConverter.toBoolean(tStr);
+			this.emptyToNull = b.booleanValue();
 		}
 		return false;
 	}
@@ -161,15 +160,13 @@ class ConditionBuilderImpl
 	public Object getAttribute(String name)
 			throws EternaException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.attrs.getAttribute(name);
 	}
 
 	public String[] getAttributeNames()
 			throws EternaException
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return this.attrs.getAttributeNames();
 	}
 
 }

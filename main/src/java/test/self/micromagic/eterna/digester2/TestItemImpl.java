@@ -167,13 +167,13 @@ class TestItemPrepare extends AbstractPreparerCreater
 		return super.initialize(factory);
 	}
 
-	protected Object convertValue(String value)
+	public Object convertValue(String value)
 			throws EternaException
 	{
 		return value;
 	}
 
-	protected Object convertValue(Object value)
+	public Object convertValue(Object value)
 			throws EternaException
 	{
 		return value == null ? null : new Integer(value.hashCode());

@@ -622,4 +622,21 @@ public class Tool
 		return null;
 	}
 
+	/**
+	 * 检查并获取emptyToNull的配置值.
+	 */
+	public static Boolean checkEmptyToNull(String baseValue, Factory factory)
+	{
+		String tStr = baseValue;
+		if (tStr == null && factory != null)
+		{
+			tStr = (String) factory.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
+		}
+		if (tStr != null)
+		{
+			return BooleanConverter.toBoolean(tStr) ? Boolean.TRUE : Boolean.FALSE;
+		}
+		return null;
+	}
+
 }

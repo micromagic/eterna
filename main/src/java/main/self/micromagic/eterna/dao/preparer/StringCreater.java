@@ -19,11 +19,11 @@ package self.micromagic.eterna.dao.preparer;
 import java.sql.SQLException;
 
 import self.micromagic.eterna.dao.PreparedStatementWrap;
-import self.micromagic.eterna.share.AttributeManager;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.converter.StringConverter;
 
 class StringCreater extends AbstractPreparerCreater
@@ -64,14 +64,20 @@ class StringCreater extends AbstractPreparerCreater
 		this.appendLength = this.beginStr.length() + this.endStr.length();
 	}
 
-	protected void setAttributes(AttributeManager attributes)
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
 	{
-		super.setAttributes(attributes);
-		String tStr = (String) attributes.getAttribute(Tool.EMPTY_TO_NULL_FLAG);
-		if (tStr != null)
+		if (super.initialize(factory))
 		{
-			this.emptyToNull = BooleanConverter.toBoolean(tStr);
+			return true;
 		}
+		Boolean b = Tool.checkEmptyToNull(
+				(String) this.getAttribute(Tool.EMPTY_TO_NULL_FLAG), factory);
+		if (b != null)
+		{
+			this.emptyToNull = b.booleanValue();
+		}
+		return false;
 	}
 
 	public Object convertValue(Object value)
