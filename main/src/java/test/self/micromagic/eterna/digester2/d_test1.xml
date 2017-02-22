@@ -114,7 +114,7 @@
 					<entity-ref entityName="e2" tableAlias="Tx"/>
 					<reader name="rEnd" alias="cEnd" colName="t.end" type="int"/>
 					<reader name="r3" alias="c3" colName="t.x1" type="BigString"/>
-					<reader name="r2" alias="c2" colName="t.x2" type="BigString"/>
+					<reader name="r2" alias="Order" colName="t.x2" type="BigString"/>
 				</readers>
 				<parameters>
 					<parameter name="p1" type="String"/>

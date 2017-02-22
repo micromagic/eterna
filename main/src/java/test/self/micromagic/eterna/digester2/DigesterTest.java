@@ -192,7 +192,7 @@ public class DigesterTest extends TestCase
 		query2.setString("pEnd", "1");
 		String tmpSQL = query2.getPreparedScript();
 		//System.out.println(tmpSQL);
-		assertTrue(tmpSQL.indexOf("t.x1 as \"c3\", Tx.i6 as \"i6\", Tx.c3 as \"p3\", t.x2 as \"c2\", t.end as \"cEnd\"") != -1);
+		assertTrue(tmpSQL.indexOf("t.x1 as c3, Tx.i6 as i6, Tx.c3 as p3, t.x2 as \"Order\", t.end as cEnd") != -1);
 		assertTrue(tmpSQL.endsWith(")  and p3 = ? and t.x2 = ?"));
 		query2.setIgnore("p3");
 		assertTrue(query2.getPreparedScript().endsWith(")  and t.x2 = ?"));
