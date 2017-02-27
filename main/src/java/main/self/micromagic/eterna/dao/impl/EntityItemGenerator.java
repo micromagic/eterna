@@ -104,6 +104,11 @@ public class EntityItemGenerator extends AbstractGenerator
 		{
 			return;
 		}
+		if (this.initialized)
+		{
+			throw new EternaException("Can't merge item [" + this.getName()
+					+ "], because it has initialized.");
+		}
 		if (this.caption == null)
 		{
 			this.caption = other.getCaption();

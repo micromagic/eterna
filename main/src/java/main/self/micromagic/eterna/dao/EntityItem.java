@@ -25,7 +25,7 @@ import self.micromagic.eterna.share.EternaException;
 public interface EntityItem
 {
 	/**
-	 * 在属性中设置是否忽略父元素中的属性.
+	 * 在属性中设置是否忽略父元素中的属性名.
 	 */
 	String IGNORE_PARENT = "ignoreParent";
 

@@ -28,6 +28,11 @@ import self.micromagic.eterna.share.EternaObject;
 public interface Entity extends EternaObject
 {
 	/**
+	 * 实体的类型名称.
+	 */
+	String TYPE = "Entity";
+
+	/**
 	 * 初始化本实体对象, 系统会在初始化时调用此方法.
 	 */
 	boolean initialize(EternaFactory factory) throws EternaException;

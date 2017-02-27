@@ -270,29 +270,18 @@ public class EntityImpl extends AbstractGenerator
 					newName = null;
 				}
 			}
-			if (newName != null || !StringTool.isEmpty(tableAlias))
+			boolean needCreate = false;
+			if (newName != null || ref instanceof ItemForceCreater)
 			{
-				// 如果有修改过的标识名称或表别名, 需要创建一个新的元素
-				String tmpName = newName == null ? oldName : newName;
-				if (ref instanceof ItemGenerator)
-				{
-					item = ((ItemGenerator) ref).create(tmpName, item, tableAlias);
-				}
-				else
-				{
-					EntityItemGenerator tmp = new EntityItemGenerator();
-					tmp.setName(tmpName);
-					tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_NONE));
-					tmp = (EntityItemGenerator) tmp.create();
-					tmp.merge(item);
-					String colName = tmp.getColumnName();
-					String newColName = getColumnNameWithTableAlias(tableAlias, colName);
-					if (newColName != colName)
-					{
-						tmp.setColumnName(newColName);
-					}
-					item = tmp;
-				}
+				needCreate = true;
+			}
+			else
+			{
+				needCreate = checkColumnNameWithTableAlias(tableAlias, item.getColumnName());
+			}
+			if (needCreate)
+			{
+				item = createItem(ref, newName, item, tableAlias);
 			}
 			if (handler.contains(item))
 			{
@@ -305,7 +294,40 @@ public class EntityImpl extends AbstractGenerator
 						+ handler.getType() + " [" + handler.getName() + "].";
 				throw new EternaException(msg);
 			}
+			if (!needCreate && Entity.TYPE.equals(handler.getType()))
+			{
+				// 如果未创建元素且处理的是实体, 需要创建新的元素
+				item = createItem(ref, null, item, tableAlias);
+			}
 			handler.add(item, tableAlias);
+		}
+	}
+
+	/**
+	 * 创建一个元素.
+	 */
+	private static EntityItem createItem(EntityRef ref,
+			String newName, EntityItem base, String tableAlias)
+	{
+		String tmpName = newName == null ? base.getName() : newName;
+		if (ref instanceof ItemGenerator)
+		{
+			return ((ItemGenerator) ref).create(tmpName, base, tableAlias);
+		}
+		else
+		{
+			EntityItemGenerator tmp = new EntityItemGenerator();
+			tmp.setName(tmpName);
+			tmp.setTypeName(TypeManager.getTypeName(TypeManager.TYPE_NONE));
+			tmp = (EntityItemGenerator) tmp.create();
+			tmp.merge(base);
+			String colName = tmp.getColumnName();
+			String newColName = getColumnNameWithTableAlias(tableAlias, colName);
+			if (newColName != colName)
+			{
+				tmp.setColumnName(newColName);
+			}
+			return tmp;
 		}
 	}
 
@@ -315,23 +337,71 @@ public class EntityImpl extends AbstractGenerator
 	 */
 	public static String getColumnNameWithTableAlias(String tableAlias, String colName)
 	{
-		if (!StringTool.isEmpty(tableAlias))
+		if (!StringTool.isEmpty(tableAlias) && isValidColumnName(colName))
 		{
 			// 原始列中只是单独的列名(关键字列名或不需要添加引号的列名), 且设置了表别名, 需要添加表别名
-			if (ScriptParser.isKey(colName) == Boolean.TRUE)
+			boolean mainKey = ScriptParser.isKey(colName) == Boolean.TRUE;
+			String tmpAlias = checkTableAliasForQuote(tableAlias);
+			StringAppender buf = StringTool.createStringAppender(
+					tmpAlias.length() + colName.length() + (mainKey ? 3 : 1));
+			buf.append(tmpAlias).append('.');
+			if (mainKey)
 			{
-				String tmpAlias = checkTableAliasForQuote(tableAlias);
-				StringAppender buf = StringTool.createStringAppender(
-						tmpAlias.length() + colName.length() + 3);
-				return buf.append(tmpAlias).append('.').append(ScriptParser.QUOTE)
-						.append(colName).append(ScriptParser.QUOTE).toString();
+				buf.append(ScriptParser.QUOTE);
 			}
-			else if (!ScriptParser.checkNeedQuote(colName))
+			buf.append(colName);
+			if (mainKey)
 			{
-				return checkTableAliasForQuote(tableAlias).concat(".").concat(colName);
+				buf.append(ScriptParser.QUOTE);
 			}
+			return buf.toString();
 		}
 		return colName;
+	}
+
+	/**
+	 * 根据表别名及原始列名检查是否需要创建新的列名.
+	 */
+	private static boolean checkColumnNameWithTableAlias(String tableAlias, String colName)
+	{
+		return !StringTool.isEmpty(tableAlias) && isValidColumnName(colName);
+	}
+
+
+	/**
+	 * 检查名称是否为有效的列标识.
+	 */
+	private static boolean isValidColumnName(String name)
+	{
+		if (StringTool.isEmpty(name))
+		{
+			return false;
+		}
+		int len = name.length();
+		int begin = 0;
+		if (len > 2 && name.startsWith(ScriptParser.QUOTE) && name.endsWith(ScriptParser.QUOTE))
+		{
+			begin = 1;
+			len -= 1;
+		}
+		for (int i = begin; i < len; i++)
+		{
+			char c = name.charAt(i);
+			if (c == '\"')
+			{
+				// 内部包含引号的名称不是有效的列名
+				return false;
+			}
+			if (c != '_' && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z'))
+			{
+				if (i == 0 || (c < '0' || c > '9'))
+				{
+					return false;
+				}
+			}
+		}
+		// 这里不需要检查关键字, 由外部代码处理
+		return true;
 	}
 
 	/**
@@ -352,6 +422,13 @@ public class EntityImpl extends AbstractGenerator
 		 */
 		EntityItem create(String newName, EntityItem base, String tableAlias);
 
+	}
+
+	/**
+	 * 一个标识接口, 实现了这个接口将会强制创建元素.
+	 */
+	public interface ItemForceCreater
+	{
 	}
 
 	/**
@@ -420,7 +497,7 @@ class EntityContainer
 
 	public String getType()
 	{
-		return "Entity";
+		return Entity.TYPE;
 	}
 
 	public boolean contains(EntityItem item)
@@ -428,6 +505,7 @@ class EntityContainer
 		boolean result = this.nameCache.containsKey(item.getName());
 		if (result)
 		{
+			// 如果已存在, 需要尝试和当前实体中的元素合并
 			EntityItem oldItem = (EntityItem) this.originItems.remove(item.getName());
 			if (oldItem != null)
 			{

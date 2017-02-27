@@ -439,14 +439,14 @@ public class ScriptParser
 			return false;
 		}
 		int len = name.length();
-		if (len > 2 && name.startsWith(QUOTE) && name.endsWith(QUOTE))
-		{
-			// 已经加上引号的名称就不需要再添加了
-			return false;
-		}
 		for (int i = 0; i < len; i++)
 		{
 			char c = name.charAt(i);
+			if (c == '\"')
+			{
+				// 包含引号的名称不能再添加引号
+				return false;
+			}
 			if (c != '_' && (c < 'A' || c > 'Z') && (c < 'a' || c > 'z'))
 			{
 				if (i == 0 || (c < '0' || c > '9'))
