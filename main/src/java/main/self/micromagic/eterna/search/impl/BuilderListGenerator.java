@@ -21,10 +21,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import self.micromagic.eterna.search.ConditionBuilder;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaCreater;
+import self.micromagic.util.StringTool;
 
 /**
  * 条件构造器列表的创建者.
@@ -35,15 +37,15 @@ public class BuilderListGenerator extends AbstractGenerator
 	/**
 	 * 添加一个条件构造者.
 	 */
-	public void addBuilder(String name)
+	public void addBuilder(String name, String caption)
 	{
-		List tmp = this.builderNames;
+		List tmp = this.builderInfos;
 		if (tmp != null)
 		{
-			tmp.add(name);
+			tmp.add(new BuilderInfoContainer(name, caption));
 		}
 	}
-	private List builderNames = new ArrayList();
+	private List builderInfos = new ArrayList();
 
 	public Object create()
 			throws EternaException
@@ -58,19 +60,24 @@ public class BuilderListGenerator extends AbstractGenerator
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		List builderNames = this.builderNames;
-		if (builderNames == null)
+		List tmpBuilderInfos = this.builderInfos;
+		if (tmpBuilderInfos == null)
 		{
 			return true;
 		}
-		this.builderNames = null;
-		int count = builderNames.size();
+		this.builderInfos = null;
+		int count = tmpBuilderInfos.size();
 		this.builders = new ArrayList(count);
-		Iterator nameItr = builderNames.iterator();
+		Iterator infoItr = tmpBuilderInfos.iterator();
 		for (int i = 0; i < count; i++)
 		{
-			String bName = (String) nameItr.next();
-			this.builders.add(factory.getConditionBuilder(bName));
+			BuilderInfoContainer info = (BuilderInfoContainer) infoItr.next();
+			ConditionBuilder builder = factory.getConditionBuilder(info.name);
+			if (!StringTool.isEmpty(info.caption) && !info.caption.equals(builder.getCaption()))
+			{
+				builder = new ConditionBuilderWrapper(info.caption, builder);
+			}
+			this.builders.add(builder);
 		}
 		this.builders = Collections.unmodifiableList(this.builders);
 		return false;
@@ -95,5 +102,17 @@ public class BuilderListGenerator extends AbstractGenerator
 	public void destroy()
 	{
 	}
+
+}
+
+class BuilderInfoContainer
+{
+	public BuilderInfoContainer(String name, String caption)
+	{
+		this.name = name;
+		this.caption = caption;
+	}
+	final String name;
+	final String caption;
 
 }

@@ -220,7 +220,7 @@ stack:{registerObject,n:0,g:0}
 
 ## builderName
 builder-name
-method:{addBuilder,name}
+method:{addBuilder,name,caption(m=0)}
 
 
 ## search

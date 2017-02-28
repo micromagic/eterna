@@ -25,6 +25,9 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.util.ref.ObjectRef;
 
+/**
+ * 模块调用者.
+ */
 public interface ModelCaller extends EternaObject
 {
 	/**
@@ -52,18 +55,46 @@ public interface ModelCaller extends EternaObject
 	 */
 	String getModelNameTag();
 
+	/**
+	 * 根据模块获取数据库连接.
+	 */
 	Connection getConnection(Model model) throws SQLException, EternaException;
 
+	/**
+	 * 关闭数据库连接.
+	 */
 	void closeConnection(Connection conn);
 
+	/**
+	 * 获取模块所在的工厂.
+	 */
 	EternaFactory getFactory() throws EternaException;
 
+	/**
+	 * 调用模块. <p>
+	 * 需要调用哪个模块将从参数中获取.
+	 */
 	ModelExport callModel(AppData data)
 			throws EternaException, SQLException, IOException;
 
+	/**
+	 * 调用模块. <p>
+	 * 需要调用哪个模块将从参数中获取.
+	 *
+	 * @param preConn  用于传递前一个数据库连接的对象
+	 */
 	ModelExport callModel(AppData data, ObjectRef preConn)
 			throws EternaException, SQLException, IOException;
 
+	/**
+	 * 调用指定的模块. <p>
+	 * 需要调用哪个模块将从参数中获取.
+	 *
+	 * @param model    需要调用的模块
+	 * @param export   模块执行完后的出口
+	 * @param tType    事务的类型
+	 * @param preConn  用于传递前一个数据库连接的对象
+	 */
 	ModelExport callModel(AppData data, Model model, ModelExport export, int tType, ObjectRef preConn)
 			throws EternaException, SQLException, IOException;
 

@@ -404,8 +404,8 @@ public class SearchManagerImpl extends AbstractGenerator
 					}
 					catch (Exception ex)
 					{
-						String msg = "Error wen builde condition [" + cp.getName()
-								+ "] in search [" + search.getName() + "].";
+						String msg = "Error in builde condition [" + cp.getName()
+								+ "] at search [" + search.getName() + "].";
 						log.error(msg, ex);
 					}
 					if (log.isDebugEnabled())
@@ -540,8 +540,9 @@ public class SearchManagerImpl extends AbstractGenerator
 				}
 				catch (Exception ex)
 				{
-					log.error("Error wen builde condition: ConditionProperty[" + cp.getName()
-							+ "], search[" + search.getName() + "]", ex);
+					String msg = "Error in builde condition [" + cp.getName()
+							+ "] at search [" + search.getName() + "].";
+					log.error(msg, ex);
 				}
 				if (log.isDebugEnabled())
 				{
@@ -628,8 +629,9 @@ public class SearchManagerImpl extends AbstractGenerator
 				}
 				catch (Exception ex)
 				{
-					log.error("Error wen builde condition: ConditionProperty[" + cp.getName()
-							+ "], search[" + search.getName() + "]", ex);
+					String msg = "Error in builde condition [" + cp.getName()
+							+ "] at search [" + search.getName() + "].";
+					log.error(msg, ex);
 				}
 				if (log.isDebugEnabled())
 				{

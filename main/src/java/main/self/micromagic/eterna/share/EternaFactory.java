@@ -182,6 +182,7 @@ public interface EternaFactory extends Factory
 	ValuePreparer createValuePreparer(int type, Object value)
 			throws EternaException;
 
+
 	//----------------------------------  search  --------------------------------------
 
 	/**
@@ -223,10 +224,15 @@ public interface EternaFactory extends Factory
 	 */
 	Search createSearch(int id) throws EternaException;
 
+	/**
+	 * 创建一个搜索管理者.
+	 */
 	SearchManager createSearchManager() throws EternaException;
 
-	SearchAttributes getSearchAttributes()
-			throws EternaException;
+	/**
+	 * 获取搜索相关的配置属性.
+	 */
+	SearchAttributes getSearchAttributes() throws EternaException;
 
 
 	//----------------------------------  model  --------------------------------------
@@ -236,12 +242,18 @@ public interface EternaFactory extends Factory
 	 */
 	String MODEL_CALLER_NAME = "model.caller";
 
+	/**
+	 * 获取参数中设置模块名称的键值.
+	 */
 	String getModelNameTag() throws EternaException;
 
+	/**
+	 * 获取模块调用者.
+	 */
 	ModelCaller getModelCaller() throws EternaException;
 
 	/**
-	 * 获取一个model的export对象.
+	 * 获取一个模块的出口对象.
 	 */
 	ModelExport getModelExport(String exportName) throws EternaException;
 
@@ -259,6 +271,7 @@ public interface EternaFactory extends Factory
 	 */
 	Model createModel(int id) throws EternaException;
 
+
 	//----------------------------------  view  --------------------------------------
 
 	/**
@@ -266,6 +279,9 @@ public interface EternaFactory extends Factory
 	 */
 	String VIEW_GLOBAL_SETTING_FLAG = "view.global.setting";
 
+	/**
+	 * 获取全集的视图设置.
+	 */
 	String getViewGlobalSetting() throws EternaException;
 
 	/**

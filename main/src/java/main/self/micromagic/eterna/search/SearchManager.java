@@ -22,6 +22,9 @@ import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 
+/**
+ * 搜索的管理者.
+ */
 public interface SearchManager
 {
 	/**

@@ -33,12 +33,24 @@ public interface ConditionProperty
 	 */
 	String DEFAULT_ENV_PREFIX = "env:";
 
+	/**
+	 * 初始化.
+	 */
 	void initialize(EternaFactory factory) throws EternaException;
 
+	/**
+	 * 获取条件配置信息的名称.
+	 */
 	String getName() throws EternaException;
 
+	/**
+	 * 获取条件相关的列名.
+	 */
 	String getColumnName() throws EternaException;
 
+	/**
+	 * 获取列的标题.
+	 */
 	String getColumnCaption() throws EternaException;
 
 	/**
@@ -73,6 +85,9 @@ public interface ConditionProperty
 	 */
 	boolean isVisible() throws EternaException;
 
+	/**
+	 * 获取条件的输入类型.
+	 */
 	String getConditionInputType() throws EternaException;
 
 	/**
@@ -80,18 +95,39 @@ public interface ConditionProperty
 	 */
 	Object getDefaultValue() throws EternaException;
 
+	/**
+	 * 根据名称获取属性.
+	 */
 	Object getAttribute(String name) throws EternaException;
 
+	/**
+	 * 获取所有属性的名称.
+	 */
 	String[] getAttributeNames() throws EternaException;
 
+	/**
+	 * 获取权限集合.
+	 */
 	PermissionSet getPermissionSet() throws EternaException;
 
+	/**
+	 * 获取条件构造器列表的名称.
+	 */
 	String getConditionBuilderListName() throws EternaException;
 
+	/**
+	 * 获取条件构造器列表.
+	 */
 	List getConditionBuilderList() throws EternaException;
 
+	/**
+	 * 是否强制使用默认的条件构造器.
+	 */
 	boolean isUseDefaultConditionBuilder() throws EternaException;
 
+	/**
+	 * 获取默认的条件构造器.
+	 */
 	ConditionBuilder getDefaultConditionBuilder() throws EternaException;
 
 }

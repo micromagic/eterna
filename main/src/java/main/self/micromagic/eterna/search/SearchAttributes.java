@@ -25,7 +25,7 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.view.DataPrinter;
 
 /**
- * 查询相关的配置属性.
+ * 搜索相关的配置属性.
  */
 public final class SearchAttributes
 		implements DataPrinter.BeanPrinter
