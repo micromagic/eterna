@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Factory;
@@ -327,12 +326,10 @@ public class ContainerManager
 			{
 				return globalContainer;
 			}
-			Map attrs = new HashMap();
-			attrs.put(CreaterManager.ATTR_CREATER, new HashMap());
 			// 这里需要先生成, 再注册及初始化
 			// 可防止初始化时再调用getGlobalContainer时重复注册
 			globalContainer = createFactoryContainer(GLOBAL_ID, config, parents,
-					null, attrs, ContainerManager.class.getClassLoader(), null, false);
+					null, null, ContainerManager.class.getClassLoader(), null, false);
 			registerFactoryContainer(globalContainer);
 		}
 		return globalContainer;
