@@ -3,7 +3,7 @@
 
 	<!-- 版本更新的脚本表-->
 	<table name="#const(version_script)" desc="版本更新的脚本表">
-		<column name="versionName" type="String(300)" desc="版本名称"/>
+		<column name="versionName" type="String(230)" desc="版本名称"/>
 		<column name="versionValue" type="int" desc="版本值"/>
 		<column name="executed" type="byte" desc="是否已执行"/>
 		<column name="scriptText" type="Clob" desc="执行的脚本"/>

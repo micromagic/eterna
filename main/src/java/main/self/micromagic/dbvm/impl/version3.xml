@@ -3,7 +3,7 @@
 
 	<!-- 版本操作日志表 -->
 	<table name="#const(version_opt_log)" desc="版本操作日志表">
-		<column name="versionName" type="String(300)" desc="版本名称"/>
+		<column name="versionName" type="String(230)" desc="版本名称"/>
 		<column name="versionValue" type="int" desc="版本值"/>
 		<column name="step" type="int" desc="步骤"/>
 		<column name="scriptIndex" type="int" desc="脚本的顺序"/>

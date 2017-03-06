@@ -3,7 +3,7 @@
 
 	<!-- 版本信息表 -->
 	<table name="#const(version_info)" desc="版本信息表">
-		<column name="versionName" type="String(300)" desc="版本名称" nullable="false"/>
+		<column name="versionName" type="String(230)" desc="版本名称" nullable="false"/>
 		<column name="versionValue" type="int" desc="版本值"/>
 		<column name="errInfo" type="String(1000)" desc="错误信息"/>
 		<column name="lastModified" type="Datetime" desc="最后修改时间"/>
@@ -11,7 +11,7 @@
 
 	<!-- 版本日志表 -->
 	<table name="#const(version_log)" desc="版本日志表">
-		<column name="versionName" type="String(300)" desc="版本名称"/>
+		<column name="versionName" type="String(230)" desc="版本名称"/>
 		<column name="versionValue" type="int" desc="版本值"/>
 		<column name="errInfo" type="String(1000)" desc="错误信息"/>
 		<column name="lastModified" type="Datetime" desc="最后修改时间"/>
