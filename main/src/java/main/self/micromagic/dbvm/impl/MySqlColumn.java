@@ -106,11 +106,11 @@ public class MySqlColumn extends AbstractObject
 						.append(colDesc.colName);
 				if (dropDefault.value)
 				{
-					buf.append(" drop default");
+					s.append(" drop default");
 				}
 				else
 				{
-					buf.append(" set ").append(defExp);
+					s.append(" set ").append(defExp);
 				}
 				Update u = this.factory.createUpdate(COMMON_EXEC);
 				u.setSubScript(1, s.toString());
