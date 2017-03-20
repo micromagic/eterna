@@ -94,7 +94,7 @@ public class MySqlColumn extends AbstractObject
 			{
 				buf.append(colDesc.colName);
 			}
-			buf.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
+			buf.append(' ').append(this.typeDefiner.getTypeDefine(colDesc.typeId));
 			if (colDesc.nullable != null)
 			{
 				buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
