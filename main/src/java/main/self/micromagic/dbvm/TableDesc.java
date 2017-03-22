@@ -26,6 +26,7 @@ import java.util.List;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
@@ -43,11 +44,13 @@ public class TableDesc extends AbstractObject
 	/**
 	 * 表名.
 	 */
+	// 表名的引号会在初始化时添加, 因为可能有常量
 	public String tableName;
 
 	/**
-	 * 修改列时, 新的表名.
+	 * 修改时, 新的表名.
 	 */
+	// 新表名的引号会在初始化时添加, 因为可能有常量
 	public String newName;
 
 	/**
@@ -101,7 +104,10 @@ public class TableDesc extends AbstractObject
 		}
 		this.comment = (TableComment) factory.createObject(TABLE_COMM_NAME);
 		this.renameOpt = factory.getConstantValue("rename");
-		this.tableName = resolveConst(this.tableName, factory);
+		this.tableName = ScriptParser.checkNameForQuote(
+				resolveConst(this.tableName, factory));
+		this.newName = ScriptParser.checkNameForQuote(
+				resolveConst(this.newName, factory));
 		Iterator itr = this.columns.iterator();
 		while (itr.hasNext())
 		{

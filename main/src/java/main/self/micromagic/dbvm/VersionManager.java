@@ -188,7 +188,7 @@ public class VersionManager
 	{
 		String vName = StringTool.isEmpty(this.versionNamePrefix) ? res.getName()
 				: this.versionNamePrefix.concat(res.getName());
-		String dbName = conn.getMetaData().getDatabaseProductName();
+		String dbName = DataBaseLocker.getDataBaseProductName(conn);
 		Factory f = DataBaseLocker.getFactory(dbName);
 		int version = getVersionValue(conn, vName, f);
 		if (version == VERSION_VALUE_ERROR)
@@ -263,7 +263,7 @@ public class VersionManager
 		{
 			log.info("Begin " + vName + " up to " + version + ". --------------------");
 		}
-		String dbName = conn.getMetaData().getDatabaseProductName();
+		String dbName = DataBaseLocker.getDataBaseProductName(conn);
 		FactoryContainer share = DataBaseLocker.getContainer(dbName);
 		FactoryContainer c = ContainerManager.createFactoryContainer("v" + version,
 				config, null, getDigester(), null, loader, share, false);

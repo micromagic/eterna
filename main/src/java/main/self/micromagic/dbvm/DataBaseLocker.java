@@ -41,8 +41,62 @@ import self.micromagic.util.ref.StringRef;
  */
 public class DataBaseLocker
 {
+	/**
+	 * mysql数据库名称.
+	 */
+	public static final String DB_NAME_MYSQL = "MySQL";
+
+	/**
+	 * oracle数据库名称.
+	 */
+	public static final String DB_NAME_ORACLE = "Oracle";
+
+	/**
+	 * H2数据库名称.
+	 */
+	public static final String DB_NAME_H2 = "H2";
+
+	/**
+	 * 数据库名称的索引表.
+	 * 奇数位为key, 偶数位为对应的名称.
+	 */
+	private static final String[] DB_NAME_INDEX = {
+		"MYSQL", DB_NAME_MYSQL,
+		"ORACLE", DB_NAME_ORACLE,
+		"H2", DB_NAME_H2
+	};
+
 	private DataBaseLocker()
 	{
+	}
+
+	/**
+	 * 根据数据库连接获取数据库产品的名称.
+	 */
+	public static String getDataBaseProductName(Connection conn)
+			throws SQLException
+	{
+		return conn.getMetaData().getDatabaseProductName();
+	}
+
+	/**
+	 * 获取标准的数据库名称.
+	 */
+	public static String getStandardDataBaseName(String name)
+	{
+		if (StringTool.isEmpty(name))
+		{
+			return null;
+		}
+		String upName = name.toUpperCase();
+		for (int i = 0; i < DB_NAME_INDEX.length; i += 2)
+		{
+			if (upName.equals(DB_NAME_INDEX[i]))
+			{
+				return DB_NAME_INDEX[i + 1];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -52,7 +106,7 @@ public class DataBaseLocker
 	{
 		try
 		{
-			String dbName = conn.getMetaData().getDatabaseProductName();
+			String dbName = getDataBaseProductName(conn);
 			EternaFactory f = getFactory(dbName);
 			Query q = f.createQuery("getDataBaseTime");
 			return q.executeQuery(conn).nextRow().getTimestamp(1);
@@ -73,7 +127,7 @@ public class DataBaseLocker
 	public static void releaseDB(Connection conn, String lockName)
 			throws SQLException, EternaException
 	{
-		String dbName = conn.getMetaData().getDatabaseProductName();
+		String dbName = getDataBaseProductName(conn);
 		EternaFactory f = getFactory(dbName);
 		Update modify = f.createUpdate("modifyLockInfo");
 		modify.setString("lockValue1", RELEASED_VALUE);
@@ -96,7 +150,7 @@ public class DataBaseLocker
 	{
 		try
 		{
-			String dbName = conn.getMetaData().getDatabaseProductName();
+			String dbName = getDataBaseProductName(conn);
 			EternaFactory f = getFactory(dbName);
 			Update modify = f.createUpdate("modifyLockInfo");
 			String nowLockValue = makeLockValue(conn);
@@ -139,7 +193,7 @@ public class DataBaseLocker
 	{
 		try
 		{
-			String dbName = conn.getMetaData().getDatabaseProductName();
+			String dbName = getDataBaseProductName(conn);
 			EternaFactory f = getFactory(dbName);
 			Update modify = f.createUpdate("flushLockTime");
 			String nowLockValue = makeLockValue(lockConn);
@@ -168,7 +222,7 @@ public class DataBaseLocker
 	public static void lock(Connection conn, String lockName, String userId)
 			throws SQLException, EternaException
 	{
-		String dbName = conn.getMetaData().getDatabaseProductName();
+		String dbName = getDataBaseProductName(conn);
 		EternaFactory f = getFactory(dbName);
 		Update modify = f.createUpdate("modifyLockInfo");
 		modify.setString("userId", userId);
@@ -212,7 +266,7 @@ public class DataBaseLocker
 			boolean overTransaction, long maxWaitTime)
 			throws SQLException, EternaException
 	{
-		String dbName = conn.getMetaData().getDatabaseProductName();
+		String dbName = getDataBaseProductName(conn);
 		EternaFactory f = getFactory(dbName);
 		Query query = f.createQuery("getLockInfo");
 		query.setString("lockName", lockName);

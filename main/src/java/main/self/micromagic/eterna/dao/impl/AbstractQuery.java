@@ -315,9 +315,24 @@ public abstract class AbstractQuery extends BaseDao
 	protected QueryHelper getQueryHelper(Connection conn)
 			throws SQLException
 	{
-		return this.checkDatabaseName ?
-				this.queryHelper = QueryHelper.getInstance(this, conn, this.queryHelper)
-				: this.queryHelper == null ? this.queryHelper = new QueryHelper(this) : this.queryHelper;
+		if (this.checkDatabaseName)
+		{
+			this.queryHelper = QueryHelper.getInstance(this, conn, this.queryHelper);
+		}
+		else if (this.queryHelper == null)
+		{
+			this.queryHelper = new QueryHelper(this);
+		}
+		super.setExecuteConnection(conn);
+		return this.queryHelper;
+	}
+
+	protected void setExecuteConnection(Connection conn)
+			throws SQLException
+	{
+		// 调用这个方法是在保存数据库连接时, 所以要清空queryHelper
+		this.queryHelper = null;
+		super.setExecuteConnection(conn);
 	}
 
 	public String getPreparedScript()
@@ -576,7 +591,7 @@ public abstract class AbstractQuery extends BaseDao
 			tmp = (ColumnInfo) readerMap.get(r.getName().toUpperCase());
 			if (tmp != null)
 			{
-				// reader的字在结果中存在, 也要去除
+				// reader的名字在结果中存在, 也要去除
 				tmp.exists = true;
 			}
 		}
@@ -765,126 +780,3 @@ class ColumnInfo
 	}
 
 }
-
-/*
-	private ResultIteratorImpl executeQuery(ResultSet rs)
-			throws EternaException, SQLException
-	{
-		int start = this.startRow - 1;
-		int recordCount = 0;
-		int realRecordCount = 0;
-		boolean realRecordCountAvailable = false;
-		boolean hasMoreRecord = false;
-		boolean hasRecord = true;
-		boolean isForwardOnly = rs.getType() == ResultSet.TYPE_FORWARD_ONLY;
-		List readerList = this.getReaderManager0(rs).getReaderList(this.getPermission0());
-
-		if (start > 0)
-		{
-			if (!isForwardOnly)
-			{
-				hasRecord = rs.absolute(start);
-			}
-			else
-			{
-				for (; recordCount < start && hasRecord; recordCount++, hasRecord = rs.next());
-			}
-		}
-		ArrayList result;
-		ResultIteratorImpl ritr;
-		if (!hasRecord)
-		{
-			recordCount--;
-			realRecordCountAvailable = true;
-			hasMoreRecord = false;
-			result = new ArrayList(0);
-			ritr = new ResultIteratorImpl(readerList);
-		}
-		else
-		{
-			result = new ArrayList(this.maxRows == -1 ? 32 : this.maxRows);
-			ritr = new ResultIteratorImpl(readerList);
-			if (this.maxRows == -1)
-			{
-				while (rs.next())
-				{
-					recordCount++;
-					result.add(this.readResults(readerList, rs, ritr));
-				}
-				realRecordCount = recordCount;
-				realRecordCountAvailable = true;
-				hasMoreRecord = false;
-			}
-			else
-			{
-				int i = 0;
-				for (; i < this.maxRows && (hasMoreRecord = rs.next()); i++)
-				{
-					recordCount++;
-					result.add(this.readResults(readerList, rs, ritr));
-				}
-				// 这么判断是防止某些jdbc在第一次next为false后, 后面的next又变回true
-				if (hasMoreRecord && (hasMoreRecord = rs.next()))
-				{
-					recordCount++;
-					realRecordCountAvailable = false;
-				}
-				else
-				{
-					realRecordCountAvailable = true;
-				}
-			}
-		}
-		if (this.totalCount == TOTAL_COUNT_AUTO)
-		{
-			if (!isForwardOnly)
-			{
-				realRecordCountAvailable = rs.last();
-				realRecordCount = rs.getRow();
-			}
-			else
-			{
-				if (hasMoreRecord)
-				{
-					for (; rs.next(); recordCount++);
-				}
-				realRecordCount = recordCount;
-			}
-			realRecordCountAvailable = true;
-		}
-		else if (this.totalCount == TOTAL_COUNT_NONE)
-		{
-			realRecordCount = recordCount;
-		}
-		else if (this.totalCount == TOTAL_COUNT_COUNT)
-		{
-			if (!realRecordCountAvailable)
-			{
-				ritr.needCount = true;
-			}
-			else
-			{
-				realRecordCount = recordCount;
-			}
-		}
-		else if (this.totalCount >= 0)
-		{
-			if (!realRecordCountAvailable)
-			{
-				realRecordCount = this.totalCount;
-				realRecordCountAvailable = true;
-			}
-			else
-			{
-				realRecordCount = recordCount;
-			}
-		}
-
-		ritr.setResult(result);
-		ritr.realRecordCount = realRecordCount;
-		ritr.recordCount = result.size();
-		ritr.realRecordCountAvailable = realRecordCountAvailable;
-		ritr.hasMoreRecord = hasMoreRecord;
-		return ritr;
-	}
-*/

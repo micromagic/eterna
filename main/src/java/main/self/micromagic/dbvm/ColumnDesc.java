@@ -16,6 +16,7 @@
 
 package self.micromagic.dbvm;
 
+import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 
@@ -31,9 +32,25 @@ public class ColumnDesc
 	public String colName;
 
 	/**
+	 * 设置列名.
+	 */
+	public void setColName(String colName)
+	{
+		this.colName = ScriptParser.checkNameForQuote(colName);
+	}
+
+	/**
 	 * 修改列时, 新的列名.
 	 */
 	public String newName;
+
+	/**
+	 * 设置新的列名.
+	 */
+	public void setNewName(String newName)
+	{
+		this.newName = ScriptParser.checkNameForQuote(newName);
+	}
 
 	/**
 	 * 列注释.

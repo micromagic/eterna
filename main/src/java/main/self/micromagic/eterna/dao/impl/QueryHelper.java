@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import self.micromagic.dbvm.DataBaseLocker;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
@@ -38,12 +39,12 @@ public class QueryHelper
 	/**
 	 * mysql数据库名称.
 	 */
-	public static final String DB_NAME_MYSQL = "MySQL";
+	public static final String DB_NAME_MYSQL = DataBaseLocker.DB_NAME_MYSQL;
 
 	/**
 	 * oracle数据库名称.
 	 */
-	public static final String DB_NAME_ORACLE = "Oracle";
+	public static final String DB_NAME_ORACLE = DataBaseLocker.DB_NAME_ORACLE;
 
 	/**
 	 * 其他普通数据库名称.
@@ -66,7 +67,7 @@ public class QueryHelper
 	public static QueryHelper getInstance(Query query, Connection conn, QueryHelper oldHelper)
 			throws SQLException
 	{
-		String dbName = conn.getMetaData().getDatabaseProductName();
+		String dbName = DataBaseLocker.getDataBaseProductName(conn);
 		if (DB_NAME_ORACLE.equals(dbName))
 		{
 			return oldHelper != null && DB_NAME_ORACLE.equals(oldHelper.getType()) ?

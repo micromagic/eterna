@@ -69,6 +69,7 @@ public class UpdateImpl extends BaseDao
 		this.executedResult = -1;
 		try
 		{
+			this.setExecuteConnection(conn);
 			if (this.hasActiveParam())
 			{
 				PreparedStatement temp = conn.prepareStatement(this.getPreparedScript());
@@ -113,6 +114,7 @@ public class UpdateImpl extends BaseDao
 		int result = this.executedResult = -1;
 		try
 		{
+			this.setExecuteConnection(conn);
 			if (this.hasActiveParam())
 			{
 				PreparedStatement temp = conn.prepareStatement(this.getPreparedScript());

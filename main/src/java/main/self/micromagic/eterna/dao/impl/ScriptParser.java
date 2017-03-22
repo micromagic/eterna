@@ -16,6 +16,8 @@
 
 package self.micromagic.eterna.dao.impl;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.dbvm.DataBaseLocker;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
@@ -79,6 +82,22 @@ public class ScriptParser
 	 * 节点类型为一个带有引号的名称.
 	 */
 	public static final int BASE_TYPE_NAME_QUOT = 11;
+
+
+	/**
+	 * 引号.
+	 */
+	public static final String QUOTE = "\"";
+
+	/**
+	 * 引号, 字符型.
+	 */
+	public static final char QUOTE_CHAR = '\"';
+
+	/**
+	 * 字符串的标识符.
+	 */
+	public static final char STRING_FLAG = '\'';
 
 	/**
 	 * 对一个脚本进行解析并返回词法节点列表.
@@ -218,14 +237,14 @@ public class ScriptParser
 			if (c != -1)
 			{
 				begin.value = element.begin;
-				if (c == '\'')
+				if (c == STRING_FLAG)
 				{
 					mode.value = P1_STRING_MODE;
 					StringAppender tmpBuf = StringTool.createStringAppender(32);
 					tmpBuf.append(element.text);
 					buf.setObject(tmpBuf);
 				}
-				else if (c == '\"')
+				else if (c == QUOTE_CHAR)
 				{
 					mode.value = P1_NAME_MODE;
 					StringAppender tmpBuf = StringTool.createStringAppender(32);
@@ -247,7 +266,7 @@ public class ScriptParser
 							int tmpChar = checkOperatorFlag(next);
 							if (tmpChar != -1)
 							{
-								if (tmpChar != '\'' && tmpChar != '\"')
+								if (tmpChar != STRING_FLAG && tmpChar != QUOTE_CHAR)
 								{
 									// 可作为转义符
 									element.type = BASE_TYPE_ESCAPE;
@@ -397,7 +416,7 @@ public class ScriptParser
 	 */
 	private static boolean isStringFlag(ParserBaseElement e)
 	{
-		return e.text.length() == 1 && e.text.charAt(0) == '\'';
+		return e.text.length() == 1 && e.text.charAt(0) == STRING_FLAG;
 	}
 
 	/**
@@ -405,7 +424,7 @@ public class ScriptParser
 	 */
 	private static boolean isNameFlag(ParserBaseElement e)
 	{
-		return e.text.length() == 1 && e.text.charAt(0) == '\"';
+		return e.text.length() == 1 && e.text.charAt(0) == QUOTE_CHAR;
 	}
 
 	/**
@@ -415,11 +434,6 @@ public class ScriptParser
 	{
 		return e.text.length() == 1 && e.text.charAt(0) <= ' ';
 	}
-
-	/**
-	 * 引号.
-	 */
-	public static final String QUOTE = "\"";
 
 	/**
 	 * 检查名称, 如果需要添加引号则添上.
@@ -442,7 +456,7 @@ public class ScriptParser
 		for (int i = 0; i < len; i++)
 		{
 			char c = name.charAt(i);
-			if (c == '\"')
+			if (c == QUOTE_CHAR)
 			{
 				// 包含引号的名称不能再添加引号
 				return false;
@@ -487,6 +501,128 @@ public class ScriptParser
 	}
 
 	/**
+	 * 检查语句中的名称标识符, 替换成数据库相关的名称标识符.
+	 */
+	public static String checkScriptNameQuote(Connection conn, String script)
+			throws SQLException
+	{
+		if (conn == null || StringTool.isEmpty(script))
+		{
+			return script;
+		}
+		String dbName = DataBaseLocker.getDataBaseProductName(conn);
+		char[] nameQuote = (char[]) nameQuoteIndex.get(dbName);
+		if (nameQuote == null || nameQuote[0] == QUOTE_CHAR)
+		{
+			return script;
+		}
+		return checkScriptNameQuote0(nameQuote, script);
+	}
+	static String checkScriptNameQuote0(char[] nameQuote, String script)
+	{
+		int nameIndex = script.indexOf(QUOTE_CHAR);
+		if (nameIndex == -1)
+		{
+			return script;
+		}
+		// 处理数据库相关的名称标识符
+		int strIndex = script.indexOf(STRING_FLAG);
+		if (strIndex == -1 && nameQuote[0] == nameQuote[1])
+		{
+			return script.replace(QUOTE_CHAR, nameQuote[0]);
+		}
+		int count = script.length();
+		StringAppender buf = StringTool.createStringAppender(script.length());
+		if (strIndex == -1)
+		{
+			strIndex = count;
+		}
+		int baseIndex = 0;
+		while (strIndex < count || nameIndex < count)
+		{
+			if (strIndex < nameIndex)
+			{
+				// 字符串标识在引号前, 需要判断名称标识符是否在字符串内
+				int next = getStringFlagEnd(script, strIndex + 1, count);
+				if (next == -1)
+				{
+					// 字符串标识有问题, 不做处理
+					return script;
+				}
+				// 查找下一个字符串标识符
+				strIndex = script.indexOf(STRING_FLAG, next + 1);
+				if (strIndex == -1)
+				{
+					strIndex = count;
+				}
+				if (next > nameIndex)
+				{
+					// 如果字符串标识结束位置大于名称标识符, 说明这个名称标识符在字符串内, 重新查找下一个名称标识符
+					nameIndex = script.indexOf(QUOTE_CHAR, next + 1);
+					if (nameIndex == -1)
+					{
+						nameIndex = count;
+					}
+				}
+			}
+			else
+			{
+				buf.append(script.substring(baseIndex, nameIndex)).append(nameQuote[0]);
+				int next = script.indexOf(QUOTE_CHAR, nameIndex + 1);
+				if (next == -1)
+				{
+					// 名称标识有问题, 不做处理
+					return script;
+				}
+				buf.append(script.substring(nameIndex + 1, next)).append(nameQuote[1]);
+				baseIndex = next + 1;
+				// 查找下一个名称标识符
+				nameIndex = script.indexOf(QUOTE_CHAR, next + 1);
+				if (nameIndex == -1)
+				{
+					nameIndex = count;
+				}
+				if (next > strIndex)
+				{
+					// 如果名称标识结束位置大于字符串标识符, 说明这个字符串标识符在名称内, 重新查找下一个字符串标识符
+					strIndex = script.indexOf(STRING_FLAG, next + 1);
+					if (strIndex == -1)
+					{
+						strIndex = count;
+					}
+				}
+			}
+		}
+		return buf.append(script.substring(baseIndex, count)).toString();
+	}
+
+	/**
+	 * 获取字符串标识的结束位置.
+	 */
+	private static int getStringFlagEnd(String script, int fromInde, int count)
+	{
+		int next = script.indexOf(STRING_FLAG, fromInde);
+		while (next != -1)
+		{
+			if (next < count - 1 && script.charAt(next + 1) == STRING_FLAG)
+			{
+				// 连续两个字符串标识符是转义, 继续查找后面的
+				next = script.indexOf(STRING_FLAG, next + 2);
+			}
+			else
+			{
+				return next;
+			}
+		}
+		return next;
+	}
+
+	/**
+	 * 名称引用符号的索引表.
+	 */
+	private static Map nameQuoteIndex = new HashMap();
+
+	/**
 	 * 操作字符集合.
 	 */
 	private static BitSet operators = new BitSet();
@@ -509,8 +645,8 @@ public class ScriptParser
 		operators.set(')');
 		operators.set('[');
 		operators.set(']');
-		operators.set('\'');
-		operators.set('\"');
+		operators.set(STRING_FLAG);
+		operators.set(QUOTE_CHAR);
 		operators.set('.');
 		operators.set('=');
 		operators.set('<');
@@ -522,6 +658,11 @@ public class ScriptParser
 		operators.set('+');
 		operators.set('-');
 		operators.set('#');
+
+		char[] defaultNameQuote = new char[] {QUOTE_CHAR, QUOTE_CHAR};
+		nameQuoteIndex.put(DataBaseLocker.DB_NAME_ORACLE, defaultNameQuote);
+		nameQuoteIndex.put(DataBaseLocker.DB_NAME_MYSQL, new char[] {'`', '`'});
+		nameQuoteIndex.put(DataBaseLocker.DB_NAME_H2, defaultNameQuote);
 
 		try
 		{

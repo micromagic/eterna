@@ -7,10 +7,11 @@
 
 	<!-- 版本信息表 -->
 	<table name="T01" desc="表1" opt="modify">
-		<column name="versionName" type="String(320)" desc="版本名称2" opt="modify" />
+		<column name="versionName" type="String(220)" desc="版本名称2" opt="modify" />
 		<column name="test" type="String(20)" desc="错误
 		信息"/>
 		<!-- <column name="versionValue" type="int" /> -->
+		<column name="from" type="String(600)" newName="table" opt="modify" />
 	</table>
 
 	<table name="T02" desc="表2">

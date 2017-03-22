@@ -82,6 +82,7 @@ public class CommonUpdate extends UpdateImpl
 	private int executeWithInfo(Connection conn, boolean needResult, UpdateThreadInfo info)
 			throws EternaException, SQLException
 	{
+		this.setExecuteConnection(conn);
 		String script = this.getPreparedScript();
 		boolean hasParam = this.hasActiveParam();
 		boolean success = false;

@@ -32,7 +32,7 @@ attr:{sameKey(m=0,i=0):ignoreSameKey}
 script
 log:{$script}
 create:{,self.micromagic.dbvm.ScriptDesc}
-attr:{$body:script,$serial(pattern=DBVM000000):name,$element:element}
+attr:{$body:script,$serial(pattern=DBVM000000):name,$element:element,dataBase(m=0,i=0)}
 stack:{registerObject,n:0,g:0}
 # @deprecated
 ## data

@@ -254,6 +254,7 @@ public class QueryImpl extends AbstractQuery
 		this.executedResult = null;
 		try
 		{
+			this.setExecuteConnection(conn);
 			int totalCount = -1;
 			// 保持链接的查询需要先计算总记录数, 因为链接在之后的查询中需要一直保持
 			if (this.getTotalCountModel() == TOTAL_COUNT_MODEL_COUNT)

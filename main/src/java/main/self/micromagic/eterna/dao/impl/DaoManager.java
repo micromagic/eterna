@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.dao.impl;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -94,6 +95,7 @@ public class DaoManager
 	private ParameterManager[] parameterManagers = new ParameterManager[0];
 	private int[] subPartIndexs = new int[0];
 
+	private Connection executeConn;
 	private boolean changed = true;
 	private String cacheScript;
 	private Dao dao;
@@ -125,6 +127,18 @@ public class DaoManager
 		}
 	}
 
+	/**
+	 * 设置执行的数据库连接.
+	 */
+	public void setExecuteConnection(Connection conn)
+	{
+		if (this.executeConn != conn)
+		{
+			this.executeConn = conn;
+			this.changed = true;
+		}
+	}
+
 	public String getPreparedScript()
 			throws EternaException
 	{
@@ -133,7 +147,8 @@ public class DaoManager
 			IntegerRef size = new IntegerRef();
 			try
 			{
-				this.cacheScript = this.buildPreparedScript(size);
+				this.cacheScript = ScriptParser.checkScriptNameQuote(
+						this.executeConn, this.buildPreparedScript(size));
 			}
 			catch (Exception ex)
 			{

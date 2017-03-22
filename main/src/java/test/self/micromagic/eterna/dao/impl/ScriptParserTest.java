@@ -24,6 +24,44 @@ import tool.PrivateAccessor;
 
 public class ScriptParserTest extends TestCase
 {
+	public void testCheckScriptNameQuote0()
+	{
+		char[] nameQuote = {'[', ']'};
+		String str;
+
+		str = "\"0\"";
+		str = ScriptParser.checkScriptNameQuote0(new char[]{'`', '`'}, str);
+		assertEquals("`0`", str);
+
+		str = "\"0\"";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("[0]", str);
+
+		str = "'\"0\"',\"a'b\" 'a\"a'";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"',[a'b] 'a\"a'", str);
+
+		str = "'\"0\"',\"a'b\" 'a\"a''";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"',\"a'b\" 'a\"a''", str);
+
+		str = "'\"0\"',\"a'b\" 'a\"a'''";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"',[a'b] 'a\"a'''", str);
+
+		str = "'\"0\"',\"a'b\" 'a\"a'''\"end\"";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"',[a'b] 'a\"a'''[end]", str);
+
+		str = "'\"0\"','\"a'b 'a\"a''' \"e'nd\"";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"','\"a'b 'a\"a''' [e'nd]", str);
+
+		str = "'\"0\"','\"a'b 'a\"a''' \"e'nd\" others";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"','\"a'b 'a\"a''' [e'nd] others", str);
+	}
+
 	public void testCheckNeedQuote()
 	{
 		String name;

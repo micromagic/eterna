@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.dao.impl;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ import self.micromagic.util.container.PreFetchIterator;
 public abstract class AbstractDao extends AbstractGenerator
 		implements Dao, EternaCreater
 {
-	private String preparedSQL;
+	private String preparedScript;
 	private DaoManager daoManager;
 	private PreparerManager preparerManager;
 	private ParameterGroup paramGroup;
@@ -66,9 +67,9 @@ public abstract class AbstractDao extends AbstractGenerator
 	{
 		if (!this.initialized)
 		{
-			if (this.preparedSQL == null)
+			if (this.preparedScript == null)
 			{
-				this.preparedSQL = "";
+				this.preparedScript = "";
 				log.error(this.getType() + " [" + this.getName()
 						+ "]'s prepared-sql hasn't setted.");
 			}
@@ -98,7 +99,7 @@ public abstract class AbstractDao extends AbstractGenerator
 			this.initElse(factory);
 
 			this.daoManager = new DaoManager();
-			String tmpScript = this.preChange(this.preparedSQL);
+			String tmpScript = this.preChange(this.preparedScript);
 			tmpScript = this.daoManager.preParse(tmpScript, this);
 			this.daoManager.parse(tmpScript);
 			this.preparerManager = new PreparerManager(this, paramArray);
@@ -165,11 +166,11 @@ public abstract class AbstractDao extends AbstractGenerator
 	protected void copy(Dao copyObj)
 	{
 		AbstractDao other = (AbstractDao) copyObj;
-		if (this.preparedSQL != null)
+		if (this.preparedScript != null)
 		{
 			other.preparerManager = new PreparerManager(other, this.parameterArray);
 			other.daoManager = this.daoManager.copy(true);
-			other.preparedSQL = this.preparedSQL;
+			other.preparedScript = this.preparedScript;
 		}
 		other.paramGroup = this.paramGroup;
 		other.parameterNameMap = this.parameterNameMap;
@@ -226,6 +227,18 @@ public abstract class AbstractDao extends AbstractGenerator
 		return this.daoManager.getSubPartCount();
 	}
 
+	/**
+	 * 设置执行的数据库连接.
+	 */
+	protected void setExecuteConnection(Connection conn)
+			throws SQLException
+	{
+		if (this.daoManager != null)
+		{
+			this.daoManager.setExecuteConnection(conn);
+		}
+	}
+
 	public String getPreparedScript()
 			throws EternaException
 	{
@@ -254,7 +267,7 @@ public abstract class AbstractDao extends AbstractGenerator
 	public void setPreparedSQL(String sql)
 			throws EternaException
 	{
-		if (this.preparedSQL != null)
+		if (this.preparedScript != null)
 		{
 			throw new EternaException("You can't set prepared sql twice at "
 					+ this.getType() + " [" + this.getName() + "].");
@@ -263,7 +276,7 @@ public abstract class AbstractDao extends AbstractGenerator
 		{
 			throw new NullPointerException();
 		}
-		this.preparedSQL = sql;
+		this.preparedScript = sql;
 	}
 
 	public void setSubScript(int index, String subPart)

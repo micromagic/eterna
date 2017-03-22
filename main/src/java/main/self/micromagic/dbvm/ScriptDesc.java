@@ -18,6 +18,8 @@ package self.micromagic.dbvm;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.dom4j.Element;
 
@@ -47,14 +49,45 @@ public class ScriptDesc extends AbstractObject
 	 */
 	public String script;
 
+	/**
+	 * 有效的数据库集合.
+	 */
+	private Set validDataBase;
+
 	public ScriptDesc()
 	{
 		this.ignoreSameKey = IgnoreConfig.getCurrentConfig().isIgnoreSameKey();
 	}
 
+	public void setDataBase(String db)
+	{
+		if (StringTool.isEmpty(db))
+		{
+			this.validDataBase = null;
+		}
+		else
+		{
+			String[] arr = StringTool.separateString(db, ",", true);
+			Set tmp = new HashSet();
+			for (int i = 0; i < arr.length; i++)
+			{
+				tmp.add(DataBaseLocker.getStandardDataBaseName(arr[i]));
+			}
+			this.validDataBase = tmp;
+		}
+	}
+
 	public void exec(Connection conn)
 			throws SQLException
 	{
+		if (this.validDataBase != null)
+		{
+			String dbName = DataBaseLocker.getDataBaseProductName(conn);
+			if (!this.validDataBase.contains(dbName))
+			{
+				return;
+			}
+		}
 		Update u = this.factory.createUpdate(COMMON_EXEC);
 		u.setSubScript(1, this.script);
 		u.execute(conn);

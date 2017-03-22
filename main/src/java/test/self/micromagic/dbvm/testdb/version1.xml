@@ -3,12 +3,20 @@
 
 	<!-- 版本信息表 -->
 	<table name="T01" desc="表1">
-		<column name="versionName" type="String(300)" desc="版本名称" nullable="false"/>
+		<column name="versionName" type="String(200)" desc="版本名称" nullable="false"/>
+		<column name="versionValue" type="int" desc="版本值" nullable="false"/>
+		<column name="errInfo" type="String(1000)" desc="错误信息"/>
+		<column name="lastModified" type="Datetime" desc="最后修改时间"/>
+		<column name="from" type="String(600)" desc="关键字"/>
+	</table>
+
+	<table name="sql" desc="表2">
+		<column name="versionName" type="String(200)" desc="版本名称" nullable="false"/>
 		<column name="versionValue" type="int" desc="版本值" nullable="false"/>
 		<column name="errInfo" type="String(1000)" desc="错误信息"/>
 		<column name="lastModified" type="Datetime" desc="最后修改时间"/>
 	</table>
-
+	
 	<!-- 版本信息表主键 -->
 	<index name="KEY_t01" type="key" tableName="T01">
 		<column name="versionName"/>
@@ -16,5 +24,9 @@
 	<index name="index_t01" tableName="T01">
 		<column name="lastModified"/>
 	</index>
+
+	<script dataBase="oracle,mysql">
+		insert into XXX (name) values ('tom')
+	</script>
 
 </dbVersion>
