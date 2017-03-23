@@ -24,6 +24,7 @@ import java.util.List;
 import org.dom4j.Element;
 
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
@@ -89,7 +90,7 @@ public class IndexDesc extends AbstractObject
 	 */
 	public void addColumn(String colName)
 	{
-		this.columns.add(colName);
+		this.columns.add(ScriptParser.checkNameForQuote(colName));
 	}
 
 	/**
@@ -107,7 +108,7 @@ public class IndexDesc extends AbstractObject
 	 */
 	public void addRefColumn(String colName)
 	{
-		this.refColumns.add(colName);
+		this.refColumns.add(ScriptParser.checkNameForQuote(colName));
 	}
 
 	/**
@@ -139,10 +140,13 @@ public class IndexDesc extends AbstractObject
 					+ this.columns.size() + " != " + this.refColumns.size() + " .";
 			throw new EternaException(msg);
 		}
-		this.tableName = resolveConst(this.tableName, factory);
+		this.indexName = ScriptParser.checkNameForQuote(this.indexName);
+		this.tableName = ScriptParser.checkNameForQuote(
+				resolveConst(this.tableName, factory));
 		if (!StringTool.isEmpty(this.refName))
 		{
-			this.refName = resolveConst(this.refName, factory);
+			this.refName = ScriptParser.checkNameForQuote(
+					resolveConst(this.refName, factory));
 		}
 		return false;
 	}

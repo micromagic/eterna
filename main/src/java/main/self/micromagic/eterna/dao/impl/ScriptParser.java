@@ -532,7 +532,7 @@ public class ScriptParser
 			return script.replace(QUOTE_CHAR, nameQuote[0]);
 		}
 		int count = script.length();
-		StringAppender buf = StringTool.createStringAppender(script.length());
+		StringAppender buf = null;
 		if (strIndex == -1)
 		{
 			strIndex = count;
@@ -567,6 +567,10 @@ public class ScriptParser
 			}
 			else
 			{
+				if (buf == null)
+				{
+					buf = StringTool.createStringAppender(script.length());
+				}
 				buf.append(script.substring(baseIndex, nameIndex)).append(nameQuote[0]);
 				int next = script.indexOf(QUOTE_CHAR, nameIndex + 1);
 				if (next == -1)
@@ -593,7 +597,8 @@ public class ScriptParser
 				}
 			}
 		}
-		return buf.append(script.substring(baseIndex, count)).toString();
+		return buf == null ? script
+				: buf.append(script.substring(baseIndex, count)).toString();
 	}
 
 	/**

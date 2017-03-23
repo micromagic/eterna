@@ -41,6 +41,11 @@ public class ScriptParserTest extends TestCase
 		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
 		assertEquals("'\"0\"',[a'b] 'a\"a'", str);
 
+		str = "'\"0\"','\"a''b\"' 'a\"a\"' tmp";
+		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
+		assertEquals("'\"0\"','\"a''b\"' 'a\"a\"' tmp", str);
+		assertTrue(str == ScriptParser.checkScriptNameQuote0(nameQuote, str));
+
 		str = "'\"0\"',\"a'b\" 'a\"a''";
 		str = ScriptParser.checkScriptNameQuote0(nameQuote, str);
 		assertEquals("'\"0\"',\"a'b\" 'a\"a''", str);
