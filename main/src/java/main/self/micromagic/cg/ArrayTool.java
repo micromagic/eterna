@@ -29,6 +29,7 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.ValueConverter;
+import self.micromagic.util.ref.BooleanRef;
 import self.micromagic.util.ref.IntegerRef;
 
 /**
@@ -368,44 +369,54 @@ public class ArrayTool
 		String wrapName = BeanTool.getPrimitiveWrapClassName(ClassGenerator.getClassName(cellType));
 		int vcIndex = BeanTool.getConverterIndex(cellType);
 		boolean beanType = BeanTool.checkBean(cellType);
+		BooleanRef needCheckEmpty = new BooleanRef();
 
 		// 生成不带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
-		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray(Object").append(srcVLStr)
-				.append(" array0, Object converter, boolean needThrow)").appendln()
+		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray").append("(Object")
+				.append(srcVLStr).append(" array0, Object converter, boolean needThrow)").appendln()
 				.append("      throws Exception").appendln().append('{').appendln();
 		fnCode.append(destType).append(destVLStr).append(" destArr0 = new ")
 				.append(destType).append("[array0.length]").append(destVLStr.substring(2)).append(';').appendln();
 		appendConvertArrayCode(fnCode, cellType, srcVLStr.substring(2), destVLStr.substring(2),
-				tmpParam, 0, level, wrapName, vcIndex, beanType, false);
+				tmpParam, 0, level, wrapName, vcIndex, beanType, false, needCheckEmpty);
 		fnCode.append("return destArr0;").appendln().append('}');
 		cg.addMethod(fnCode.toString());
 
 		// 生成带目标数组的转换方法
 		fnCode = StringTool.createStringAppender();
-		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray(Object").append(srcVLStr)
-				.append(" array0, ").append(destType).append(destVLStr)
+		fnCode.append("private ").append(destType).append(destVLStr).append(" convertArray")
+				.append("(Object").append(srcVLStr).append(" array0, ").append(destType).append(destVLStr)
 				.append(" destArr0, Object converter, boolean needThrow)").appendln()
 				.append("      throws Exception").appendln().append('{').appendln();
 		fnCode.append("if (destArr0 == null)").appendln().append('{').appendln()
-				.append("return this.convertArray(array0, converter, needThrow);").appendln().append('}')
-				.appendln();
+				.append("return this.convertArray").append("(array0, converter, needThrow);")
+				.appendln().append('}').appendln();
 		fnCode.append("else if (destArr0.length < array0.length)").appendln().append('{').appendln()
 				.append(destType).append(destVLStr).append(" tmpArr = new ")
 				.append(destType).append("[array0.length]").append(destVLStr.substring(2)).append(';').appendln()
 				.append("System.arraycopy(tmpArr, 0, destArr0, 0, destArr0.length);").appendln()
 				.append("destArr0 = tmpArr;").appendln().append('}').appendln();
 		appendConvertArrayCode(fnCode, cellType, srcVLStr.substring(2), destVLStr.substring(2),
-				tmpParam, 0, level, wrapName, vcIndex, beanType, true);
+				tmpParam, 0, level, wrapName, vcIndex, beanType, true, needCheckEmpty);
 		fnCode.append("return destArr0;").appendln().append('}');
 		cg.addMethod(fnCode.toString());
+
+		// 增加检查是否为空的方法
+		if (needCheckEmpty.value)
+		{
+			fnCode = StringTool.createStringAppender();
+			BeanTool.printRes("arrayCell.convert.bean.checkEmpty", tmpParam, 0, fnCode).appendln();
+			cg.addMethod(fnCode.toString());
+		}
 	}
 
 	/**
 	 * 生成数组类型转换的方法主体.
 	 */
 	private static void appendConvertArrayCode(StringAppender bodyCode, Class cellType, String srcVLStr, String destVLStr,
-			Map params, int levelIndex, int arrayLevel, String wrapName, int vcIndex, boolean beanType, boolean hasDest)
+			Map params, int levelIndex, int arrayLevel, String wrapName, int vcIndex, boolean beanType, boolean hasDest,
+			BooleanRef needCheckEmpty)
 	{
 		params.put("levelIndex", Integer.toString(levelIndex));
 		params.put("nextIndex", Integer.toString(levelIndex + 1));
@@ -426,7 +437,7 @@ public class ArrayTool
 				BeanTool.printRes("array2array_def", params, 0, bodyCode).appendln();
 			}
 			appendConvertArrayCode(bodyCode, cellType, srcVLStr.substring(2), destVLStr.substring(2),
-					params, levelIndex + 1, arrayLevel, wrapName, vcIndex, beanType, hasDest);
+					params, levelIndex + 1, arrayLevel, wrapName, vcIndex, beanType, hasDest, needCheckEmpty);
 		}
 		else
 		{
@@ -447,6 +458,7 @@ public class ArrayTool
 			else if (beanType)
 			{
 				BeanTool.printRes("arrayCell.convert.bean", params, 0, bodyCode).appendln();
+				needCheckEmpty.value = true;
 			}
 			else if (ClassGenerator.isArray(cellType))
 			{

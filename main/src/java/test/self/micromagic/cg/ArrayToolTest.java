@@ -43,9 +43,23 @@ public class ArrayToolTest extends TestCase
 		assertEquals(Integer[][][].class, ArrayTool.convertArray(1, Integer[][].class, arr2).getClass());
 
 		Object[][] arr3 = new Object[1][2];
-		arr2[0][0] = new Integer[1][2];
-		arr2[0][1] = new Integer[2][3];
+		arr3[0][0] = new Integer[1][2];
+		arr3[0][1] = new Integer[2][3];
 		assertEquals(Integer[][][][].class, ArrayTool.convertArray(2, Integer[][].class, arr3).getClass());
+
+		Object[][] arr4 = new Object[1][2];
+		arr4[0][0] = new TestSubBean[1][2];
+		arr4[0][1] = new TestSubBean[2][3];
+		assertEquals(TestSubBean[][][][].class, ArrayTool.convertArray(2, TestSubBean[][].class, arr4).getClass());
+
+		Object[] arr5 = new Object[3];
+		arr5[2] = new TestSubBean();
+		assertEquals(TestSubBean[].class, ArrayTool.convertArray(1, TestSubBean.class, arr5).getClass());
+
+		Object[][] arr6 = new Object[3][];
+		arr6[2] = new TestSubBean[2];
+		arr6[2][0] = new TestSubBean();
+		assertEquals(TestSubBean[][].class, ArrayTool.convertArray(2, TestSubBean.class, arr6).getClass());
 	}
 
 	public void testPrimitiveWrap()

@@ -697,19 +697,19 @@ if (tmpObj instanceof ${cellType})
 }
 else if (tmpObj instanceof Map)
 {
-	${cellType} tb = ${dest}${levelIndex}[i${levelIndex}] == null ? new ${cellType}() : ${dest}${levelIndex}[i${levelIndex}];
+	${cellType} tb = this.checkEmpty(${dest}${levelIndex}[i${levelIndex}]);
 	BeanTool.getBeanMap(tb).setValues((Map) tmpObj);
 	${dest}${levelIndex}[i${levelIndex}] = tb;
 }
 else if (tmpObj instanceof ResultRow)
 {
-	${cellType} tb = ${dest}${levelIndex}[i${levelIndex}] == null ? new ${cellType}() : ${dest}${levelIndex}[i${levelIndex}];
+	${cellType} tb = this.checkEmpty(${dest}${levelIndex}[i${levelIndex}]);
 	BeanTool.getBeanMap(tb).setValues((ResultRow) tmpObj);
 	${dest}${levelIndex}[i${levelIndex}] = tb;
 }
 else if (BeanTool.checkBean(tmpObj.getClass()))
 {
-	${cellType} tb = ${dest}${levelIndex}[i${levelIndex}] == null ? new ${cellType}() : ${dest}${levelIndex}[i${levelIndex}];
+	${cellType} tb = this.checkEmpty(${dest}${levelIndex}[i${levelIndex}]);
 	BeanMap _beanMap = BeanTool.getBeanMap(tmpObj);
 	_beanMap.setBean2Map(true);
 	BeanTool.getBeanMap(tb).setValues(_beanMap);
@@ -790,5 +790,12 @@ else if (tmpObj instanceof java.util.Collection || ClassGenerator.isArray(tmpObj
 else if (${needThrow})
 {
 	throw new ClassCastException("Can't cast [" + tmpObj + "](" + tmpObj.getClass() + ") to (${cellType}).");
+}
+
+# 数组中的元素类型转换成bean类型需要的判空方法
+## arrayCell.convert.bean.checkEmpty
+private ${cellType} checkEmpty(${cellType} obj)
+{
+	return obj != null ? obj : new ${cellType}();
 }
 
