@@ -63,6 +63,7 @@ public class DaoManager
 	public static final String AUTO_TYPE_UPDATE = "update";
 	public static final String AUTO_TYPE_INSERT_N = "insertN";
 	public static final String AUTO_TYPE_INSERT_V = "insertV";
+	public static final String AUTO_TYPE_COLUMN = "column";
 	public static final String AUTO_TYPE_SELECT = "select";
 
 	public static final String AUTO_OPT_DYNAMIC = "dynamic";
@@ -80,16 +81,6 @@ public class DaoManager
 
 	protected static final Log log = Tool.log;
 
-	/**
-	 * 在attribute中设置别名外使用怎样的引号的键值.
-	 */
-	public static final String NAME_QUOTE_FLAG = "dao.name.qoute";
-
-	/**
-	 * 生成的select部分的别名外需要使用的引号.
-	 */
-	private String nameQuote = ScriptParser.QUOTE;
-
 	private PartScript[] partScripts = new PartScript[0];
 
 	private ParameterManager[] parameterManagers = new ParameterManager[0];
@@ -105,13 +96,6 @@ public class DaoManager
 	{
 		this.dao = dao;
 		EternaFactory factory = dao.getFactory();
-		// 设置别名使用的引号
-		String tmpQuote;
-		if ((tmpQuote = (String) dao.getAttribute(NAME_QUOTE_FLAG)) != null
-				|| (tmpQuote = (String) factory.getAttribute(NAME_QUOTE_FLAG)) != null)
-		{
-			this.nameQuote = tmpQuote;
-		}
 		int subIndex = 1;
 		for (int i = 0; i < this.partScripts.length; i++)
 		{
@@ -305,7 +289,7 @@ public class DaoManager
 				{
 					BooleanRef dynamic = new BooleanRef();
 					String type = this.getAutoType(optParam, dynamic);
-					boolean isSelect = AUTO_TYPE_SELECT.equals(type);
+					boolean isSelect = AUTO_TYPE_SELECT.equals(type) || AUTO_TYPE_COLUMN.equals(type);
 					int begin, end;
 					if (isSelect)
 					{
@@ -355,6 +339,7 @@ public class DaoManager
 
 					if (isSelect)
 					{
+						boolean needAs = AUTO_TYPE_SELECT.equals(type);
 						boolean first = true;
 						Map aliasSet = new HashMap();
 						for (int i = begin; i < end; i++)
@@ -377,15 +362,12 @@ public class DaoManager
 								{
 									first = false;
 								}
-								buf.append(readerArray[i].getColumnName()).append(" as ");
-								String alias = readerArray[i].getAlias();
-								if (ScriptParser.checkNeedQuote(alias))
+								buf.append(readerArray[i].getColumnName());
+								if (needAs)
 								{
-									buf.append(this.nameQuote).append(alias).append(this.nameQuote);
-								}
-								else
-								{
-									buf.append(alias);
+									buf.append(" as ");
+									String alias = readerArray[i].getAlias();
+									buf.append(ScriptParser.checkNameForQuote(alias));
 								}
 							}
 						}

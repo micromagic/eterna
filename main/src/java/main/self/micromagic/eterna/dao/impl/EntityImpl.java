@@ -379,7 +379,8 @@ public class EntityImpl extends AbstractGenerator
 		}
 		int len = name.length();
 		int begin = 0;
-		if (len > 2 && name.startsWith(ScriptParser.QUOTE) && name.endsWith(ScriptParser.QUOTE))
+		if (len > 2 && name.charAt(0) == ScriptParser.QUOTE_CHAR
+				&& name.charAt(len - 1) == ScriptParser.QUOTE_CHAR)
 		{
 			begin = 1;
 			len -= 1;
