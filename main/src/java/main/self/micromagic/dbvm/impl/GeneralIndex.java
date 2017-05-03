@@ -26,9 +26,10 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * h2的数据库索引定义.
+ * 通用的的数据库索引定义.
+ * 使用的库为: H2, PostgreSQL
  */
-public class H2Index extends AbstractObject
+public class GeneralIndex extends AbstractObject
 		implements IndexDefiner
 {
 	public String getIndexDefine(IndexDesc indexDesc, List paramList)

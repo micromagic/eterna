@@ -666,8 +666,9 @@ public class ScriptParser
 
 		char[] defaultNameQuote = new char[] {QUOTE_CHAR, QUOTE_CHAR};
 		nameQuoteIndex.put(DataBaseLocker.DB_NAME_ORACLE, defaultNameQuote);
-		nameQuoteIndex.put(DataBaseLocker.DB_NAME_MYSQL, new char[] {'`', '`'});
 		nameQuoteIndex.put(DataBaseLocker.DB_NAME_H2, defaultNameQuote);
+		nameQuoteIndex.put(DataBaseLocker.DB_NAME_MYSQL, new char[] {'`', '`'});
+		nameQuoteIndex.put(DataBaseLocker.DB_NAME_PGSQL, defaultNameQuote);
 
 		try
 		{

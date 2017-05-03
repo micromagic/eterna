@@ -188,13 +188,13 @@ public class QueryHelperTest extends TestCase
 		assertFalse(sql1 == sql2);
 	}
 
-	public void testMySql()
+	public void testH2()
 			throws Exception
 	{
 		List readerList = new ArrayList();
 		EmptyQuery query = new EmptyQuery();
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_NONE);
-		QueryHelper qh = new MySqlQueryHelper(query);
+		QueryHelper qh = new LimitQueryHelper(query, QueryHelper.DB_NAME_H2);
 		ResultSet rs;
 		long maxValue = Integer.MAX_VALUE;
 

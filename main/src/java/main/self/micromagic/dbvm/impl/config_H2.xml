@@ -21,9 +21,9 @@
 <dbVersion>
 	<config>
 
-		<table-comment className="self.micromagic.dbvm.impl.H2Comment"/>
+		<table-comment className="self.micromagic.dbvm.impl.GeneralComment"/>
 		<column-def className="self.micromagic.dbvm.impl.H2Column"/>
-		<index-def className="self.micromagic.dbvm.impl.H2Index"/>
+		<index-def className="self.micromagic.dbvm.impl.GeneralIndex"/>
 		<type-def className="self.micromagic.dbvm.TypeDefiner">
 		</type-def>
 

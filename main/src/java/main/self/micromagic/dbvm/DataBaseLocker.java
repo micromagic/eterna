@@ -42,11 +42,6 @@ import self.micromagic.util.ref.StringRef;
 public class DataBaseLocker
 {
 	/**
-	 * mysql数据库名称.
-	 */
-	public static final String DB_NAME_MYSQL = "MySQL";
-
-	/**
 	 * oracle数据库名称.
 	 */
 	public static final String DB_NAME_ORACLE = "Oracle";
@@ -57,13 +52,24 @@ public class DataBaseLocker
 	public static final String DB_NAME_H2 = "H2";
 
 	/**
+	 * mysql数据库名称.
+	 */
+	public static final String DB_NAME_MYSQL = "MySQL";
+
+	/**
+	 * PostgreSQL数据库名称.
+	 */
+	public static final String DB_NAME_PGSQL = "PostgreSQL";
+
+	/**
 	 * 数据库名称的索引表.
 	 * 奇数位为key, 偶数位为对应的名称.
 	 */
 	private static final String[] DB_NAME_INDEX = {
-		"MYSQL", DB_NAME_MYSQL,
 		"ORACLE", DB_NAME_ORACLE,
-		"H2", DB_NAME_H2
+		"POSTGRESQL", DB_NAME_PGSQL,
+		"H2", DB_NAME_H2,
+		"MYSQL", DB_NAME_MYSQL
 	};
 
 	private DataBaseLocker()

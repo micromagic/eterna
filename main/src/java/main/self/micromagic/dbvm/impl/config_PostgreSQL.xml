@@ -16,14 +16,14 @@
 -->
 
 <!--
-	oracle的生成定义
+	PostgreSQL的生成定义
 -->
 <dbVersion>
 	<config>
 
 		<table-comment className="self.micromagic.dbvm.impl.GeneralComment"/>
-		<column-def className="self.micromagic.dbvm.impl.OracleColumn"/>
-		<index-def className="self.micromagic.dbvm.impl.OracleIndex"/>
+		<column-def className="self.micromagic.dbvm.impl.PgSqlColumn"/>
+		<index-def className="self.micromagic.dbvm.impl.GeneralIndex"/>
 		<type-def className="self.micromagic.dbvm.TypeDefiner">
 		</type-def>
 

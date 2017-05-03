@@ -29,9 +29,9 @@ import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.BooleanRef;
 
 /**
- * mysql的数据库列定义.
+ * PostgreSQL的数据库列定义.
  */
-public class MySqlColumn extends AbstractObject
+public class PgSqlColumn extends AbstractObject
 		implements ColumnDefiner
 {
 	public String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, List paramList)
@@ -50,55 +50,35 @@ public class MySqlColumn extends AbstractObject
 			{
 				buf.append(colDesc.colName).append(' ')
 						.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
-				if (colDesc.nullable != null && !colDesc.nullable.booleanValue())
-				{
-					buf.append(" not null");
-				}
 				if (defExp != null)
 				{
 					buf.append(' ').append(defExp);
 				}
+				if (colDesc.nullable != null && !colDesc.nullable.booleanValue())
+				{
+					buf.append(" not null");
+				}
 			}
 			else
 			{
-				buf.append("alter table ").append(tableName).append(" add column ")
+				buf.append("alter table ").append(tableName).append(" add ")
 						.append(colDesc.colName).append(' ')
 						.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
+				if (defExp != null)
+				{
+					buf.append(' ').append(defExp);
+				}
 				if (colDesc.nullable != null)
 				{
 					buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
-				}
-				if (defExp != null)
-				{
-					StringAppender s = StringTool.createStringAppender(72);
-					s.append("alter table ").append(tableName).append(" alter column ")
-							.append(colDesc.colName).append(" set ").append(defExp);
-					Update u = this.factory.createUpdate(COMMON_EXEC);
-					u.setSubScript(1, s.toString());
-					if (paramList != null)
-					{
-						paramList.add(u);
-					}
 				}
 			}
 		}
 		else if (colDesc.optType == OPT_TYPE_MODIFY)
 		{
-			buf.append("alter table ").append(tableName).append(" change column ")
+			buf.append("alter table ").append(tableName).append(" alter column type ")
 					.append(colDesc.colName).append(' ');
-			if (!StringTool.isEmpty(colDesc.newName))
-			{
-				buf.append(colDesc.newName);
-			}
-			else
-			{
-				buf.append(colDesc.colName);
-			}
-			buf.append(' ').append(this.typeDefiner.getTypeDefine(colDesc.typeId));
-			if (colDesc.nullable != null)
-			{
-				buf.append(colDesc.nullable.booleanValue() ? " null" : " not null");
-			}
+			buf.append(this.typeDefiner.getTypeDefine(colDesc.typeId));
 			if (defExp != null)
 			{
 				StringAppender s = StringTool.createStringAppender(72);
@@ -112,6 +92,31 @@ public class MySqlColumn extends AbstractObject
 				{
 					s.append(" set ").append(defExp);
 				}
+				Update u = this.factory.createUpdate(COMMON_EXEC);
+				u.setSubScript(1, s.toString());
+				if (paramList != null)
+				{
+					paramList.add(u);
+				}
+			}
+			if (colDesc.nullable != null)
+			{
+				String tmpOpt = colDesc.nullable.booleanValue() ? "drop" : "set";
+				StringAppender s = StringTool.createStringAppender(56);
+				s.append("alter table ").append(tableName).append(" alter column ")
+						.append(colDesc.colName).append(tmpOpt).append(" not null");
+				Update u = this.factory.createUpdate(COMMON_EXEC);
+				u.setSubScript(1, s.toString());
+				if (paramList != null)
+				{
+					paramList.add(u);
+				}
+			}
+			if (!StringTool.isEmpty(colDesc.newName))
+			{
+				StringAppender s = StringTool.createStringAppender(56);
+				s.append("alter table ").append(tableName).append(" rename column ")
+						.append(colDesc.colName).append(" to ").append(colDesc.newName);
 				Update u = this.factory.createUpdate(COMMON_EXEC);
 				u.setSubScript(1, s.toString());
 				if (paramList != null)
@@ -133,8 +138,21 @@ public class MySqlColumn extends AbstractObject
 		{
 			if (!StringTool.isEmpty(colDesc.desc) || colDesc.optType == OPT_TYPE_MODIFY)
 			{
-				buf.append(" comment '")
+				String colName = colDesc.colName;
+				if (!StringTool.isEmpty(colDesc.newName))
+				{
+					colName = colDesc.newName;
+				}
+				StringAppender s = StringTool.createStringAppender(72);
+				s.append("comment on column ").append(tableName).append('.')
+						.append(colName).append(" is '")
 						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");
+				Update u = this.factory.createUpdate(COMMON_EXEC);
+				u.setSubScript(1, s.toString());
+				if (paramList != null)
+				{
+					paramList.add(u);
+				}
 			}
 		}
 		return buf.toString();

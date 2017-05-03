@@ -40,7 +40,7 @@ public class OracleColumn extends AbstractObject
 		{
 			tableName = tableDesc.newName;
 		}
-		StringAppender buf = StringTool.createStringAppender(16);
+		StringAppender buf = StringTool.createStringAppender(128);
 		String defExp = makeDefaultExpression(colDesc, null);
 		if (colDesc.optType == OPT_TYPE_CREATE)
 		{
@@ -116,7 +116,7 @@ public class OracleColumn extends AbstractObject
 				{
 					colName = colDesc.newName;
 				}
-				StringAppender s = StringTool.createStringAppender(16);
+				StringAppender s = StringTool.createStringAppender(72);
 				s.append("comment on column ").append(tableName).append('.')
 						.append(colName).append(" is '")
 						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");

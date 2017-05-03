@@ -36,15 +36,26 @@ import self.micromagic.util.Utility;
  */
 public class QueryHelper
 {
+
+	/**
+	 * oracle数据库名称.
+	 */
+	public static final String DB_NAME_ORACLE = DataBaseLocker.DB_NAME_ORACLE;
+
+	/**
+	 * H2数据库名称.
+	 */
+	public static final String DB_NAME_H2 = DataBaseLocker.DB_NAME_H2;
+
 	/**
 	 * mysql数据库名称.
 	 */
 	public static final String DB_NAME_MYSQL = DataBaseLocker.DB_NAME_MYSQL;
 
 	/**
-	 * oracle数据库名称.
+	 * H2数据库名称.
 	 */
-	public static final String DB_NAME_ORACLE = DataBaseLocker.DB_NAME_ORACLE;
+	public static final String DB_NAME_PGSQL = DataBaseLocker.DB_NAME_PGSQL;
 
 	/**
 	 * 其他普通数据库名称.
@@ -73,10 +84,11 @@ public class QueryHelper
 			return oldHelper != null && DB_NAME_ORACLE.equals(oldHelper.getType()) ?
 					 oldHelper : new OracleQueryHelper(query);
 		}
-		else if (DB_NAME_MYSQL.equals(dbName))
+		if (DB_NAME_PGSQL.equals(dbName) || DB_NAME_H2.equals(dbName)
+				|| DB_NAME_MYSQL.equals(dbName))
 		{
-			return oldHelper != null && DB_NAME_MYSQL.equals(oldHelper.getType()) ?
-					 oldHelper : new MySqlQueryHelper(query);
+			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
+					 oldHelper : new LimitQueryHelper(query, dbName);
 		}
 		return oldHelper != null && DB_NAME_COMMON.equals(oldHelper.getType()) ?
 				oldHelper : new QueryHelper(query);
@@ -364,7 +376,6 @@ public class QueryHelper
 
 }
 
-
 abstract class SpecialQueryHelper extends QueryHelper
 {
 	protected int nowStartRow = 1;
@@ -573,11 +584,17 @@ class OracleQueryHelper extends SpecialQueryHelper
 
 }
 
-class MySqlQueryHelper extends SpecialQueryHelper
+/**
+ * 可以使用limit命令分页的数据库查询辅助工具.
+ */
+class LimitQueryHelper extends SpecialQueryHelper
 {
-	public MySqlQueryHelper(Query query)
+	private final String dbType;
+
+	public LimitQueryHelper(Query query, String dbType)
 	{
 		super(query);
+		this.dbType = dbType;
 	}
 
 	/**
@@ -585,7 +602,7 @@ class MySqlQueryHelper extends SpecialQueryHelper
 	 */
 	public String getType()
 	{
-		return DB_NAME_MYSQL;
+		return this.dbType;
 	}
 
 	protected String createSpecialSQL(String preparedSQL)

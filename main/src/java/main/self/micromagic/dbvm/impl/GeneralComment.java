@@ -22,9 +22,10 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * h2的数据库表注释定义.
+ * 通用的数据库表注释定义.
+ * 使用的库为: Oracle, H2, PostgreSQL
  */
-public class H2Comment
+public class GeneralComment
 		implements TableComment
 {
 	public String getComment(TableDesc tableDesc)
@@ -34,7 +35,7 @@ public class H2Comment
 		{
 			tableName = tableDesc.newName;
 		}
-		StringAppender buf = StringTool.createStringAppender(32);
+		StringAppender buf = StringTool.createStringAppender(56);
 		buf.append("comment on table ").append(tableName).append(" is '")
 				.append(StringTool.replaceAll(tableDesc.desc, "'", "''")).append("'");
 		return buf.toString();

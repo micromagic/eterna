@@ -28,7 +28,7 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
 /**
- * h2的数据库列定义.
+ * H2的数据库列定义.
  */
 public class H2Column extends AbstractObject
 		implements ColumnDefiner
@@ -40,7 +40,7 @@ public class H2Column extends AbstractObject
 		{
 			tableName = tableDesc.newName;
 		}
-		StringAppender buf = StringTool.createStringAppender(16);
+		StringAppender buf = StringTool.createStringAppender(128);
 		String defExp = makeDefaultExpression(colDesc, null);
 		if (colDesc.optType == OPT_TYPE_CREATE)
 		{
@@ -87,7 +87,7 @@ public class H2Column extends AbstractObject
 			}
 			if (!StringTool.isEmpty(colDesc.newName))
 			{
-				StringAppender s = StringTool.createStringAppender(16);
+				StringAppender s = StringTool.createStringAppender(56);
 				s.append("alter table ").append(tableName).append(" alter column ")
 						.append(colDesc.colName).append(" rename to ").append(colDesc.newName);
 				Update u = this.factory.createUpdate(COMMON_EXEC);
@@ -116,7 +116,7 @@ public class H2Column extends AbstractObject
 				{
 					colName = colDesc.newName;
 				}
-				StringAppender s = StringTool.createStringAppender(16);
+				StringAppender s = StringTool.createStringAppender(72);
 				s.append("comment on column ").append(tableName).append('.')
 						.append(colName).append(" is '")
 						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");
