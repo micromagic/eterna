@@ -78,7 +78,7 @@ public class ColumnDesc
 	public void setTypeName(String typeName)
 	{
 		this.typeId = TypeManager.getTypeId(typeName);
-		if (this.typeId == TypeManager.TYPE_NULL)
+		if (this.typeId == TypeManager.TYPE_NONE)
 		{
 			throw new EternaException("Error type [" + typeName + "].");
 		}

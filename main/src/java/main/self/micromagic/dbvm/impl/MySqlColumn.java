@@ -129,13 +129,11 @@ public class MySqlColumn extends AbstractObject
 		{
 			throw new EternaException("Error opt type [" + colDesc.optType + "].");
 		}
-		if (colDesc.desc != null && colDesc.optType != OPT_TYPE_DROP)
+		if (colDesc.desc != null && colDesc.optType != OPT_TYPE_DROP
+				&& (!StringTool.isEmpty(colDesc.desc) || colDesc.optType == OPT_TYPE_MODIFY))
 		{
-			if (!StringTool.isEmpty(colDesc.desc) || colDesc.optType == OPT_TYPE_MODIFY)
-			{
-				buf.append(" comment '")
-						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");
-			}
+			buf.append(" comment '").append(StringTool.replaceAll(colDesc.desc, "'", "''"))
+					.append('\'');
 		}
 		return buf.toString();
 	}

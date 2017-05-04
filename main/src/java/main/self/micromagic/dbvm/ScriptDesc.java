@@ -139,8 +139,7 @@ public class ScriptDesc extends AbstractObject
 					&& OPT_INSERT.equalsIgnoreCase(elements[0].getText())
 					&& OPT_INTO.equalsIgnoreCase(elements[1].getText()))
 			{
-				this.sameKeyCode = Integer.parseInt(
-						this.factory.getConstantValue(SAME_KEY_FLAG));
+				this.sameStateCode = this.factory.getConstantValue(SAME_KEY_FLAG);
 			}
 			else
 			{
@@ -149,13 +148,14 @@ public class ScriptDesc extends AbstractObject
 		}
 	}
 	private boolean ignoreSameKey;
-	private int sameKeyCode;
+	private String sameStateCode;
 
 	public boolean isIgnoreError(Throwable error)
 	{
 		if (this.ignoreSameKey && error instanceof SQLException)
 		{
-			return this.sameKeyCode == ((SQLException) error).getErrorCode();
+			SQLException ex = (SQLException) error;
+			return this.sameStateCode.equals(ex.getSQLState());
 		}
 		return false;
 	}

@@ -37,7 +37,7 @@ public class GeneralComment
 		}
 		StringAppender buf = StringTool.createStringAppender(56);
 		buf.append("comment on table ").append(tableName).append(" is '")
-				.append(StringTool.replaceAll(tableDesc.desc, "'", "''")).append("'");
+				.append(StringTool.replaceAll(tableDesc.desc, "'", "''")).append('\'');
 		return buf.toString();
 	}
 

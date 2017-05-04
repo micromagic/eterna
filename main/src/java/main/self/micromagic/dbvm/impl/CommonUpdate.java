@@ -82,6 +82,7 @@ public class CommonUpdate extends UpdateImpl
 	private int executeWithInfo(Connection conn, boolean needResult, UpdateThreadInfo info)
 			throws EternaException, SQLException
 	{
+		// 这里需要先执行设置conn, 这样才能保证打印的语句与执行的一致
 		this.setExecuteConnection(conn);
 		String script = this.getPreparedScript();
 		boolean hasParam = this.hasActiveParam();

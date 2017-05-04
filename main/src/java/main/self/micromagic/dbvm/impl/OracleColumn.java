@@ -107,27 +107,7 @@ public class OracleColumn extends AbstractObject
 		{
 			throw new EternaException("Error opt type [" + colDesc.optType + "].");
 		}
-		if (colDesc.desc != null && colDesc.optType != OPT_TYPE_DROP)
-		{
-			if (!StringTool.isEmpty(colDesc.desc) || colDesc.optType == OPT_TYPE_MODIFY)
-			{
-				String colName = colDesc.colName;
-				if (!StringTool.isEmpty(colDesc.newName))
-				{
-					colName = colDesc.newName;
-				}
-				StringAppender s = StringTool.createStringAppender(72);
-				s.append("comment on column ").append(tableName).append('.')
-						.append(colName).append(" is '")
-						.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append("'");
-				Update u = this.factory.createUpdate(COMMON_EXEC);
-				u.setSubScript(1, s.toString());
-				if (paramList != null)
-				{
-					paramList.add(u);
-				}
-			}
-		}
+		this.makeColumnCommon(colDesc, tableName, paramList);
 		return buf.toString();
 	}
 

@@ -26,9 +26,9 @@
 		<objs>
 
 			<constant name="boolean" value="BOOLEAN" />
-			<constant name="int" value="INT" />
+			<constant name="int" value="INTEGER" />
 			<constant name="short" value="SMALLINT" />
-			<constant name="byte" value="TINYINT" />
+			<constant name="byte" value="NUMERIC(2)" />
 			<constant name="long" value="BIGINT" />
 			<constant name="double" value="DOUBLE PRECISION" />
 			<constant name="numeric" value="NUMERIC" />

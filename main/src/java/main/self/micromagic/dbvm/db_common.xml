@@ -46,7 +46,7 @@
 				</prepared-sql>
 				<parameters>
 					<parameter name="versionName" type="String" />
-					<parameter name="versionValue" type="String" />
+					<parameter name="versionValue" type="int" />
 				</parameters>
 			</update>
 			<!-- 设置步骤信息 v3 -->
@@ -59,7 +59,7 @@
 				<parameters>
 					<parameter name="step" type="int" />
 					<parameter name="optStatus" type="String" />
-					<parameter name="versionValue" type="String" />
+					<parameter name="versionValue" type="int" />
 					<parameter name="versionName" type="String" />
 				</parameters>
 			</update>

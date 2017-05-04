@@ -44,7 +44,7 @@
 			<constant name="rename" value="rename" />
 
 			<!-- 各类错误码 -->
-			<constant name="EC_sameKey" value="1089" />
+			<constant name="EC_sameKey" value="23000" />
 
 		</objs>
 	</factory>

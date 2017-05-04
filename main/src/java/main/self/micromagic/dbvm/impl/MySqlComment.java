@@ -36,7 +36,7 @@ public class MySqlComment
 		}
 		StringAppender buf = StringTool.createStringAppender(56);
 		buf.append("alter table ").append(tableName).append(" comment '")
-				.append(StringTool.replaceAll(tableDesc.desc, "'", "''")).append("'");
+				.append(StringTool.replaceAll(tableDesc.desc, "'", "''")).append('\'');
 		return buf.toString();
 	}
 

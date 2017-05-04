@@ -10,6 +10,25 @@
 		<column name="from" type="String(600)" desc="关键字"/>
 	</table>
 
+	<table name="T_TEST_ALL_TYPE" desc="类型测试表">
+		<column name="mainId" type="String(50)" desc="主键" nullable="false"/>
+		<column name="type1" type="boolean" desc="布尔型" nullable="false"/>
+		<column name="type2" type="int" desc="整型"/>
+		<column name="type3" type="short" desc="短整型"/>
+		<column name="type4" type="byte" desc="字节型"/>
+		<column name="type5" type="long" desc="长整型"/>
+		<column name="type6_1" type="double" desc="浮点型"/>
+		<column name="type6_2" type="double(3,2)" desc="浮点型"/>
+		<column name="type7" type="Date" desc="日期型"/>
+		<column name="type8" type="Datetime" desc="日期时间型"/>
+		<column name="type9_1" type="Blob" desc="大字节型"/>
+		<column name="type9_2" type="Clob" desc="大字符型"/>
+	</table>
+
+	<index name="T_TEST_KEY_01" type="key" tableName="T_TEST_ALL_TYPE">
+		<column name="mainId"/>
+	</index>
+
 	<table name="sql" desc="表2">
 		<column name="versionName" type="String(200)" desc="版本名称" nullable="false"/>
 		<column name="versionValue" type="int" desc="版本值" nullable="false"/>

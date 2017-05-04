@@ -11,4 +11,6 @@
 
 	<script>insert into T03 (versionName, versionValue, test) values ('a', 1, 'ok?')</script>
 
+	<script>insert into T03 (versionName, versionValue, test) values (-33, 2, '''?+')</script>
+
 </dbVersion>

@@ -16,6 +16,9 @@
 
 package self.micromagic.dbvm;
 
+import java.util.List;
+
+import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.share.EternaException;
@@ -90,6 +93,35 @@ public abstract class AbstractObject
 			return "default '".concat(dValue.concat("'"));
 		}
 		return "default ".concat(colDesc.defaultValue);
+	}
+
+	/**
+	 * 构造修改列注释的表达式.
+	 */
+	protected String makeColumnCommon(ColumnDesc colDesc, String tableName, List paramList)
+	{
+		if (colDesc.desc != null && colDesc.optType != OPT_TYPE_DROP
+				&& (!StringTool.isEmpty(colDesc.desc) || colDesc.optType == OPT_TYPE_MODIFY))
+		{
+			String colName = colDesc.colName;
+			if (!StringTool.isEmpty(colDesc.newName))
+			{
+				colName = colDesc.newName;
+			}
+			StringAppender buf = StringTool.createStringAppender(72);
+			buf.append("comment on column ").append(tableName).append('.')
+					.append(colName).append(" is '")
+					.append(StringTool.replaceAll(colDesc.desc, "'", "''")).append('\'');
+			String script = buf.toString();
+			if (paramList != null)
+			{
+				Update u = this.factory.createUpdate(COMMON_EXEC);
+				u.setSubScript(1, script);
+				paramList.add(u);
+			}
+			return script;
+		}
+		return null;
 	}
 
 	/**
