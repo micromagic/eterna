@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 import java.util.ListIterator;
@@ -150,8 +151,10 @@ public class QueryImpl extends AbstractQuery
 		Throwable error = null;
 		ResultIterator result = null;
 		this.executedResult = null;
+		Savepoint savepoint = null;
 		try
 		{
+			savepoint = makeSavepoint(conn, this.getName());
 			QueryHelper qh = this.getQueryHelper(conn);
 			if (this.hasActiveParam())
 			{
@@ -221,6 +224,7 @@ public class QueryImpl extends AbstractQuery
 		catch (SQLException ex)
 		{
 			error = ex;
+			rollbackWithError(error, savepoint, conn);
 			throw ex;
 		}
 		catch (RuntimeException ex)
@@ -252,8 +256,10 @@ public class QueryImpl extends AbstractQuery
 		Throwable error = null;
 		ResultIterator result = null;
 		this.executedResult = null;
+		Savepoint savepoint = null;
 		try
 		{
+			savepoint = makeSavepoint(conn, this.getName());
 			this.setExecuteConnection(conn);
 			int totalCount = -1;
 			// 保持链接的查询需要先计算总记录数, 因为链接在之后的查询中需要一直保持
@@ -311,6 +317,7 @@ public class QueryImpl extends AbstractQuery
 		catch (SQLException ex)
 		{
 			error = ex;
+			rollbackWithError(error, savepoint, conn);
 			throw ex;
 		}
 		catch (RuntimeException ex)

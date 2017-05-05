@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -193,6 +194,37 @@ public abstract class BaseDao extends AbstractDao
 		{
 			logDocument = null;
 			logs = null;
+		}
+	}
+
+	/**
+	 * 根据数据库连接构造一个savepoint, 如果不需要则返回null.
+	 */
+	public static Savepoint makeSavepoint(Connection conn, String name)
+			throws SQLException
+	{
+		if (ScriptParser.needSavepoint(conn))
+		{
+			return conn.setSavepoint(name);
+		}
+		return null;
+	}
+
+	/**
+	 * 如果出错的话根据savepoint进行回滚.
+	 */
+	public static void rollbackWithError(Throwable err, Savepoint point, Connection conn)
+	{
+		if (err != null && point != null)
+		{
+			try
+			{
+				conn.rollback(point);
+			}
+			catch (Exception ex)
+			{
+				log.error("Error in rollback [" + point + "].", ex);
+			}
 		}
 	}
 

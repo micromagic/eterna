@@ -19,6 +19,7 @@ package self.micromagic.eterna.dao.impl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 
 import org.dom4j.Element;
@@ -67,8 +68,10 @@ public class UpdateImpl extends BaseDao
 		Statement stmt = null;
 		Throwable error = null;
 		this.executedResult = -1;
+		Savepoint savepoint = null;
 		try
 		{
+			savepoint = makeSavepoint(conn, this.getName());
 			this.setExecuteConnection(conn);
 			if (this.hasActiveParam())
 			{
@@ -86,6 +89,7 @@ public class UpdateImpl extends BaseDao
 		catch (SQLException ex)
 		{
 			error = ex;
+			rollbackWithError(error, savepoint, conn);
 			throw ex;
 		}
 		catch (RuntimeException ex)
@@ -112,8 +116,10 @@ public class UpdateImpl extends BaseDao
 		Statement stmt = null;
 		Throwable error = null;
 		int result = this.executedResult = -1;
+		Savepoint savepoint = null;
 		try
 		{
+			savepoint = makeSavepoint(conn, this.getName());
 			this.setExecuteConnection(conn);
 			if (this.hasActiveParam())
 			{
@@ -133,6 +139,7 @@ public class UpdateImpl extends BaseDao
 		catch (SQLException ex)
 		{
 			error = ex;
+			rollbackWithError(error, savepoint, conn);
 			throw ex;
 		}
 		catch (RuntimeException ex)

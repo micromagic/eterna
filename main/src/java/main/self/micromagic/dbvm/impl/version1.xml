@@ -18,7 +18,7 @@
 	</table>
 
 	<!-- 版本信息表主键 -->
-	<index name="KEY_ETERNA_VERSION_INFO_VALUE" type="key" tableName="#const(version_info)">
+	<index name="KEY_#const(version_info)" type="key" tableName="#const(version_info)">
 		<column name="versionName"/>
 	</index>
 

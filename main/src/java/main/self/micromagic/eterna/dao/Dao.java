@@ -56,7 +56,6 @@ public interface Dao
 	 */
 	String SIMPLE_PRINT_FLAG = "eterna.dao.log.simplePrint";
 
-
 	String DAO_TYPE_UPDATE = "update";
 	String DAO_TYPE_QUERY = "query";
 	String DAO_TYPE_COUNT = "count";

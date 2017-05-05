@@ -140,7 +140,8 @@ public class IndexDesc extends AbstractObject
 					+ this.columns.size() + " != " + this.refColumns.size() + " .";
 			throw new EternaException(msg);
 		}
-		this.indexName = ScriptParser.checkNameForQuote(this.indexName);
+		this.indexName = ScriptParser.checkNameForQuote(
+				resolveConst(this.indexName, factory));
 		this.tableName = ScriptParser.checkNameForQuote(
 				resolveConst(this.tableName, factory));
 		if (!StringTool.isEmpty(this.refName))

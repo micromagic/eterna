@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.TestCase;
+import self.micromagic.dbvm.DataBaseLocker;
 import self.micromagic.eterna.dao.EmptyQuery;
 import self.micromagic.eterna.dao.OnlyCountResultSet;
 import self.micromagic.eterna.dao.Query;
@@ -194,7 +195,7 @@ public class QueryHelperTest extends TestCase
 		List readerList = new ArrayList();
 		EmptyQuery query = new EmptyQuery();
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_NONE);
-		QueryHelper qh = new LimitQueryHelper(query, QueryHelper.DB_NAME_H2);
+		QueryHelper qh = new LimitQueryHelper(query, DataBaseLocker.DB_NAME_H2);
 		ResultSet rs;
 		long maxValue = Integer.MAX_VALUE;
 

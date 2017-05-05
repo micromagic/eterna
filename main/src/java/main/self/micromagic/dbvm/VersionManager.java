@@ -415,7 +415,7 @@ public class VersionManager
 		return ignore;
 	}
 
-	private void setStepInfo(Connection conn,  Factory factory, String vName, int version,
+	private void setStepInfo(Connection conn, Factory factory, String vName, int version,
 			int step, String optStatus, long timeFix)
 			throws SQLException
 	{

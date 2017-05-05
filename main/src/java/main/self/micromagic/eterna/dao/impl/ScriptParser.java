@@ -501,6 +501,20 @@ public class ScriptParser
 	}
 
 	/**
+	 * 检查数据库连接是否需要添加回滚记录点.
+	 */
+	public static boolean needSavepoint(Connection conn)
+			throws SQLException
+	{
+		if (conn.getAutoCommit())
+		{
+			return false;
+		}
+		String dbName = DataBaseLocker.getDataBaseProductName(conn);
+		return DataBaseLocker.DB_NAME_PGSQL.equals(dbName);
+	}
+
+	/**
 	 * 检查语句中的名称标识符, 替换成数据库相关的名称标识符.
 	 */
 	public static String checkScriptNameQuote(Connection conn, String script)

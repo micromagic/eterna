@@ -497,4 +497,3 @@ public abstract class AbstractDao extends AbstractGenerator
 	}
 
 }
-
