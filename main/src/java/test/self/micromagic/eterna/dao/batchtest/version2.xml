@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+
+	<table name="T_BATCH_TEST" opt="modify">
+		<column name="index" type="int" desc="排序"/>
+	</table>
+
+</dbVersion>

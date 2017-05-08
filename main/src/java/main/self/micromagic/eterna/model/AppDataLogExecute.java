@@ -390,7 +390,7 @@ public class AppDataLogExecute extends AbstractExecute
 				{
 					parent.addAttribute("class", ClassGenerator.getClassName(value.getClass()));
 				}
-				parent.addAttribute("value", String.valueOf(value));
+				vNode.addAttribute("value", String.valueOf(value));
 			}
 		}
 

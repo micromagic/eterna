@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<eterna-config>
+	<factory>
+		<objs>
+
+			<update name="clearAll">
+				<prepared-sql>
+					delete from T_BATCH_TEST
+				</prepared-sql>
+			</update>
+
+			<update name="addRow">
+				<prepared-sql>
+					insert into T_BATCH_TEST (#auto[insertN]) values (#auto[insertV])
+				</prepared-sql>
+				<parameters>
+					<parameter name="strValue" type="string"/>
+					<parameter name="key" type="string"/>
+					<parameter name="index" type="int"/>
+				</parameters>
+			</update>
+			<update name="modifyRow">
+				<prepared-sql>
+					update T_BATCH_TEST set #auto[update;1,-2]
+					where #auto[and;-1]
+				</prepared-sql>
+				<parameters>
+					<parameter name="strValue" type="string"/>
+					<parameter name="key" type="string"/>
+				</parameters>
+			</update>
+			<query name="listAll">
+				<prepared-sql>
+					select #auto[select] from T_BATCH_TEST
+					order by "index"
+				</prepared-sql>
+				<readers>
+					<reader name="key" type="string"/>
+					<reader name="strValue" type="string"/>
+				</readers>
+			</query>
+
+		</objs>
+	</factory>
+</eterna-config>

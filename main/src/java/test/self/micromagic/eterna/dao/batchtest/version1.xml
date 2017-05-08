@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dbVersion>
+
+	<table name="T_BATCH_TEST" desc="批量测试表">
+		<column name="key" type="string(50)" desc="主键" nullable="false"/>
+		<column name="strValue" type="string(50)" desc="字符值"/>
+	</table>
+	<index name="KEY_T_BATCH_TEST" type="key" tableName="T_BATCH_TEST">
+		<column name="key"/>
+	</index>
+
+</dbVersion>
