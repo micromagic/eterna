@@ -51,47 +51,47 @@ public class QueryHelperTest extends TestCase
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(11);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 11", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 11", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, false, qh);
 
 		rs = new OnlyCountResultSet(1);
 		query.setStartRow(10);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 10", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 10", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(1, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 15", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 15", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, false, qh);
 
 		rs = new OnlyCountResultSet(6);
 		query.setMaxCount(5);
 		query.setStartRow(2);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 7) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 7) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(5, 7, false, true, false, qh);
 
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(-1);
 		query.setStartRow(1);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(10, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(3);
 		query.setMaxCount(5);
 		query.setStartRow(8);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 13) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 8", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 13) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 8", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, false, false, qh);
 
@@ -99,7 +99,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, true, false, qh);
 
@@ -107,7 +107,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(13);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -115,7 +115,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(-1);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -123,7 +123,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 0, false, true, true, qh);
 
@@ -131,7 +131,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(10);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -139,7 +139,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 15, true, true, false, qh);
 
@@ -147,7 +147,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(10);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 12) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 15, true, false, false, qh);
 
@@ -155,7 +155,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1 where rownum <= 5) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 15, true, false, false, qh);
 
@@ -163,85 +163,84 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(-1);
 		query.setStartRow(2);
 		query.setTotalCountModel(15, new Query.TotalCountInfo(true, false));
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 2", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(2, 15, false, true, false, qh);
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(11);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 11", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 11", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, true, qh);
 
 		rs = new OnlyCountResultSet(1);
 		query.setStartRow(10);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 10", qh.getQuerySQL("TEST"));
+		assertEquals("select * from (select tmpTable1.*, rownum as " + QueryHelper.ORACLE_ROW_NUM + " from (TEST) tmpTable1) tmpTable2 where " + QueryHelper.ORACLE_ROW_NUM + " >= 10", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(1, 10, true, false, false, qh);
 
-		String sql1 = qh.getQuerySQL("TEST");
-		String sql2 = qh.getQuerySQL("TEST");
+		String sql1 = qh.getQueryScript("TEST");
+		String sql2 = qh.getQueryScript("TEST");
 		assertTrue(sql1 == sql2);
-		sql2 = qh.getQuerySQL(new String("TEST"));
+		sql2 = qh.getQueryScript(new String("TEST"));
 		assertEquals(sql1, sql2);
 		assertFalse(sql1 == sql2);
 	}
 
-	public void testH2()
+	public void testWithLimit()
 			throws Exception
 	{
 		List readerList = new ArrayList();
 		EmptyQuery query = new EmptyQuery();
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_NONE);
-		QueryHelper qh = new LimitQueryHelper(query, DataBaseLocker.DB_NAME_H2);
+		QueryHelper qh = new LimitQueryHelper(query, DataBaseLocker.DB_NAME_H2, " offset ");
 		ResultSet rs;
-		long maxValue = Integer.MAX_VALUE;
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(11);
-		assertEquals("TEST limit 10, " + maxValue, qh.getQuerySQL("TEST"));
+		assertEquals("TEST offset 10", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, false, qh);
 
 		rs = new OnlyCountResultSet(1);
 		query.setStartRow(10);
-		assertEquals("TEST limit 9, " + maxValue, qh.getQuerySQL("TEST"));
+		assertEquals("TEST offset 9", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(1, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(0);
 		query.setStartRow(15);
-		assertEquals("TEST limit 14, " + maxValue, qh.getQuerySQL("TEST"));
+		assertEquals("TEST offset 14", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 0, false, false, false, qh);
 
 		rs = new OnlyCountResultSet(6);
 		query.setMaxCount(5);
 		query.setStartRow(2);
-		assertEquals("TEST limit 1, 6", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 6 offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(5, 7, false, true, false, qh);
 
 		rs = new OnlyCountResultSet(9);
 		query.setMaxCount(-1);
 		query.setStartRow(2);
-		assertEquals("TEST limit 1, " + maxValue, qh.getQuerySQL("TEST"));
+		assertEquals("TEST offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(10);
 		query.setMaxCount(-1);
 		query.setStartRow(1);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(10, 10, true, false, false, qh);
 
 		rs = new OnlyCountResultSet(3);
 		query.setMaxCount(5);
 		query.setStartRow(8);
-		assertEquals("TEST limit 7, 6", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 6 offset 7", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, false, false, qh);
 
@@ -249,7 +248,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 10, true, true, false, qh);
 
@@ -257,7 +256,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(13);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -265,7 +264,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(-1);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_AUTO);
-		assertEquals("TEST", qh.getQuerySQL("TEST"));
+		assertEquals("TEST", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -273,7 +272,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("TEST limit 1, 4", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 4 offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 0, false, true, true, qh);
 
@@ -281,7 +280,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(10);
 		query.setStartRow(2);
 		query.setTotalCountModel(Query.TOTAL_COUNT_MODEL_COUNT);
-		assertEquals("TEST limit 1, 11", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 11 offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 10, true, false, false, qh);
 
@@ -289,7 +288,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("TEST limit 1, 4", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 4 offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(3, 15, true, true, false, qh);
 
@@ -297,7 +296,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(10);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("TEST limit 1, 11", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 11 offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(9, 15, true, false, false, qh);
 
@@ -305,7 +304,7 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(3);
 		query.setStartRow(2);
 		query.setTotalCountModel(15);
-		assertEquals("TEST limit 1, 4", qh.getQuerySQL("TEST"));
+		assertEquals("TEST limit 4 offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(0, 15, true, false, false, qh);
 
@@ -313,14 +312,14 @@ public class QueryHelperTest extends TestCase
 		query.setMaxCount(-1);
 		query.setStartRow(2);
 		query.setTotalCountModel(15, new Query.TotalCountInfo(true, false));
-		assertEquals("TEST limit 1, " + maxValue, qh.getQuerySQL("TEST"));
+		assertEquals("TEST offset 1", qh.getQueryScript("TEST"));
 		qh.readResults(rs, readerList);
 		assertResult(2, 15, false, true, false, qh);
 
-		String sql1 = qh.getQuerySQL("TEST");
-		String sql2 = qh.getQuerySQL("TEST");
+		String sql1 = qh.getQueryScript("TEST");
+		String sql2 = qh.getQueryScript("TEST");
 		assertTrue(sql1 == sql2);
-		sql2 = qh.getQuerySQL(new String("TEST"));
+		sql2 = qh.getQueryScript(new String("TEST"));
 		assertEquals(sql1, sql2);
 		assertFalse(sql1 == sql2);
 	}

@@ -63,12 +63,21 @@ public class QueryHelper
 			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
 					 oldHelper : new OracleQueryHelper(query);
 		}
-		if (DataBaseLocker.DB_NAME_PGSQL.equals(dbName)
-				|| DataBaseLocker.DB_NAME_H2.equals(dbName)
-				|| DataBaseLocker.DB_NAME_MYSQL.equals(dbName))
+		if (DataBaseLocker.DB_NAME_PGSQL.equals(dbName))
 		{
 			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
-					 oldHelper : new LimitQueryHelper(query, dbName);
+					 oldHelper : new LimitQueryHelper(query, dbName, " offset ");
+		}
+		if (DataBaseLocker.DB_NAME_H2.equals(dbName))
+		{
+			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
+					 oldHelper : new LimitQueryHelper(query, dbName, " limit -1 offset ");
+		}
+		if (DataBaseLocker.DB_NAME_MYSQL.equals(dbName))
+		{
+			String prefix = " limit 18446744073709551615 offset ";
+			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
+					 oldHelper : new LimitQueryHelper(query, dbName, prefix);
 		}
 		return oldHelper != null && DB_NAME_COMMON.equals(oldHelper.getType()) ?
 				oldHelper : new QueryHelper(query);
@@ -105,7 +114,7 @@ public class QueryHelper
 	/**
 	 * 根据原始语句, 生成处理后的, 带记录数限制的查询语句.
 	 */
-	public String getQuerySQL(String preparedSQL)
+	public String getQueryScript(String preparedSQL)
 			throws EternaException
 	{
 		return preparedSQL;
@@ -361,9 +370,9 @@ abstract class SpecialQueryHelper extends QueryHelper
 	protected int nowMaxRows = -1;
 	protected int nowTotalCount = Query.TOTAL_COUNT_MODEL_NONE;
 	protected Query.TotalCountInfo nowTotalCountExt;
-	protected String oldPreparedSQL;
-	protected String cacheSQL;
-	protected boolean useOldSQL;
+	protected String oldPreparedScript;
+	protected String cacheScript;
+	protected boolean useOldScript;
 
 	public SpecialQueryHelper(Query query)
 	{
@@ -373,21 +382,23 @@ abstract class SpecialQueryHelper extends QueryHelper
 	/**
 	 * 构造特殊的用于分页的SQL语句.
 	 */
-	protected abstract String createSpecialSQL(String preparedSQL);
+	protected abstract String createSpecialScript(String preparedScript);
 
-	public String getQuerySQL(String preparedSQL)
+	public String getQueryScript(String preparedScript)
 			throws EternaException
 	{
 		Query query = this.getQueryAdapter();
-		if (this.cacheSQL != null)
+		if (this.cacheScript != null)
 		{
 			try
 			{
-				if (this.oldPreparedSQL != preparedSQL || this.nowStartRow != query.getStartRow()
-						|| this.nowMaxRows != query.getMaxCount() || this.nowTotalCount != query.getTotalCountModel()
+				if (this.oldPreparedScript != preparedScript 
+						|| this.nowStartRow != query.getStartRow()
+						|| this.nowMaxRows != query.getMaxCount() 
+						|| this.nowTotalCount != query.getTotalCountModel()
 						|| !Utility.objectEquals(this.nowTotalCountExt, query.getTotalCountInfo()))
 				{
-					this.cacheSQL = null;
+					this.cacheScript = null;
 				}
 			}
 			catch (SQLException ex)
@@ -395,9 +406,9 @@ abstract class SpecialQueryHelper extends QueryHelper
 				throw new EternaException(ex);
 			}
 		}
-		if (this.cacheSQL == null)
+		if (this.cacheScript == null)
 		{
-			this.oldPreparedSQL = preparedSQL;
+			this.oldPreparedScript = preparedScript;
 			try
 			{
 				this.nowStartRow = query.getStartRow();
@@ -410,24 +421,24 @@ abstract class SpecialQueryHelper extends QueryHelper
 				throw new EternaException(ex);
 			}
 			// 如果是读取全部记录或使用自动计数, 则使用原始的语句
-			this.useOldSQL = (this.nowMaxRows == -1 && this.nowStartRow == 1)
+			this.useOldScript = (this.nowMaxRows < 0 && this.nowStartRow <= 1)
 					|| this.nowTotalCount == Query.TOTAL_COUNT_MODEL_AUTO;
-			if (this.useOldSQL)
+			if (this.useOldScript)
 			{
-				this.cacheSQL = preparedSQL;
+				this.cacheScript = preparedScript;
 			}
 			else
 			{
-				this.cacheSQL = this.createSpecialSQL(preparedSQL);
+				this.cacheScript = this.createSpecialScript(preparedScript);
 			}
 		}
-		return this.cacheSQL;
+		return this.cacheScript;
 	}
 
 	public List readResults(ResultSet rs, List readerList)
 			throws EternaException, SQLException
 	{
-		if (this.useOldSQL)
+		if (this.useOldScript)
 		{
 			return super.readResults(rs, readerList);
 		}
@@ -535,15 +546,19 @@ class OracleQueryHelper extends SpecialQueryHelper
 		return DataBaseLocker.DB_NAME_ORACLE;
 	}
 
-	protected String createSpecialSQL(String preparedSQL)
+	protected String createSpecialScript(String preparedScript)
 	{
-		if (this.nowStartRow == 1)
+		if (this.nowStartRow <= 1)
 		{
+			if (this.nowMaxRows < 0)
+			{
+				return preparedScript;
+			}
 			String part1 = "select * from (";
 			String part2 = ") tmpTable where rownum <= " + (this.nowMaxRows + 1);
 			StringAppender buf = StringTool.createStringAppender(
-					part1.length() + part2.length() + preparedSQL.length());
-			buf.append(part1).append(preparedSQL).append(part2);
+					part1.length() + part2.length() + preparedScript.length());
+			buf.append(part1).append(preparedScript).append(part2);
 			return buf.toString();
 		}
 		else
@@ -555,8 +570,8 @@ class OracleQueryHelper extends SpecialQueryHelper
 					+ ORACLE_ROW_NUM + " from (";
 			String part2 = ") tmpTable1" + condition1 + ") tmpTable2" + condition2;
 			StringAppender buf = StringTool.createStringAppender(
-					part1.length() + part2.length() + preparedSQL.length());
-			buf.append(part1).append(preparedSQL).append(part2);
+					part1.length() + part2.length() + preparedScript.length());
+			buf.append(part1).append(preparedScript).append(part2);
 			return buf.toString();
 		}
 	}
@@ -569,11 +584,13 @@ class OracleQueryHelper extends SpecialQueryHelper
 class LimitQueryHelper extends SpecialQueryHelper
 {
 	private final String dbType;
+	private final String unlimitPrefix;
 
-	public LimitQueryHelper(Query query, String dbType)
+	public LimitQueryHelper(Query query, String dbType, String unlimitPrefix)
 	{
 		super(query);
 		this.dbType = dbType;
+		this.unlimitPrefix = unlimitPrefix;
 	}
 
 	/**
@@ -584,19 +601,27 @@ class LimitQueryHelper extends SpecialQueryHelper
 		return this.dbType;
 	}
 
-	protected String createSpecialSQL(String preparedSQL)
+	protected String createSpecialScript(String preparedScript)
 	{
-		if (this.nowStartRow == 1)
+		String appendStr;
+		if (this.nowStartRow <= 1)
 		{
-			String appendStr = " limit " + (this.nowMaxRows + 1);
-			return preparedSQL + appendStr;
+			if (this.nowMaxRows < 0)
+			{
+				return preparedScript;
+			}
+			appendStr = " limit " + (this.nowMaxRows + 1);
+		}
+		else if (this.nowMaxRows < 0)
+		{
+			appendStr = this.unlimitPrefix + (this.nowStartRow - 1);
 		}
 		else
 		{
-			int count = this.nowMaxRows == -1 ? Integer.MAX_VALUE : this.nowMaxRows + 1;
-			String appendStr = " limit " + (this.nowStartRow - 1) + ", " + count;
-			return preparedSQL + appendStr;
+			appendStr = " limit " + (this.nowMaxRows + 1)
+					+ " offset " + (this.nowStartRow - 1);
 		}
+		return preparedScript.concat(appendStr);
 	}
 
 }

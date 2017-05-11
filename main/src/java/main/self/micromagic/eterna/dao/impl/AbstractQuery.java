@@ -202,7 +202,8 @@ public abstract class AbstractQuery extends BaseDao
 				}
 				else
 				{
-					orderStr = StringTool.linkStringArr(this.orderStrs, ", ").concat(", ".concat(orderStr));
+					orderStr = StringTool.linkStringArr(this.orderStrs, ", ")
+							.concat(", ".concat(orderStr));
 				}
 			}
 			if (log.isDebugEnabled())
@@ -338,8 +339,9 @@ public abstract class AbstractQuery extends BaseDao
 	public String getPreparedScript()
 			throws EternaException
 	{
-		String preparedSQL = super.getPreparedScript();
-		return this.queryHelper == null ? preparedSQL : this.queryHelper.getQuerySQL(preparedSQL);
+		String preparedScript = super.getPreparedScript();
+		return this.queryHelper == null ? preparedScript
+				: this.queryHelper.getQueryScript(preparedScript);
 	}
 
 	public String getPrimitiveQuerySQL()
@@ -421,7 +423,7 @@ public abstract class AbstractQuery extends BaseDao
 				orderStr = orderFlag < 0 ? orderStr + " DESC" : orderStr;
 				char tmpChar = orderFlag < 0 ? ResultReaderManager.ORDER_FLAG_DESC
 						: ResultReaderManager.ORDER_FLAG_ASC;
-				this.orderNames = new String[]{String.valueOf(tmpChar).concat(readerName)};;
+				this.orderNames = new String[]{String.valueOf(tmpChar).concat(readerName)};
 			}
 			this.orderStrs = new String[]{orderStr};
 			String settingOrder = this.readerManager.getOrderByString();
@@ -609,7 +611,8 @@ public abstract class AbstractQuery extends BaseDao
 				hasColumn = true;
 				// 如果结果中的列不在reader配置中, 则添加
 				String typeName = TypeManager.getTypeName(tmp.typeId);
-				ObjectReader reader = (ObjectReader) ReaderFactory.createReader(typeName, tmp.colName);
+				ObjectReader reader = (ObjectReader) ReaderFactory.createReader(
+						typeName, tmp.colName);
 				reader.setColumnIndex(i);
 				tmpRm.addReader(reader);
 				newReaders.add(reader);
@@ -677,7 +680,6 @@ public abstract class AbstractQuery extends BaseDao
 				reader.setColumnIndex(i);
 				rm.addReader(reader);
 			}
-
 		}
 		rm.initialize(this.getFactory());
 		rm.lock();
