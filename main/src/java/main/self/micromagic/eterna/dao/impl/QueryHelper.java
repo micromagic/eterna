@@ -63,7 +63,7 @@ public class QueryHelper
 			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
 					 oldHelper : new OracleQueryHelper(query);
 		}
-		if (DataBaseLocker.DB_NAME_PGSQL.equals(dbName))
+		if (DataBaseLocker.DB_NAME_POSTGRES.equals(dbName))
 		{
 			return oldHelper != null && dbName.equals(oldHelper.getType()) ?
 					 oldHelper : new LimitQueryHelper(query, dbName, " offset ");

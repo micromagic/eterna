@@ -31,7 +31,7 @@ import self.micromagic.util.ref.BooleanRef;
 /**
  * PostgreSQL的数据库列定义.
  */
-public class PgSqlColumn extends AbstractObject
+public class PostgresColumn extends AbstractObject
 		implements ColumnDefiner
 {
 	public String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, List paramList)
@@ -101,7 +101,7 @@ public class PgSqlColumn extends AbstractObject
 			}
 			if (colDesc.nullable != null)
 			{
-				String tmpOpt = colDesc.nullable.booleanValue() ? "drop" : "set";
+				String tmpOpt = colDesc.nullable.booleanValue() ? " drop" : " set";
 				StringAppender s = StringTool.createStringAppender(56);
 				s.append("alter table ").append(tableName).append(" alter column ")
 						.append(colDesc.colName).append(tmpOpt).append(" not null");

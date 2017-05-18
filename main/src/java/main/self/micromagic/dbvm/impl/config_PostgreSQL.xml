@@ -22,7 +22,7 @@
 	<config>
 
 		<table-comment className="self.micromagic.dbvm.impl.GeneralComment"/>
-		<column-def className="self.micromagic.dbvm.impl.PgSqlColumn"/>
+		<column-def className="self.micromagic.dbvm.impl.PostgresColumn"/>
 		<index-def className="self.micromagic.dbvm.impl.GeneralIndex"/>
 		<type-def className="self.micromagic.dbvm.TypeDefiner">
 		</type-def>

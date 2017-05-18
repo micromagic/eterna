@@ -59,7 +59,7 @@ public class DataBaseLocker
 	/**
 	 * PostgreSQL数据库名称.
 	 */
-	public static final String DB_NAME_PGSQL = "PostgreSQL";
+	public static final String DB_NAME_POSTGRES = "PostgreSQL";
 
 	/**
 	 * 数据库名称的索引表.
@@ -67,7 +67,7 @@ public class DataBaseLocker
 	 */
 	private static final String[] DB_NAME_INDEX = {
 		"ORACLE", DB_NAME_ORACLE,
-		"POSTGRESQL", DB_NAME_PGSQL,
+		"POSTGRESQL", DB_NAME_POSTGRES,
 		"H2", DB_NAME_H2,
 		"MYSQL", DB_NAME_MYSQL
 	};

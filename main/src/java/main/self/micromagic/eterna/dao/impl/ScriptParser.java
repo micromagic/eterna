@@ -511,7 +511,7 @@ public class ScriptParser
 			return false;
 		}
 		String dbName = DataBaseLocker.getDataBaseProductName(conn);
-		return DataBaseLocker.DB_NAME_PGSQL.equals(dbName);
+		return DataBaseLocker.DB_NAME_POSTGRES.equals(dbName);
 	}
 
 	/**
@@ -682,7 +682,7 @@ public class ScriptParser
 		nameQuoteIndex.put(DataBaseLocker.DB_NAME_ORACLE, defaultNameQuote);
 		nameQuoteIndex.put(DataBaseLocker.DB_NAME_H2, defaultNameQuote);
 		nameQuoteIndex.put(DataBaseLocker.DB_NAME_MYSQL, new char[] {'`', '`'});
-		nameQuoteIndex.put(DataBaseLocker.DB_NAME_PGSQL, defaultNameQuote);
+		nameQuoteIndex.put(DataBaseLocker.DB_NAME_POSTGRES, defaultNameQuote);
 
 		try
 		{
