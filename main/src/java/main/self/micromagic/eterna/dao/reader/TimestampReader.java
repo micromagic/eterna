@@ -25,16 +25,16 @@ import self.micromagic.util.converter.TimestampConverter;
 
 public class TimestampReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_TIMPSTAMP;
-	}
-
 	public TimestampReader(String name)
 	{
 		super(name);
 		this.converter = new TimestampConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_TIMPSTAMP;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -46,8 +46,8 @@ public class TimestampReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getTimestamp(this.columnIndex) : rs.getTimestamp(this.alias);
+		return this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getTimestamp(this.columnIndex) : rs.getTimestamp(this.realAlias);
 	}
 
 }

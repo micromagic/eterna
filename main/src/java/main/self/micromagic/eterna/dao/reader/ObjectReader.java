@@ -27,6 +27,7 @@ import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.impl.FormatGenerator;
 import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.security.PermissionSetHolder;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -49,73 +50,74 @@ public class ObjectReader
 	 */
 	protected static final AttributeManager EMPTY_ATTRIBUTES = new AttributeManager();
 
+	/**
+	 * reader的状态位, 是否已初始化.
+	 */
+	protected static final int RS_INITIALIZED = 0x1;
+	/**
+	 * reader的状态位, 是否使用索引值, false则使用列名.
+	 */
+	protected static final int RS_USE_INDEX_OR_ALIAS = 0x10;
+
 	protected String name;
+	private String caption;
 	protected String columnName;
 	protected String orderCol;
-	protected String formatName;
-	protected ResultFormat format;
-	private String caption;
 
-	protected String permissionConfig;
+	protected ResultFormat format;
 	protected PermissionSet permissionSet;
 
-	protected boolean useIndexOrAlias;
 	protected String alias;
+	protected String realAlias;
 	protected int columnIndex = -1;
 	protected boolean checkIndex;
-	protected boolean initialized;
+
+	// 当前reader的状态, 是否初始化及是否使用列索引
+	protected int readerStatus;
 
 	protected ValueConverter converter;
 	protected AttributeManager attributes = EMPTY_ATTRIBUTES;
 
-	public int getType()
-	{
-		return TypeManager.TYPE_OBJECT;
-	}
-
 	public ObjectReader(String name)
 	{
-		this.name = this.alias = name;
+		this.name = this.realAlias = this.alias = name;
 	}
 
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
+		if ((this.readerStatus & RS_INITIALIZED) != 0)
 		{
 			return;
 		}
-		this.initialized = true;
+		this.readerStatus |= RS_INITIALIZED;
 		if (this.columnName == null)
 		{
-			this.columnName = this.alias == null ? this.name : this.alias;
+			this.columnName = this.realAlias == null ? this.name : this.realAlias;
 		}
 		this.columnName = ScriptParser.checkNameWithKey(this.columnName);
 		if (this.orderCol != null)
 		{
 			this.orderCol = ScriptParser.checkNameWithKey(this.orderCol);
 		}
-		if (this.formatName != null)
+		ResultFormat f = this.format;
+		String formatName = f instanceof ResultFormatHolder ? f.getName() : null;
+		if (formatName != null)
 		{
 			String checkStr = Tool.PATTERN_PREFIX;
-			if (this.formatName.startsWith(checkStr))
+			if (formatName.startsWith(checkStr))
 			{
 				this.format = FormatGenerator.createFormat(this.getType(),
-						this.formatName.substring(checkStr.length()), this, factory);
+						formatName.substring(checkStr.length()), this, factory);
 			}
 			else
 			{
-				this.format = factory.getFormat(this.formatName);
-				if (this.format == null)
-				{
-					log.warn("The format [" + this.formatName + "] not found.");
-				}
+				this.format = factory.getFormat(formatName);
 			}
 		}
-		if (this.permissionConfig != null)
-		{
-			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
-		}
+
+		this.permissionSet = PermissionSetHolder.getRealPermissionSet(
+				factory, this.permissionSet);
 		if (this.caption == null)
 		{
 			this.caption = Tool.translateCaption(factory, this.getName());
@@ -138,6 +140,11 @@ public class ObjectReader
 		this.attributes.convertType(factory, "reader");
 	}
 
+	public int getType()
+	{
+		return TypeManager.TYPE_OBJECT;
+	}
+
 	public ResultFormat getFormat()
 	{
 		return this.format;
@@ -145,12 +152,13 @@ public class ObjectReader
 
 	public void setFormatName(String format)
 	{
-		this.formatName = format;
+		this.format = format == null ? null : new ResultFormatHolder(format);
 	}
 
 	public String getFormatName()
 	{
-		return this.formatName;
+		ResultFormat f = this.format;
+		return f == null ? null : f.getName();
 	}
 
 	public String getName()
@@ -185,14 +193,24 @@ public class ObjectReader
 
 	public void setAlias(String alias)
 	{
-		this.alias = alias;
+		this.realAlias = this.alias = alias;
 		this.columnIndex = -1;
-		this.useIndexOrAlias = false;
+		this.readerStatus &= ~RS_USE_INDEX_OR_ALIAS;
+	}
+
+	public String getRealAlias()
+	{
+		return this.realAlias;
+	}
+
+	public void setRealAlias(String alias)
+	{
+		this.realAlias = alias == null ? this.alias : alias;
 	}
 
 	public boolean isUseAlias()
 	{
-		return !this.useIndexOrAlias;
+		return (this.readerStatus & RS_USE_INDEX_OR_ALIAS) == 0;
 	}
 
 	public int getColumnIndex()
@@ -202,14 +220,14 @@ public class ObjectReader
 
 	public void setColumnIndex(int columnIndex)
 	{
-		this.alias = null;
+		this.realAlias = this.alias = null;
 		this.columnIndex = columnIndex;
-		this.useIndexOrAlias = true;
+		this.readerStatus |= RS_USE_INDEX_OR_ALIAS;
 	}
 
 	public boolean isUseColumnIndex()
 	{
-		return this.useIndexOrAlias;
+		return (this.readerStatus & RS_USE_INDEX_OR_ALIAS) != 0;
 	}
 
 	/**
@@ -235,10 +253,8 @@ public class ObjectReader
 
 	public void setPermission(String permission)
 	{
-		if (!StringTool.isEmpty(permission))
-		{
-			this.permissionConfig = permission;
-		}
+		this.permissionSet = StringTool.isEmpty(permission) ? null
+				: new PermissionSetHolder(permission);
 	}
 
 	public void setPermissionSet(PermissionSet permissionSet)
@@ -299,8 +315,8 @@ public class ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getObject(this.columnIndex) : rs.getObject(this.alias);
+		return this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getObject(this.columnIndex) : rs.getObject(this.realAlias);
 	}
 
 	/**
@@ -312,8 +328,9 @@ public class ObjectReader
 		{
 			try
 			{
-				this.columnIndex = rs.findColumn(this.alias);
-				return this.useIndexOrAlias = true;
+				this.columnIndex = rs.findColumn(this.realAlias);
+				this.readerStatus |= RS_USE_INDEX_OR_ALIAS;
+				return true;
 			}
 			catch (SQLException ex)
 			{

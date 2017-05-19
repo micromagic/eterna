@@ -25,16 +25,16 @@ import self.micromagic.util.converter.FloatConverter;
 
 public class FloatReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_FLOAT;
-	}
-
 	public FloatReader(String name)
 	{
 		super(name);
 		this.converter = new FloatConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_FLOAT;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -47,8 +47,8 @@ public class FloatReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		float floatValue = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getFloat(this.columnIndex) : rs.getFloat(this.alias);
+		float floatValue = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getFloat(this.columnIndex) : rs.getFloat(this.realAlias);
 		return rs.wasNull() ? null : new Float(floatValue);
 	}
 

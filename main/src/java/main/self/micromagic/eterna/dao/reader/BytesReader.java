@@ -25,16 +25,16 @@ import self.micromagic.util.converter.BytesConverter;
 
 public class BytesReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_BYTES;
-	}
-
 	public BytesReader(String name)
 	{
 		super(name);
 		this.converter = new BytesConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_BYTES;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -46,8 +46,8 @@ public class BytesReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getBytes(this.columnIndex): rs.getBytes(this.alias);
+		return this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getBytes(this.columnIndex): rs.getBytes(this.realAlias);
 	}
 
 }

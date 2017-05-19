@@ -25,16 +25,16 @@ import self.micromagic.util.converter.ShortConverter;
 
 public class ShortReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_SHORT;
-	}
-
 	public ShortReader(String name)
 	{
 		super(name);
 		this.converter = new ShortConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_SHORT;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -47,8 +47,8 @@ public class ShortReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		short shortValue = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getShort(this.columnIndex) : rs.getShort(this.alias);
+		short shortValue = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getShort(this.columnIndex) : rs.getShort(this.realAlias);
 		return rs.wasNull() ? null : new Short(shortValue);
 	}
 

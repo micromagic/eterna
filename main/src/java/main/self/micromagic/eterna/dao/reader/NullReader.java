@@ -24,14 +24,14 @@ import self.micromagic.eterna.share.TypeManager;
 
 public class NullReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_NULL;
-	}
-
 	public NullReader(String name)
 	{
 		super(name);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_NULL;
 	}
 
 	public Object readCall(CallableStatement call, int index)

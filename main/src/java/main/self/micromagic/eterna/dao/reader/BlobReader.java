@@ -25,14 +25,14 @@ import self.micromagic.eterna.share.TypeManager;
 
 public class BlobReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_BLOB;
-	}
-
 	public BlobReader(String name)
 	{
 		super(name);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_BLOB;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -44,8 +44,8 @@ public class BlobReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		Blob blob = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getBlob(this.columnIndex) : rs.getBlob(this.alias);
+		Blob blob = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getBlob(this.columnIndex) : rs.getBlob(this.realAlias);
 		return blob;
 	}
 

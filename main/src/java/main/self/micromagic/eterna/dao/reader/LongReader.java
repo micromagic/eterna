@@ -25,16 +25,16 @@ import self.micromagic.util.converter.LongConverter;
 
 public class LongReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_LONG;
-	}
-
 	public LongReader(String name)
 	{
 		super(name);
 		this.converter = new LongConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_LONG;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -47,8 +47,8 @@ public class LongReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		long longValue = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getLong(this.columnIndex) : rs.getLong(this.alias);
+		long longValue = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getLong(this.columnIndex) : rs.getLong(this.realAlias);
 		return rs.wasNull() ? null : new Long(longValue);
 	}
 

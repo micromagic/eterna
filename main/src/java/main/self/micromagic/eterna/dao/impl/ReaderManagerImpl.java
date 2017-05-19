@@ -182,7 +182,7 @@ public class ReaderManagerImpl
 						// 如果是通过别名获取, 且设置了列名并已出现过, 则将别名设置成与之前相同的
 						if (reader instanceof ObjectReader)
 						{
-							((ObjectReader) reader).setAlias(oldAlias);
+							((ObjectReader) reader).setRealAlias(oldAlias);
 						}
 					}
 					else

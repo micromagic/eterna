@@ -25,16 +25,16 @@ import self.micromagic.util.converter.StringConverter;
 
 public class StringReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_STRING;
-	}
-
 	public StringReader(String name)
 	{
 		super(name);
 		this.converter = new StringConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_STRING;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -46,8 +46,8 @@ public class StringReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getString(this.columnIndex) : rs.getString(this.alias);
+		return this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getString(this.columnIndex) : rs.getString(this.realAlias);
 	}
 
 }

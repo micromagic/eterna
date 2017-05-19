@@ -30,16 +30,16 @@ import self.micromagic.util.converter.ReaderConverter;
 
 public class CharsReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_CHARS;
-	}
-
 	public CharsReader(String name)
 	{
 		super(name);
 		this.converter = new ReaderConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_CHARS;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -57,8 +57,8 @@ public class CharsReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		Reader reader = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getCharacterStream(this.columnIndex) : rs.getCharacterStream(this.alias);
+		Reader reader = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getCharacterStream(this.columnIndex) : rs.getCharacterStream(this.realAlias);
 		if (reader == null)
 		{
 			return null;

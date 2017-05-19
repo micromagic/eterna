@@ -25,16 +25,16 @@ import self.micromagic.util.converter.BooleanConverter;
 
 public class BooleanReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_BOOLEAN;
-	}
-
 	public BooleanReader(String name)
 	{
 		super(name);
 		this.converter = new BooleanConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_BOOLEAN;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -47,8 +47,8 @@ public class BooleanReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		boolean booleanValue = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getBoolean(this.columnIndex) : rs.getBoolean(this.alias);
+		boolean booleanValue = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getBoolean(this.columnIndex) : rs.getBoolean(this.realAlias);
 		return rs.wasNull() ? null : new Boolean(booleanValue);
 	}
 

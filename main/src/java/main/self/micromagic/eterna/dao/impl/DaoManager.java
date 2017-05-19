@@ -30,6 +30,7 @@ import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.reader.InvalidReader;
+import self.micromagic.eterna.dao.reader.ObjectReader;
 import self.micromagic.eterna.dao.reader.ReaderWrapper;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -308,7 +309,7 @@ public class DaoManager
 								throw new EternaException(msg);
 							}
 							// 生成reader列表
-							readerArray = this.makeReaderArray((Query) dao);
+							readerArray = makeReaderArray((Query) dao);
 							itemCount = readerArray.length;
 						}
 						begin = this.getAutoParamIndex(beginParam, null, readerArray) - 1;
@@ -349,7 +350,8 @@ public class DaoManager
 							{
 								continue;
 							}
-							String upName = reader.getAlias().toUpperCase();
+							String alias = getReaderAlias(reader);
+							String upName = alias.toUpperCase();
 							if (!aliasSet.containsKey(upName))
 							{
 								// 如果别名已生成过, 则不出现在select列表中
@@ -362,11 +364,10 @@ public class DaoManager
 								{
 									first = false;
 								}
-								buf.append(readerArray[i].getColumnName());
+								buf.append(reader.getColumnName());
 								if (needAs)
 								{
 									buf.append(" as ");
-									String alias = readerArray[i].getAlias();
 									buf.append(ScriptParser.checkNameForQuote(alias));
 								}
 							}
@@ -429,7 +430,25 @@ public class DaoManager
 		return new String(buf.toString());
 	}
 
-	private ResultReader[] makeReaderArray(Query query)
+	/**
+	 * 获取reader中的别名.
+	 */
+	private static String getReaderAlias(ResultReader reader)
+	{
+		if (reader instanceof ObjectReader)
+		{
+			return ((ObjectReader) reader).getRealAlias();
+		}
+		else
+		{
+			return reader.getAlias();
+		}
+	}
+
+	/**
+	 * 构造预处理中需要的reader列表.
+	 */
+	private static ResultReader[] makeReaderArray(Query query)
 	{
 		List tmp = query.getReaderManager().getReaderList();
 		int itemCount = tmp.size();

@@ -30,16 +30,16 @@ import self.micromagic.util.converter.StreamConverter;
 
 public class StreamReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_STREAM;
-	}
-
 	public StreamReader(String name)
 	{
 		super(name);
 		this.converter = new StreamConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_STREAM;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -57,8 +57,8 @@ public class StreamReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		InputStream ins = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getBinaryStream(this.columnIndex) : rs.getBinaryStream(this.alias);
+		InputStream ins = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getBinaryStream(this.columnIndex) : rs.getBinaryStream(this.realAlias);
 		if (ins == null)
 		{
 			return null;

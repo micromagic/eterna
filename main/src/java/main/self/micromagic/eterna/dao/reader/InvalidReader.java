@@ -44,7 +44,7 @@ public class InvalidReader
 
 	public int getType()
 	{
-		return TypeManager.TYPE_NULL;
+		return TypeManager.TYPE_NONE;
 	}
 
 	public ResultFormat getFormat()

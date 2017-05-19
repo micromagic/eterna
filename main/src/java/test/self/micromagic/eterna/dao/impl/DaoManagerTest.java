@@ -120,9 +120,12 @@ public class DaoManagerTest extends TestCase
 		assertEquals("d", ((ResultReader) list.get(5)).getName());
 		assertEquals("x", ((ResultReader) list.get(6)).getName());
 
-		assertEquals("b", query.getReaderManager().getReader("d").getAlias());
+		ResultReader tmpReader = query.getReaderManager().getReader("d");
+		assertEquals("d_name", tmpReader.getAlias());
+		assertEquals("b", ((ObjectReader) tmpReader).getRealAlias());
+
 		String str = daoManager.preParse("select #auto[select]", query);
-		String result = "select a as \"a\", b as \"b\", c as \"c\"";
+		String result = "select a as \"index\", b as b, c as c";
 		assertEquals(result, str);
 
 		str = daoManager.preParse("select #auto[select;1,-2]", query);
@@ -132,15 +135,15 @@ public class DaoManagerTest extends TestCase
 		str = daoManager.preParse("select #auto[select;1,4]", query);
 		assertEquals(result, str);
 		str = daoManager.preParse("select #auto[select;1,2]", query);
-		result = "select a as \"a\", b as \"b\"";
+		result = "select a as \"index\", b as b";
 		assertEquals(result, str);
 		str = daoManager.preParse("select #auto[select;1,3]", query);
 		assertEquals(result, str);
 		str = daoManager.preParse("select #auto[select;2,4]", query);
-		result = "select b as \"b\", c as \"c\"";
+		result = "select b as b, c as c";
 		assertEquals(result, str);
 		str = daoManager.preParse("select #auto[select;4]", query);
-		result = "select c as \"c\", b as \"b\"";
+		result = "select c as c, b as b";
 		assertEquals(result, str);
 
 		try
@@ -189,6 +192,8 @@ public class DaoManagerTest extends TestCase
 	{
 		ReaderManagerImpl r = new ReaderManagerImpl();
 		ObjectReader reader = (ObjectReader) ReaderFactory.createReader("String", "a");
+		reader.setColumnName("a");
+		reader.setAlias("index");
 		reader.setAttribute(ResultReaderManager.SHOW_NAME_FLAG, "x");
 		r.addReader(reader);
 		reader = (ObjectReader) ReaderFactory.createReader("String", "b");
@@ -200,6 +205,7 @@ public class DaoManagerTest extends TestCase
 		r.addReader(reader);
 		reader = (ObjectReader) ReaderFactory.createReader("String", "d");
 		reader.setColumnName("b");
+		reader.setAlias("d_name");
 		r.addReader(reader);
 		EternaFactory f = (EternaFactory) ContainerManager.getGlobalContainer().getFactory();
 		f.setAttribute(ResultReaderManager.CHECK_SAME_COL, "1");

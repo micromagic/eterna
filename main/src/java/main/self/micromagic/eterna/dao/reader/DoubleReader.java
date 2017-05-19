@@ -25,16 +25,16 @@ import self.micromagic.util.converter.DoubleConverter;
 
 public class DoubleReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_DOUBLE;
-	}
-
 	public DoubleReader(String name)
 	{
 		super(name);
 		this.converter = new DoubleConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_DOUBLE;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -47,8 +47,8 @@ public class DoubleReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		double doubleValue = this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getDouble(this.columnIndex) : rs.getDouble(this.alias);
+		double doubleValue = this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getDouble(this.columnIndex) : rs.getDouble(this.realAlias);
 		return rs.wasNull() ? null : new Double(doubleValue);
 	}
 

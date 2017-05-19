@@ -25,16 +25,16 @@ import self.micromagic.util.converter.DateConverter;
 
 public class DateReader extends ObjectReader
 {
-	public int getType()
-	{
-		return TypeManager.TYPE_DATE;
-	}
-
 	public DateReader(String name)
 	{
 		super(name);
 		this.converter = new DateConverter();
 		this.converter.setNeedThrow(true);
+	}
+
+	public int getType()
+	{
+		return TypeManager.TYPE_DATE;
 	}
 
 	public Object readCall(CallableStatement call, int index)
@@ -46,8 +46,8 @@ public class DateReader extends ObjectReader
 	public Object readResult(ResultSet rs)
 			throws SQLException
 	{
-		return this.useIndexOrAlias || this.transIndex(rs) ?
-				rs.getDate(this.columnIndex) : rs.getDate(this.alias);
+		return this.isUseColumnIndex() || this.transIndex(rs) ?
+				rs.getDate(this.columnIndex) : rs.getDate(this.realAlias);
 	}
 
 }
