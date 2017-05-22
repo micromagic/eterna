@@ -76,6 +76,7 @@ public class ObjectReader
 	protected int readerStatus;
 
 	protected ValueConverter converter;
+	// reader的attr会在创建时被替换掉, 所以这里不创建, 使用默认的空attr
 	protected AttributeManager attributes = EMPTY_ATTRIBUTES;
 
 	public ObjectReader(String name)
@@ -299,7 +300,7 @@ public class ObjectReader
 
 	public void setAttributes(AttributeManager attributes)
 	{
-		this.attributes = attributes;
+		this.attributes = attributes == null ? EMPTY_ATTRIBUTES : attributes;
 	}
 
 	public Object getAttribute(String name)

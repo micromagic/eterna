@@ -24,7 +24,7 @@ import self.micromagic.eterna.share.EternaFactory;
 
 /**
  * format的占位对象.
- *  在设置结果的格式化对象名称时使用.
+ * 在设置结果的格式化对象名称时使用.
  */
 public class ResultFormatHolder
 		implements ResultFormat

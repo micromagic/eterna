@@ -22,6 +22,7 @@ import java.util.Set;
 import self.micromagic.eterna.dao.Entity;
 import self.micromagic.eterna.dao.EntityItem;
 import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.security.PermissionSetHolder;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
@@ -33,6 +34,11 @@ import self.micromagic.util.converter.BooleanConverter;
 public class EntityItemGenerator extends AbstractGenerator
 		implements EntityItem
 {
+	private String caption;
+	protected String columnName;
+	protected int type = TypeManager.TYPE_NONE;
+	protected PermissionSet permissionSet;
+
 	protected boolean initialized;
 
 	public void initialize(Entity entity)
@@ -43,13 +49,24 @@ public class EntityItemGenerator extends AbstractGenerator
 			return;
 		}
 		this.initialized = true;
+		if (this.type == TypeManager.TYPE_NONE)
+		{
+			log.error("The entity [" + entity.getName() + "] item ["
+					+ this.getName() + "]'s type hasn't setted.");
+		}
 		EternaFactory factory = entity.getFactory();
 		this.attributes.convertType(factory, "item");
 		this.checkEmptyAttrs(factory);
-		if (this.permissionConfig != null)
-		{
-			this.permissionSet = factory.createPermissionSet(this.permissionConfig);
-		}
+		this.initPermissionSet(factory);
+	}
+
+	/**
+	 * 初始化权限集合.
+	 */
+	protected void initPermissionSet(EternaFactory factory)
+	{
+		this.permissionSet = PermissionSetHolder.getRealPermissionSet(
+				factory, this.permissionSet);
 	}
 
 	/**
@@ -76,14 +93,14 @@ public class EntityItemGenerator extends AbstractGenerator
 
 	public String getColumnName()
 	{
-		return this.columnName != null ? this.columnName : this.getName();
+		String tmpName = this.columnName;
+		return tmpName != null ? tmpName : this.getName();
 	}
 
 	public int getType()
 	{
 		return this.type;
 	}
-	protected int type;
 
 	public String getCaption()
 	{
@@ -95,7 +112,6 @@ public class EntityItemGenerator extends AbstractGenerator
 	{
 		return this.permissionSet;
 	}
-	protected PermissionSet permissionSet;
 
 	public void merge(EntityItem other)
 			throws EternaException
@@ -121,7 +137,7 @@ public class EntityItemGenerator extends AbstractGenerator
 		{
 			this.columnName = other.getColumnName();
 		}
-		if (this.permissionConfig == null)
+		if (this.permissionSet == null)
 		{
 			this.permissionSet = other.getPermissionSet();
 		}
@@ -137,7 +153,6 @@ public class EntityItemGenerator extends AbstractGenerator
 
 	public Object create()
 	{
-		this.type = TypeManager.getTypeId(this.typeName);
 		return this;
 	}
 
@@ -145,24 +160,21 @@ public class EntityItemGenerator extends AbstractGenerator
 	{
 		this.columnName = colName;
 	}
-	protected String columnName;
 
 	public void setTypeName(String type)
 	{
-		this.typeName = type;
+		this.type = TypeManager.getTypeId(type);
 	}
-	private String typeName;
 
 	public void setCaption(String caption)
 	{
 		this.caption = caption;
 	}
-	private String caption;
 
 	public void setPermission(String permission)
 	{
-		this.permissionConfig = permission;
+		this.permissionSet = StringTool.isEmpty(permission) ? null
+				: new PermissionSetHolder(permission);
 	}
-	protected String permissionConfig;
 
 }

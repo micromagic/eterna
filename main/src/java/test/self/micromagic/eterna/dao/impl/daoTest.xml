@@ -43,7 +43,7 @@
 			<update name="t1" logType="log1">
 				<prepared-sql>
 					update TEST01 set strValue = ?, intValue = ?, doubleValue = ?
-					where key = ?
+					where "key" = ?
 				</prepared-sql>
 				<parameters>
 					<parameter name="str" type="string"/>
@@ -56,7 +56,7 @@
 				<prepared-sql>
 					select * from TEST01
 					where strValue = ? and intValue = ? and doubleValue = ?
-							and key = ? #param(d)[and errCol = ?]
+							and "key" = ? #param(d)[and errCol = ?]
 				</prepared-sql>
 				<readers>
 					<reader name="key" type="string"/>

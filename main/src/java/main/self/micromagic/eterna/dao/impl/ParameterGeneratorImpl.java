@@ -22,11 +22,13 @@ import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.security.PermissionSet;
+import self.micromagic.eterna.security.PermissionSetHolder;
 import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.StringTool;
 
 public class ParameterGeneratorImpl extends AbstractGenerator
 		implements ParameterGenerator
@@ -76,12 +78,13 @@ class ParameterImpl
 {
 	protected String name;
 	private final String colName;
-	protected String permissionConfig;
-	protected String prepareName;
+	private PermissionSet permissionSet;
 	protected PreparerCreater prepare;
 	protected int type;
 	protected int index;
 	protected AttributeManager attrs;
+	// 这里需要保留prepareName, 因为在转换成item时需要使用
+	protected String prepareName;
 
 	public ParameterImpl(String name, String colName, String typeName,
 			int index, String prepareName, String permission, AttributeManager attrs)
@@ -91,7 +94,8 @@ class ParameterImpl
 		this.type = TypeManager.getTypeId(typeName);
 		this.index = index;
 		this.prepareName = prepareName;
-		this.permissionConfig = permission;
+		this.permissionSet = StringTool.isEmpty(permission) ? null
+				: new PermissionSetHolder(permission);
 		this.attrs = attrs;
 	}
 
@@ -103,10 +107,8 @@ class ParameterImpl
 			this.prepare = CreaterManager.createPreparerCreater(
 					this.type, this.prepareName, factory);
 			this.attrs.convertType(factory, "parameter");
-			if (this.permissionConfig != null)
-			{
-				this.permissionSet = factory.createPermissionSet(this.permissionConfig);
-			}
+			this.permissionSet = PermissionSetHolder.getRealPermissionSet(
+					factory, this.permissionSet);
 		}
 	}
 
@@ -133,7 +135,6 @@ class ParameterImpl
 	{
 		return this.permissionSet;
 	}
-	private PermissionSet permissionSet;
 
 	public int getType()
 	{

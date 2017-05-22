@@ -30,4 +30,9 @@ public interface PermissionSet
 	 */
 	boolean checkPermission(Permission permission);
 
+	/**
+	 * 返回此权限集合的配置字符串.
+	 */
+	String toString();
+
 }
