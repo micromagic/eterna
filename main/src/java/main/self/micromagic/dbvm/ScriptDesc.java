@@ -25,6 +25,7 @@ import org.dom4j.Element;
 
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.impl.ScriptParser;
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
@@ -71,7 +72,12 @@ public class ScriptDesc extends AbstractObject
 			Set tmp = new HashSet();
 			for (int i = 0; i < arr.length; i++)
 			{
-				tmp.add(DataBaseLocker.getStandardDataBaseName(arr[i]));
+				String dbName = DataBaseLocker.getStandardDataBaseName(arr[i]);
+				if (dbName == null)
+				{
+					throw new ParseException("Wrong data base [" + arr[i] + "].");
+				}
+				tmp.add(dbName);
 			}
 			this.validDataBase = tmp;
 		}
