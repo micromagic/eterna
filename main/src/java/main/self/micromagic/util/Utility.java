@@ -24,6 +24,7 @@ import java.io.Writer;
 import java.lang.reflect.Method;
 import java.rmi.server.UID;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -172,6 +173,19 @@ public class Utility
 	public static Integer createInteger(int i)
 	{
 		return i >= 0 && i <= 15 ? INTEGER_ARRAY[i] : new Integer(i);
+	}
+
+	/**
+	 * 使用配置对象加载输入流, 然后将输入流关闭.
+	 */
+	public static void loadProperties(Properties props, InputStream stream)
+			throws IOException
+	{
+		if (props != null && stream != null)
+		{
+			props.load(stream);
+			stream.close();
+		}
 	}
 
 	/**

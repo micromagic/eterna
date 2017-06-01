@@ -410,8 +410,7 @@ public class PropertiesManager
 			return null;
 		}
 		Properties temp = new Properties();
-		temp.load(inStream);
-		inStream.close();
+		Utility.loadProperties(temp, inStream);
 		if (preReadNames != null)
 		{
 			this.changeProperties(temp, preReadNames);
@@ -787,12 +786,11 @@ public class PropertiesManager
 		{
 			return;
 		}
-		InputStream is = res.getAsStream();
-		if (is != null)
+		InputStream stream = res.getAsStream();
+		if (stream != null)
 		{
 			Properties tmpProps = new Properties();
-			tmpProps.load(is);
-			is.close();
+			Utility.loadProperties(tmpProps, stream);
 			this.loadChildProperties(tmpProps, null, res, delayMap, allProps);
 			Iterator<Map.Entry<Object, Object>> itr = tmpProps.entrySet().iterator();
 			while (itr.hasNext())
@@ -820,12 +818,11 @@ public class PropertiesManager
 		{
 			return;
 		}
-		InputStream is = res.getAsStream();
-		if (is != null)
+		InputStream stream = res.getAsStream();
+		if (stream != null)
 		{
 			Properties tmpProps = new Properties();
-			tmpProps.load(is);
-			is.close();
+			Utility.loadProperties(tmpProps, stream);
 			this.loadParentProperties(tmpProps, null, res, delayMap, allProps);
 			Iterator<Map.Entry<Object, Object>> itr = tmpProps.entrySet().iterator();
 			while (itr.hasNext())

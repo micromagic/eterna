@@ -165,6 +165,10 @@ public class ResManager
 	}
 	private boolean skipEmptyLine = true;
 
+	/**
+	 * 从输入流中载入配置值.
+	 * 载入完毕后会将输入流关闭.
+	 */
 	public synchronized void load(InputStream inStream)
 			throws IOException
 	{

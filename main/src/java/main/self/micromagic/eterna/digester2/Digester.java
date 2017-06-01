@@ -113,15 +113,13 @@ public class Digester
 		ResManager rm = new ResManager();
 		rm.load(Digester.class.getResourceAsStream(DEFAULT_RULES));
 		Properties rConfig = new Properties();
-		rConfig.load(Digester.class.getResourceAsStream(DEFAULT_CINFIG));
-		InputStream in = Digester.class.getResourceAsStream("/" + RULES_CINFIG_FILE);
-		if (in != null)
-		{
-			// 如果有自定义的配置, 也将其载入
-			rConfig.load(in);
-		}
+		Utility.loadProperties(rConfig,
+				Digester.class.getResourceAsStream(DEFAULT_CINFIG));
+		// 如果有自定义的配置, 也将其载入
+		Utility.loadProperties(rConfig,
+				Digester.class.getResourceAsStream("/" + RULES_CINFIG_FILE));
 		instance.initRules(rm, rConfig);
-		in = Digester.class.getResourceAsStream("/" + RULES_EXT_FILE);
+		InputStream in = Digester.class.getResourceAsStream("/" + RULES_EXT_FILE);
 		if (in != null)
 		{
 			// 载入扩展规则.
