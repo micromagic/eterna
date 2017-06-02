@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -99,10 +101,19 @@ public class VersionManager
 	 */
 	private static final String ETERNA_VERSION_TABLE = "__eterna_version_table";
 
+	private static Log log = Utility.createLog("eterna.dbvm");
+	private static Digester digester;
+	private static VersionManager instance = new VersionManager();
+
 	/**
 	 * 当前版本系统表的版本.
 	 */
 	private int currentEternaVersion;
+
+	private String versionNamePrefix;
+	private Connection lockTimeFlushConn;
+	private FactoryContainer shareContainer;
+	private final Map realShareCache = new HashMap(2);
 
 	/**
 	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
@@ -115,7 +126,6 @@ public class VersionManager
 	{
 		return instance.doCheck(conn, packagePath, loader);
 	}
-	private static VersionManager instance = new VersionManager();
 
 	/**
 	 * 检查连接所对应的数据库版本, 如果未达到要求则进行版本升级.
@@ -264,7 +274,7 @@ public class VersionManager
 			log.info("Begin " + vName + " up to " + version + ". --------------------");
 		}
 		String dbName = DataBaseLocker.getDataBaseProductName(conn);
-		FactoryContainer share = DataBaseLocker.getContainer(dbName);
+		FactoryContainer share = this.getRealShareContainer(dbName);
 		FactoryContainer c = ContainerManager.createFactoryContainer("v" + version,
 				config, null, getDigester(), null, loader, share, false);
 		IgnoreConfig.clearCurrentConfig();
@@ -577,7 +587,6 @@ public class VersionManager
 	{
 		this.versionNamePrefix = prefix;
 	}
-	private String versionNamePrefix;
 
 	/**
 	 * 获取刷新锁定时间的数据库连接.
@@ -595,7 +604,51 @@ public class VersionManager
 	{
 		this.lockTimeFlushConn = conn;
 	}
-	private Connection lockTimeFlushConn;
+
+	/**
+	 * 获取正式使用的共享工厂容器.
+	 */
+	private FactoryContainer getRealShareContainer(String dbName)
+	{
+		FactoryContainer share = this.getShareContainer();
+		if (share == null)
+		{
+			// 没有设置共享的工厂容器, 直接获取对应数据库的工厂容器
+			return DataBaseLocker.getContainer(dbName, null);
+		}
+		FactoryContainer tmp = (FactoryContainer) this.realShareCache.get(dbName);
+		if (tmp != null)
+		{
+			return tmp;
+		}
+		synchronized (this.realShareCache)
+		{
+			tmp = (FactoryContainer) this.realShareCache.get(dbName);
+			if (tmp != null)
+			{
+				return tmp;
+			}
+			tmp = DataBaseLocker.getContainer(dbName, share);
+			this.realShareCache.put(dbName, tmp);
+			return tmp;
+		}
+	}
+
+	/**
+	 * 获取共享的工厂容器.
+	 */
+	public FactoryContainer getShareContainer()
+	{
+		return this.shareContainer;
+	}
+
+	/**
+	 * 设置共享的工厂容器.
+	 */
+	public void setShareContainer(FactoryContainer shareContainer)
+	{
+		this.shareContainer = shareContainer;
+	}
 
 	/**
 	 * 记录版本更新时的日志.
@@ -619,7 +672,6 @@ public class VersionManager
 	{
 		VersionManager.log = log;
 	}
-	private static Log log = Utility.createLog("eterna.dbvm");
 
 	/**
 	 * 获取配置文件的解析对象.
@@ -628,7 +680,7 @@ public class VersionManager
 	{
 		return digester;
 	}
-	private static Digester digester;
+
 	static
 	{
 		try
@@ -636,7 +688,8 @@ public class VersionManager
 			ResManager rm1 = new ResManager();
 			rm1.load(Digester.class.getResourceAsStream(Digester.DEFAULT_RULES));
 			Properties rConfig = new Properties();
-			rConfig.load(Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
+			Utility.loadProperties(rConfig,
+					Digester.class.getResourceAsStream(Digester.DEFAULT_CINFIG));
 			ResManager rm2 = new ResManager();
 			rm2.load(DataBaseLocker.class.getResourceAsStream("dbvm_rules.res"));
 			digester = new Digester(new ResManager[]{rm1, rm2}, rConfig);

@@ -88,7 +88,7 @@ public class InitTest extends TestCase
 		String config = DataBaseLocker.CONFIG_PREFIX + file;
 		FactoryContainer c = ContainerManager.createFactoryContainer(file,
 				config, null, VersionManager.getDigester(), null, loader,
-				DataBaseLocker.getContainer("MySQL"), false);
+				DataBaseLocker.getContainer("MySQL", null), false);
 		StringRef msg = new StringRef();
 		c.reInit(msg);
 		if (!StringTool.isEmpty(msg.getString()))

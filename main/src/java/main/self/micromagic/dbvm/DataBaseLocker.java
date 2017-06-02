@@ -425,8 +425,13 @@ public class DataBaseLocker
 		return getRuntimeName().concat(":".concat(Integer.toString(conn.hashCode())));
 	}
 
-	static FactoryContainer getContainer(String dbName)
+	static FactoryContainer getContainer(String dbName, FactoryContainer share)
 	{
+		if (share != null)
+		{
+			// 有共享工厂容器时不能从缓存中取
+			return getContainer0(dbName, share);
+		}
 		FactoryContainer c = (FactoryContainer) containerCache.get(dbName);
 		if (c != null)
 		{
@@ -439,28 +444,37 @@ public class DataBaseLocker
 			{
 				return c;
 			}
-			ClassLoader loader = DataBaseLocker.class.getClassLoader();
-			String config = CONFIG_PREFIX + "def_" + dbName + ".xml;"
-					+ CONFIG_PREFIX + "db_lock.xml;" + CONFIG_PREFIX + "db_common.xml;";
-			c = ContainerManager.createFactoryContainer(dbName, config, null,
-					VersionManager.getDigester(), null, loader,
-					ContainerManager.getGlobalContainer(), false);
-			StringRef msg = new StringRef();
-			c.reInit(msg);
-			if (!StringTool.isEmpty(msg.getString()))
-			{
-				throw new EternaException(msg.getString());
-			}
+			c = getContainer0(dbName, share);
 			containerCache.put(dbName, c);
 			return c;
 		}
+	}
+
+	private static FactoryContainer getContainer0(String dbName, FactoryContainer share)
+	{
+		ClassLoader loader = DataBaseLocker.class.getClassLoader();
+		String config = CONFIG_PREFIX + "def_" + dbName + ".xml;"
+				+ CONFIG_PREFIX + "db_lock.xml;" + CONFIG_PREFIX + "db_common.xml;";
+		if (share == null)
+		{
+			share = ContainerManager.getGlobalContainer();
+		}
+		FactoryContainer c = ContainerManager.createFactoryContainer(dbName, config, null,
+				VersionManager.getDigester(), null, loader, share, false);
+		StringRef msg = new StringRef();
+		c.reInit(msg);
+		if (!StringTool.isEmpty(msg.getString()))
+		{
+			throw new EternaException(msg.getString());
+		}
+		return c;
 	}
 
 	static EternaFactory getFactory(String dbName)
 			throws EternaException
 	{
 
-		return (EternaFactory) getContainer(dbName).getFactory();
+		return (EternaFactory) getContainer(dbName, null).getFactory();
 	}
 
 	/**
