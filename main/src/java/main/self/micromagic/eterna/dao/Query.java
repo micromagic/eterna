@@ -30,7 +30,7 @@ public interface Query extends Dao
 	/**
 	 * 可设置查询前是否需要检查reader列表, 将结果中不存在的去除, 未设置的添加上. <p>
 	 * 如果设为true表示需要检查, 设为false(默认值)表示不需要检查.
-	 * 在query的attribute中设置, 仅对此quer有效.
+	 * 在query的attribute中设置, 仅对此query有效.
 	 * 在factory的attribute中设置, 将对此工厂中的所有未设置的query有效.
 	 */
 	String CHECK_READER_FLAG = "checkResultReader";

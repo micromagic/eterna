@@ -183,8 +183,14 @@ public class Utility
 	{
 		if (props != null && stream != null)
 		{
-			props.load(stream);
-			stream.close();
+			try
+			{
+				props.load(stream);
+			}
+			finally
+			{
+				stream.close();
+			}
 		}
 	}
 
