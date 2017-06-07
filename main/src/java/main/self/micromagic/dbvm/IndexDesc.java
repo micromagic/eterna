@@ -28,6 +28,7 @@ import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringTool;
 
 /**
@@ -141,13 +142,13 @@ public class IndexDesc extends AbstractObject
 			throw new EternaException(msg);
 		}
 		this.indexName = ScriptParser.checkNameForQuote(
-				resolveConst(this.indexName, factory));
+				Tool.resolveConst(this.indexName, factory));
 		this.tableName = ScriptParser.checkNameForQuote(
-				resolveConst(this.tableName, factory));
+				Tool.resolveConst(this.tableName, factory));
 		if (!StringTool.isEmpty(this.refName))
 		{
 			this.refName = ScriptParser.checkNameForQuote(
-					resolveConst(this.refName, factory));
+					Tool.resolveConst(this.refName, factory));
 		}
 		return false;
 	}

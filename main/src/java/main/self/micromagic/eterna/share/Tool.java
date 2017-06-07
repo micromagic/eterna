@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.BeanTool;
 import self.micromagic.eterna.digester2.ParseException;
+import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.converter.BooleanConverter;
@@ -637,6 +638,55 @@ public class Tool
 			return BooleanConverter.toBoolean(tStr) ? Boolean.TRUE : Boolean.FALSE;
 		}
 		return null;
+	}
+
+	/**
+	 * 处理文本中的常量定义.
+	 */
+	public static String resolveConst(String text, EternaFactory factory)
+	{
+		if (text == null)
+		{
+			return text;
+		}
+		String constPrefix = "#const(";
+		String constSuffix = ")";
+		int startIndex = text.indexOf(constPrefix);
+		if (startIndex == -1)
+		{
+			return text;
+		}
+
+		String tempStr = text;
+		StringAppender result = StringTool.createStringAppender(text.length() + 32);
+		int prefixLength = constPrefix.length();
+		while (startIndex != -1)
+		{
+			result.append(tempStr.substring(0, startIndex));
+			int endIndex = tempStr.indexOf(constSuffix, startIndex + prefixLength);
+			if (endIndex != -1)
+			{
+				String cName = tempStr.substring(startIndex + prefixLength, endIndex);
+				String tmp = factory.getConstantValue(cName);
+				if (tmp != null)
+				{
+					result.append(resolveConst(tmp, factory));
+					tempStr = tempStr.substring(endIndex + constSuffix.length());
+					startIndex = tempStr.indexOf(constPrefix);
+				}
+				else
+				{
+					throw new EternaException("Not found constant value [" + cName + "].");
+				}
+			}
+			else
+			{
+				tempStr = tempStr.substring(startIndex);
+				startIndex = -1;
+			}
+		}
+		result.append(tempStr);
+		return result.toString();
 	}
 
 }

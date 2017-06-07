@@ -32,6 +32,7 @@ import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
@@ -105,16 +106,16 @@ public class TableDesc extends AbstractObject
 		this.comment = (TableComment) factory.createObject(TABLE_COMM_NAME);
 		this.renameOpt = factory.getConstantValue("rename");
 		this.tableName = ScriptParser.checkNameForQuote(
-				resolveConst(this.tableName, factory));
+				Tool.resolveConst(this.tableName, factory));
 		this.newName = ScriptParser.checkNameForQuote(
-				resolveConst(this.newName, factory));
+				Tool.resolveConst(this.newName, factory));
 		Iterator itr = this.columns.iterator();
 		while (itr.hasNext())
 		{
 			ColumnDesc colDesc = (ColumnDesc) itr.next();
 			if (!StringTool.isEmpty(colDesc.defaultValue))
 			{
-				colDesc.defaultValue = resolveConst(colDesc.defaultValue, factory);
+				colDesc.defaultValue = Tool.resolveConst(colDesc.defaultValue, factory);
 			}
 		}
 		return false;

@@ -29,6 +29,7 @@ import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
+import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringTool;
 
 
@@ -107,7 +108,7 @@ public class ScriptDesc extends AbstractObject
 			this.factory = factory;
 			if (!StringTool.isEmpty(this.script))
 			{
-				this.script = resolveConst(this.script, factory);
+				this.script = Tool.resolveConst(this.script, factory);
 				this.checkIgnore();
 			}
 			return false;
