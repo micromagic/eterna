@@ -473,7 +473,6 @@ public class DataBaseLocker
 	static EternaFactory getFactory(String dbName)
 			throws EternaException
 	{
-
 		return (EternaFactory) getContainer(dbName, null).getFactory();
 	}
 
