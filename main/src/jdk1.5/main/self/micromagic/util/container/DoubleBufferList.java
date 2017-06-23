@@ -86,7 +86,7 @@ public class DoubleBufferList<T>
 		}
 		if (fireFlag)
 		{
-			this.listener.action(this);
+			this.fireAction();
 		}
 	}
 
@@ -114,7 +114,24 @@ public class DoubleBufferList<T>
 		}
 		if (fireFlag)
 		{
+			this.fireAction();
+		}
+	}
+
+	/**
+	 * 触发监听的动作.
+	 */
+	private void fireAction()
+	{
+		try
+		{
 			this.listener.action(this);
+		}
+		catch (RuntimeException ex)
+		{
+			/// 如果监听动作触发出错, 需要重置触发标识
+			this.needFire = true;
+			throw ex;
 		}
 	}
 
