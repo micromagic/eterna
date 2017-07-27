@@ -101,7 +101,8 @@ public class ExprTool
 		ExprCreater creater = createrCache[type];
 		if (creater == null)
 		{
-			throw new EternaException("Error node type [" + type + "] [" + node.getText() + "].");
+			throw new EternaException(
+					"Error node type [" + type + "] [" + node.getText() + "].");
 		}
 		return creater.create(node);
 	}
@@ -262,7 +263,8 @@ public class ExprTool
 		}
 		return createNumberOpt(level, optName, optFlag);
 	}
-	private static synchronized Operation createNumberOpt(int level, String optName, String optFlag)
+	private static synchronized Operation createNumberOpt(
+			int level, String optName, String optFlag)
 	{
 		Operation[] optArr = (Operation[]) numOptCache.get(optName);
 		if (optArr == null)
@@ -280,7 +282,7 @@ public class ExprTool
 			cg.addInterface(Operation.class);
 			char optType = optName.charAt(optName.length() - 1);
 			String resName = optType == '1' ? "oneOpt_num" : optType == '2' ? "twoOpt_num"
-					: optType == '3' ? "compareOpt_num" :"methodOpt_num";
+					: optType == '3' ? "compareOpt_num" : "methodOpt_num";
 			Map params = new HashMap();
 			params.put("type", type);
 			params.put("wrapType", BeanTool.getPrimitiveWrapClassName(type));
