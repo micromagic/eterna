@@ -16,6 +16,7 @@
 
 package self.micromagic.util.converter;
 
+import java.io.CharArrayReader;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -66,7 +67,7 @@ public class ReaderConverter extends ObjectConverter
 		}
 		if (value instanceof char[])
 		{
-			return this.convertToReader(new String((char[]) value));
+			return new CharArrayReader((char[]) value);
 		}
 		if (value instanceof String)
 		{

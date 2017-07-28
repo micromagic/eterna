@@ -16,6 +16,7 @@
 
 package self.micromagic.eterna.dao.preparer;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -25,6 +26,7 @@ import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.share.AttributeManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryStream;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.StreamConverter;
 
 class StreamCreater extends AbstractPreparerCreater
@@ -53,12 +55,37 @@ class StreamCreater extends AbstractPreparerCreater
 
 	public ValuePreparer createPreparer(Object value)
 	{
+		if (value instanceof String)
+		{
+			return this.createPreparer((String) value);
+		}
+		else if (value instanceof byte[])
+		{
+			byte[] buf = (byte[]) value;
+			return new StreamPreparer(this, new ByteArrayInputStream(buf), buf.length);
+		}
+		else if (value instanceof MemoryStream)
+		{
+			return new StreamPreparer(this, (MemoryStream) value);
+		}
 		return new StreamPreparer(this, convert.convertToStream(value, this.charset));
 	}
 
 	public ValuePreparer createPreparer(String value)
 	{
-		return new StreamPreparer(this, convert.convertToStream(value, this.charset));
+		if (StringTool.isEmpty(value))
+		{
+			return new StreamPreparer(this, null, 0);
+		}
+		try
+		{
+			byte[] buf = value.getBytes(this.charset);
+			return new StreamPreparer(this, new ByteArrayInputStream(buf), buf.length);
+		}
+		catch (IOException ex)
+		{
+			throw new EternaException(ex);
+		}
 	}
 
 	protected void setAttributes(AttributeManager attributes)
@@ -84,6 +111,19 @@ class StreamPreparer extends AbstractValuePreparer
 		this.length = length;
 		this.value = value;
 	}
+
+	public StreamPreparer(PreparerCreater creater, MemoryStream value)
+	{
+		super(creater);
+		long len = value.getUsedSize();
+		if (len > Integer.MAX_VALUE)
+		{
+			throw new EternaException("Too large value for InputStream.");
+		}
+		this.length = (int) len;
+		this.value = value.getInputStream();
+	}
+
 	public StreamPreparer(PreparerCreater creater, InputStream value)
 	{
 		super(creater);
@@ -111,6 +151,8 @@ class StreamPreparer extends AbstractValuePreparer
 			}
 			this.length = allCount;
 			this.value = ms.getInputStream();
+			// 这里使用MemoryStream, 原始的流可以关闭
+			value.close();
 		}
 		catch (IOException ex)
 		{

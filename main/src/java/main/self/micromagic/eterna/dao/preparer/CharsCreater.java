@@ -16,14 +16,17 @@
 
 package self.micromagic.eterna.dao.preparer;
 
+import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.sql.SQLException;
 
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.MemoryChars;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.ReaderConverter;
 
 class CharsCreater extends AbstractPreparerCreater
@@ -46,12 +49,29 @@ class CharsCreater extends AbstractPreparerCreater
 
 	public ValuePreparer createPreparer(Object value)
 	{
+		if (value instanceof String)
+		{
+			return this.createPreparer((String) value);
+		}
+		else if (value instanceof char[])
+		{
+			char[] buf = (char[]) value;
+			return new CharsPreparer(this, new CharArrayReader(buf), buf.length);
+		}
+		else if (value instanceof MemoryChars)
+		{
+			return new CharsPreparer(this, (MemoryChars) value);
+		}
 		return new CharsPreparer(this, convert.convertToReader(value));
 	}
 
 	public ValuePreparer createPreparer(String value)
 	{
-		return new CharsPreparer(this, convert.convertToReader(value));
+		if (StringTool.isEmpty(value))
+		{
+			return new CharsPreparer(this, null, 0);
+		}
+		return new CharsPreparer(this, new StringReader(value), value.length());
 	}
 
 }
@@ -66,6 +86,18 @@ class CharsPreparer extends AbstractValuePreparer
 		super(creater);
 		this.length = length;
 		this.value = value;
+	}
+
+	public CharsPreparer(PreparerCreater creater, MemoryChars value)
+	{
+		super(creater);
+		long len = value.getUsedSize();
+		if (len > Integer.MAX_VALUE)
+		{
+			throw new EternaException("Too large value for Reader.");
+		}
+		this.length = (int) len;
+		this.value = value.getReader();
 	}
 
 	public CharsPreparer(PreparerCreater creater, Reader value)
@@ -95,6 +127,8 @@ class CharsPreparer extends AbstractValuePreparer
 			}
 			this.length = allCount;
 			this.value = mc.getReader();
+			// 这里使用MemoryChars, 原始的reader可以关闭
+			value.close();
 		}
 		catch (IOException ex)
 		{
