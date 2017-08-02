@@ -87,12 +87,12 @@ public class VarCache
 	 * 获取一个变量定义的信息.
 	 * 如果变量不存在, 则创建一个变量定义.
 	 *
-	 * @param name         变量的名称
-	 * @param writeOrRead  用于写入还是读取, true为写入, false为读取
-	 * @param err          定义变量时的出错信息
+	 * @param name        变量的名称
+	 * @param statusType  变量的状态类型, 读取 写入等
+	 * @param err         定义变量时的出错信息
 	 * @return
 	 */
-	public VarInfo getVarInfo(String name, boolean writeOrRead, StringRef err)
+	public VarInfo getVarInfo(String name, int statusType, StringRef err)
 	{
 		if (name == null)
 		{
@@ -101,7 +101,7 @@ public class VarCache
 		if (!this.globalCache && name.startsWith("$$"))
 		{
 			// 以"$$"起始的变量定义到全局
-			return global.getVarInfo(name, writeOrRead, null);
+			return global.getVarInfo(name, statusType, null);
 		}
 		VarInfo info = null;
 		if (!"$".equals(name))
@@ -113,11 +113,7 @@ public class VarCache
 				AbstractVarInfo tmp = (AbstractVarInfo) itr.next();
 				if (name.equals(tmp.getName()))
 				{
-					if (!writeOrRead)
-					{
-						// 如果是读取, 设置为被使用
-						tmp.used = true;
-					}
+					tmp.addStatusType(statusType);
 					info = tmp;
 					break;
 				}
@@ -127,14 +123,14 @@ public class VarCache
 		{
 			if (this.globalCache)
 			{
-				info = new GlobalVarInfo(name, this.varCount++);
+				info = new GlobalVarInfo(name, statusType, this.varCount++);
 			}
 			else
 			{
-				info = new ModelVarInfo(name, this.varCount++);
+				info = new ModelVarInfo(name, statusType, this.varCount++);
 			}
 			this.varList.add(info);
-			if (warnNotInit && !writeOrRead && err != null)
+			if (warnNotInit && err != null && !info.isSetted())
 			{
 				err.setString("The var [" + name + "] hasn't setted value.");
 			}
@@ -146,6 +142,19 @@ public class VarCache
 
 	public interface VarInfo
 	{
+		/**
+		 * 变量的状态类型, 读取.
+		 */
+		int STATUS_TYPE_READ = 0x01;
+		/**
+		 * 变量的状态类型, 写入.
+		 */
+		int STATUS_TYPE_WRITE = 0x02;
+		/**
+		 * 变量的状态类型, 初始化或外部使用.
+		 */
+		int STATUS_TYPE_INIT = 0x1;
+
 		/**
 		 * 变量的名称.
 		 */
@@ -162,9 +171,26 @@ public class VarCache
 		void setValue(AppData data, Object v);
 
 		/**
-		 * 变量是否被使用过.
+		 * 变量是否在表达式中被使用过.
+		 * 即是否被读取过.
 		 */
 		boolean isUsed();
+
+		/**
+		 * 变量是否在表达式中被赋过值.
+		 */
+		boolean isWrite();
+
+		/**
+		 * 变量是否被设置过值.
+		 */
+		boolean isSetted();
+
+		/**
+		 * 变量是否需要赋值.
+		 * 即在使用时还未设置过值.
+		 */
+		boolean isNeedSet();
 
 	}
 
@@ -176,10 +202,26 @@ public class VarCache
 abstract class AbstractVarInfo
 		implements VarCache.VarInfo
 {
-	AbstractVarInfo(String name)
+	/**
+	 * 用于检测变量是否被设过值的状态.
+	 */
+	static final int STATUS_CHECK_SETTED = STATUS_TYPE_INIT | STATUS_TYPE_WRITE;
+
+	/**
+	 * 变量的状态类型, 需要赋值, 即在使用时还未设置过值.
+	 */
+	static final int STATUS_TYPE_NEEDSET = 0x002;
+
+	AbstractVarInfo(String name, int statusType)
 	{
 		this.name = name;
+		this.statusType = statusType;
+		if (statusType == STATUS_TYPE_READ)
+		{
+			this.statusType |= STATUS_TYPE_NEEDSET;
+		}
 	}
+	private int statusType;
 	private final String name;
 
 	public String getName()
@@ -187,11 +229,34 @@ abstract class AbstractVarInfo
 		return this.name;
 	}
 
+	/**
+	 * 添加一个状态类型.
+	 */
+	void addStatusType(int type)
+	{
+		this.statusType |= type;
+	}
+
 	public boolean isUsed()
 	{
-		return this.used;
+		return (this.statusType & STATUS_TYPE_READ) != 0;
 	}
-	boolean used;
+
+	public boolean isWrite()
+	{
+		return (this.statusType & STATUS_TYPE_WRITE) != 0;
+	}
+
+	public boolean isSetted()
+	{
+		return (this.statusType & STATUS_CHECK_SETTED) != 0;
+	}
+
+	public boolean isNeedSet()
+	{
+		return (this.statusType & STATUS_TYPE_NEEDSET) != 0
+				&& (this.statusType & STATUS_TYPE_INIT) == 0;
+	}
 
 }
 
@@ -201,9 +266,9 @@ abstract class AbstractVarInfo
 class ModelVarInfo extends AbstractVarInfo
 		implements VarCache.VarInfo
 {
-	public ModelVarInfo(String name, int pos)
+	public ModelVarInfo(String name, int statusType, int pos)
 	{
-		super(name);
+		super(name, statusType);
 		this.pos = pos;
 	}
 	private final int pos;
@@ -226,9 +291,9 @@ class ModelVarInfo extends AbstractVarInfo
 class GlobalVarInfo extends AbstractVarInfo
 		implements VarCache.VarInfo
 {
-	public GlobalVarInfo(String name, int pos)
+	public GlobalVarInfo(String name, int statusType, int pos)
 	{
-		super(name);
+		super(name, statusType);
 		this.pos = pos;
 	}
 	private final int pos;

@@ -202,7 +202,8 @@ public class DataHandler
 			if (!ExprTool.isConstObject(this.exprObj))
 			{
 				// 不是静态对象, 需要有个变量暂存结果
-				this.varInfo = this.getVarCache().getVarInfo("$", false, null);
+				this.varInfo = this.getVarCache().getVarInfo(
+						"$", VarCache.VarInfo.STATUS_TYPE_INIT, null);
 			}
 			this.subs = subs.toArray(new Object[subs.size()]);
 			return;
@@ -234,7 +235,9 @@ public class DataHandler
 		{
 			// 变量定义
 			StringRef err = new StringRef(null);
-			this.varInfo = this.getVarCache().getVarInfo(mainName, !this.readOnly, err);
+			int varStatusType = this.readOnly ? VarCache.VarInfo.STATUS_TYPE_READ
+					: VarCache.VarInfo.STATUS_TYPE_WRITE;
+			this.varInfo = this.getVarCache().getVarInfo(mainName, varStatusType, err);
 			if (err.getString() != null)
 			{
 				AppData.log.error("Error " + this.caption + " [" + this.config + "], msg: "
