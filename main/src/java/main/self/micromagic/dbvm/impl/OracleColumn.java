@@ -18,10 +18,9 @@ package self.micromagic.dbvm.impl;
 
 import java.util.List;
 
-import self.micromagic.dbvm.AbstractObject;
-import self.micromagic.dbvm.ColumnDefiner;
 import self.micromagic.dbvm.ColumnDesc;
 import self.micromagic.dbvm.TableDesc;
+import self.micromagic.dbvm.core.AbstractColumnDefiner;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
@@ -30,8 +29,7 @@ import self.micromagic.util.StringTool;
 /**
  * mysql的数据库列定义.
  */
-public class OracleColumn extends AbstractObject
-		implements ColumnDefiner
+public class OracleColumn extends AbstractColumnDefiner
 {
 	public String getColumnDefine(TableDesc tableDesc, ColumnDesc colDesc, List paramList)
 	{

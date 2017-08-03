@@ -14,36 +14,34 @@
  * limitations under the License.
  */
 
-package self.micromagic.dbvm;
-
-import java.sql.Connection;
-import java.sql.SQLException;
+package self.micromagic.dbvm.core;
 
 import org.dom4j.Element;
 
+import self.micromagic.dbvm.OptDesc;
+import self.micromagic.eterna.share.EternaObject;
+
 /**
- * 数据库操作的描述.
+ * 抽象的操作描述.
  */
-public interface OptDesc
+public abstract class AbstractOptDesc extends AbstractObject
+		implements EternaObject, OptDesc
 {
-	/**
-	 * 获取操作的名称.
-	 */
-	String getName();
+	private Element element;
 
-	/**
-	 * 检查是否为需要忽略的错误.
-	 */
-	boolean isIgnoreError(Throwable error);
+	public Element getElement()
+	{
+		return this.element;
+	}
 
-	/**
-	 * 获取操作的定义.
-	 */
-	Element getElement();
+	public void setElement(Element element)
+	{
+		this.element = element;
+	}
 
-	/**
-	 * 执行描述所定义的数据库操作.
-	 */
-	void exec(Connection conn) throws SQLException;
+	public boolean isIgnoreError(Throwable error)
+	{
+		return false;
+	}
 
 }

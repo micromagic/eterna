@@ -24,7 +24,7 @@ sub:{table,index,script,config,eterna,data,ignore}
 
 ## ignore
 ignore
-create:{,self.micromagic.dbvm.IgnoreConfig}
+create:{,self.micromagic.dbvm.core.IgnoreConfig}
 attr:{sameKey(m=0,i=0):ignoreSameKey}
 
 

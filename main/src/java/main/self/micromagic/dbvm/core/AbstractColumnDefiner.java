@@ -14,61 +14,39 @@
  * limitations under the License.
  */
 
-package self.micromagic.dbvm;
+package self.micromagic.dbvm.core;
 
 import java.util.List;
 
+import self.micromagic.dbvm.ColumnDefiner;
+import self.micromagic.dbvm.ColumnDesc;
+import self.micromagic.dbvm.TypeDefiner;
 import self.micromagic.eterna.dao.Update;
-import self.micromagic.eterna.dao.preparer.CreaterManager;
-import self.micromagic.eterna.dao.preparer.PreparerCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.BooleanRef;
 
 /**
- * 抽象的各类对象.
+ * 抽象的数据库列定义.
  */
-public abstract class AbstractObject
-		implements ConstantDef
+public abstract class AbstractColumnDefiner extends AbstractObject
+		implements ColumnDefiner
 {
-	public boolean initialize(EternaFactory factory)
-		throws EternaException
-	{
-		if (this.typeDefiner == null)
-		{
-			this.factory = factory;
-			this.typeDefiner = (TypeDefiner) factory.createObject(TYPE_DEF_NAME);
-			this.columnDefiner = (ColumnDefiner) factory.createObject(COLUMN_DEF_NAME);
-			this.indexDefiner = (IndexDefiner) factory.createObject(INDEX_DEF_NAME);
-			this.preparerCreater = CreaterManager.createPreparerCreater(
-					TypeManager.TYPE_STRING, null, factory);
-			this.mutipleLine = BooleanConverter.toBoolean(
-					factory.getAttribute(MUTIPLE_LINE_FLAG));
-			return false;
-		}
-		return true;
-	}
-	protected boolean mutipleLine;
 	protected TypeDefiner typeDefiner;
-	protected ColumnDefiner columnDefiner;
-	protected IndexDefiner indexDefiner;
-	protected EternaFactory factory;
-	protected PreparerCreater preparerCreater;
 
-	public String getName()
-		throws EternaException
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
 	{
-	return this.name;
+		if (super.initialize(factory))
+		{
+			return true;
+		}
+		this.typeDefiner = (TypeDefiner) factory.createObject(TYPE_DEF_NAME);
+		return false;
 	}
-	public void setName(String name)
-	{
-	this.name = name;
-	}
-	protected String name;
 
 	/**
 	 * 生成默认值的表达式.

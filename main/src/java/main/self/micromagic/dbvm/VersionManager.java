@@ -26,6 +26,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 
+import self.micromagic.dbvm.core.IgnoreConfig;
 import self.micromagic.dbvm.impl.CommonUpdate;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultIterator;
@@ -82,9 +83,9 @@ public class VersionManager
 	public static final int V2 = 2;
 
 	/**
-	 * 数据库锁的等待时间, 37秒.
+	 * 数据库锁的等待时间, 52秒.
 	 */
-	static final long FLUSH_LOCK_GAP = 37 * 1000L;
+	static final long FLUSH_LOCK_GAP = 52 * 1000L;
 	/**
 	 * 需要锁定时间的延长值(21hour).
 	 */

@@ -24,7 +24,6 @@ import self.micromagic.eterna.share.TypeManager;
  * 数据库列定义的描述.
  */
 public class ColumnDesc
-		implements ConstantDef
 {
 	/**
 	 * 列名.
@@ -32,25 +31,9 @@ public class ColumnDesc
 	public String colName;
 
 	/**
-	 * 设置列名.
-	 */
-	public void setColName(String colName)
-	{
-		this.colName = ScriptParser.checkNameForQuote(colName);
-	}
-
-	/**
 	 * 修改列时, 新的列名.
 	 */
 	public String newName;
-
-	/**
-	 * 设置新的列名.
-	 */
-	public void setNewName(String newName)
-	{
-		this.newName = ScriptParser.checkNameForQuote(newName);
-	}
 
 	/**
 	 * 列注释.
@@ -73,6 +56,27 @@ public class ColumnDesc
 	public int typeId;
 
 	/**
+	 * 操作方式.
+	 */
+	public int optType = ConstantDef.OPT_TYPE_CREATE;
+
+	/**
+	 * 设置列名.
+	 */
+	public void setColName(String colName)
+	{
+		this.colName = ScriptParser.checkNameForQuote(colName);
+	}
+
+	/**
+	 * 设置新的列名.
+	 */
+	public void setNewName(String newName)
+	{
+		this.newName = ScriptParser.checkNameForQuote(newName);
+	}
+
+	/**
 	 * 设置类型的名称.
 	 */
 	public void setTypeName(String typeName)
@@ -85,22 +89,17 @@ public class ColumnDesc
 	}
 
 	/**
-	 * 操作方式.
-	 */
-	public int optType = OPT_TYPE_CREATE;
-
-	/**
 	 * 设置操作的名称.
 	 */
 	public void setOptName(String optName)
 	{
 		if ("drop".equalsIgnoreCase(optName))
 		{
-			this.optType = OPT_TYPE_DROP;
+			this.optType = ConstantDef.OPT_TYPE_DROP;
 		}
 		else if("modify".equalsIgnoreCase(optName))
 		{
-			this.optType = OPT_TYPE_MODIFY;
+			this.optType = ConstantDef.OPT_TYPE_MODIFY;
 		}
 	}
 

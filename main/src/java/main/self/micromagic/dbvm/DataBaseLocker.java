@@ -62,6 +62,11 @@ public class DataBaseLocker
 	public static final String DB_NAME_POSTGRES = "PostgreSQL";
 
 	/**
+	 * 配置文件的前缀.
+	 */
+	public static final String CONFIG_PREFIX = "cp:/self/micromagic/dbvm/";
+
+	/**
 	 * 数据库名称的索引表.
 	 * 奇数位为key, 偶数位为对应的名称.
 	 */
@@ -71,6 +76,24 @@ public class DataBaseLocker
 		"H2", DB_NAME_H2,
 		"MYSQL", DB_NAME_MYSQL
 	};
+
+	/**
+	 * 各类型数据库相关的工厂容器的缓存.
+	 */
+	private static Map containerCache = new HashMap();
+
+	/**
+	 * 锁已被释放的值.
+	 */
+	private static final String RELEASED_VALUE = "<released>";
+
+	/**
+	 * 默认的最大等待时间, 15min.
+	 */
+	private static long defaultMaxWaitTime =  15 * 60 * 1000L;
+
+	// 运行时名称
+	private static String runtimeName = getRuntimeName0();
 
 	private DataBaseLocker()
 	{
@@ -454,7 +477,8 @@ public class DataBaseLocker
 	{
 		ClassLoader loader = DataBaseLocker.class.getClassLoader();
 		String config = CONFIG_PREFIX + "def_" + dbName + ".xml;"
-				+ CONFIG_PREFIX + "db_lock.xml;" + CONFIG_PREFIX + "db_common.xml;";
+				+ CONFIG_PREFIX + "core/db_lock.xml;"
+				+ CONFIG_PREFIX + "core/db_common.xml;";
 		if (share == null)
 		{
 			share = ContainerManager.getGlobalContainer();
@@ -477,26 +501,6 @@ public class DataBaseLocker
 	}
 
 	/**
-	 * 各类型数据库相关的工厂容器的缓存.
-	 */
-	private static Map containerCache = new HashMap();
-
-	/**
-	 * 配置文件的前缀.
-	 */
-	public static final String CONFIG_PREFIX = "cp:/self/micromagic/dbvm/";
-
-	/**
-	 * 锁已被释放的值.
-	 */
-	private static final String RELEASED_VALUE = "<released>";
-
-	/**
-	 * 默认的最大等待时间, 15min.
-	 */
-	private static long defaultMaxWaitTime =  15 * 60 * 1000L;
-
-	/**
 	 * 设置强行获取锁的默认最大等待时间.
 	 */
 	public static void setMaxWaitTime(long time)
@@ -515,7 +519,6 @@ public class DataBaseLocker
 	{
 		return runtimeName;
 	}
-	private static String runtimeName = getRuntimeName0();
 	private static String getRuntimeName0()
 	{
 		String name = null;

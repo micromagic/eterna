@@ -21,14 +21,13 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.dom4j.Element;
-
+import self.micromagic.dbvm.core.AbstractOptDesc;
+import self.micromagic.dbvm.core.IgnoreConfig;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringTool;
 
@@ -36,8 +35,7 @@ import self.micromagic.util.StringTool;
 /**
  * 执行数据库脚本操作定义的描述.
  */
-public class ScriptDesc extends AbstractObject
-		implements OptDesc, EternaObject, ConstantDef
+public class ScriptDesc extends AbstractOptDesc
 {
 	// 定义主键重复的常量标识
 	private static final String SAME_KEY_FLAG = "EC_sameKey";
@@ -51,10 +49,12 @@ public class ScriptDesc extends AbstractObject
 	 */
 	public String script;
 
-	/**
-	 * 有效的数据库集合.
-	 */
+	// 有效的数据库集合
 	private Set validDataBase;
+	// 是否需要护理主键冲突的错误
+	private boolean ignoreSameKey;
+	// 主键冲突时的状态码
+	private String sameStateCode;
 
 	public ScriptDesc()
 	{
@@ -103,35 +103,17 @@ public class ScriptDesc extends AbstractObject
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.factory == null)
+		if (super.initialize(factory))
 		{
-			this.factory = factory;
-			if (!StringTool.isEmpty(this.script))
-			{
-				this.script = Tool.resolveConst(this.script, factory);
-				this.checkIgnore();
-			}
-			return false;
+			return true;
 		}
-		return true;
+		if (!StringTool.isEmpty(this.script))
+		{
+			this.script = Tool.resolveConst(this.script, factory);
+			this.checkIgnore();
+		}
+		return false;
 	}
-	private EternaFactory factory;
-
-	public EternaFactory getFactory()
-	{
-		return this.factory;
-	}
-
-	public Element getElement()
-	{
-		return this.element;
-	}
-
-	public void setElement(Element element)
-	{
-		this.element = element;
-	}
-	private Element element;
 
 	/**
 	 * 检查是否有需要忽略的.
@@ -154,8 +136,6 @@ public class ScriptDesc extends AbstractObject
 			}
 		}
 	}
-	private boolean ignoreSameKey;
-	private String sameStateCode;
 
 	public boolean isIgnoreError(Throwable error)
 	{

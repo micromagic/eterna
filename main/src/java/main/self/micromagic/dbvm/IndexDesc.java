@@ -21,21 +21,18 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.dom4j.Element;
-
+import self.micromagic.dbvm.core.AbstractOptDesc;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringTool;
 
 /**
  * 数据库索引定义的描述.
  */
-public class IndexDesc extends AbstractObject
-		implements ConstantDef, EternaObject, OptDesc
+public class IndexDesc extends AbstractOptDesc
 {
 	/**
 	 * 索引的名称.
@@ -63,6 +60,29 @@ public class IndexDesc extends AbstractObject
 	public boolean foreign;
 
 	/**
+	 * 相关列名列表.
+	 */
+	public List columns = new ArrayList();
+
+	/**
+	 * 外键关联的表名.
+	 */
+	public String refName;
+
+	/**
+	 * 关联外键的列名列表.
+	 */
+	public List refColumns = new ArrayList();
+
+	/**
+	 * 操作方式.
+	 */
+	public int optType = OPT_TYPE_CREATE;
+
+	// 索引定义的实现
+	private IndexDefiner indexDefiner;
+
+	/**
 	 * 设置索引的类型.
 	 */
 	public void setType(String type)
@@ -82,11 +102,6 @@ public class IndexDesc extends AbstractObject
 	}
 
 	/**
-	 * 相关列名列表.
-	 */
-	public List columns = new ArrayList();
-
-	/**
 	 * 添加一个列名.
 	 */
 	public void addColumn(String colName)
@@ -95,27 +110,12 @@ public class IndexDesc extends AbstractObject
 	}
 
 	/**
-	 * 外键关联的表名.
-	 */
-	public String refName;
-
-	/**
-	 * 关联外键的列名列表.
-	 */
-	public List refColumns = new ArrayList();
-
-	/**
 	 * 添加一个列名.
 	 */
 	public void addRefColumn(String colName)
 	{
 		this.refColumns.add(ScriptParser.checkNameForQuote(colName));
 	}
-
-	/**
-	 * 操作方式.
-	 */
-	public int optType = OPT_TYPE_CREATE;
 
 	/**
 	 * 设置操作的名称.
@@ -135,6 +135,7 @@ public class IndexDesc extends AbstractObject
 		{
 			return true;
 		}
+		this.indexDefiner = (IndexDefiner) factory.createObject(INDEX_DEF_NAME);
 		if (this.foreign && this.columns.size() != this.refColumns.size())
 		{
 			String msg = "The foreign key [" + this.indexName + "]'s column isn't same, "
@@ -162,22 +163,6 @@ public class IndexDesc extends AbstractObject
 		Update u = this.factory.createUpdate(COMMON_EXEC);
 		u.setSubScript(1, this.indexDefiner.getIndexDefine(this, null));
 		u.execute(conn);
-	}
-
-	public Element getElement()
-	{
-		return this.element;
-	}
-
-	public void setElement(Element element)
-	{
-		this.element = element;
-	}
-	private Element element;
-
-	public boolean isIgnoreError(Throwable error)
-	{
-		return false;
 	}
 
 }

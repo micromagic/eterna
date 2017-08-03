@@ -16,6 +16,7 @@
 
 package self.micromagic.dbvm;
 
+import self.micromagic.dbvm.core.AbstractObject;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
@@ -25,13 +26,17 @@ import self.micromagic.util.ref.IntegerRef;
 /**
  * 数据库列类型的定义者.
  */
-public class TypeDefiner
+public class TypeDefiner extends AbstractObject
 		implements EternaObject
 {
+	private final TypeDefineDesc[] types
+			= new TypeDefineDesc[TypeManager.TYPES_COUNT];
+
 	public TypeDefiner()
 	{
 		this.init();
 	}
+
 	private void init()
 	{
 		this.types[TypeManager.TYPE_BOOLEAN] = new TypeDefineDesc("boolean");
@@ -51,17 +56,14 @@ public class TypeDefiner
 		this.types[TypeManager.TYPE_CLOB] = clob;
 		this.types[TypeManager.TYPE_BIGSTRING] = clob;
 	}
-	private final TypeDefineDesc[] types
-			= new TypeDefineDesc[TypeManager.TYPES_COUNT];
 
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (this.initialized)
+		if (super.initialize(factory))
 		{
 			return true;
 		}
-		this.initialized = true;
 		for (int i = 0; i < this.types.length; i++)
 		{
 			if (this.types[i] != null)
@@ -71,7 +73,6 @@ public class TypeDefiner
 		}
 		return false;
 	}
-	private boolean initialized;
 
 	/**
 	 * 根据类型定义的id获取类型定义.
@@ -85,17 +86,6 @@ public class TypeDefiner
 		}
 		throw new EternaException("Unknow type [" + TypeManager.getTypeName(typeId) + "].");
 	}
-
-	public String getName()
-			throws EternaException
-	{
-		return this.name;
-	}
-	public void setName(String name)
-	{
-		this.name = name;
-	}
-	private String name;
 
 	public void modifyTypeDefineDesc(TypeDefineDesc desc)
 	{
@@ -128,19 +118,20 @@ class CommonString extends TypeDefineDesc
 
 class ComminDouble extends TypeDefineDesc
 {
+	private final String extName;
+	private String extDefine;
+
 	public ComminDouble(String constName, String extName)
 	{
 		super(constName);
 		this.extName = extName;
 	}
-	private final String extName;
 
 	public void init(EternaFactory factory)
 	{
 		super.init(factory);
 		this.extDefine = factory.getConstantValue(this.extName);
 	}
-	private String extDefine;
 
 	/**
 	 * 获取类型的定义.

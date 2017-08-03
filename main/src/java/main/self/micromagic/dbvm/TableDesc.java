@@ -23,24 +23,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.dom4j.Element;
-
+import self.micromagic.dbvm.core.AbstractOptDesc;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
-import self.micromagic.eterna.share.EternaObject;
 import self.micromagic.eterna.share.Tool;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.converter.BooleanConverter;
 
 /**
  * 数据库表定义的描述.
  */
-public class TableDesc extends AbstractObject
-		implements ConstantDef, EternaObject, OptDesc
+public class TableDesc extends AbstractOptDesc
 {
 	/**
 	 * 表名.
@@ -65,6 +63,20 @@ public class TableDesc extends AbstractObject
 	public List columns = new ArrayList();
 
 	/**
+	 * 操作方式.
+	 */
+	public int optType = OPT_TYPE_CREATE;
+
+	// 语句中是否可多行
+	private boolean mutipleLine;
+	// 列定义的实现
+	private ColumnDefiner columnDefiner;
+	// 修改表名使用的操作符
+	private String renameOpt;
+	// 表注释定义的实现
+	private TableComment comment;
+
+	/**
 	 * 添加一个列.
 	 */
 	public void addColumn(ColumnDesc colDesc)
@@ -75,11 +87,6 @@ public class TableDesc extends AbstractObject
 		}
 		this.columns.add(colDesc);
 	}
-
-	/**
-	 * 操作方式.
-	 */
-	public int optType = OPT_TYPE_CREATE;
 
 	/**
 	 * 设置操作的名称.
@@ -103,6 +110,9 @@ public class TableDesc extends AbstractObject
 		{
 			return true;
 		}
+		this.mutipleLine = BooleanConverter.toBoolean(
+				factory.getAttribute(MUTIPLE_LINE_FLAG));
+		this.columnDefiner = (ColumnDefiner) factory.createObject(COLUMN_DEF_NAME);
 		this.comment = (TableComment) factory.createObject(TABLE_COMM_NAME);
 		this.renameOpt = factory.getConstantValue("rename");
 		this.tableName = ScriptParser.checkNameForQuote(
@@ -120,8 +130,6 @@ public class TableDesc extends AbstractObject
 		}
 		return false;
 	}
-	protected String renameOpt;
-	private TableComment comment;
 
 	/**
 	 * 执行表描述中所有定义的操作.
@@ -315,22 +323,6 @@ public class TableDesc extends AbstractObject
 			}
 			throw new EternaException(err);
 		}
-	}
-
-	public Element getElement()
-	{
-		return this.element;
-	}
-
-	public void setElement(Element element)
-	{
-		this.element = element;
-	}
-	private Element element;
-
-	public boolean isIgnoreError(Throwable error)
-	{
-		return false;
 	}
 
 }

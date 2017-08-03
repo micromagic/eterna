@@ -14,51 +14,41 @@
  * limitations under the License.
  */
 
-package self.micromagic.dbvm;
+package self.micromagic.dbvm.core;
 
+import self.micromagic.dbvm.ConstantDef;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
 /**
- * 类型定义的描述信息.
+ * 抽象的各类对象.
  */
-public class TypeDefineDesc
+public abstract class AbstractObject
+		implements ConstantDef
 {
-	protected String constName;
-	protected String define;
+	protected EternaFactory factory;
+	protected String name;
 
-	public TypeDefineDesc()
+	public boolean initialize(EternaFactory factory)
+		throws EternaException
 	{
+		if (this.factory == null)
+		{
+			this.factory = factory;
+			return false;
+		}
+		return true;
 	}
 
-	public TypeDefineDesc(String constName)
+	public String getName()
+		throws EternaException
 	{
-		this.constName = constName;
+		return this.name;
 	}
 
-	public void init(EternaFactory factory)
+	public void setName(String name)
 	{
-		this.define = factory.getConstantValue(this.constName);
-	}
-
-	public void setConstName(String constName)
-	{
-		this.constName = constName;
-	}
-
-	/**
-	 * 获取类型定义的常量名.
-	 */
-	public String getConstName()
-	{
-		return this.constName;
-	}
-
-	/**
-	 * 获取类型的定义.
-	 */
-	public String getDefine(int type)
-	{
-		return this.define;
+		this.name = name;
 	}
 
 }

@@ -18,9 +18,9 @@ package self.micromagic.dbvm.impl;
 
 import java.util.List;
 
-import self.micromagic.dbvm.AbstractObject;
 import self.micromagic.dbvm.IndexDefiner;
 import self.micromagic.dbvm.IndexDesc;
+import self.micromagic.dbvm.core.AbstractObject;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;

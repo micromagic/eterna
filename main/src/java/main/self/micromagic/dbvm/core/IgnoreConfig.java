@@ -1,5 +1,5 @@
 
-package self.micromagic.dbvm;
+package self.micromagic.dbvm.core;
 
 import self.micromagic.util.container.ThreadCache;
 
@@ -11,7 +11,9 @@ public class IgnoreConfig
 	/**
 	 * 线程缓存中放置此对象的名称.
 	 */
-	private static final String THREAD_CACHE_FLAG = "eterna.ignoreConfig";
+	private static final String THREAD_CACHE_FLAG = "eterna.dbvm.ignoreConfig";
+
+	private boolean ignoreSameKey;
 
 	/**
 	 * 设置在执行插入时是否需要忽略主键冲突的错误.
@@ -21,7 +23,6 @@ public class IgnoreConfig
 		this.ignoreSameKey = b;
 		getCurrentConfig().ignoreSameKey = b;
 	}
-	private boolean ignoreSameKey;
 
 	/**
 	 * 执行插入时是否需要忽略主键冲突的错误.
@@ -48,8 +49,9 @@ public class IgnoreConfig
 
 	/**
 	 * 清除当前的忽略配置对象.
+	 * 在版本初始化前使用.
 	 */
-	static void clearCurrentConfig()
+	public static void clearCurrentConfig()
 	{
 		ThreadCache.getInstance().removeProperty(THREAD_CACHE_FLAG);
 	}
