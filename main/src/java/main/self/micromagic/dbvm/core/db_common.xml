@@ -90,8 +90,8 @@
 					<parameter name="scriptText" type="String" />
 				</parameters>
 			</update>
-			<!-- 添加步骤的出错信息 v3 -->
-			<update name="addStepError">
+			<!-- 添加步骤的日志信息 v3 -->
+			<update name="addStepOptLog">
 				<prepared-sql noLine="true">
 					insert into #const(version_opt_log) (optTime, #auto[insertN])
 					values (#const(now), #auto[insertV])

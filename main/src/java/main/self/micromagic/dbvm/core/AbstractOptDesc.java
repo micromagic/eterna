@@ -16,10 +16,18 @@
 
 package self.micromagic.dbvm.core;
 
+import java.sql.Connection;
+
 import org.dom4j.Element;
 
 import self.micromagic.dbvm.OptDesc;
+import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.EternaObject;
+import self.micromagic.util.StringAppender;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.ref.BooleanRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * 抽象的操作描述.
@@ -28,6 +36,63 @@ public abstract class AbstractOptDesc extends AbstractObject
 		implements EternaObject, OptDesc
 {
 	private Element element;
+	private final CheckHandler checkHandler;
+
+	public AbstractOptDesc()
+	{
+		this.checkHandler = CheckHandler.getCurrentCheck();
+	}
+
+	public boolean checkNeedExec(Connection conn, int step, StringRef firstMsg)
+	{
+		if (this.checkHandler == null)
+		{
+			return true;
+		}
+		BooleanRef first = new BooleanRef();
+		boolean result = this.checkHandler.doCheck(conn, first);
+		if (!result && first.value)
+		{
+			StringAppender buf = StringTool.createStringAppender(56);
+			buf.append('[').append(this.checkHandler.tableName);
+			if (!StringTool.isEmpty(this.checkHandler.columnName))
+			{
+				buf.append('.').append(this.checkHandler.columnName);
+			}
+			buf.append("] ").append(this.checkHandler.existsFlag ? "isn't" : "is")
+					.append(" exists and ignore step [").append(step);
+			int optCount = this.checkHandler.getOptCount();
+			if (optCount > 1)
+			{
+				buf.append('-').append(step + optCount - 1);
+			}
+			buf.append(']');
+			firstMsg.setString(buf.toString());
+		}
+		return result;
+	}
+
+	public void initCheckFlag()
+	{
+		if (this.checkHandler != null)
+		{
+			this.checkHandler.setCheckResult(Boolean.TRUE);
+		}
+	}
+
+	public boolean initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (super.initialize(factory))
+		{
+			return true;
+		}
+		if (this.checkHandler != null)
+		{
+			this.checkHandler.initialize(factory, this);
+		}
+		return false;
+	}
 
 	public Element getElement()
 	{

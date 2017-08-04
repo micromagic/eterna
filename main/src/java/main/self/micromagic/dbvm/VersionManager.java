@@ -78,14 +78,19 @@ public class VersionManager
 	private static final int VERSION_VALUE_ERROR = -2;
 
 	/**
+	 * 添加步骤操作日志的更新对象名称.
+	 */
+	private static final String ADD_STEP_LOG_NAME = "addStepOptLog";
+
+	/**
 	 * 版本2.
 	 */
 	public static final int V2 = 2;
 
 	/**
-	 * 数据库锁的等待时间, 52秒.
+	 * 数据库锁的等待时间, 72秒.
 	 */
-	static final long FLUSH_LOCK_GAP = 52 * 1000L;
+	static final long FLUSH_LOCK_GAP = 72 * 1000L;
 	/**
 	 * 需要锁定时间的延长值(21hour).
 	 */
@@ -304,7 +309,7 @@ public class VersionManager
 			{
 				if (log.isInfoEnabled())
 				{
-					log.info("End   " + vName + " up to " + version + ". --------------------");
+					log.info("End " + vName + " up to " + version + ". --------------------");
 				}
 			}
 			else
@@ -334,6 +339,8 @@ public class VersionManager
 		{
 			checker = LockTimeChecker.getCurrentChecker(true, timeFix, checkConn, conn);
 		}
+		this.addStepOptLog(conn, vName, version, index + 1, factory, "begin", null);
+		boolean initCheck = index > 0;
 		try
 		{
 			for (; index < count; index++)
@@ -351,6 +358,28 @@ public class VersionManager
 				if (obj instanceof OptDesc)
 				{
 					int step = index + 1;
+					OptDesc optDesc = (OptDesc) obj;
+					if (initCheck)
+					{
+						// 不是从第一步开始, 需要初始化检测标记
+						optDesc.initCheckFlag();
+						initCheck = false;
+					}
+					StringRef firstMsg = new StringRef(null);
+					if (!optDesc.checkNeedExec(conn, step, firstMsg))
+					{
+						String tmpMsg = firstMsg.getString();
+						if (!StringTool.isEmpty(tmpMsg))
+						{
+							if (log.isInfoEnabled())
+							{
+								log.info(tmpMsg + " in " + vName + " up to " + version + ".");
+							}
+							this.addStepOptLog(
+									conn, vName, version, step, factory, tmpMsg, optDesc);
+						}
+						continue;
+					}
 					try
 					{
 						insert.setString("versionName", vName);
@@ -359,14 +388,14 @@ public class VersionManager
 						CommonUpdate.initThreadInfo(insert, this.currentEternaVersion, timeFix);
 						this.setStepInfo(conn, factory, vName, version, step,
 								OPT_STATUS_BEGIN, timeFix);
-						((OptDesc) obj).exec(conn);
+						optDesc.exec(conn);
 						this.setStepInfo(conn, factory, vName, version, step,
 								OPT_STATUS_DONE, timeFix);
 					}
 					catch (Exception ex)
 					{
 						boolean ignore = this.addStepError(conn, vName, version, step, ex,
-								factory, (OptDesc) obj, timeFix);
+								factory, optDesc, timeFix);
 						if (ignore)
 						{
 							this.setStepInfo(conn, factory, vName, version, step,
@@ -392,6 +421,7 @@ public class VersionManager
 			}
 		}
 		this.setStepInfo(conn, factory, vName, version, -1, OPT_STATUS_FINISH, 0L);
+		this.addStepOptLog(conn, vName, version, index, factory, "end", null);
 		return true;
 	}
 
@@ -407,13 +437,13 @@ public class VersionManager
 			return false;
 		}
 		boolean ignore = opt.isIgnoreError(error);
-		Update insert = (Update) factory.createObject("addStepError");
+		Update insert = (Update) factory.createObject(ADD_STEP_LOG_NAME);
 		insert.setString("versionName", vName);
 		insert.setObject("versionValue", Utility.createInteger(version));
 		insert.setObject("step", Utility.createInteger(step));
 		insert.setString("optContent", opt.getElement().asXML());
 		StringAppender buf = StringTool.createStringAppender(128);
-		buf.append(ignore ? "WARN: " : "ERROR: ").append(error.getClass())
+		buf.append(ignore ? "VU-WARN: " : "VU-ERROR: ").append(error.getClass())
 				.appendln().append(error.getMessage());
 		insert.setString("optMessage", buf.toString());
 		insert.setString("optUser", DataBaseLocker.getRuntimeName());
@@ -424,6 +454,28 @@ public class VersionManager
 			conn.commit();
 		}
 		return ignore;
+	}
+
+	/**
+	 * 添加步骤操作日志.
+	 */
+	private void addStepOptLog(Connection conn, String vName, int version, int step,
+			Factory factory, String logMsg, OptDesc opt)
+			throws SQLException
+	{
+		if (this.currentEternaVersion <= V2)
+		{
+			return;
+		}
+		Update insert = (Update) factory.createObject(ADD_STEP_LOG_NAME);
+		insert.setString("versionName", vName);
+		insert.setObject("versionValue", Utility.createInteger(version));
+		insert.setObject("step", Utility.createInteger(step));
+		insert.setString("optMessage", "VU: ".concat(logMsg));
+		insert.setString("optContent", opt == null ? null : opt.getElement().asXML());
+		insert.setString("optUser", DataBaseLocker.getRuntimeName());
+		insert.executeUpdate(conn);
+		conn.commit();
 	}
 
 	private void setStepInfo(Connection conn, Factory factory, String vName, int version,
@@ -524,7 +576,7 @@ public class VersionManager
 				ResultRow row = ritr.nextRow();
 				version = row.getInt("versionValue");
 				String errInfo = row.getString("errInfo");
-				if (!StringTool.isEmpty(errInfo))
+				if (!StringTool.isEmpty(errInfo) && errInfo.trim().length() > 0)
 				{
 					log.warn("The db [" + vName + "] can't upper, because has error: "
 							+ errInfo + ".");
@@ -717,7 +769,7 @@ class LockTimeChecker
 	/**
 	 * 检查的间隔.
 	 */
-	private static final long CHECK_TIME_GAP = VersionManager.FLUSH_LOCK_GAP / 3;
+	private static final long CHECK_TIME_GAP = VersionManager.FLUSH_LOCK_GAP / 5;
 
 	/**
 	 * 检查线程结束的延迟时间(20second).

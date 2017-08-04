@@ -21,6 +21,8 @@ import java.sql.SQLException;
 
 import org.dom4j.Element;
 
+import self.micromagic.util.ref.StringRef;
+
 /**
  * 数据库操作的描述.
  */
@@ -30,6 +32,20 @@ public interface OptDesc
 	 * 获取操作的名称.
 	 */
 	String getName();
+
+	/**
+	 * 初始化检测标志.
+	 * 在直接从中间的步骤开始执行时使用.
+	 */
+	void initCheckFlag();
+
+	/**
+	 * 检查本次操作是否需要执行.
+	 *
+	 * @param step      当前执行到的操作步骤
+	 * @param firstMsg  第一次判断为false后的提示信息
+	 */
+	boolean checkNeedExec(Connection conn, int step, StringRef firstMsg);
 
 	/**
 	 * 检查是否为需要忽略的错误.

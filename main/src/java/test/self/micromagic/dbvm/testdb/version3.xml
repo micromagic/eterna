@@ -7,6 +7,36 @@
 		<column name="test2" type="String(20)" desc="错误信息2"/>
 	</table>
 
+	<check tableName="T02_check">
+
+		<table name="T02_check" desc="检测测试表">
+			<column name="id" type="String(5)" desc="key" nullable="false"/>
+			<column name="test" type="String(3)" desc="信息"/>
+		</table>
+
+		<index name="KEY_T02_check" type="key" tableName="T02_check">
+			<column name="id"/>
+		</index>
+
+		<check exists="true" tableName="T02_check" columnName="test">
+			<script>insert into T02_check values ('a', 'a')</script>
+			<ignore sameKey="true"/>
+			<script>insert into T02_check values ('a', 'b')</script>
+			<ignore sameKey="false"/>
+			<script>insert into T02_check values ('c', 'c')</script>
+		</check>
+
+		<script>insert into T02_check values ('d', 'd')</script>
+
+	</check>
+
+	<check tableName="T_none">
+		<check exists="true" tableName="T02_check" columnName="idx">
+			<script>insert into T02_check values ('e', 'e')</script>
+		</check>
+		<script>insert into T02_check values ('f', 'f')</script>
+	</check>
+	
 	<table name="T02" desc="表2" opt="modify">
 		<column name="value" type="double(6,3)" default="3.14" opt="modify"/>
 		<column name="test" type="String(3)" desc="信息" opt="modify"/>
