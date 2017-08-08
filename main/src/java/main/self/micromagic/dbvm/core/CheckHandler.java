@@ -40,6 +40,11 @@ import self.micromagic.util.ref.BooleanRef;
 public class CheckHandler
 {
 	/**
+	 * 检测是否存在主键的索引名称.
+	 */
+	public static final String KEY_FLAG = "$key";
+
+	/**
 	 * 线程缓存中放置此对象的名称.
 	 */
 	private static final String THREAD_CACHE_FLAG = "eterna.dbvm.checkHandler";
@@ -53,6 +58,11 @@ public class CheckHandler
 	 * 需要检测的列名.
 	 */
 	public String columnName;
+
+	/**
+	 * 需要检测的索引名.
+	 */
+	public String indexName;
 
 	/**
 	 * 检测的是存在还是不存在的标识.
@@ -74,10 +84,19 @@ public class CheckHandler
 		if (this.optList == null)
 		{
 			this.optList = new ArrayList();
-			// 首次初始化 , 需要处理表名及列名
+			// 首次初始化 , 需要处理表名及列名等
 			this.tableName = ScriptParser.checkNameForQuote(
 					Tool.resolveConst(this.tableName, factory));
 			this.columnName = ScriptParser.checkNameForQuote(this.columnName);
+			String tmpIndexName = Tool.resolveConst(this.indexName, factory);
+			if (KEY_FLAG.equalsIgnoreCase(tmpIndexName))
+			{
+				this.indexName = KEY_FLAG;
+			}
+			else
+			{
+				this.indexName = ScriptParser.checkNameForQuote(tmpIndexName);
+			}
 		}
 		this.optList.add(opt.getName());
 		if (this.parent != null)
@@ -112,33 +131,88 @@ public class CheckHandler
 			return false;
 		}
 		first.value = true;
+		boolean result;
+		Savepoint savepoint = null;
+		try
+		{
+			savepoint = BaseDao.makeSavepoint(conn, "check-".concat(this.tableName));
+			result = this.checkTableWithColumn(conn);
+			if (result && !StringTool.isEmpty(this.indexName))
+			{
+				result = this.checkIndex(this.tableName.toUpperCase(), conn)
+						|| this.checkIndex(this.tableName.toLowerCase(), conn);
+			}
+		}
+		catch (SQLException ex)
+		{
+			BaseDao.rollbackWithError(ex, savepoint, conn);
+			result = false;;
+		}
+		this.checkResult = this.existsFlag ^ result ? Boolean.FALSE : Boolean.TRUE;
+		return this.checkResult.booleanValue();
+	}
+
+	/**
+	 * 检查表的索引是否存在.
+	 *
+	 * @param tableName  表名, 已做了转大写或小写处理
+	 */
+	private boolean checkIndex(String tableName, Connection conn)
+			throws SQLException
+	{
+		ResultSet result = null;
+		try
+		{
+			if (KEY_FLAG.equals(this.indexName))
+			{
+				result = conn.getMetaData().getPrimaryKeys(null, null, tableName);
+				return result.next();
+			}
+			else
+			{
+				result = conn.getMetaData().getIndexInfo(
+						null, null, tableName, false, false);
+				while (result.next())
+				{
+					if (this.indexName.equalsIgnoreCase(result.getString("INDEX_NAME")))
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+		finally
+		{
+			BaseDao.doClose(result, null);
+		}
+	}
+
+	/**
+	 * 检查表及列名是否存在.
+	 */
+	private boolean checkTableWithColumn(Connection conn)
+			throws SQLException
+	{
+		Statement stmt = null;
+		ResultSet result = null;
 		StringAppender scriptBuf = StringTool.createStringAppender();
 		scriptBuf.append("select count(*) from ").append(this.tableName);
 		if (!StringTool.isEmpty(this.columnName))
 		{
 			scriptBuf.append(" where ").append(this.columnName).append(" is null");
 		}
-		Statement stmt = null;
-		ResultSet result = null;
-		Savepoint savepoint = null;
 		try
 		{
-			savepoint = BaseDao.makeSavepoint(conn, "check-".concat(this.tableName));
 			String script = ScriptParser.checkScriptNameQuote(conn, scriptBuf.toString());
 			stmt = conn.createStatement();
 			result = stmt.executeQuery(script);
-			this.checkResult = this.existsFlag ? Boolean.TRUE : Boolean.FALSE;
-		}
-		catch (SQLException ex)
-		{
-			BaseDao.rollbackWithError(ex, savepoint, conn);
-			this.checkResult = this.existsFlag ? Boolean.FALSE : Boolean.TRUE;
+			return true;
 		}
 		finally
 		{
 			BaseDao.doClose(result, stmt);
 		}
-		return this.checkResult.booleanValue();
 	}
 
 	/**

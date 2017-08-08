@@ -59,6 +59,10 @@ public abstract class AbstractOptDesc extends AbstractObject
 			{
 				buf.append('.').append(this.checkHandler.columnName);
 			}
+			if (!StringTool.isEmpty(this.checkHandler.indexName))
+			{
+				buf.append(" index:").append(this.checkHandler.indexName);
+			}
 			buf.append("] ").append(this.checkHandler.existsFlag ? "isn't" : "is")
 					.append(" exists and ignore step [").append(step);
 			int optCount = this.checkHandler.getOptCount();

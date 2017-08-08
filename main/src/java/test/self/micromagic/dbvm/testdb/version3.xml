@@ -14,9 +14,12 @@
 			<column name="test" type="String(3)" desc="信息"/>
 		</table>
 
-		<index name="KEY_T02_check" type="key" tableName="T02_check">
-			<column name="id"/>
-		</index>
+		<check tableName="T02_check" indexName="$key">
+			<index name="KEY_T02_check" type="key" tableName="T02_check">
+				<column name="id"/>
+			</index>
+			<script>insert into T02_check values ('k01', 'ok')</script>
+		</check>
 
 		<check exists="true" tableName="T02_check" columnName="test">
 			<script>insert into T02_check values ('a', 'a')</script>
@@ -30,11 +33,38 @@
 
 	</check>
 
+	<check tableName="T02_check" indexName="$key" exists="true">
+		<script>insert into T02_check values ('k02', 'ex')</script>
+	</check>
+	<check tableName="T02_check" indexName="IX_#const(tmp)_01">
+		<table name="T02_check" opt="modify">
+			<column name="other" type="String(3)" desc="信息"/>
+		</table>
+		<index name="IX_#const(tmp)_01" type="index" tableName="T02_check">
+			<column name="test"/>
+		</index>
+		<script>insert into T02_check values ('i01', 'ok', 'x')</script>
+	</check>
+	<check tableName="T02_check" indexName="IX_#const(tmp)_01" exists="true">
+		<index name="IX_#const(tmp)_02" type="unique" tableName="T02_check">
+			<column name="id"/>
+			<column name="other"/>
+		</index>
+		<script>insert into T02_check values ('i02', 'ok', 'x')</script>
+	</check>
+	<check tableName="T02_check" indexName="IX_#const(tmp)_02" exists="true">
+		<script>insert into T02_check values ('i03', 'ex', 'x')</script>
+	</check>
+	<check tableName="T02_check" indexName="IX_#const(tmp)_02">
+		<script>insert into T02_check values ('i04', 'err', 'x')</script>
+		<script>insert into T02_check values ('i05', 'err', 'x')</script>
+	</check>
+
 	<check tableName="T_none">
 		<check exists="true" tableName="T02_check" columnName="idx">
-			<script>insert into T02_check values ('e', 'e')</script>
+			<script>insert into T02_check values ('e', 'e', 'x')</script>
 		</check>
-		<script>insert into T02_check values ('f', 'f')</script>
+		<script>insert into T02_check values ('f', 'f', 'x')</script>
 	</check>
 	
 	<table name="T02" desc="表2" opt="modify">

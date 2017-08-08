@@ -36,7 +36,7 @@ public class MySqlString extends TypeDefineDesc
 		}
 		else
 		{
-			return "text(" .concat(ext + ")");
+			return "text(".concat(ext + ")");
 		}
 	}
 

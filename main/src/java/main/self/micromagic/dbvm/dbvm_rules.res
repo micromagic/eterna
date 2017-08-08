@@ -31,7 +31,7 @@ attr:{sameKey(m=0,i=0):ignoreSameKey}
 ## check
 check;self.micromagic.dbvm.core.CheckParseRule
 log:{$check}
-attr:{tableName(i=0),columnName(m=0,i=0),exists(m=0,i=0):existsFlag}
+attr:{tableName(i=0),columnName(m=0,i=0),indexName(m=0,i=0),exists(m=0,i=0):existsFlag}
 stack:{popStack,t:1,o:0,n:0,g:0,begin:1}
 sub:{table,index,script,ignore,check,data}
 
