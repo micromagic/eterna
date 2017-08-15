@@ -16,6 +16,11 @@ import java.util.Iterator;
 public class DoubleBufferList<T>
 {
 	/**
+	 * 清理时是否需要清除缓存中的数据.
+	 */
+	public static boolean CLEAR_BUFFER_DATA = false;
+
+	/**
 	 * 用于接收对象的列表.
 	 */
 	private Collection<T> receiverList;
@@ -316,6 +321,7 @@ class OneBufferList<T>
 
 	public void clear()
 	{
+		boolean needClear = DoubleBufferList.CLEAR_BUFFER_DATA;
 		if (this.needCheckSize && this.objs.length > 128)
 		{
 			if (this.count < (this.objs.length >> 1))
@@ -325,11 +331,19 @@ class OneBufferList<T>
 					this.halfCount = 0;
 					int newSize = this.objs.length >> 1;
 					this.objs = new Object[newSize];
+					needClear = false;
 				}
 			}
 			else
 			{
 				this.halfCount = 0;
+			}
+		}
+		if (needClear && this.count > 0)
+		{
+			for (int i = this.count - 1; i >= 0; i--)
+			{
+				this.objs[i] = null;
 			}
 		}
 		this.count = 0;
