@@ -249,17 +249,47 @@ public class ProxyTool
 			proxy = (MethodProxy) obj;
 			putMethodProxy(c, method, paramCheck, proxy);
 		}
-		catch (RuntimeException ex)
-		{
-			throw ex;
-		}
 		catch (Exception ex)
 		{
-			throw new CGException(ex);
+			proxy = checkGeneratedClass(c, method, paramCheck);
+			if (proxy == null)
+			{
+				if (ex instanceof RuntimeException)
+				{
+					throw (RuntimeException) ex;
+				}
+				throw new CGException(ex);
+			}
 		}
 		return proxy;
 	}
 	private static int METHOD_PROXY_ID = 1;
+
+	/**
+	 * 判断所给出的类是否为自动生成的类.
+	 * 即无法找到类定义文件.
+	 */
+	public static boolean isGeneratedClass(Class c)
+	{
+		String name = c.getName();
+		return c.getResource("/".concat(name.replace('.', '/')).concat(".class")) == null;
+	}
+
+	/**
+	 * 检查是否为自动生成的类.
+	 * 如果是则生成反射的方法代理, 并将其添加到缓存中.
+	 */
+	private static MethodProxy checkGeneratedClass(Class c, Method method, boolean paramCheck)
+	{
+		MethodProxy proxy = null;
+		if (isGeneratedClass(c))
+		{
+			// 类文件不存在, 说明是通过其他工具自动生成的类
+			proxy = new ReflectMethodProxy(method);
+			putMethodProxy(c, method, paramCheck, proxy);
+		}
+		return proxy;
+	}
 
 	/**
 	 * 检查目标类的ClassLoader是否在当前的ClassLoader之下或相同.

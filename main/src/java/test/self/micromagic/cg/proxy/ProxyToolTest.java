@@ -22,6 +22,15 @@ import junit.framework.TestCase;
 
 public class ProxyToolTest extends TestCase
 {
+	public void testIsGeneratedClass()
+			throws Exception
+	{
+		Method m = this.getClass().getDeclaredMethod("doOut1", new Class[]{String.class, int.class});
+		MethodProxy p = ProxyTool.createMethodProxy(m, true);
+		assertTrue(ProxyTool.isGeneratedClass(p.getClass()));
+		assertFalse(ProxyTool.isGeneratedClass(MethodProxy.class));
+	}
+
 	public void testErrors()
 			throws Exception
 	{
