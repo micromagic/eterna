@@ -17,6 +17,8 @@
 package self.micromagic.cg;
 
 import java.beans.Introspector;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -25,8 +27,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.collections.ReferenceMap;
 
 /**
  * 描述bean的一个方法的信息类.
@@ -120,7 +120,7 @@ public class BeanMethodInfo
 	/**
 	 * bean相关的方法列表的缓存.
 	 */
-	private static ReferenceMap beanMethodsCache = new ReferenceMap(ReferenceMap.WEAK, ReferenceMap.SOFT);
+	private static ClassKeyCache beanMethodsCache = ClassKeyCache.getInstance();
 
 	/**
 	 * 获取和这个bean相关的方法.
@@ -130,7 +130,7 @@ public class BeanMethodInfo
 	 */
 	public static synchronized BeanMethodInfo[] getBeanMethods(Class beanClass)
 	{
-		BeanMethodInfo[] result = (BeanMethodInfo[]) beanMethodsCache.get(beanClass);
+		BeanMethodInfo[] result = getBeanMethods0(beanClass);
 		if (result != null)
 		{
 			return result;
@@ -193,8 +193,15 @@ public class BeanMethodInfo
 		}
 
 		result = arrangeMethods(tmpMethodsCache);
-		beanMethodsCache.put(beanClass, result);
+		// 这里使用软引用, 因为方法信息不需要一直存着, 生成类后就不需要了
+		beanMethodsCache.setProperty(beanClass, new SoftReference(result));
 		return result;
+	}
+
+	private static BeanMethodInfo[] getBeanMethods0(Class beanClass)
+	{
+		Reference ref = (Reference) beanMethodsCache.getProperty(beanClass);
+		return ref != null ? (BeanMethodInfo[]) ref.get() : null;
 	}
 
 	/**
