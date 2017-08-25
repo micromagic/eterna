@@ -695,7 +695,7 @@ public class ScriptParser
 				{
 					if (arr[i].charAt(0) == '*')
 					{
-						keys.put(arr[i].substring(1), Boolean.TRUE);
+						keys.put(arr[i].substring(1).intern(), Boolean.TRUE);
 						int len = arr[i].length() - 1;
 						if (len > MAX_MAIN_KEY_LENGTH)
 						{
@@ -704,7 +704,7 @@ public class ScriptParser
 					}
 					else
 					{
-						keys.put(arr[i], Boolean.FALSE);
+						keys.put(arr[i].intern(), Boolean.FALSE);
 					}
 				}
 			}
