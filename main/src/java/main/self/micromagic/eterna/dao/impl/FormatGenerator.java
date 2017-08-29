@@ -124,7 +124,8 @@ public class FormatGenerator extends AbstractGenerator
 	 * @param type  类型的id
 	 * @see TypeManager
 	 */
-	public static ResultFormat createFormat(int type, String pattern, ResultReader reader, EternaFactory factory)
+	public static ResultFormat createFormat(int type, String name, String pattern,
+			ResultReader reader, EternaFactory factory)
 	{
 		synchronized (formatCache)
 		{
@@ -135,7 +136,8 @@ public class FormatGenerator extends AbstractGenerator
 				return format;
 			}
 			FormatGenerator fg = new FormatGenerator();
-			fg.setName("_auto");
+			// 这里不能用setName因为名称中会包含":"
+			fg.name = name;
 			fg.setPattern(pattern);
 			if (TypeManager.isBoolean(type))
 			{

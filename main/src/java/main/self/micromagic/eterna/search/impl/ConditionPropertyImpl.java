@@ -35,7 +35,7 @@ import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
 
 /**
- * @author micromagic@sina.com
+ * 条件配置信息的实现类.
  */
 class ConditionPropertyImpl
 		implements ConditionProperty
@@ -52,41 +52,38 @@ class ConditionPropertyImpl
 	boolean visible = true;
 	String inputType;
 	Object defaultObj;
-	String listName;
-	String defaultBuilderName;
 	String permissionConfig;
 	PermissionSet permissionSet = null;
-	List conditionBuilderList;
-	boolean useDefaultConditionBuilder = false;
-	ConditionBuilder defaultBuilder;
 	AttributeManager attributes;
+
+	// 这里需要保留条件构造器列表的名称, 因为list中没有保留名称, 无法使用holder
+	String listName;
+	List builderList;
+	// condition不需要再转换回item, 所以不会有默认builder的问题, 可以使用holder
+	private ConditionBuilder defaultBuilder;
+	boolean useDefaultConditionBuilder = false;
 
 	public void initialize(EternaFactory factory)
 			throws EternaException
 	{
 		if (this.listName != null)
 		{
-			this.conditionBuilderList = factory.getConditionBuilderList(this.listName);
-			if (this.conditionBuilderList == null)
+			this.builderList = factory.getConditionBuilderList(this.listName);
+			if (this.builderList == null)
 			{
 				log.warn("The ConditionBuilder list [" + this.listName + "] not found.");
 			}
 		}
 
-		if (this.defaultBuilderName != null)
+		String defaultName = this.defaultBuilder instanceof ConditionBuilderHolder ?
+				this.defaultBuilder.getName() : null;
+		if (defaultName != null)
 		{
-			this.defaultBuilder = factory.getConditionBuilder(this.defaultBuilderName);
-			if (this.defaultBuilder == null)
-			{
-				log.warn("The ConditionBuilder [" + this.defaultBuilderName + "] not found.");
-			}
+			this.defaultBuilder = factory.getConditionBuilder(defaultName);
 		}
-		else if (this.conditionBuilderList != null)
+		else if (this.builderList != null && !this.builderList.isEmpty())
 		{
-			if (this.conditionBuilderList.size() > 0)
-			{
-				this.defaultBuilder = (ConditionBuilder) this.conditionBuilderList.get(0);
-			}
+			this.defaultBuilder = (ConditionBuilder) this.builderList.iterator().next();
 		}
 
 		if (!StringTool.isEmpty(this.permissionConfig))
@@ -185,6 +182,11 @@ class ConditionPropertyImpl
 		return this.useDefaultConditionBuilder;
 	}
 
+	public void setDefaultConditionBuilderName(String name)
+	{
+		this.defaultBuilder = name == null ? null : new ConditionBuilderHolder(name);
+	}
+
 	public ConditionBuilder getDefaultConditionBuilder()
 	{
 		return this.defaultBuilder;
@@ -192,7 +194,7 @@ class ConditionPropertyImpl
 
 	public List getConditionBuilderList()
 	{
-		return this.conditionBuilderList;
+		return this.builderList;
 	}
 
 }

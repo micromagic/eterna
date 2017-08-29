@@ -873,7 +873,7 @@ public class SearchImpl extends AbstractGenerator
 			}
 			else if (DEFAULT_BUILDER_FLAG.equals(n) || BUILDER_FLAG.equals(n))
 			{
-				condition.defaultBuilderName = (String) item.getAttribute(n);
+				condition.setDefaultConditionBuilderName((String) item.getAttribute(n));
 			}
 			else if (BUILDER_LIST_FLAG.equals(n))
 			{

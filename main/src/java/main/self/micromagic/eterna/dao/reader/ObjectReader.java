@@ -108,7 +108,7 @@ public class ObjectReader
 			String checkStr = Tool.PATTERN_PREFIX;
 			if (formatName.startsWith(checkStr))
 			{
-				this.format = FormatGenerator.createFormat(this.getType(),
+				this.format = FormatGenerator.createFormat(this.getType(), formatName,
 						formatName.substring(checkStr.length()), this, factory);
 			}
 			else

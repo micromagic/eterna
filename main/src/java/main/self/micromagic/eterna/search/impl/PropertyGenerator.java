@@ -93,7 +93,7 @@ public class PropertyGenerator extends AbstractGenerator
 
 	public void setDefaultConditionBuilderName(String name)
 	{
-		this.conditionProperty.defaultBuilderName = name;
+		this.conditionProperty.setDefaultConditionBuilderName(name);
 	}
 
 	public void setConditionBuilderListName(String name)
