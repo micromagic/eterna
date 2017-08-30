@@ -40,7 +40,7 @@ import self.micromagic.util.converter.BooleanConverter;
 public abstract class AbstractTable extends ComponentImpl
 {
 	/**
-	 * 在item的arrtibute中设置单元是否显示的名称.
+	 * 在item的attribute中设置单元是否显示的名称.
 	 */
 	public static final String VISIBLE_FLAG = "visible";
 

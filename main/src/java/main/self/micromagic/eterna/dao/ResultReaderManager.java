@@ -25,12 +25,12 @@ import self.micromagic.eterna.share.EternaFactory;
 public interface ResultReaderManager
 {
 	/**
-	 * 在item的arrtibute中设置使用format的名称.
+	 * 在item的attribute中设置使用format的名称.
 	 */
 	String FORMAT_FLAG = "format";
 
 	/**
-	 * 在ResultReader的arrtibute中设置格式化值只显示列的名称.
+	 * 在ResultReader的attribute中设置格式化值只显示列的名称.
 	 * 如果设置了此属性, 将会以此属性值作为名称添加一个相同的
 	 * ResultReader到最后, 并将当前ResultReader的format设为
 	 * 无效.
@@ -38,17 +38,17 @@ public interface ResultReaderManager
 	String SHOW_NAME_FLAG = "showName";
 
 	/**
-	 * 在item的arrtibute中设置读取的列表别名的名称.
+	 * 在item的attribute中设置读取的列表别名的名称.
 	 */
 	String ALIAS_FLAG = "alias";
 
 	/**
-	 * 在item的arrtibute中设置排序中的列的名称.
+	 * 在item的attribute中设置排序中的列的名称.
 	 */
 	String ORDER_COL = "orderCol";
 
 	/**
-	 * 在factory的arrtibute中设置是否需要检查相同列名的名称.
+	 * 在factory的attribute中设置是否需要检查相同列名的名称.
 	 */
 	String CHECK_SAME_COL = "checkSameCol";
 

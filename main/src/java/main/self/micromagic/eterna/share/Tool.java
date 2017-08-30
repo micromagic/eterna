@@ -53,16 +53,16 @@ public class Tool
 	 */
 	public static final String PATTERN_PREFIX = "pattern:";
 	/**
-	 * 在arrtibute中设置使用格式化模式的名称.
+	 * 在attribute中设置使用格式化模式的名称.
 	 */
 	public static final String PATTERN_FLAG = "pattern";
 
 	/**
-	 * 在arrtibute中设置是否显示的名称.
+	 * 在attribute中设置是否显示的名称.
 	 */
 	public static final String VISIBLE_FLAG = "visible";
 	/**
-	 * 在arrtibute中设置是否要将空字符串变为null的名称.
+	 * 在attribute中设置是否要将空字符串变为null的名称.
 	 */
 	public static final String EMPTY_TO_NULL_FLAG = "emptyToNull";
 

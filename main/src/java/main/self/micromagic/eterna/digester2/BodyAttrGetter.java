@@ -153,7 +153,7 @@ public class BodyAttrGetter
 				String aPos;
 				if (this.attrTag != null)
 				{
-					aPos = "in arrtibute [" + this.attrTag + "] or "
+					aPos = "in attribute [" + this.attrTag + "] or "
 							+ (this.bodyTag != null ? "[" + this.bodyTag + "]'s " : "") + "body";
 				}
 				else
@@ -168,7 +168,7 @@ public class BodyAttrGetter
 		{
 			if (!StringTool.isEmpty(bText))
 			{
-				throw new ParseException("Both arrtibute [" + this.attrTag + "] and "
+				throw new ParseException("Both attribute [" + this.attrTag + "] and "
 						+ (this.bodyTag != null ? "[" + this.bodyTag + "]'s " : "")
 						+ "body are setted value.");
 			}

@@ -43,17 +43,17 @@ import self.micromagic.util.container.UnmodifiableIterator;
 public class ParameterGroup
 {
 	/**
-	 * 在item的arrtibute中设置使用prepare的名称.
+	 * 在item的attribute中设置使用prepare的名称.
 	 */
 	public static final String PREPARE_FLAG = "prepare";
 
 	/**
-	 * 在parameter的arrtibute中设置使用caption的名称.
+	 * 在parameter的attribute中设置使用caption的名称.
 	 */
 	public static final String CAPTION_FLAG = "caption";
 
 	/**
-	 * 在EntityItem的arrtibute中设置构造ParameterGenerator对象的名称.
+	 * 在EntityItem的attribute中设置构造ParameterGenerator对象的名称.
 	 */
 	public static final String GENERATOR_FLAG = "parameter.generator";
 

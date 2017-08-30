@@ -33,26 +33,26 @@ public interface Search
 	String SESSION_SEARCH_QUERY = "ETERNA_SESSION_SEARCH_QUERY";
 
 	/**
-	 * 在item的arrtibute中设置输入类型的名称.
+	 * 在item的attribute中设置输入类型的名称.
 	 */
 	String INPUT_TYPE_FLAG = "inputType";
 
 	/**
-	 * 在item的arrtibute中设置查询列名的名称.
+	 * 在item的attribute中设置查询列名的名称.
 	 */
 	String SEARCH_COLUMN_FLAG = "searchColumn";
 
 	/**
-	 * 在item的arrtibute中设置默认条件构造器的名称.
+	 * 在item的attribute中设置默认条件构造器的名称.
 	 */
 	String BUILDER_FLAG = "builder";
 	/**
-	 * 在item的arrtibute中设置默认条件构造器的名称.
+	 * 在item的attribute中设置默认条件构造器的名称.
 	 */
 	String DEFAULT_BUILDER_FLAG = "defaultBuilder";
 
 	/**
-	 * 在item的arrtibute中设置条件构造列表的名称.
+	 * 在item的attribute中设置条件构造列表的名称.
 	 */
 	String BUILDER_LIST_FLAG = "builderList";
 

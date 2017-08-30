@@ -30,12 +30,7 @@ import self.micromagic.eterna.share.EternaFactory;
 public interface ResultReader
 {
 	/**
-	 * 在arrtibute中设置输入框类型使用的名称.
-	 */
-	public static final String INPUT_TYPE_FLAG = "inputType";
-
-	/**
-	 * 在工厂的arrtibute中设置关闭检查reader索引使用的名称. <p>
+	 * 在factory的attribute中设置关闭检查reader索引使用的名称. <p>
 	 * reader如果是使用别名获取数据的话, 默认会在第一次将别名转换成列索引,
 	 * 之后会以索引值获取数据.
 	 * 如果关闭检查reader索引后, 那将一直使用别名来获取数据.

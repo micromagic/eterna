@@ -41,7 +41,7 @@ public class ObjectReader
 		implements ResultReader, Cloneable
 {
 	/**
-	 * 在arrtibute中设置导出时使用的标题.
+	 * 在ResultReader的attribute中设置导出时使用的标题.
 	 */
 	public static final String PRINT_CAPTION = "print.caption";
 

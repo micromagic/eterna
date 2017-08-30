@@ -51,7 +51,7 @@ public interface Model
 
 	/**
 	 * 设置需前置执行的model.
-	 * 这是一个factory的arrtibute, 它的值是那个前置model的名称.
+	 * 这是一个factory的attribute, 它的值是那个前置model的名称.
 	 */
 	public static final String FRONT_MODEL_ATTRIBUTE = "front.model.name";
 

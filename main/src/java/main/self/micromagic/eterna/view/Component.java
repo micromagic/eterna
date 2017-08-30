@@ -37,7 +37,7 @@ public interface Component
 	String VIEW_WRPA_NEED_SCRIPT_FLAG = "view.wrpa.needScript";
 
 	/**
-	 * 在item的arrtibute中设置使用控件名称的标识.
+	 * 在item的attribute中设置使用控件名称的标识.
 	 */
 	String TYPICAL_COMPONENT_FLAG = "typical";
 
