@@ -33,7 +33,7 @@ public class ParameterManager
 	public static final int NORMAL_PARAMETER = 0;
 	public static final int DYNAMIC_PARAMETER = 1;
 
-	private Parameter param;
+	private String paramName;
 	private final int type;
 	private String groupName;
 	private boolean parameterSetted;
@@ -48,6 +48,12 @@ public class ParameterManager
 		this.type = type;
 	}
 
+	public ParameterManager(int type, String name)
+	{
+		this(type);
+		this.paramName = name;
+	}
+
 	public void setGroupName(String groupName)
 	{
 		this.groupName = groupName;
@@ -57,7 +63,7 @@ public class ParameterManager
 	{
 		ParameterManager other = new ParameterManager(this.type);
 		other.checked = this.checked;
-		other.param = this.param;
+		other.paramName = this.paramName;
 		other.index = this.index;
 		other.parameterSetted = clear ? false : this.parameterSetted;
 		other.templates = this.templates;
@@ -82,7 +88,8 @@ public class ParameterManager
 		for (int i = 0; i < this.templates.length; i++)
 		{
 			template = this.templates[i];
-			DaoManager.parse(template, true, partList, paramList, subSQLList, subList);
+			DaoManager.parse(template, true, false,
+					partList, paramList, subSQLList, subList);
 		}
 		if (paramList.size() != 1)
 		{
@@ -99,15 +106,7 @@ public class ParameterManager
 		{
 			return;
 		}
-
 		this.checked = true;
-		// 对于没有设置的不进行判断, 未设置的可以通过数字设置
-		/*if (this.param == null)
-		{
-			throw new EternaException("The parameter not begin at position:"
-					+ (this.index + 1) + ".");
-		}*/
-
 		if (this.type == NORMAL_PARAMETER)
 		{
 			return;
@@ -121,7 +120,8 @@ public class ParameterManager
 		for (int i = 0; i < this.templates.length; i++)
 		{
 			template = this.templates[i];
-			DaoManager.parse(template, true, partList, paramList, subSQLList, subList);
+			DaoManager.parse(template, true, false,
+					partList, paramList, subSQLList, subList);
 
 			// 根据解析的结果修改template
 			StringAppender temp = StringTool.createStringAppender();
@@ -132,39 +132,28 @@ public class ParameterManager
 				ps.initialize(factory);
 				temp.append(ps.getScript());
 			}
-			if (!template.equals(temp.toString()))
-			{
-				// 如果相同则不进行处理, 如果不同说明有常量在里面, 要进行intern处理
-				this.templates[i] = StringTool.intern(temp.toString(), true);
-			}
+			String tmpStr = temp.toString();
+			// 7个字符以下的用intern处理, 字符多的重新构造字符串, 去除buf中多余的存储空间
+			this.templates[i] = tmpStr.length() < 7 ? tmpStr.intern() : new String(tmpStr);
 			partList.clear();
 		}
-		if (paramList.size() != 1)
-		{
-			throw new EternaException("Error parameter template, param name ["
-					+ this.param.getName() + "].");
-		}
+		// 这里不需要检查参数个数, 在preCheck中已经做了
 	}
 
-	public Parameter getParam()
+	public String getParamName()
 	{
-		return this.param;
+		return this.paramName;
 	}
 
 	public void setParam(Parameter param)
 			throws EternaException
 	{
-		if (this.param != null)
+		if (this.paramName != null)
 		{
-			throw new EternaException("You can't begin two name in same position:"
+			throw new EternaException("You can't bind two name in same position:"
 					+ (this.index + 1) + ".");
 		}
-		this.param = param;
-	}
-
-	public void clearParam()
-	{
-		this.param = null;
+		this.paramName = param.getName();
 	}
 
 	public int getType()
@@ -177,8 +166,9 @@ public class ParameterManager
 	{
 		if (this.type == NORMAL_PARAMETER)
 		{
-			throw new EternaException("You can't set template in normal parameter, name "
-					+ this.param.getName() + ".");
+			throw new EternaException("You can't add template in normal parameter, name ["
+					+ this.paramName + "], position [" + (this.index + 1) + "].");
+
 		}
 		if (template == null)
 		{
@@ -197,8 +187,8 @@ public class ParameterManager
 	{
 		if (type == NORMAL_PARAMETER)
 		{
-			throw new EternaException("You can't get template in normal parameter, name "
-					+ this.param.getName() + ".");
+			throw new EternaException("You can't get template count in normal parameter, "
+					+ "name [" + this.paramName + "], position [" + (this.index + 1) + "].");
 		}
 		return this.templates.length;
 	}
@@ -208,8 +198,8 @@ public class ParameterManager
 	{
 		if (type == NORMAL_PARAMETER)
 		{
-			throw new EternaException("You can't get template in normal parameter, name "
-					+ this.param.getName() + ".");
+			throw new EternaException("You can't get template in normal parameter, name ["
+					+ this.paramName + "], position [" + (this.index + 1) + "].");
 		}
 		return this.templates[index];
 	}

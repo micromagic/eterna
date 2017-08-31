@@ -238,8 +238,10 @@ public class TemplateBuilder extends AbstractGenerator
 			ArrayList paramList = new ArrayList();
 			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(this.template, true, partList, paramList, subScriptList, subList);
-			StringAppender buf = StringTool.createStringAppender(this.template.length() + 128);
+			DaoManager.parse(this.template, true, false,
+					partList, paramList, subScriptList, subList);
+			StringAppender buf = StringTool.createStringAppender(
+					this.template.length() + 128);
 			Iterator itr = partList.iterator();
 			for (int i = 0; i < partList.size(); i++)
 			{

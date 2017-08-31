@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.Iterator;
 
 import self.micromagic.eterna.dao.preparer.PreparerManager;
-import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 
@@ -31,6 +30,14 @@ import self.micromagic.eterna.share.EternaFactory;
  */
 public interface Dao
 {
+	/**
+	 * 可设置参数是否通过名称来绑定. <p>
+	 * 如果设为true表示通过名称绑定, 设为false(默认值)表示通过"?"的位置绑定.
+	 * 在dao的attribute中设置, 仅对此dao有效.
+	 * 在factory的attribute中设置, 将对此工厂中的所有未设置的dao有效.
+	 */
+	String PARAM_BIND_WITH_NAME_FLAG = "paramBindWithName";
+
 	/**
 	 * 配置中设置日志方式的标识.
 	 */
@@ -95,9 +102,16 @@ public interface Dao
 	/**
 	 * 获得参数的个数.
 	 *
-	 * @return   数据操作对象中参数的个数
+	 * @return   数据操作对象中设置的参数个数
 	 */
 	int getParameterCount() throws EternaException;
+
+	/**
+	 * 获得真正的参数个数.
+	 *
+	 * @return  执行数据操作时真正需要的参数个数
+	 */
+	int getRealParameterCount() throws EternaException;
 
 	/**
 	 * 获得实际有效的参数个数.
@@ -196,11 +210,6 @@ public interface Dao
 	 * @param name    参数的名称
 	 */
 	boolean isParameterSetted(String name) throws EternaException;
-
-	/**
-	 * 通过ValuePreparer来设置参数.
-	 */
-	void setValuePreparer(ValuePreparer preparer) throws EternaException;
 
 	/**
 	 * 将参数设置到PreparedStatement中.

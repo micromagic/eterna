@@ -39,10 +39,12 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaCreater;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.util.Utility;
 import self.micromagic.util.container.PreFetchIterator;
+import self.micromagic.util.converter.BooleanConverter;
 
 /**
- * @author micromagic@sina.com
+ * 抽象的数据库操作对象.
  */
 public abstract class AbstractDao extends AbstractGenerator
 		implements Dao, EternaCreater
@@ -65,62 +67,89 @@ public abstract class AbstractDao extends AbstractGenerator
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
-		if (!this.initialized)
+		if (this.initialized)
 		{
-			if (this.preparedScript == null)
-			{
-				this.preparedScript = "";
-				log.error(this.getType() + " [" + this.getName()
-						+ "]'s prepared-sql hasn't setted.");
-			}
-			this.initialized = true;
-			this.attributes.convertType(factory, this.getType());
-
-			List paramList = new ArrayList();
-			if (this.paramGroup != null)
-			{
-				this.paramGroup.initialize(factory);
-				Iterator itr = this.paramGroup.getParameterGeneratorIterator();
-				int paramIndex = 1;
-				while (itr.hasNext())
-				{
-					ParameterGenerator spg = (ParameterGenerator) itr.next();
-					Parameter param = spg.createParameter(paramIndex++);
-					ParseException.setContextInfo(null, null, spg.getName());
-					param.initialize(this.getFactory());
-					paramList.add(param);
-				}
-				this.paramGroup = null;
-			}
-			Parameter[] paramArray = new Parameter[paramList.size()];
-			paramList.toArray(paramArray);
-			this.parameterArray = paramArray;
-
-			this.initElse(factory);
-
-			this.daoManager = new DaoManager();
-			String tmpScript = this.preChange(this.preparedScript);
-			tmpScript = this.daoManager.preParse(tmpScript, this);
-			this.daoManager.parse(tmpScript);
-			this.preparerManager = new PreparerManager(this, paramArray);
-			this.daoManager.initialize(this);
-
-			this.parameterNameMap = new HashMap();
-			for (int i = 0; i < paramArray.length; i++)
-			{
-				Parameter param = paramArray[i];
-				this.addParameterNameMap(param);
-			}
-			if (this.daoManager.getParameterCount() != paramArray.length)
-			{
-				String msg = "There are " + paramArray.length + " parameter(s), but the script ["
-						+ tmpScript + "] need " + this.daoManager.getParameterCount() + " parameter(s).";
-				throw new ParseException(msg);
-			}
-			this.checkParamPermission(tmpScript);
-			return false;
+			return true;
 		}
-		return true;
+		this.initialized = true;
+		if (this.preparedScript == null)
+		{
+			this.preparedScript = "";
+			log.error(this.getType() + " [" + this.getName()
+					+ "]'s prepared-sql hasn't setted.");
+		}
+		this.attributes.convertType(factory, this.getType());
+
+		List paramList = new ArrayList();
+		List pgList = new ArrayList();
+		if (this.paramGroup != null)
+		{
+			this.paramGroup.initialize(factory);
+			Iterator itr = this.paramGroup.getParameterGeneratorIterator();
+			int paramIndex = 1;
+			while (itr.hasNext())
+			{
+				ParameterGenerator pg = (ParameterGenerator) itr.next();
+				pgList.add(pg);
+				paramList.add(pg.createParameter(paramIndex++));
+			}
+			this.paramGroup = null;
+		}
+		Parameter[] paramArray = new Parameter[paramList.size()];
+		paramList.toArray(paramArray);
+		this.parameterArray = paramArray;
+
+		this.initElse(factory);
+
+		boolean bindWithName = this.getBooleanAttr(PARAM_BIND_WITH_NAME_FLAG, false);
+		this.daoManager = new DaoManager(bindWithName);
+		String tmpScript = this.preChange(this.preparedScript);
+		tmpScript = this.daoManager.preParse(tmpScript, this);
+		this.daoManager.parse(tmpScript);
+		this.daoManager.initialize(this);
+		this.parameterNameMap = new HashMap();
+		for (int i = 0; i < paramArray.length; i++)
+		{
+			Parameter param = paramArray[i];
+			ParseException.setContextInfo(null, null, param.getName());
+			if (bindWithName)
+			{
+				int[] positions = this.getParameterPositions(param.getName());
+				if (positions.length > 1 || positions[0] != param.getIndex())
+				{
+					param = ((ParameterGenerator) pgList.get(i)).createParameter(
+							param.getIndex(), positions);
+					paramArray[i] = param;
+				}
+			}
+			param.initialize(this.getFactory());
+			this.addParameterNameMap(param, bindWithName);
+		}
+		ParseException.setContextInfo(null, null, "");
+		if (bindWithName)
+		{
+			for (int i = 0; i < this.daoManager.getParameterCount(); i++)
+			{
+				ParameterManager pm = this.daoManager.getParameterManager(i);
+				if (!this.parameterNameMap.containsKey(pm.getParamName()))
+				{
+					throw new ParseException("Used parameter bind with name, "
+						+ "the parameter [" + pm.getParamName() + "] at position ["
+						+ (i + 1) + "] hasn't binded.");
+				}
+			}
+		}
+		else if (this.daoManager.getParameterCount() != paramArray.length)
+		{
+			throw new ParseException("There are " + paramArray.length
+					+ " parameter(s), " + "but the script [" + tmpScript + "] need "
+					+ this.daoManager.getParameterCount() + " parameter(s).");
+		}
+
+		this.preparerManager = new PreparerManager(
+				this, this.daoManager.getParameterCount(), paramArray);
+		this.checkParamPermission(tmpScript);
+		return false;
 	}
 
 	/**
@@ -163,12 +192,38 @@ public abstract class AbstractDao extends AbstractGenerator
 		return false;
 	}
 
+	private int[] getParameterPositions(String name)
+	{
+		List positions = new ArrayList();
+		for (int i = 0; i < this.daoManager.getParameterCount(); i++)
+		{
+			ParameterManager pm = this.daoManager.getParameterManager(i);
+			if (name.equals(pm.getParamName()))
+			{
+				positions.add(Utility.createInteger(i + 1));
+			}
+		}
+		if (positions.isEmpty())
+		{
+			throw new ParseException("Used parameter bind with name, "
+				+ "not found parameter [" + name + "] in script.");
+		}
+		int[] result = new int[positions.size()];
+		Iterator itr = positions.iterator();
+		for (int i = 0; i < result.length; i++)
+		{
+			result[i] = ((Integer) itr.next()).intValue();
+		}
+		return result;
+	}
+
 	protected void copy(Dao copyObj)
 	{
 		AbstractDao other = (AbstractDao) copyObj;
 		if (this.preparedScript != null)
 		{
-			other.preparerManager = new PreparerManager(other, this.parameterArray);
+			other.preparerManager = new PreparerManager(
+					other, this.daoManager.getParameterCount(), this.parameterArray);
 			other.daoManager = this.daoManager.copy(true);
 			other.preparedScript = this.preparedScript;
 		}
@@ -185,45 +240,33 @@ public abstract class AbstractDao extends AbstractGenerator
 	public int getParameterCount()
 			throws EternaException
 	{
-		if (this.daoManager == null && this.parameterArray == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
-		return this.daoManager == null ? this.parameterArray.length
-				: this.daoManager.getParameterCount();
+		return this.parameterArray.length;
+	}
+
+	public int getRealParameterCount() throws EternaException
+	{
+		this.checkInitialized();
+		return this.daoManager.getParameterCount();
 	}
 
 	public boolean hasActiveParam()
 			throws EternaException
 	{
-		if (this.preparerManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		return this.preparerManager.hasActiveParam();
 	}
 
 	public int getActiveParamCount()
 			throws EternaException
 	{
-		if (this.preparerManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		return this.preparerManager.getParamCount();
 	}
 
 	public int getSubScriptCount()
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		return this.daoManager.getSubPartCount();
 	}
 
@@ -242,11 +285,7 @@ public abstract class AbstractDao extends AbstractGenerator
 	public String getPreparedScript()
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		return this.daoManager.getPreparedScript();
 	}
 
@@ -256,11 +295,7 @@ public abstract class AbstractDao extends AbstractGenerator
 	String getTempPreparedSQL(int[] indexs, String[] subParts)
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		return this.daoManager.getTempPreparedScript(indexs, subParts);
 	}
 
@@ -288,11 +323,7 @@ public abstract class AbstractDao extends AbstractGenerator
 	public void setSubScript(int index, String subPart, PreparerManager pm)
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		int tempI = this.daoManager.setSubPart(index - 1, subPart);
 		this.preparerManager.inserPreparerManager(pm, tempI, index);
 	}
@@ -305,115 +336,187 @@ public abstract class AbstractDao extends AbstractGenerator
 	public boolean isParameterSetted(int index)
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
-		return this.daoManager.isParamSetted(index - 1);
+		return this.isParameterSetted(this.getParameter(index));
 	}
 
 	public boolean isParameterSetted(String name)
 			throws EternaException
 	{
-		return this.isParameterSetted(this.getParameterIndex(name));
+		return this.isParameterSetted(this.getParameter(name));
+	}
+
+	private boolean isParameterSetted(Parameter param)
+			throws EternaException
+	{
+		this.checkInitialized();
+		boolean setted = false;
+		if (param.isMultiple())
+		{
+			int[] arr = param.listValuePreparerIndex();
+			for (int i = 0; i < arr.length; i++)
+			{
+				if (!this.daoManager.isParamSetted(arr[i] - 1))
+				{
+					return false;
+				}
+			}
+			setted = true;
+		}
+		else if (this.daoManager.isParamSetted(param.getValuePreparerIndex() - 1))
+		{
+			setted = true;
+		}
+		return setted;
 	}
 
 	public boolean isDynamicParameter(int index)
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
-		return this.daoManager.isDynamicParameter(index - 1);
+		return this.isDynamicParameter(this.getParameter(index));
 	}
 
 	public boolean isDynamicParameter(String name)
 			throws EternaException
 	{
-		return this.isDynamicParameter(this.getParameterIndex(name));
+		return this.isDynamicParameter(this.getParameter(name));
+	}
+
+	public boolean isDynamicParameter(Parameter param)
+			throws EternaException
+	{
+		this.checkInitialized();
+		boolean dynamic = false;
+		if (param.isMultiple())
+		{
+			int[] arr = param.listValuePreparerIndex();
+			for (int i = 0; i < arr.length; i++)
+			{
+				if (!this.daoManager.isDynamicParameter(arr[i] - 1))
+				{
+					return false;
+				}
+			}
+			dynamic = true;
+		}
+		else if (this.daoManager.isDynamicParameter(param.getValuePreparerIndex() - 1))
+		{
+			dynamic = true;
+		}
+		return dynamic;
 	}
 
 	public void setIgnore(int parameterIndex)
 			throws EternaException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
-		this.preparerManager.setIgnore(parameterIndex);
-		this.daoManager.setParamSetted(parameterIndex - 1, false);
+		this.setIgnore(this.getParameter(parameterIndex));
 	}
 
 	public void setIgnore(String parameterName)
 			throws EternaException
 	{
-		this.setIgnore(this.getParameterIndex(parameterName));
+		this.setIgnore(this.getParameter(parameterName));
 	}
 
-	public void setValuePreparer(ValuePreparer preparer)
+	private void setIgnore(Parameter param)
 			throws EternaException
 	{
-		if (this.daoManager == null)
+		this.checkInitialized();
+		if (param.isMultiple())
 		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
+			int[] arr = param.listValuePreparerIndex();
+			for (int i = 0; i < arr.length; i++)
+			{
+				this.preparerManager.setIgnore(arr[i]);
+				this.daoManager.setParamSetted(arr[i] - 1, false);
+			}
 		}
+		else
+		{
+			this.preparerManager.setIgnore(param.getValuePreparerIndex());
+			this.daoManager.setParamSetted(param.getValuePreparerIndex() - 1, false);
+		}
+	}
+
+	private void setParamValue(ValuePreparer[] preparers, Parameter param)
+			throws EternaException
+	{
+		this.checkInitialized();
+		for (int i = 0; i < preparers.length; i++)
+		{
+			this.preparerManager.setValuePreparer(preparers[i]);
+			this.daoManager.setParamSetted(preparers[i].getRelativeIndex() - 1, true);
+		}
+	}
+
+	private void setParamValue(ValuePreparer preparer, Parameter param)
+			throws EternaException
+	{
+		this.checkInitialized();
 		this.preparerManager.setValuePreparer(preparer);
-		preparer.setName(this.parameterArray[preparer.getRelativeIndex() - 1].getName());
 		this.daoManager.setParamSetted(preparer.getRelativeIndex() - 1, true);
 	}
 
 	public void setString(int parameterIndex, String x)
 			throws EternaException
 	{
-		Parameter p = this.getParameter(parameterIndex);
-		this.setValuePreparer(p.createValuePreparer(x));
+		this.setString(x, this.getParameter(parameterIndex));
 	}
 
 	public void setString(String parameterName, String x)
 			throws EternaException
 	{
-		Parameter p = this.getParameter(parameterName);
-		this.setValuePreparer(p.createValuePreparer(x));
+		this.setString(x, this.getParameter(parameterName));
+	}
+
+	private void setString(Object x, Parameter param)
+			throws EternaException
+	{
+		if (param.isMultiple())
+		{
+			this.setParamValue(param.listValuePreparer(x), param);
+		}
+		else
+		{
+			this.setParamValue(param.createValuePreparer(x), param);
+		}
 	}
 
 	public void setObject(int parameterIndex, Object x)
 			throws EternaException
 	{
-		Parameter p = this.getParameter(parameterIndex);
-		this.setValuePreparer(p.createValuePreparer(x));
+		this.setObject(x, this.getParameter(parameterIndex));
 	}
 
 	public void setObject(String parameterName, Object x)
 			throws EternaException
 	{
-		Parameter p = this.getParameter(parameterName);
-		this.setValuePreparer(p.createValuePreparer(x));
+		this.setObject(x, this.getParameter(parameterName));
+	}
+
+	private void setObject(Object x, Parameter param)
+			throws EternaException
+	{
+		if (param.isMultiple())
+		{
+			this.setParamValue(param.listValuePreparer(x), param);
+		}
+		else
+		{
+			this.setParamValue(param.createValuePreparer(x), param);
+		}
 	}
 
 	public void prepareValues(PreparedStatement stmt)
 			throws EternaException, SQLException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		this.preparerManager.prepareValues(new PreparedStatementWrapImpl(stmt));
 	}
 
 	public void prepareValues(PreparedStatementWrap stmtWrap)
 			throws EternaException, SQLException
 	{
-		if (this.daoManager == null)
-		{
-			throw new EternaException(this.getType() + " [" + this.getName()
-					+ "] not initialized.");
-		}
+		this.checkInitialized();
 		this.preparerManager.prepareValues(stmtWrap);
 	}
 
@@ -423,7 +526,7 @@ public abstract class AbstractDao extends AbstractGenerator
 		return new PreFetchIterator(Arrays.asList(this.parameterArray).iterator(), false);
 	}
 
-	private void addParameterNameMap(Parameter param)
+	private void addParameterNameMap(Parameter param, boolean paramBindWithName)
 			throws EternaException
 	{
 		int index = param.getIndex();
@@ -438,8 +541,11 @@ public abstract class AbstractDao extends AbstractGenerator
 			throw new EternaException("Duplicate parameter name [" + param.getName()
 					+ "] at " + this.getType() + "[" + this.getName() + "].");
 		}
-		ParameterManager pm = this.daoManager.getParameterManager(index - 1);
-		pm.setParam(param);
+		if (!paramBindWithName)
+		{
+			ParameterManager pm = this.daoManager.getParameterManager(index - 1);
+			pm.setParam(param);
+		}
 	}
 
 	public void addParameter(ParameterGenerator paramGenerator)
@@ -492,8 +598,35 @@ public abstract class AbstractDao extends AbstractGenerator
 		return p;
 	}
 
+	private void checkInitialized()
+	{
+		if (this.daoManager == null)
+		{
+			throw new EternaException(this.getType() + " [" + this.getName()
+					+ "] not initialized.");
+		}
+	}
+
+	/**
+	 * 从当前数据操作对象的属性中获取布尔值, 如果当前操作对象中不存在指定名称的属性,
+	 * 则从所属的工厂属性中获取, 如果也不存在则使用默认值.
+	 */
+	protected boolean getBooleanAttr(String name, boolean defaultValue)
+	{
+		String boolStr = (String) this.getAttribute(name);
+		if (boolStr == null)
+		{
+			boolStr = (String) this.getFactory().getAttribute(name);
+		}
+		return boolStr == null ? defaultValue : BooleanConverter.toBoolean(boolStr);
+	}
+
 	public void destroy()
 	{
+		this.daoManager = null;
+		this.preparerManager = null;
+		this.parameterArray = null;
+		this.parameterNameMap = null;
 	}
 
 }

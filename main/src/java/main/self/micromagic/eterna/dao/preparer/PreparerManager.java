@@ -26,6 +26,9 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
+/**
+ * 值准备器的管理者.
+ */
 public class PreparerManager
 {
 	public static final ValuePreparer IGNORE_PREPARER = new IgnorePreparer();
@@ -46,9 +49,9 @@ public class PreparerManager
 	/**
 	 * 通过指定Parameter数组来构造一个PreparerManager
 	 */
-	public PreparerManager(Dao dao, Parameter[] parameterArray)
+	public PreparerManager(Dao dao, int paramCount, Parameter[] parameterArray)
 	{
-		this(parameterArray.length);
+		this(paramCount);
 		this.parameterArray = parameterArray;
 		this.dao = dao;
 	}
@@ -325,7 +328,7 @@ public class PreparerManager
 				StringAppender buf = StringTool.createStringAppender(52);
 				if (this.dao != null)
 				{
-					buf.append("In").append(this.dao.getType()).append(" [")
+					buf.append("In ").append(this.dao.getType()).append(" [")
 							.append(this.dao.getName()).append(']');
 					buf.append(", the parameter");
 				}
@@ -335,7 +338,7 @@ public class PreparerManager
 				}
 				if (this.parameterArray != null)
 				{
-					buf.append(" [").append(this.parameterArray[i].getName()).append(']');
+					buf.append(" [").append(this.findParamName(i + 1)).append(']');
 				}
 				buf.append(" not setted. real:").append(realIndex);
 				buf.append(" relative:").append(i + 1).append('.');
@@ -370,6 +373,23 @@ public class PreparerManager
 			}
 		}
 		return settedCount;
+	}
+
+	/**
+	 * 根据参数的位置查找参数的名称.
+	 *
+	 * @param index  从1开始
+	 */
+	private String findParamName(int index)
+	{
+		for (int i = 0; i < this.parameterArray.length; i++)
+		{
+			if (this.parameterArray[i].containsValuePreparerIndex(index))
+			{
+				return this.parameterArray[i].getName();
+			}
+		}
+		return "<notfound(" + index + ")>";
 	}
 
 }

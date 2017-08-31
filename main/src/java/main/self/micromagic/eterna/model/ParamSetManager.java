@@ -24,15 +24,16 @@ import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultRow;
-import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
-import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.search.ConditionInfo;
 import self.micromagic.eterna.search.SearchManager;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 
+/**
+ * 数据库操作的参数设置管理者.
+ */
 public class ParamSetManager
 {
 	private final Dao dao;
@@ -72,12 +73,12 @@ public class ParamSetManager
 		this.paramsCacheValues.put(names, values);
 	}
 
-	public static void preparerValue(Dao sql, Parameter param, String value)
+	public static void preparerValue(Dao dao, Parameter param, String value)
 			throws EternaException
 	{
 		try
 		{
-			sql.setValuePreparer(param.createValuePreparer(value));
+			dao.setString(param.getIndex(), value);
 		}
 		catch (Exception ex)
 		{
@@ -85,16 +86,16 @@ public class ParamSetManager
 			{
 				throw (EternaException) ex;
 			}
-			doPreparerError(sql, param, value, ex);
+			doPreparerError(dao, param, value, ex);
 		}
 	}
 
-	public static void preparerValue(Dao sql, Parameter param, Object value)
+	public static void preparerValue(Dao dao, Parameter param, Object value)
 			throws EternaException
 	{
 		try
 		{
-			sql.setValuePreparer(param.createValuePreparer(value));
+			dao.setObject(param.getIndex(), value);
 		}
 		catch (Exception ex)
 		{
@@ -102,33 +103,30 @@ public class ParamSetManager
 			{
 				throw (EternaException) ex;
 			}
-			doPreparerError(sql, param, value, ex);
+			doPreparerError(dao, param, value, ex);
 		}
 	}
 
-	private static void doPreparerError(Dao sql, Parameter param, Object value,
-			Exception ex)
+	private static void doPreparerError(Dao dao, Parameter param,
+			Object value, Exception err)
 			throws EternaException
 	{
 		if (!"".equals(value))
 		{
 			// 如果因为是空字符串而产生的类型转换错误，则不记录警告日志.
 			StringAppender str = StringTool.createStringAppender(64);
-			str.append("SQL:[").append(sql.getName()).append("] ");
+			str.append("SQL:[").append(dao.getName()).append("] ");
 			str.append("param:[").append(param.getName()).append("] ");
 			str.append("value:[").append(value).append("] preparer error.");
-			AppData.log.warn(str, ex);
+			AppData.log.warn(str, err);
 		}
-		if (sql.isDynamicParameter(param.getIndex()))
+		if (dao.isDynamicParameter(param.getIndex()))
 		{
-			sql.setIgnore(param.getIndex());
+			dao.setIgnore(param.getIndex());
 		}
 		else
 		{
-			ValuePreparer p = CreaterManager.createNullPreparer(
-					sql.getFactory(), param.getType());
-			p.setRelativeIndex(param.getIndex());
-			sql.setValuePreparer(p);
+			dao.setObject(param.getIndex(), null);
 		}
 	}
 
@@ -162,10 +160,7 @@ public class ParamSetManager
 		}
 		else
 		{
-			ValuePreparer p = CreaterManager.createNullPreparer(
-					dao.getFactory(), param.getType());
-			p.setRelativeIndex(index);
-			dao.setValuePreparer(p);
+			this.dao.setObject(param.getIndex(), null);
 		}
 	}
 
@@ -471,10 +466,7 @@ public class ParamSetManager
 		}
 		else
 		{
-			ValuePreparer p = CreaterManager.createNullPreparer(
-					this.dao.getFactory(), param.getType());
-			p.setRelativeIndex(param.getIndex());
-			this.dao.setValuePreparer(p);
+			this.dao.setObject(param.getIndex(), null);
 		}
 	}
 

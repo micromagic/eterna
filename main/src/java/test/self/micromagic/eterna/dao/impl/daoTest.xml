@@ -40,6 +40,16 @@
 				<item name="c3" type="none" caption="my_c3" colName="new.x"/>
 			</entity>
 
+			<entity name="e_bind">
+				<item name="n1" type="String" colName="col1"/>
+				<item name="n2" type="String" colName="col2"/>
+				<item name="n3" type="String" colName="col3"/>
+				<item name="n4" type="String" colName="col4"/>
+				<item name="n5" type="String" colName="col5"/>
+				<item name="n6" type="String" colName="col6"/>
+				<item name="n7" type="String" colName="col7"/>
+			</entity>
+
 			<update name="t1" logType="log1">
 				<prepared-sql>
 					update TEST01 set strValue = ?, intValue = ?, doubleValue = ?

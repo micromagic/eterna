@@ -19,10 +19,13 @@ package self.micromagic.eterna.dao;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.Generator;
 
+/**
+ * 参数对象的构造器.
+ */
 public interface ParameterGenerator extends Generator
 {
 	/**
-	 * 设置要构造的SQLParameter的名称.
+	 * 设置要构造的Parameter的名称.
 	 */
 	void setName(String name) throws EternaException;
 
@@ -37,7 +40,7 @@ public interface ParameterGenerator extends Generator
 	void setPermission(String permission) throws EternaException;
 
 	/**
-	 * 设置要构造的SQLParameter的类型.
+	 * 设置要构造的Parameter的类型.
 	 */
 	void setParamType(String type) throws EternaException;
 
@@ -47,8 +50,15 @@ public interface ParameterGenerator extends Generator
 	void setPrepareName(String name) throws EternaException;
 
 	/**
-	 * 构造一个SQLParameter.
+	 * 构造一个Parameter.
 	 */
 	Parameter createParameter(int paramIndex) throws EternaException;
+
+	/**
+	 * 构造一个Parameter.
+	 *
+	 * @param preparers  对应参数准备器的位置列表
+	 */
+	Parameter createParameter(int paramIndex, int[] preparers) throws EternaException;
 
 }

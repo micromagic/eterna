@@ -32,6 +32,7 @@ import self.micromagic.eterna.dao.ResultReader;
 import self.micromagic.eterna.dao.reader.InvalidReader;
 import self.micromagic.eterna.dao.reader.ObjectReader;
 import self.micromagic.eterna.dao.reader.ReaderWrapper;
+import self.micromagic.eterna.digester2.ParseException;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
@@ -73,6 +74,9 @@ public class DaoManager
 	public static final char TEMPLATE_BEGIN = '[';
 	public static final char TEMPLATE_END = ']';
 
+	// 参数名称和后面的分组后缀的分隔符
+	protected static final char PARAM_NAME_SPLIT = '|';
+
 	// 动态生成时, 不需要名称的标志
 	private static final int AUTO_NAME_NONE = 0;
 	// 动态生成时, 需要名称的标志
@@ -82,15 +86,25 @@ public class DaoManager
 
 	protected static final Log log = Tool.log;
 
-	private PartScript[] partScripts = new PartScript[0];
+	protected static final PartScript[] DEFAULT_PART_SCRIPTS = new PartScript[0];
+	protected static final ParameterManager[] DEFAULT_PARAMS = new ParameterManager[0];
+	protected static final int[] DEFAULT_SUB_PART_INDEXS = new int[0];
 
-	private ParameterManager[] parameterManagers = new ParameterManager[0];
-	private int[] subPartIndexs = new int[0];
+
+	private PartScript[] partScripts = DEFAULT_PART_SCRIPTS;
+	private ParameterManager[] parameterManagers = DEFAULT_PARAMS;
+	private int[] subPartIndexs = DEFAULT_SUB_PART_INDEXS;
 
 	private Connection executeConn;
 	private boolean changed = true;
 	private String cacheScript;
 	private Dao dao;
+	private final boolean paramBindWithName;
+
+	public DaoManager(boolean paramBindWithName)
+	{
+		this.paramBindWithName = paramBindWithName;
+	}
 
 	public void initialize(Dao dao)
 			throws EternaException
@@ -109,7 +123,17 @@ public class DaoManager
 		for (int i = 0; i < this.parameterManagers.length; i++)
 		{
 			this.parameterManagers[i].check(factory);
+			if (this.paramBindWithName && this.parameterManagers[i].getParamName() == null)
+			{
+				throw new ParseException("Used parameter bind with name, "
+						+ "can't use [?] at position [" + (i + 1) + "].");
+			}
 		}
+	}
+
+	public boolean isParamBindWithName()
+	{
+		return this.paramBindWithName;
 	}
 
 	/**
@@ -210,21 +234,19 @@ public class DaoManager
 
 	public DaoManager copy(boolean clear)
 	{
-		DaoManager other = new DaoManager();
+		DaoManager other = new DaoManager(this.paramBindWithName);
 		other.dao = this.dao;
 		other.parameterManagers = new ParameterManager[this.parameterManagers.length];
 		for (int i = 0; i < this.parameterManagers.length; i++)
 		{
 			other.parameterManagers[i] = this.parameterManagers[i].copy(clear);
 		}
-		other.subPartIndexs = this.subPartIndexs;
-
 		other.partScripts = new PartScript[this.partScripts.length];
 		for (int i = 0; i < this.partScripts.length; i++)
 		{
 			other.partScripts[i] = this.partScripts[i].copy(clear, other);
 		}
-
+		other.subPartIndexs = this.subPartIndexs;
 		if (!clear)
 		{
 			other.cacheScript = this.cacheScript;
@@ -248,6 +270,7 @@ public class DaoManager
 		StringAppender buf = StringTool.createStringAppender(script.length() + 16);
 		String dealedScript = script;
 		int index = dealedScript.indexOf(EXTEND_FLAG + AUTO_NAME);
+		int autoIndex = 0;
 		while (index != -1)
 		{
 			// 不是个转义标记, 处理自动生成
@@ -375,30 +398,31 @@ public class DaoManager
 					}
 					else
 					{
+						autoIndex++;
 						if (AUTO_TYPE_UPDATE.equals(type))
 						{
 							this.dealAuto(" = ?", ", ", buf, paramArray, begin, end,
-									AUTO_NAME_SKIPTABLE, dynamic.value);
+									AUTO_NAME_SKIPTABLE, dynamic.value, autoIndex);
 						}
 						else if (AUTO_TYPE_INSERT_N.equals(type))
 						{
 							this.dealAuto("", ", ", buf, paramArray, begin, end,
-									AUTO_NAME_SKIPTABLE, dynamic.value);
+									AUTO_NAME_SKIPTABLE, dynamic.value, autoIndex);
 						}
 						else if (AUTO_TYPE_INSERT_V.equals(type))
 						{
 							this.dealAuto("?", ", ", buf, paramArray, begin, end,
-									AUTO_NAME_NONE, dynamic.value);
+									AUTO_NAME_NONE, dynamic.value, autoIndex);
 						}
 						else if (AUTO_TYPE_OR.equals(type))
 						{
 							this.dealAuto(" = ?", " or ", buf, paramArray, begin, end,
-									AUTO_NAME_NEED, dynamic.value);
+									AUTO_NAME_NEED, dynamic.value, autoIndex);
 						}
 						else if (AUTO_TYPE_AND.equals(type))
 						{
 							this.dealAuto(" = ?", " and ", buf, paramArray, begin, end,
-									AUTO_NAME_NEED, dynamic.value);
+									AUTO_NAME_NEED, dynamic.value, autoIndex);
 						}
 						else
 						{
@@ -570,7 +594,8 @@ public class DaoManager
 	 * 处理非select的动态语句.
 	 */
 	private void dealAuto(String plus, String separator, StringAppender buf,
-			Parameter[] paramArray, int begin, int end, int nameType, boolean dynamic)
+			Parameter[] paramArray, int begin, int end, int nameType,
+			boolean dynamic, int autoIndex)
 			throws EternaException
 	{
 		boolean first = true;
@@ -578,7 +603,9 @@ public class DaoManager
 		{
 			if (dynamic)
 			{
-				buf.append("#param(dAuto_").append(i).append(")[");
+				buf.append("#param(").append(paramArray[i].getName())
+					.append(PARAM_NAME_SPLIT).append("ED").append(autoIndex)
+					.append(")[");
 			}
 			if (!first || dynamic)
 			{
@@ -598,7 +625,16 @@ public class DaoManager
 					buf.append(paramArray[i].getColumnName());
 				}
 			}
-			buf.append(plus);
+			if (this.paramBindWithName && !dynamic && plus.length() > 0
+					&& plus.charAt(plus.length() - 1) == PARAMETER_FLAG)
+			{
+				buf.append(plus.substring(0, plus.length() - 1)).append("#param(")
+					.append(paramArray[i].getName()).append(')');
+			}
+			else
+			{
+				buf.append(plus);
+			}
 			if (dynamic)
 			{
 				buf.append(']');
@@ -614,10 +650,13 @@ public class DaoManager
 		ArrayList paramList = new ArrayList();
 		ArrayList subScriptList = new ArrayList();
 		ArrayList subList = new ArrayList();
-		parse(script, false, partList, paramList, subScriptList, subList);
+		parse(script, false, this.paramBindWithName,
+				partList, paramList, subScriptList, subList);
 
-		this.partScripts = (PartScript[]) partList.toArray(new PartScript[0]);
-		this.parameterManagers = (ParameterManager[]) paramList.toArray(new ParameterManager[0]);
+		this.partScripts = (PartScript[]) partList.toArray(
+				new PartScript[partList.size()]);
+		this.parameterManagers = (ParameterManager[]) paramList.toArray(
+				new ParameterManager[paramList.size()]);
 		for (int i = 0; i < this.parameterManagers.length; i++)
 		{
 			this.parameterManagers[i].setIndex(i);
@@ -634,15 +673,16 @@ public class DaoManager
 	/**
 	 * 将一个脚本解析成片段, 并整理出特殊的片段.
 	 *
-	 * @param script         需要解析的脚本
-	 * @param onlyC          是否只能有常量
-	 * @param partList       解析出来的脚本片段列表
-	 * @param paramList      参数管理器列表
-	 * @param subScriptList  子句前参数个数的列表
-	 * @param subList        子句标识列表
+	 * @param script             需要解析的脚本
+	 * @param onlyC              是否只能有常量
+	 * @param paramBindWithName  参数是否与名称绑定
+	 * @param partList           解析出来的脚本片段列表
+	 * @param paramList          参数管理器列表
+	 * @param subScriptList      子句前参数个数的列表
+	 * @param subList            子句标识列表
 	 */
-	public static void parse(String script, boolean onlyC, List partList, List paramList,
-			List subScriptList, List subList)
+	public static void parse(String script, boolean onlyC, boolean paramBindWithName,
+			List partList, List paramList, List subScriptList, List subList)
 			throws EternaException
 	{
 		HashMap paramMap = new HashMap();
@@ -711,7 +751,8 @@ public class DaoManager
 					{
 						throw new EternaException("Not found dynamic parameter group, script:" + script + ".");
 					}
-					dealedScript = addParamPart(partList, paramList, paramMap, dealedScript);
+					dealedScript = addParamPart(partList, paramList, paramMap,
+							paramBindWithName, dealedScript);
 				}
 				else if (checked == CONSTANT_NAME)
 				{
@@ -778,7 +819,7 @@ public class DaoManager
 		ArrayList paramList = new ArrayList();
 		ArrayList subScriptList = new ArrayList();
 		ArrayList subList = new ArrayList();
-		parse(script, true, partList, paramList, subScriptList, subList);
+		parse(script, true, false, partList, paramList, subScriptList, subList);
 		StringAppender buf = StringTool.createStringAppender(script.length() + 128);
 		Iterator itr = partList.iterator();
 		for (int i = 0; i < partList.size(); i++)
@@ -1014,33 +1055,49 @@ public class DaoManager
 		return (count & 0x1) == 1;
 	}
 
-	private static String addParamPart(List partList, List paramList, Map paramMap, String dealedScript)
+	private static String addParamPart(List partList, List paramList, Map paramMap,
+			boolean paramBindWithName, String dealedScript)
 			throws EternaException
 	{
 		int index = dealedScript.indexOf(EXTEND_NAME_END);
 		if (index == -1)
 		{
-			throw new EternaException("Not end dynamic parameter group name, dealed script:"
+			throw new EternaException("Not end parameter group name, dealed script:"
 					+ dealedScript + ".");
 		}
-
 		// 根据组名 归类动态参数
 		String group = dealedScript.substring(1, index);
-		ParameterManager pm = (ParameterManager) paramMap.get(group);
+		ParameterManager pm;
+		// 判断参数是否有template
+		dealedScript = dealedScript.substring(index + 1);
+		if (dealedScript.charAt(0) != TEMPLATE_BEGIN)
+		{
+			if (!paramBindWithName)
+			{
+				throw new EternaException("Not found dynamic parameter template, "
+						+ "dealed script:" + dealedScript + ".");
+			}
+			pm = new ParameterManager(ParameterManager.NORMAL_PARAMETER,
+					getParamNameFromGroup(group).intern());
+			paramList.add(pm);
+			return dealedScript;
+		}
+		pm = (ParameterManager) paramMap.get(group);
 		if (pm == null)
 		{
-			pm = new ParameterManager(ParameterManager.DYNAMIC_PARAMETER);
+			if (paramBindWithName)
+			{
+				pm = new ParameterManager(ParameterManager.DYNAMIC_PARAMETER,
+						getParamNameFromGroup(group).intern());
+			}
+			else
+			{
+				pm = new ParameterManager(ParameterManager.DYNAMIC_PARAMETER);
+			}
 			pm.setGroupName(group);
 			paramMap.put(group, pm);
 		}
 
-		// 获取动态参数的template
-		dealedScript = dealedScript.substring(index + 1);
-		if (dealedScript.charAt(0) != TEMPLATE_BEGIN)
-		{
-			throw new EternaException("Not found dynamic parameter template, dealed script:"
-					+ dealedScript + ".");
-		}
 		index = getEndTemplateIndex(dealedScript);
 
 		String temp = dealedScript.substring(1, index);
@@ -1067,6 +1124,12 @@ public class DaoManager
 			}
 		}
 		return dealedScript.substring(index + 1);
+	}
+
+	private static String getParamNameFromGroup(String group)
+	{
+		int index = group.indexOf(PARAM_NAME_SPLIT);
+		return index == -1 ? group : group.substring(0, index);
 	}
 
 	private static List getNormalParameters(String script)

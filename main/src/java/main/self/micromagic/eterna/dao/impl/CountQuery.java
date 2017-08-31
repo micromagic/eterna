@@ -47,6 +47,9 @@ import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.logging.TimeLogger;
 
+/**
+ * 用于统计总记录数的查询.
+ */
 class CountQuery
 		implements Query
 {
@@ -297,6 +300,12 @@ class CountQuery
 			throws EternaException
 	{
 		return this.query.getParameterCount();
+	}
+
+	public int getRealParameterCount()
+			throws EternaException
+	{
+		return this.query.getRealParameterCount();
 	}
 
 	public int getActiveParamCount()

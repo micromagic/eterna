@@ -777,7 +777,7 @@ class PreparedValueReader
 		}
 	}
 
-	public void setObject(String parameterName, int parameterIndex, Object x) throws SQLException
+	public void setObject(String parameterName, int parameterIndex, Object x)
 	{
 		Element parameter = this.paramsRoot.addElement("parameter");
 		this.addParameterName(parameter, parameterName);

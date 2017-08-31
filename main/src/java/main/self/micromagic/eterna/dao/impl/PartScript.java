@@ -12,7 +12,7 @@ import self.micromagic.util.StringTool;
 import self.micromagic.util.converter.BooleanConverter;
 
 /**
- * SQL脚本的片断, 可以是一部分普通的脚本, 或一个子语句脚本,
+ * 数据库操作脚本的片断, 可以是一部分普通的脚本, 或一个子语句脚本,
  * 或可选参数, 或一个常量.
  */
 public abstract class PartScript
@@ -30,6 +30,9 @@ public abstract class PartScript
 
 }
 
+/**
+ * 动态参数片段.
+ */
 class ParameterPart extends PartScript
 {
 	private ParameterManager paramManager;
@@ -81,6 +84,9 @@ class ParameterPart extends PartScript
 
 }
 
+/**
+ * 子句标志片段, 即替换"$"的片段.
+ */
 class SubFlagPart extends PartScript
 {
 	private String insertString = null;
@@ -109,6 +115,9 @@ class SubFlagPart extends PartScript
 
 }
 
+/**
+ * 子句片段.
+ */
 class SubPart extends PartScript
 {
 	private int flagPartIndex = -1;
@@ -158,7 +167,8 @@ class SubPart extends PartScript
 			ArrayList paramList = new ArrayList();
 			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(this.template, true, partList, paramList, subScriptList, subList);
+			DaoManager.parse(this.template, true, false,
+					partList, paramList, subScriptList, subList);
 
 			if (paramList.size() > 0)
 			{
@@ -277,6 +287,9 @@ class SubPart extends PartScript
 
 }
 
+/**
+ * 常量片段.
+ */
 class ConstantScript extends PartScript
 {
 	private final String name;
@@ -309,7 +322,8 @@ class ConstantScript extends PartScript
 			ArrayList paramList = new ArrayList();
 			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(this.value, true, partList, paramList, subScriptList, subList);
+			DaoManager.parse(this.value, true, false,
+					partList, paramList, subScriptList, subList);
 
 			if (paramList.size() > 0)
 			{
@@ -363,6 +377,9 @@ class ConstantScript extends PartScript
 
 }
 
+/**
+ * 检测片段.
+ */
 class CheckPart extends PartScript
 {
 	private String hasSubStr;
@@ -394,7 +411,8 @@ class CheckPart extends PartScript
 			ArrayList paramList = new ArrayList();
 			ArrayList subScriptList = new ArrayList();
 			ArrayList subList = new ArrayList();
-			DaoManager.parse(tmpStr, true, partList, paramList, subScriptList, subList);
+			DaoManager.parse(tmpStr, true, false,
+					partList, paramList, subScriptList, subList);
 
 			if (paramList.size() > 0)
 			{
@@ -412,9 +430,11 @@ class CheckPart extends PartScript
 				buf.append(ps.getScript());
 			}
 
-			Map map = StringTool.string2Map(buf.toString(), ";", '=', true, false, null, null);
+			Map map = StringTool.string2Map(
+					buf.toString(), ";", '=', true, false, null, null);
 			String tmp;
-			if ((tmp = (String) map.get("hasSub")) != null || (tmp = (String) map.get("append")) != null)
+			if ((tmp = (String) map.get("hasSub")) != null
+					|| (tmp = (String) map.get("append")) != null)
 			{
 				this.hasSubStr = tmp;
 			}
@@ -674,6 +694,9 @@ class CheckContainer
 
 }
 
+/**
+ * 普通脚本的片段.
+ */
 class NormalScript extends PartScript
 {
 	private final String script;

@@ -42,7 +42,7 @@ public class DaoManagerTest extends TestCase
 
 	static
 	{
-		daoManager = new DaoManager();
+		daoManager = new DaoManager(false);
 		paramArray = new Parameter[10];
 		for (int i = 0; i < paramArray.length; i++)
 		{
@@ -83,7 +83,8 @@ public class DaoManagerTest extends TestCase
 		try
 		{
 			String str = daoManager.preParse("#auto[update,dynamic;1,3]", query);
-			String result = "#param(dAuto_0)[, col_0 = ?]#param(dAuto_1)[, col_1 = ?]#param(dAuto_2)[, col_2 = ?]";
+			String result = "#param(name_0|ED1)[, col_0 = ?]#param(name_1|ED1)[, col_1 = ?]"
+					+ "#param(name_2|ED1)[, col_2 = ?]";
 			assertEquals(result, str);
 
 			str = daoManager.preParse("##auto[update;1,3] #? #param(t)[t = ?] #sub[($)]", query);
@@ -91,15 +92,24 @@ public class DaoManagerTest extends TestCase
 			assertEquals(result, str);
 
 			str = daoManager.preParse("#auto[and,dynamic;6,-2]", query);
-			result = "#param(dAuto_5)[ and col_5 = ?]#param(dAuto_6)[ and col_6 = ?]"
-					+ "#param(dAuto_7)[ and col_7 = ?]#param(dAuto_8)[ and col_8 = ?]";
+			result = "#param(name_5|ED1)[ and col_5 = ?]#param(name_6|ED1)[ and col_6 = ?]"
+					+ "#param(name_7|ED1)[ and col_7 = ?]#param(name_8|ED1)[ and col_8 = ?]";
 			assertEquals(result, str);
 
 			str = daoManager.preParse("#auto[insertN,dynamic;1,3] ###auto[insertV,dynamic;1,-1]", query);
-			result = "#param(dAuto_0)[, col_0]#param(dAuto_1)[, col_1]#param(dAuto_2)[, col_2] ##"
-					+ "#param(dAuto_0)[, ?]#param(dAuto_1)[, ?]#param(dAuto_2)[, ?]#param(dAuto_3)[, ?]"
-					+ "#param(dAuto_4)[, ?]#param(dAuto_5)[, ?]#param(dAuto_6)[, ?]#param(dAuto_7)[, ?]"
-					+ "#param(dAuto_8)[, ?]#param(dAuto_9)[, ?]";
+			result = "#param(name_0|ED1)[, col_0]#param(name_1|ED1)[, col_1]"
+					+ "#param(name_2|ED1)[, col_2] ###param(name_0|ED2)[, ?]#param(name_1|ED2)[, ?]"
+					+ "#param(name_2|ED2)[, ?]#param(name_3|ED2)[, ?]#param(name_4|ED2)[, ?]"
+					+ "#param(name_5|ED2)[, ?]#param(name_6|ED2)[, ?]#param(name_7|ED2)[, ?]"
+					+ "#param(name_8|ED2)[, ?]#param(name_9|ED2)[, ?]";
+			assertEquals(result, str);
+
+			DaoManager daoManager2 = new DaoManager(true);
+			str = daoManager2.preParse("#auto[update;1,3] #auto[insertV;2,6] #auto[or,dynamic;5,7]", query);
+			result = "col_0 = #param(name_0), col_1 = #param(name_1), col_2 = #param(name_2) "
+					+ "#param(name_1), #param(name_2), #param(name_3), #param(name_4), #param(name_5) "
+					+ "#param(name_4|ED3)[ or col_4 = ?]#param(name_5|ED3)[ or col_5 = ?]"
+					+ "#param(name_6|ED3)[ or col_6 = ?]";
 			assertEquals(result, str);
 		}
 		catch (EternaException ex)

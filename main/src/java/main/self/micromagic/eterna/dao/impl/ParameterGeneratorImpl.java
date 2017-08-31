@@ -30,6 +30,9 @@ import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
 
+/**
+ * 参数对象构造器的实现.
+ */
 public class ParameterGeneratorImpl extends AbstractGenerator
 		implements ParameterGenerator
 {
@@ -71,20 +74,32 @@ public class ParameterGeneratorImpl extends AbstractGenerator
 				paramIndex, this.prepareName, this.permission, this.attributes);
 	}
 
+	public Parameter createParameter(int paramIndex, int[] preparers)
+			throws EternaException
+	{
+		return new DifferentIndexParameter(this.getName(), this.colName, this.type,
+				paramIndex, this.prepareName, this.permission, this.attributes, preparers);
+	}
+
 }
 
+/**
+ * 参数的索引与语句中的索引位置相同的Parameter.
+ */
 class ParameterImpl
 		implements Parameter
 {
-	protected String name;
+	protected final String name;
 	private final String colName;
 	private PermissionSet permissionSet;
 	protected PreparerCreater prepare;
-	protected int type;
-	protected int index;
-	protected AttributeManager attrs;
-	// 这里需要保留prepareName, 因为在转换成item时需要使用
-	protected String prepareName;
+	protected final int type;
+	protected final int index;
+	protected final AttributeManager attrs;
+
+	// 这里需要保留prepareName, 因为未设置名称时会生成默认的preparer,
+	// 这样在转换成item时就无法获取到原始的名称. 所以不能使用holder
+	protected final String prepareName;
 
 	public ParameterImpl(String name, String colName, String typeName,
 			int index, String prepareName, String permission, AttributeManager attrs)
@@ -136,6 +151,11 @@ class ParameterImpl
 		return this.permissionSet;
 	}
 
+	public String getTypeName()
+	{
+		return TypeManager.getTypeName(this.type);
+	}
+
 	public int getType()
 	{
 		return this.type;
@@ -146,14 +166,29 @@ class ParameterImpl
 		return TypeManager.getPureType(this.type);
 	}
 
+	public boolean isMultiple()
+	{
+		return false;
+	}
+
 	public int getIndex()
 	{
 		return this.index;
 	}
 
-	public String getTypeName()
+	public int getValuePreparerIndex()
 	{
-		return TypeManager.getTypeName(this.type);
+		return this.index;
+	}
+
+	public int[] listValuePreparerIndex()
+	{
+		throw this.makeMultipleError();
+	}
+
+	public boolean containsValuePreparerIndex(int index)
+	{
+		return this.index == index;
 	}
 
 	public Object getAttribute(String name)
@@ -170,16 +205,142 @@ class ParameterImpl
 			throws EternaException
 	{
 		ValuePreparer vp = this.prepare.createPreparer(value);
-		vp.setRelativeIndex(this.index);
+		vp.setRelativeIndex(this.getValuePreparerIndex());
+		vp.setName(this.getName());
 		return vp;
+	}
+
+	public ValuePreparer[] listValuePreparer(String value)
+			throws EternaException
+	{
+		throw this.makeMultipleError();
 	}
 
 	public ValuePreparer createValuePreparer(Object value)
 			throws EternaException
 	{
 		ValuePreparer vp = this.prepare.createPreparer(value);
-		vp.setRelativeIndex(this.index);
+		vp.setRelativeIndex(this.getValuePreparerIndex());
+		vp.setName(this.getName());
 		return vp;
+	}
+
+	public ValuePreparer[] listValuePreparer(Object value)
+			throws EternaException
+	{
+		throw this.makeMultipleError();
+	}
+
+	protected EternaException makeMultipleError()
+	{
+		return new EternaException("The parameter [" + this.getName() + "] "
+				+ (this.isMultiple() ? "is" : "isn't") + " multiple.");
+	}
+
+}
+
+/**
+ * 参数的索引与语句中的索引位置不同的Parameter.
+ */
+class DifferentIndexParameter	extends ParameterImpl
+{
+	protected final int[] prepareIndexArray;
+
+	public DifferentIndexParameter(String name, String colName, String typeName,
+			int index, String prepareName, String permission, AttributeManager attrs,
+			int[] prepareIndexArray)
+	{
+		super(name, colName, typeName, index, prepareName, permission, attrs);
+		this.prepareIndexArray = prepareIndexArray;
+	}
+
+	public boolean isMultiple()
+	{
+		return this.prepareIndexArray.length != 1;
+	}
+
+	public int getValuePreparerIndex()
+	{
+		if (this.isMultiple())
+		{
+			throw this.makeMultipleError();
+		}
+		return this.prepareIndexArray[0];
+	}
+
+	public int[] listValuePreparerIndex()
+	{
+		if (!this.isMultiple())
+		{
+			throw this.makeMultipleError();
+		}
+		return this.prepareIndexArray;
+	}
+
+	public boolean containsValuePreparerIndex(int index)
+	{
+		for (int i = 0; i < this.prepareIndexArray.length; i++)
+		{
+			if (this.prepareIndexArray[i] == index)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public ValuePreparer createValuePreparer(String value)
+			throws EternaException
+	{
+		if (this.isMultiple())
+		{
+			throw this.makeMultipleError();
+		}
+		return super.createValuePreparer(value);
+	}
+
+	public ValuePreparer[] listValuePreparer(String value)
+			throws EternaException
+	{
+		if (!this.isMultiple())
+		{
+			throw this.makeMultipleError();
+		}
+		ValuePreparer[] arr = new ValuePreparer[this.prepareIndexArray.length];
+		for (int i = 0; i < arr.length; i++)
+		{
+			arr[i] = this.prepare.createPreparer(value);
+			arr[i].setRelativeIndex(this.prepareIndexArray[i]);
+			arr[i].setName(this.getName());
+		}
+		return arr;
+	}
+
+	public ValuePreparer createValuePreparer(Object value)
+			throws EternaException
+	{
+		if (this.isMultiple())
+		{
+			throw this.makeMultipleError();
+		}
+		return super.createValuePreparer(value);
+	}
+
+	public ValuePreparer[] listValuePreparer(Object value)
+			throws EternaException
+	{
+		if (!this.isMultiple())
+		{
+			throw this.makeMultipleError();
+		}
+		ValuePreparer[] arr = new ValuePreparer[this.prepareIndexArray.length];
+		for (int i = 0; i < arr.length; i++)
+		{
+			arr[i] = this.prepare.createPreparer(value);
+			arr[i].setRelativeIndex(this.prepareIndexArray[i]);
+			arr[i].setName(this.getName());
+		}
+		return arr;
 	}
 
 }

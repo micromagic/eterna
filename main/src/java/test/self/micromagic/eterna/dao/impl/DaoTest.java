@@ -19,13 +19,117 @@ package self.micromagic.eterna.dao.impl;
 import java.sql.Connection;
 
 import self.micromagic.eterna.dao.Dao;
+import self.micromagic.eterna.dao.PreparerChecker;
 import self.micromagic.eterna.dao.Query;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.Update;
+import self.micromagic.eterna.dao.preparer.PreparerManager;
+import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.share.TypeManager;
+import self.micromagic.util.Utility;
 import tool.ConnectionTool;
 
 public class DaoTest extends TestBase
 {
+	public void testBindWithName()
+			throws Exception
+	{
+		EntityRefImpl ref = new EntityRefImpl();
+		ref.setEntityName("e_bind");
+		UpdateImpl u = new UpdateImpl();
+		u.setAttribute(Dao.PARAM_BIND_WITH_NAME_FLAG, "1");
+		u.setName("b_t_02");
+		u.addEntityRef(ref);
+		u.setPreparedSQL("#param(n1) #sub #auto[and;5] #sub #auto[and,dynamic;2,6]");
+		u.setFactory(f);
+		f.registerObject(u);
+
+		Object[] results;
+		Update update = f.createUpdate("b_t_02");
+		update.setSubScript(1, "");
+		update.setSubScript(2, "");
+		update.setString("n1", "a");
+		update.setIgnore("n2");
+		update.setIgnore("n3");
+		update.setIgnore("n4");
+		update.setString("n5", "e");
+		update.setString("n6", "f");
+		update.setString("n7", "g");
+		results = new Object[]{"a", "e", "f", "g", "e", "f"};
+		update.prepareValues(new PreparerChecker(results));
+
+		PreparerManager pm;
+		ValuePreparer vp;
+		pm = new PreparerManager(1);
+		vp = f.createValuePreparer(TypeManager.TYPE_INTEGER, "1");
+		vp.setRelativeIndex(1);
+		pm.setValuePreparer(vp);
+		update.setSubScript(1, "?", pm);
+		pm = new PreparerManager(2);
+		vp = f.createValuePreparer(TypeManager.TYPE_INTEGER, "2");
+		vp.setRelativeIndex(1);
+		pm.setValuePreparer(vp);
+		vp = f.createValuePreparer(TypeManager.TYPE_INTEGER, "3");
+		vp.setRelativeIndex(2);
+		pm.setValuePreparer(vp);
+		update.setSubScript(2, "? ?", pm);;
+		update.setObject("n3", Utility.INTEGER_10);
+		results = new Object[]{
+			"a", Utility.INTEGER_1, "e", "f", "g",
+			Utility.INTEGER_2, Utility.INTEGER_3, "10", "e", "f"
+		};
+		update.prepareValues(new PreparerChecker(results));
+	}
+
+	public void testBindWithIndex()
+			throws Exception
+	{
+		EntityRefImpl ref = new EntityRefImpl();
+		ref.setEntityName("e_bind");
+		UpdateImpl u = new UpdateImpl();
+		u.setName("b_t_01");
+		u.addEntityRef(ref);
+		u.setPreparedSQL("? #sub #auto[and,dynamic;2,5] #sub #auto[and;6]");
+		u.setFactory(f);
+		f.registerObject(u);
+
+		Object[] results;
+		Update update = f.createUpdate("b_t_01");
+		update.setSubScript(1, "");
+		update.setSubScript(2, "");
+		update.setString("n1", "a");
+		update.setIgnore("n2");
+		update.setIgnore("n3");
+		update.setIgnore("n4");
+		update.setIgnore("n5");
+		update.setString("n6", "f");
+		update.setString("n7", "g");
+		results = new Object[]{"a", "f", "g"};
+		update.prepareValues(new PreparerChecker(results));
+
+		PreparerManager pm;
+		ValuePreparer vp;
+		pm = new PreparerManager(1);
+		vp = f.createValuePreparer(TypeManager.TYPE_INTEGER, "1");
+		vp.setRelativeIndex(1);
+		pm.setValuePreparer(vp);
+		update.setSubScript(1, "?", pm);
+		pm = new PreparerManager(2);
+		vp = f.createValuePreparer(TypeManager.TYPE_INTEGER, "2");
+		vp.setRelativeIndex(1);
+		pm.setValuePreparer(vp);
+		vp = f.createValuePreparer(TypeManager.TYPE_INTEGER, "3");
+		vp.setRelativeIndex(2);
+		pm.setValuePreparer(vp);
+		update.setSubScript(2, "? ?", pm);;
+		update.setObject("n3", Utility.INTEGER_10);
+		results = new Object[]{
+			"a", Utility.INTEGER_1, "10",
+			Utility.INTEGER_2, Utility.INTEGER_3, "f", "g"
+		};
+		update.prepareValues(new PreparerChecker(results));
+	}
+
 	public void test01()
 			throws Exception
 	{
