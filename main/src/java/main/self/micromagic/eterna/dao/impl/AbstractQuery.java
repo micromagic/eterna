@@ -40,12 +40,11 @@ import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
-import self.micromagic.util.converter.BooleanConverter;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
 
 /**
- * @author micromagic@sina.com
+ * 抽象的数据库查询对象.
  */
 public abstract class AbstractQuery extends BaseDao
 		implements Query
@@ -126,17 +125,7 @@ public abstract class AbstractQuery extends BaseDao
 		if (temp.getReaderCount() > 0)
 		{
 			temp.lock();
-			String checkStr = (String) this.getAttribute(CHECK_READER_FLAG);
-			if (checkStr == null)
-			{
-				checkStr = (String) this.getFactory().getAttribute(CHECK_READER_FLAG);
-			}
-			boolean checkReader = false;
-			if (checkStr != null)
-			{
-				checkReader = BooleanConverter.toBoolean(checkStr);
-			}
-			if (!checkReader)
+			if (!this.getBooleanAttr(CHECK_READER_FLAG, false))
 			{
 				// 当设置了reader且没有设置检查时就添加到全局中
 				this.globalReaderManager.setObject(temp);
