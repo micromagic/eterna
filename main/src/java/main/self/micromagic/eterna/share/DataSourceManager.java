@@ -16,12 +16,16 @@
 
 package self.micromagic.eterna.share;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.naming.Context;
+import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import self.micromagic.eterna.share.EternaException;
+import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 
 public interface DataSourceManager
 {
@@ -51,5 +55,129 @@ public interface DataSourceManager
 
 	void addDataSource(Context context, String dataSourceConfig)
 			throws EternaException;
+
+}
+
+class DataSourceManagerImpl implements DataSourceManager
+{
+	private String defaultDataSourceName = null;
+	private DataSource defaultDataSource = null;
+
+	private Map dataSourceMap = null;
+
+	/**
+	 * 初始化这个DataSourceManager.
+	 */
+	public void initialize(EternaFactory factory)
+			throws EternaException
+	{
+		if (this.dataSourceMap == null)
+		{
+			throw new EternaException("Not registe any data source.");
+		}
+		if (this.defaultDataSourceName == null)
+		{
+			throw new EternaException("Must give this default data source name.");
+		}
+		this.defaultDataSource = (DataSource) this.dataSourceMap.get(this.defaultDataSourceName);
+		if (this.defaultDataSource == null)
+		{
+			throw new EternaException("Not found the data source:" + this.defaultDataSourceName + ".");
+		}
+
+	}
+
+	public DataSource getDefaultDataSource()
+	{
+		return this.defaultDataSource;
+	}
+
+	public DataSource getDataSource(String name)
+	{
+		return (DataSource) this.dataSourceMap.get(name);
+	}
+
+	public Map getDataSourceMap()
+	{
+		return Collections.unmodifiableMap(this.dataSourceMap);
+	}
+
+	protected boolean hasDataSource(String name)
+	{
+		if (this.dataSourceMap == null)
+		{
+			return false;
+		}
+		return this.dataSourceMap.containsKey(name);
+	}
+
+	public String getDefaultDataSourceName()
+	{
+		return this.defaultDataSourceName;
+	}
+
+	public void setDefaultDataSourceName(String name)
+			throws EternaException
+	{
+		if (this.defaultDataSource != null)
+		{
+			throw new EternaException("Can't set default data source name after Initialization.");
+		}
+		this.defaultDataSourceName = name;
+	}
+
+	protected void addDataSource(String name, DataSource ds)
+	{
+		if (this.dataSourceMap == null)
+		{
+			this.dataSourceMap = new HashMap();
+		}
+		this.dataSourceMap.put(name, ds);
+	}
+
+	public void addDataSource(Context context, String dataSourceConfig)
+			throws EternaException
+	{
+		String[] items = StringTool.separateString(
+				Utility.resolveDynamicPropnames(dataSourceConfig), ";", true);
+		try
+		{
+			for (int i = 0; i < items.length; i++)
+			{
+				if (this.dataSourceMap == null)
+				{
+					this.dataSourceMap = new HashMap();
+				}
+				String item = items[i];
+				if (item.length() > 0)
+				{
+					int index = item.indexOf('=');
+					if (index == -1)
+					{
+						throw new EternaException("Error DataSource define:" + item + ".");
+					}
+					String key = item.substring(0, index).trim();
+					if (this.dataSourceMap.containsKey(key))
+					{
+						throw new EternaException("Duplicate DataSource name:" + key + ".");
+					}
+					String name = item.substring(index + 1).trim();
+					if (name.length() > 0)
+					{
+						this.dataSourceMap.put(key, context.lookup(name));
+					}
+					else
+					{
+						this.dataSourceMap.put(key, Utility.getDataSource());
+					}
+				}
+			}
+		}
+		catch (NamingException ex)
+		{
+			EternaFactoryImpl.log.error("Error when get jdbc in jndi.", ex);
+			throw new EternaException(ex);
+		}
+	}
 
 }
