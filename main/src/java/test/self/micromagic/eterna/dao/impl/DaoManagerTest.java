@@ -97,11 +97,11 @@ public class DaoManagerTest extends TestCase
 			assertEquals(result, str);
 
 			str = daoManager.preParse("#auto[insertN,dynamic;1,3] ###auto[insertV,dynamic;1,-1]", query);
-			result = "#param(name_0|ED1)[, col_0]#param(name_1|ED1)[, col_1]"
-					+ "#param(name_2|ED1)[, col_2] ###param(name_0|ED2)[, ?]#param(name_1|ED2)[, ?]"
-					+ "#param(name_2|ED2)[, ?]#param(name_3|ED2)[, ?]#param(name_4|ED2)[, ?]"
-					+ "#param(name_5|ED2)[, ?]#param(name_6|ED2)[, ?]#param(name_7|ED2)[, ?]"
-					+ "#param(name_8|ED2)[, ?]#param(name_9|ED2)[, ?]";
+			result = "#param(name_0|ED0)[, col_0]#param(name_1|ED0)[, col_1]"
+					+ "#param(name_2|ED0)[, col_2] ###param(name_0|ED0)[, ?]#param(name_1|ED0)[, ?]"
+					+ "#param(name_2|ED0)[, ?]#param(name_3|ED0)[, ?]#param(name_4|ED0)[, ?]"
+					+ "#param(name_5|ED0)[, ?]#param(name_6|ED0)[, ?]#param(name_7|ED0)[, ?]"
+					+ "#param(name_8|ED0)[, ?]#param(name_9|ED0)[, ?]";
 			assertEquals(result, str);
 
 			DaoManager daoManager2 = new DaoManager(true);

@@ -19,6 +19,7 @@ package self.micromagic.eterna.dao.impl;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -406,13 +407,15 @@ public class DaoManager
 						}
 						else if (AUTO_TYPE_INSERT_N.equals(type))
 						{
+							// 插入的group名称用固定的序号0
 							this.dealAuto("", ", ", buf, paramArray, begin, end,
-									AUTO_NAME_SKIPTABLE, dynamic.value, autoIndex);
+									AUTO_NAME_SKIPTABLE, dynamic.value, 0);
 						}
 						else if (AUTO_TYPE_INSERT_V.equals(type))
 						{
+							// 插入的group名称用固定的序号0, 否则序号不同无法与名称匹配
 							this.dealAuto("?", ", ", buf, paramArray, begin, end,
-									AUTO_NAME_NONE, dynamic.value, autoIndex);
+									AUTO_NAME_NONE, dynamic.value, 0);
 						}
 						else if (AUTO_TYPE_OR.equals(type))
 						{
@@ -657,10 +660,27 @@ public class DaoManager
 				new PartScript[partList.size()]);
 		this.parameterManagers = (ParameterManager[]) paramList.toArray(
 				new ParameterManager[paramList.size()]);
+		Map checkedPM = new IdentityHashMap();
+		for (int i = 0; i < this.partScripts.length; i++)
+		{
+			PartScript part = this.partScripts[i];
+			if (part instanceof ParameterPart)
+			{
+				ParameterManager pm = ((ParameterPart) part).getParameterManager();
+				if (!checkedPM.containsKey(pm))
+				{
+					pm.preCheck();
+					checkedPM.put(pm, Boolean.TRUE);
+				}
+			}
+		}
 		for (int i = 0; i < this.parameterManagers.length; i++)
 		{
 			this.parameterManagers[i].setIndex(i);
-			this.parameterManagers[i].preCheck();
+			if (!checkedPM.containsKey(this.parameterManagers[i]))
+			{
+				this.parameterManagers[i].preCheck();
+			}
 		}
 		this.subPartIndexs = new int[subScriptList.size()];
 		Iterator itr = subScriptList.iterator();

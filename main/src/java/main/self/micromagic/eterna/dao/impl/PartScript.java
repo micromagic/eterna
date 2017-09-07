@@ -52,6 +52,11 @@ class ParameterPart extends PartScript
 	{
 	}
 
+	public ParameterManager getParameterManager()
+	{
+		return this.paramManager;
+	}
+
 	public PartScript copy(boolean clear, DaoManager manager)
 	{
 		ParameterManager pm = manager.getParameterManager(this.paramManager.getIndex());

@@ -25,6 +25,7 @@ import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.Utility;
 import tool.ConnectionTool;
@@ -38,14 +39,14 @@ public class DaoTest extends TestBase
 		ref.setEntityName("e_bind");
 		UpdateImpl u = new UpdateImpl();
 		u.setAttribute(Dao.PARAM_BIND_WITH_NAME_FLAG, "1");
-		u.setName("b_t_02");
+		u.setName("b_t_03");
 		u.addEntityRef(ref);
 		u.setPreparedSQL("#param(n1) #sub #auto[and;5] #sub #auto[and,dynamic;2,6]");
 		u.setFactory(f);
 		f.registerObject(u);
 
 		Object[] results;
-		Update update = f.createUpdate("b_t_02");
+		Update update = f.createUpdate("b_t_03");
 		update.setSubScript(1, "");
 		update.setSubScript(2, "");
 		update.setString("n1", "a");
@@ -81,7 +82,35 @@ public class DaoTest extends TestBase
 		update.prepareValues(new PreparerChecker(results));
 	}
 
-	public void testBindWithIndex()
+	public void testBindWithIndex2()
+			throws Exception
+	{
+		EntityRefImpl ref = new EntityRefImpl();
+		ref.setEntityName("e_bind");
+		UpdateImpl u = new UpdateImpl();
+		u.setName("b_t_02");
+		u.addEntityRef(ref);
+		u.setPreparedSQL("insert into T (#auto[insertN;1,2] #auto[insertN,d;3])"
+				+ " values (#auto[insertV;1,2] #auto[insertV,d;3])");
+		u.setFactory(f);
+		f.registerObject(u);
+
+		Object[] results;
+		Update update = f.createUpdate("b_t_02");
+		update.setString("n1", "a");
+		update.setString("n2", "b");
+		update.setIgnore("n3");
+		update.setIgnore("n4");
+		update.setIgnore("n5");
+		update.setIgnore("n6");
+		update.setString("n7", "g");
+		results = new Object[]{"a", "b", "g"};
+		update.prepareValues(new PreparerChecker(results));
+		assertEquals("insert into T (col1, col2 , col7) values (?, ? , ?)",
+				update.getPreparedScript());
+	}
+
+	public void testBindWithIndex1()
 			throws Exception
 	{
 		EntityRefImpl ref = new EntityRefImpl();
@@ -128,6 +157,23 @@ public class DaoTest extends TestBase
 			Utility.INTEGER_2, Utility.INTEGER_3, "f", "g"
 		};
 		update.prepareValues(new PreparerChecker(results));
+	}
+
+	public void testErrorDynamic()
+	{
+		EntityRefImpl ref = new EntityRefImpl();
+		ref.setEntityName("e_bind");
+		UpdateImpl u = new UpdateImpl();
+		u.setName("b_t_err");
+		u.addEntityRef(ref);
+		u.setPreparedSQL("? #sub #auto[insertN,dynamic;2,5] #sub #auto[and;2]");
+		u.setFactory(f);
+		try
+		{
+			f.registerObject(u);
+			fail("动态参数有未绑定的应抛出异常");
+		}
+		catch (EternaException ex) {}
 	}
 
 	public void test01()
