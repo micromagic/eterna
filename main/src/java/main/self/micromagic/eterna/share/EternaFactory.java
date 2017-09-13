@@ -42,7 +42,10 @@ import self.micromagic.eterna.view.StringCoder;
 import self.micromagic.eterna.view.View;
 
 /**
- * eterna框架的工厂.
+ * eterna框架的工厂. <p>
+ *
+ * 注: 工厂初始化时会加同步锁, 初始化完后, 使用时不会加锁.
+ * 所以运行时是非线程安全的, 如果有修改操作时请对此对象加锁.
  */
 public interface EternaFactory extends Factory
 {
