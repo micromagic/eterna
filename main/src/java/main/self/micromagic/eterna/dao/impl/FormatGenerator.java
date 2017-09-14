@@ -42,6 +42,12 @@ import self.micromagic.util.ref.StringRef;
 
 public class FormatGenerator extends AbstractGenerator
 {
+	private static Map formatCache = new HashMap();
+
+	private static final String T_BOOLEAN = "boolean";
+	private static final String T_DATE = "Date";
+	private static final String T_NUMBER = "Number";
+
 	private String formatType;
 	private String formatPattern;
 
@@ -124,20 +130,26 @@ public class FormatGenerator extends AbstractGenerator
 	 * @param type  类型的id
 	 * @see TypeManager
 	 */
-	public static ResultFormat createFormat(int type, String name, String pattern,
+	public static ResultFormat createFormat(int type, String pattern,
 			ResultReader reader, EternaFactory factory)
 	{
+		String key = pattern.concat(
+				"/".concat(Integer.toString(TypeManager.getPureType(type))));
+		ResultFormat format = (ResultFormat) formatCache.get(key);
+		if (format != null)
+		{
+			return format;
+		}
 		synchronized (formatCache)
 		{
-			String key = pattern.concat("/".concat(Integer.toString(TypeManager.getPureType(type))));
-			ResultFormat format = (ResultFormat) formatCache.get(key);
+			// 加上同步锁后需要再获取一遍
+			format = (ResultFormat) formatCache.get(key);
 			if (format != null)
 			{
 				return format;
 			}
 			FormatGenerator fg = new FormatGenerator();
-			// 这里不能用setName因为名称中会包含":"
-			fg.name = name;
+			fg.setName("_auto");
 			fg.setPattern(pattern);
 			if (TypeManager.isBoolean(type))
 			{
@@ -154,8 +166,9 @@ public class FormatGenerator extends AbstractGenerator
 			else
 			{
 				// 类型错误, 无法生成需要的格式化对象
-				log.error("Error format type [" + TypeManager.getPureTypeName(type) + "] for pattern ["
-						+ pattern + "] in factory [" + factory.getFactoryContainer().getId()
+				log.error("Error format type [" + TypeManager.getPureTypeName(type)
+						+ "] for pattern [" + pattern + "] in factory ["
+						+ factory.getFactoryContainer().getId()
 						+ "]'s reader [" + reader.getName() + "]");
 				return null;
 			}
@@ -164,11 +177,6 @@ public class FormatGenerator extends AbstractGenerator
 			return format;
 		}
 	}
-	private static Map formatCache = new HashMap();
-
-	private static final String T_BOOLEAN = "boolean";
-	private static final String T_DATE = "Date";
-	private static final String T_NUMBER = "Number";
 
 }
 
@@ -194,7 +202,8 @@ class StandardFormat
 		return this.name;
 	}
 
-	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
+	public Object format(Object obj, ResultRow row, ResultReader reader,
+			Permission permission)
 	{
 		return obj == null ? "" : FormatTool.getThreadFormat(this.format).format(obj);
 	}
@@ -240,7 +249,8 @@ class BooleanFormat
 		return this.name;
 	}
 
-	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
+	public Object format(Object obj, ResultRow row, ResultReader reader,
+			Permission permission)
 	{
 		if (obj == null)
 		{

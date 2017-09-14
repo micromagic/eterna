@@ -92,14 +92,11 @@ class ParameterImpl
 	protected final String name;
 	private final String colName;
 	private PermissionSet permissionSet;
+	protected final String prepareName;
 	protected PreparerCreater prepare;
 	protected final int type;
 	protected final int index;
 	protected final AttributeManager attrs;
-
-	// 这里需要保留prepareName, 因为未设置名称时会生成默认的preparer,
-	// 这样在转换成item时就无法获取到原始的名称. 所以不能使用holder
-	protected final String prepareName;
 
 	public ParameterImpl(String name, String colName, String typeName,
 			int index, String prepareName, String permission, AttributeManager attrs)

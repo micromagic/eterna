@@ -18,8 +18,6 @@ package self.micromagic.eterna.search.impl;
 
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-
 import self.micromagic.eterna.dao.impl.ScriptParser;
 import self.micromagic.eterna.dao.preparer.CreaterManager;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
@@ -40,26 +38,23 @@ import self.micromagic.util.StringTool;
 class ConditionPropertyImpl
 		implements ConditionProperty
 {
-	private static final Log log = Tool.log;
-
 	String name;
 	String columnName;
 	String columnCaption = null;
 	boolean ignore = false;
 	int columnType;
 	String prepareName;
-	PreparerCreater prepare;
+	private PreparerCreater prepare;
 	boolean visible = true;
 	String inputType;
 	Object defaultObj;
 	String permissionConfig;
-	PermissionSet permissionSet = null;
+	private PermissionSet permissionSet = null;
 	AttributeManager attributes;
 
-	// 这里需要保留条件构造器列表的名称, 因为list中没有保留名称, 无法使用holder
 	String listName;
-	List builderList;
-	// condition不需要再转换回item, 所以不会有默认builder的问题, 可以使用holder
+	private List builderList;
+	private String builderName;
 	private ConditionBuilder defaultBuilder;
 	boolean useDefaultConditionBuilder = false;
 
@@ -69,17 +64,10 @@ class ConditionPropertyImpl
 		if (this.listName != null)
 		{
 			this.builderList = factory.getConditionBuilderList(this.listName);
-			if (this.builderList == null)
-			{
-				log.warn("The ConditionBuilder list [" + this.listName + "] not found.");
-			}
 		}
-
-		String defaultName = this.defaultBuilder instanceof ConditionBuilderHolder ?
-				this.defaultBuilder.getName() : null;
-		if (defaultName != null)
+		if (this.builderName != null)
 		{
-			this.defaultBuilder = factory.getConditionBuilder(defaultName);
+			this.defaultBuilder = factory.getConditionBuilder(this.builderName);
 		}
 		else if (this.builderList != null && !this.builderList.isEmpty())
 		{
@@ -184,7 +172,7 @@ class ConditionPropertyImpl
 
 	public void setDefaultConditionBuilderName(String name)
 	{
-		this.defaultBuilder = name == null ? null : new ConditionBuilderHolder(name);
+		this.builderName = name;
 	}
 
 	public ConditionBuilder getDefaultConditionBuilder()

@@ -64,6 +64,7 @@ public class ObjectReader
 	protected String columnName;
 	protected String orderCol;
 
+	protected String formatName;
 	protected ResultFormat format;
 	protected PermissionSet permissionSet;
 
@@ -101,19 +102,17 @@ public class ObjectReader
 		{
 			this.orderCol = ScriptParser.checkNameWithKey(this.orderCol);
 		}
-		ResultFormat f = this.format;
-		String formatName = f instanceof ResultFormatHolder ? f.getName() : null;
-		if (formatName != null)
+		if (this.formatName != null)
 		{
 			String checkStr = Tool.PATTERN_PREFIX;
 			if (formatName.startsWith(checkStr))
 			{
-				this.format = FormatGenerator.createFormat(this.getType(), formatName,
-						formatName.substring(checkStr.length()), this, factory);
+				this.format = FormatGenerator.createFormat(this.getType(),
+						this.formatName.substring(checkStr.length()), this, factory);
 			}
 			else
 			{
-				this.format = factory.getFormat(formatName);
+				this.format = factory.getFormat(this.formatName);
 			}
 		}
 
@@ -151,15 +150,14 @@ public class ObjectReader
 		return this.format;
 	}
 
-	public void setFormatName(String format)
+	public void setFormatName(String formatName)
 	{
-		this.format = format == null ? null : new ResultFormatHolder(format);
+		this.formatName = formatName;
 	}
 
 	public String getFormatName()
 	{
-		ResultFormat f = this.format;
-		return f == null ? null : f.getName();
+		return this.formatName;
 	}
 
 	public String getName()
