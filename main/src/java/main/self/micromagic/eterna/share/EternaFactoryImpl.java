@@ -233,7 +233,18 @@ public class EternaFactoryImpl extends AbstractFactory
 				return null;
 			}
 		}
-		return super.setAttribute(name, value);
+		if (this.initFlag == INIT_FLAG_FINISH)
+		{
+			// 如果已初始化完毕, 添加属性时需要加锁
+			synchronized (this.getLockObject())
+			{
+				return super.setAttribute(name, value);
+			}
+		}
+		else
+		{
+			return super.setAttribute(name, value);
+		}
 	}
 
 	public boolean initialize(FactoryContainer factoryContainer, Factory shareFactory)
@@ -743,6 +754,22 @@ public class EternaFactoryImpl extends AbstractFactory
 		{
 			throw new NullPointerException("Param obj is null.");
 		}
+		if (this.initFlag == INIT_FLAG_FINISH)
+		{
+			// 如果已初始化完毕, 注册时需要加锁
+			synchronized (this.getLockObject())
+			{
+				this.registerObject1(obj);
+			}
+		}
+		else
+		{
+			this.registerObject1(obj);
+		}
+	}
+	private void registerObject1(Object obj)
+			throws EternaException
+	{
 		int id = this.findEmptyPosition();
 		if (id >= Factory.MAX_OBJECT_COUNT)
 		{
@@ -768,6 +795,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		this.registerObject0(id, container);
 	}
+
 	public void registerObject(String name, Object obj)
 			throws EternaException
 	{
@@ -775,6 +803,22 @@ public class EternaFactoryImpl extends AbstractFactory
 		{
 			throw new NullPointerException("Param obj is null.");
 		}
+		if (this.initFlag == INIT_FLAG_FINISH)
+		{
+			// 如果已初始化完毕, 注册时需要加锁
+			synchronized (this.getLockObject())
+			{
+				this.registerObject1(name, obj);
+			}
+		}
+		else
+		{
+			this.registerObject1(name, obj);
+		}
+	}
+	private void registerObject1(String name, Object obj)
+			throws EternaException
+	{
 		int id = this.findEmptyPosition();
 		if (id >= Factory.MAX_OBJECT_COUNT)
 		{
@@ -785,6 +829,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		ObjectContainer container = new NormalObjectCon(id, name, obj);
 		this.registerObject0(id, container);
 	}
+
 	private void registerObject0(int id, ObjectContainer container)
 	{
 		String name = container.getName();
@@ -806,6 +851,7 @@ public class EternaFactoryImpl extends AbstractFactory
 			initObject(true, this, container);
 		}
 	}
+
 	private int findEmptyPosition()
 	{
 		if (this.hasEmptyPosition)
@@ -864,6 +910,22 @@ public class EternaFactoryImpl extends AbstractFactory
 		{
 			throw new ParseException("Not found object [" + name + "].");
 		}
+		if (this.initFlag == INIT_FLAG_FINISH)
+		{
+			// 如果已初始化完毕, 注销时需要加锁
+			synchronized (this.getLockObject())
+			{
+				this.deregisterObject1(key, container);
+			}
+		}
+		else
+		{
+			this.deregisterObject1(key, container);
+		}
+	}
+	private void deregisterObject1(Object key, ObjectContainer container)
+			throws EternaException
+	{
 		this.objectList.set(container.getId(), null);
 		this.objectMap.remove(key);
 		container.destroy();

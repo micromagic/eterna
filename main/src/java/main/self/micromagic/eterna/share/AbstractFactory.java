@@ -123,6 +123,15 @@ public abstract class AbstractFactory
 	}
 
 	/**
+	 * 获取用于加同步锁的对象.
+	 */
+	protected Object getLockObject()
+	{
+		Object obj = this.factoryContainer;
+		return obj == null ? this : obj;
+	}
+
+	/**
 	 * 销毁工厂及工厂中的对象.
 	 */
 	public void destroy()
