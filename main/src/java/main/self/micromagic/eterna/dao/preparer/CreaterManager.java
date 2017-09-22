@@ -35,17 +35,47 @@ import self.micromagic.util.ref.ObjectRef;
  */
 public class CreaterManager extends AbstractGenerator
 {
+	/**
+	 * 在factory的属性中存放自动创建的PreparerCreater的缓存的键值.
+	 */
+	public static final String ATTR_CREATER = "__f_attr.PreparerCreater";
+
+	private static Map typeClassMap = new HashMap();
+
+	private String type;
+	private String pattern;
+
+	static
+	{
+		typeClassMap.put("String", StringCreater.class);
+		typeClassMap.put("boolean", BooleanCreater.class);
+		typeClassMap.put("byte", ByteCreater.class);
+		typeClassMap.put("short", ShortCreater.class);
+		typeClassMap.put("int", IntegerCreater.class);
+		typeClassMap.put("long", LongCreater.class);
+		typeClassMap.put("float", FloatCreater.class);
+		typeClassMap.put("double", DoubleCreater.class);
+		typeClassMap.put("Bytes", BytesCreater.class);
+		typeClassMap.put("Date", DateCreater.class);
+		typeClassMap.put("Time", TimeCreater.class);
+		typeClassMap.put("Datetime", TimestampCreater.class);
+		typeClassMap.put("Timestamp", TimestampCreater.class);
+		typeClassMap.put("BigString", StringCreater.class);
+		typeClassMap.put("Stream", StreamCreater.class);
+		typeClassMap.put("Chars", CharsCreater.class);
+		typeClassMap.put("Blob", BlobCreater.class);
+		typeClassMap.put("Clob", ClobCreater.class);
+	}
+
 	public void setType(String type)
 	{
 		this.type = type;
 	}
-	private String type;
 
 	public void setPattern(String pattern)
 	{
 		this.pattern = pattern;
 	}
-	private String pattern;
 
 	public Object create()
 			throws EternaException
@@ -126,9 +156,16 @@ public class CreaterManager extends AbstractGenerator
 		{
 			return creater;
 		}
-		creater = new NullCreater(name);
-		creater.initialize(factory);
-		createrCache.put(name, creater);
+		synchronized (createrCache)
+		{
+			creater = (NullCreater) createrCache.get(name);
+			if (creater == null)
+			{
+				creater = new NullCreater(name);
+				creater.initialize(factory);
+				createrCache.put(name, creater);
+			}
+		}
 		return creater;
 	}
 
@@ -151,20 +188,26 @@ public class CreaterManager extends AbstractGenerator
 			name = name.concat(".").concat(pattern);
 		}
 		PreparerCreater creater = (PreparerCreater) createrCache.get(name);
-		if (creater != null)
+		if (creater == null)
 		{
-			return creater;
+			synchronized (createrCache)
+			{
+				creater = (PreparerCreater) createrCache.get(name);
+				if (creater == null)
+				{
+					CreaterManager cm = new CreaterManager();
+					cm.setType(type);
+					cm.setName("_auto");
+					if (pattern != null)
+					{
+						cm.setPattern(pattern);
+					}
+					creater = (PreparerCreater) cm.create();
+					creater.initialize(factory);
+					createrCache.put(name, creater);
+				}
+			}
 		}
-		CreaterManager cm = new CreaterManager();
-		cm.setType(type);
-		cm.setName("_auto");
-		if (pattern != null)
-		{
-			cm.setPattern(pattern);
-		}
-		creater = (PreparerCreater) cm.create();
-		creater.initialize(factory);
-		createrCache.put(name, creater);
 		return creater;
 	}
 
@@ -177,6 +220,7 @@ public class CreaterManager extends AbstractGenerator
 		if (createrCache == null)
 		{
 			createrCache = new HashMap();
+			// 设置属性时工厂已根据是否初始完毕来加锁
 			factory.setAttribute(ATTR_CREATER, createrCache);
 			realFactory.setObject(factory);
 		}
@@ -191,33 +235,6 @@ public class CreaterManager extends AbstractGenerator
 			realFactory.setObject(tmpFactory);
 		}
 		return createrCache;
-	}
-	/**
-	 * 在factory的属性中存放自动创建的PreparerCreater的缓存的键值.
-	 */
-	public static final String ATTR_CREATER = "__f_attr.PreparerCreater";
-
-	private static Map typeClassMap = new HashMap();
-	static
-	{
-		typeClassMap.put("String", StringCreater.class);
-		typeClassMap.put("boolean", BooleanCreater.class);
-		typeClassMap.put("byte", ByteCreater.class);
-		typeClassMap.put("short", ShortCreater.class);
-		typeClassMap.put("int", IntegerCreater.class);
-		typeClassMap.put("long", LongCreater.class);
-		typeClassMap.put("float", FloatCreater.class);
-		typeClassMap.put("double", DoubleCreater.class);
-		typeClassMap.put("Bytes", BytesCreater.class);
-		typeClassMap.put("Date", DateCreater.class);
-		typeClassMap.put("Time", TimeCreater.class);
-		typeClassMap.put("Datetime", TimestampCreater.class);
-		typeClassMap.put("Timestamp", TimestampCreater.class);
-		typeClassMap.put("BigString", StringCreater.class);
-		typeClassMap.put("Stream", StreamCreater.class);
-		typeClassMap.put("Chars", CharsCreater.class);
-		typeClassMap.put("Blob", BlobCreater.class);
-		typeClassMap.put("Clob", ClobCreater.class);
 	}
 
 	static PreparerCreater createPreparerCreater(String type, String name)
