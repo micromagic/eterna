@@ -331,6 +331,21 @@ public class EternaFactoryImpl extends AbstractFactory
 		}
 		// 新添加的对象不需要再初始化, 因为在添加时已经初始化了
 
+		Object extInit = factoryContainer.getAttribute(FactoryContainer.EXT_INIT_FLAG);
+		if (extInit != null)
+		{
+			// 处理扩展初始化
+			EternaObject[] extInitObjs = extInit instanceof EternaObject ?
+					new EternaObject[]{(EternaObject) extInit} : (EternaObject[]) extInit;
+			for (int i = 0; i < extInitObjs.length; i++)
+			{
+				EternaObject obj = extInitObjs[i];
+				String objName = obj.getName() + "(extInit)";
+				ParseException.setContextInfo(null, objName, "");
+				obj.initialize(this);
+			}
+		}
+
 		// 重新构造列表, 去除对象列表中的多余空间
 		Object leaveSizeObj = factoryContainer.getAttribute(FactoryContainer.LEAVE_SIZE_FLAG);
 		int leaveSize = 2;

@@ -60,6 +60,14 @@ public interface FactoryContainer
 	String EXT_PREFIX = "ext.";
 
 	/**
+	 * 在attribute中存放扩展初始化对象的键值.
+	 * 存放的对象只能是EternaObject或其数组.
+	 *
+	 * @see EternaObject
+	 */
+	String EXT_INIT_FLAG = "eterna.ext.init";
+
+	/**
 	 * 获得工厂容器实例的id.
 	 */
 	String getId();
