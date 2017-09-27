@@ -23,6 +23,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -445,7 +446,11 @@ public class BeanTool
 			}
 			catch (Throwable ex)
 			{
-				CG.log.error("Error in create bean map for [" + ClassGenerator.getClassName(beanClass) + "].", ex);
+				if (!checkBeanClass(beanClass, ex))
+				{
+					String name = ClassGenerator.getClassName(beanClass);
+					CG.log.error("Error in create bean map for [" + name + "].", ex);
+				}
 				if (ex instanceof RuntimeException)
 				{
 					throw (RuntimeException) ex;
@@ -459,6 +464,39 @@ public class BeanTool
 		}
 		beanDescriptorCache.setProperty(beanClass, bd);
 		return bd;
+	}
+
+	/**
+	 * 检查抛出的异常是否为beanClass未找到.
+	 */
+	private static boolean checkBeanClass(Class beanClass, Throwable err)
+	{
+		String name = beanClass.getName();
+		Throwable tmp = err;
+		while (tmp != null)
+		{
+			if (name.equals(tmp.getMessage()))
+			{
+				ClassLoader loader = beanClass.getClassLoader();
+				String path = name.replace('.', '/').concat(".class");
+				InputStream stream = loader.getResourceAsStream(path);
+				URL locate = loader.getResource(path);
+				String msg = "Error in create bean map for [" + name + "], locate is: [" + locate
+						+ "], stream is: [" + stream + "].";
+				CG.log.error(msg, tmp);
+				if (stream != null)
+				{
+					try
+					{
+						stream.close();
+					}
+					catch (Exception ex) {}
+				}
+				return true;
+			}
+			tmp = tmp.getCause();
+		}
+		return false;
 	}
 
 	private static ClassKeyCache mapToBeanCache = ClassKeyCache.getInstance();

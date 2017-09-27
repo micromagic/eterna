@@ -450,7 +450,7 @@ public class JavassistCG
 				}
 				return null;
 			}
-			String fName = classname.replace('.', '/') + ".class";
+			String fName = classname.replace('.', '/').concat(".class");
 			InputStream is = cl.getResourceAsStream(fName);
 			if (ClassGenerator.COMPILE_LOG_TYPE > COMPILE_LOG_TYPE_INFO)
 			{
@@ -476,7 +476,7 @@ public class JavassistCG
 				}
 				return null;
 			}
-			String fName = classname.replace('.', '/') + ".class";
+			String fName = classname.replace('.', '/').concat(".class");
 			URL url = cl.getResource(fName);
 			if (ClassGenerator.COMPILE_LOG_TYPE > COMPILE_LOG_TYPE_INFO)
 			{
