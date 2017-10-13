@@ -35,6 +35,7 @@ import self.micromagic.coder.Base64;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.ref.BooleanRef;
+import self.micromagic.util.ref.StringRef;
 
 /**
  * cookie信息的容器.
@@ -50,7 +51,7 @@ public class CookieContainer extends AbstractContainerSetting
 	/**
 	 * 对压缩后的编码进行转码的base64编码的实例.
 	 */
-	private static final Base64 ZIP_CODER = new Base64(
+	private static final Base64 COMPRESS_CODER = new Base64(
 			"0123456789abcedfghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ_+.".toCharArray());
 
 	private final HttpServletRequest request;
@@ -290,16 +291,18 @@ public class CookieContainer extends AbstractContainerSetting
 			String str = value.toString();
 			if (this.compressValue)
 			{
-				BooleanRef ziped = new BooleanRef();
-				String zipStr = this.doDeflater(str, ziped);
-				if (ziped.value && zipStr.length() + 8 < str.length())
+				BooleanRef done = new BooleanRef();
+				StringRef encoded = new StringRef(null);
+				String tmpStr = this.doDeflater(str, done, encoded);
+				if (done.value)
 				{
 					// 已压缩且压缩后的尺寸小于原始尺寸的, 才作为压缩存放
-					str = COMPRESS_VALUE_PREFIX.concat(zipStr);
+					str = COMPRESS_VALUE_PREFIX.concat(tmpStr);
 				}
 				else
 				{
-					str = this.encodeStr(str);
+					tmpStr = encoded.getString();
+					str = tmpStr == null ? this.encodeStr(str) : tmpStr;
 				}
 			}
 			else
@@ -353,14 +356,13 @@ public class CookieContainer extends AbstractContainerSetting
 	{
 		try
 		{
-			byte[] buf = ZIP_CODER.base64ToByteArray(str);
+			byte[] buf = COMPRESS_CODER.base64ToByteArray(str);
 			ByteArrayInputStream byteIn = new ByteArrayInputStream(buf);
 			InflaterInputStream in = new InflaterInputStream(byteIn);
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream(str.length() * 3 + 128);
 			Utility.copyStream(in, byteOut);
 			in.close();
-			byte[] result = byteOut.toByteArray();
-			return new String(result, "UTF-8");
+			return byteOut.toString("UTF-8");
 		}
 		catch (IOException ex)
 		{
@@ -372,11 +374,11 @@ public class CookieContainer extends AbstractContainerSetting
 	/**
 	 * 对字符串进行压缩操作.
 	 */
-	private String doDeflater(String str, BooleanRef ziped)
+	private String doDeflater(String str, BooleanRef done, StringRef encoded)
 	{
+		done.value = false;
 		if (str.length() < this.minCompressSize)
 		{
-			ziped.value = false;
 			return str;
 		}
 		try
@@ -386,9 +388,20 @@ public class CookieContainer extends AbstractContainerSetting
 			byte[] buf = str.getBytes("UTF-8");
 			out.write(buf);
 			out.close();
+			int outSize = byteOut.size() * 4 / 3 + 8;
+			if (outSize > str.length() && outSize > buf.length)
+			{
+				// 压缩加Base64后的字节数大于编码后的字节, 不使用压缩
+				String tmp = this.encodeStr(str);
+				encoded.setString(tmp);
+				if (outSize > tmp.length())
+				{
+					return str;
+				}
+			}
 			byte[] result = byteOut.toByteArray();
-			ziped.value = true;
-			return ZIP_CODER.byteArrayToBase64(result);
+			done.value = true;
+			return COMPRESS_CODER.byteArrayToBase64(result);
 		}
 		catch (IOException ex)
 		{
