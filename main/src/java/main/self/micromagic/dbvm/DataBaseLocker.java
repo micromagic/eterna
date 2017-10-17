@@ -16,6 +16,8 @@
 
 package self.micromagic.dbvm;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.rmi.server.UID;
@@ -92,6 +94,11 @@ public class DataBaseLocker
 	 */
 	private static long defaultMaxWaitTime =  15 * 60 * 1000L;
 
+	// 存放已加锁的数据库连接, 用于生成id
+	private static Reference[] connsInLock = new Reference[8];
+	// 存放已数组中已使用的数量
+	private static int connsInLockUsedCount;
+
 	// 运行时名称
 	private static String runtimeName = getRuntimeName0();
 
@@ -166,6 +173,29 @@ public class DataBaseLocker
 		modify.setIgnore("userId");
 		modify.executeUpdate(conn);
 		conn.commit();
+		synchronized (DataBaseLocker.class)
+		{
+			for (int i = connsInLockUsedCount - 1; i >= 0; i--)
+			{
+				Reference ref = connsInLock[i];
+				if ((ref == null || ref.get() == null) && i == connsInLockUsedCount - 1)
+				{
+					// 如果在末尾的已被清空, 则使用值-1
+					connsInLock[i] = null;
+					connsInLockUsedCount--;
+				}
+				if (ref != null && ref.get() == conn)
+				{
+					connsInLock[i] = null;
+					if (i == connsInLockUsedCount - 1)
+					{
+						// 如果释放的在末尾, 则使用值-1
+						connsInLockUsedCount--;
+					}
+					break;
+				}
+			}
+		}
 	}
 
 	/**
@@ -354,7 +384,8 @@ public class DataBaseLocker
 				{
 					Update update = f.createUpdate("addLockInfo");
 					update.setString("lockName", lockName);
-					update.setString("lockValue", overTransaction ? nowLockValue : null);
+					update.setString("lockValue",
+							overTransaction ? nowLockValue : RELEASED_VALUE);
 					update.setString("userId", userId);
 					if (update.executeUpdate(conn) == 0)
 					{
@@ -387,7 +418,9 @@ public class DataBaseLocker
 			}
 			else
 			{
-				if (row != null && row.getLong("nowTime") - row.getLong("lockTime") > maxWaitTime)
+				long timpMargin = row == null ? 0L
+						: row.getLong("nowTime") - row.getLong("lockTime");
+				if (timpMargin > maxWaitTime)
 				{
 					// 如果超过了最长等待时间, 则强制获取锁
 					if (tryGetLock(conn, modify, lockValue))
@@ -445,7 +478,51 @@ public class DataBaseLocker
 	 */
 	private static String makeLockValue(Connection conn)
 	{
-		return getRuntimeName().concat(":".concat(Integer.toString(conn.hashCode())));
+		int index = -1;
+		synchronized (DataBaseLocker.class)
+		{
+			int emptyIndex = -1;
+			for (int i = 0; i < connsInLockUsedCount; i++)
+			{
+				Reference ref = connsInLock[i];
+				if (ref != null && ref.get() == conn)
+				{
+					// 找到匹配的conn
+					index = i;
+					break;
+				}
+				else if (emptyIndex == -1 && (ref == null || ref.get() == null))
+				{
+					// 找到空项
+					emptyIndex = i;
+				}
+			}
+			if (index == -1)
+			{
+				if (emptyIndex == -1 && connsInLockUsedCount < connsInLock.length)
+				{
+					// 未找到匹配项或空项
+					emptyIndex = connsInLockUsedCount++;
+				}
+				if (emptyIndex != -1)
+				{
+					connsInLock[emptyIndex] = new WeakReference(conn);
+					index = emptyIndex;
+				}
+				else
+				{
+					// 数组长度不够需要扩展
+					int count = connsInLock.length;
+					Reference[] arr = new Reference[count + 2];
+					System.arraycopy(connsInLock, 0, arr, 0, count);
+					connsInLock = arr;
+					index = count;
+					connsInLockUsedCount++;
+					connsInLock[index] = new WeakReference(conn);
+				}
+			}
+		}
+		return getRuntimeName().concat(":".concat(Integer.toString(index)));
 	}
 
 	static FactoryContainer getContainer(String dbName, FactoryContainer share)
