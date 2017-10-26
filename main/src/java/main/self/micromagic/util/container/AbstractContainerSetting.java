@@ -16,9 +16,9 @@
 
 package self.micromagic.util.container;
 
-import java.net.URLEncoder;
-import java.net.URLDecoder;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
@@ -31,7 +31,8 @@ class AbstractContainerSetting
 	/**
 	 * 进行URL编解码时使用的默认字符集
 	 */
-	protected static final String DEFAULT_CHARSET = Utility.getProperty(Utility.CHARSET_TAG, "UTF-8");
+	protected static final String DEFAULT_CHARSET
+			= Utility.getProperty(Utility.CHARSET_TAG, "UTF-8");
 
 	/**
 	 * 是否要对获取的value进行处理.

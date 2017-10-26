@@ -49,10 +49,24 @@ public class CookieContainer extends AbstractContainerSetting
 	public static final String COMPRESS_VALUE_PREFIX = "--zip-";
 
 	/**
+	 * 压缩时使用的字符集.
+	 */
+	private static final String COMPRESS_CHARSET = "UTF-8";
+
+	private static final char[] BASE64_CHARS = {
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+		'a', 'b', 'c', 'e', 'd', 'f', 'g', 'h', 'i', 'j',
+		'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+		'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'E',
+		'D', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+		'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+		'Y', 'Z', '_', '+', '.'
+	};
+
+	/**
 	 * 对压缩后的编码进行转码的base64编码的实例.
 	 */
-	private static final Base64 COMPRESS_CODER = new Base64(
-			"0123456789abcedfghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ_+.".toCharArray());
+	private static final Base64 COMPRESS_CODER = new Base64(BASE64_CHARS);
 
 	private final HttpServletRequest request;
 	private HttpServletResponse response;
@@ -178,7 +192,8 @@ public class CookieContainer extends AbstractContainerSetting
 		{
 			if (name != null && name.endsWith(this.parseSuffix))
 			{
-				return this.findCookie(name.substring(0, name.length() - this.parseSuffix.length()));
+				return this.findCookie(
+						name.substring(0, name.length() - this.parseSuffix.length()));
 			}
 			else
 			{
@@ -261,7 +276,8 @@ public class CookieContainer extends AbstractContainerSetting
 				cookie = new Cookie(this.encodeStr(name), "");
 				cookie.setMaxAge(0);
 				String oldDomain = oldCookie.getDomain();
-				if (!StringTool.isEmpty(oldDomain) && !(oldDomain.equals(this.request.getServerName())))
+				if (!StringTool.isEmpty(oldDomain)
+						&& !(oldDomain.equals(this.request.getServerName())))
 				{
 					// 存在原始的域, 且与当前服务器host不同, 才重新设置域
 					cookie.setDomain(oldDomain);
@@ -279,7 +295,8 @@ public class CookieContainer extends AbstractContainerSetting
 		else if (value instanceof Cookie)
 		{
 			cookie = (Cookie) value;
-			String cookieName = this.decodeStr(cookie.getName(), this.response.getCharacterEncoding());
+			String cookieName = this.decodeStr(cookie.getName(),
+					this.response.getCharacterEncoding());
 			if (!(name.equals(cookieName)))
 			{
 				throw new IllegalArgumentException("The cookie name not same, name:["
@@ -359,10 +376,11 @@ public class CookieContainer extends AbstractContainerSetting
 			byte[] buf = COMPRESS_CODER.base64ToByteArray(str);
 			ByteArrayInputStream byteIn = new ByteArrayInputStream(buf);
 			InflaterInputStream in = new InflaterInputStream(byteIn);
-			ByteArrayOutputStream byteOut = new ByteArrayOutputStream(str.length() * 3 + 128);
+			ByteArrayOutputStream byteOut = new ByteArrayOutputStream(
+					str.length() * 3 + 128);
 			Utility.copyStream(in, byteOut);
 			in.close();
-			return byteOut.toString("UTF-8");
+			return byteOut.toString(COMPRESS_CHARSET);
 		}
 		catch (IOException ex)
 		{
@@ -385,7 +403,7 @@ public class CookieContainer extends AbstractContainerSetting
 		{
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream(str.length() + 128);
 			DeflaterOutputStream out = new DeflaterOutputStream(byteOut);
-			byte[] buf = str.getBytes("UTF-8");
+			byte[] buf = str.getBytes(COMPRESS_CHARSET);
 			out.write(buf);
 			out.close();
 			int outSize = byteOut.size() * 4 / 3 + 8;
