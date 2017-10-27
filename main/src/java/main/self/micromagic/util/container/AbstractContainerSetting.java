@@ -29,7 +29,7 @@ import self.micromagic.util.Utility;
 class AbstractContainerSetting
 {
 	/**
-	 * 进行URL编解码时使用的默认字符集
+	 * 进行URL编解码时使用的默认字符集.
 	 */
 	protected static final String DEFAULT_CHARSET
 			= Utility.getProperty(Utility.CHARSET_TAG, "UTF-8");

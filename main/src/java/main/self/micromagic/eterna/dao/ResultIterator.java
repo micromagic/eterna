@@ -27,7 +27,9 @@ import self.micromagic.eterna.share.EternaException;
 public interface ResultIterator extends Iterator
 {
 	/**
-	 * 用于标识在保持连接的结果集中不要关闭连接.
+	 * 用于标识在保持连接的结果集中不要关闭连接. <p>
+	 * 如果需要自行控制所有连接的关闭, 可在调用前按如下方法设置:
+	 * request.setAttribute(ResultIterator.DONT_CLOSE_CONNECTION, "1");
 	 */
 	String DONT_CLOSE_CONNECTION = "ETERNA_DONT_CLOSE_CONNECTION";
 
