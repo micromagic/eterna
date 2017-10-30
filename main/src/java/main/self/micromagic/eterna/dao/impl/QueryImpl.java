@@ -33,9 +33,7 @@ import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultMetaData;
 import self.micromagic.eterna.dao.ResultReaderManager;
 import self.micromagic.eterna.dao.ResultRow;
-import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.model.AppDataLogExecute;
-import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.logging.TimeLogger;
 
@@ -303,6 +301,7 @@ public class QueryImpl extends AbstractQuery
 			}
 			ResultReaderManager rm = this.getReaderManager0(rs);
 			List readerList = rm.getReaderList(this.getPermission0());
+			// 在构造函数中会设置是否已接管数据库连接的标识
 			ResultSetIteratorImpl rsitr = new ResultSetIteratorImpl(
 					conn, stmt, rs, rm, readerList, this);
 			if (totalCount != -1)
@@ -310,8 +309,6 @@ public class QueryImpl extends AbstractQuery
 				rsitr.setTotalCount(totalCount);
 			}
 			this.executedResult = result = rsitr;
-			// 查询执行完成, 表示已接管了数据库链接的控制, 可以设置链接接管标志
-			AppData.getCurrentData().addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "1");
 			return result;
 		}
 		catch (SQLException ex)

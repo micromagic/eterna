@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.model.Model;
 import self.micromagic.util.converter.BooleanConverter;
 
 public abstract class AbstractResultSetIterator
@@ -56,11 +57,15 @@ public abstract class AbstractResultSetIterator
 		this.conn = conn;
 		this.stmt = stmt;
 		this.resultSet = rs;
-		Map attrMap = AppData.getCurrentData().getRequestAttributeMap();
-		this.dontClose = attrMap != null && BooleanConverter.toBoolean(attrMap.get(DONT_CLOSE_CONNECTION));
+		AppData data = AppData.getCurrentData();
+		Map attrMap = data.getRequestAttributeMap();
+		this.dontClose = attrMap != null
+				&& BooleanConverter.toBoolean(attrMap.get(DONT_CLOSE_CONNECTION));
 		if (!this.dontClose)
 		{
 			CheckRunner.addResult(this);
+			// 释放检测添加完成, 表示已接管了数据库链接的控制, 可以设置链接接管标志
+			data.addSpcialData(Model.MODEL_CACHE, Model.CONN_HOLDED, "1");
 		}
 	}
 
@@ -181,7 +186,8 @@ public abstract class AbstractResultSetIterator
 		throw new NoSuchElementException();
 	}
 
-	protected abstract ResultRow getResultRow(ResultSet rs, int rowNum) throws SQLException;
+	protected abstract ResultRow getResultRow(ResultSet rs, int rowNum)
+			throws SQLException;
 
 	public boolean beforeFirst()
 	{
