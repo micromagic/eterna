@@ -29,6 +29,8 @@ public class BindingError
 	private final String code;
 	private final String msg;
 	private final boolean fieldType;
+	
+	private String strValue;
 
 	BindingError(Class<?> c, Member m, String code, String msg)
 	{
@@ -99,6 +101,5 @@ public class BindingError
 		}
 		return this.strValue;
 	}
-	private String strValue;
 
 }

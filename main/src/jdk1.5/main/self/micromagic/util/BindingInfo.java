@@ -18,6 +18,12 @@ package self.micromagic.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 与配置管理器绑定的类成员的信息.
@@ -31,6 +37,8 @@ public class BindingInfo
 	private final String description;
 	private final String defaultValue;
 	private final boolean fieldType;
+
+	private String strValue;
 
 	BindingInfo(Class<?> c, Member m, String name, String value, String description,
 			String defaultValue)
@@ -159,6 +167,150 @@ public class BindingInfo
 		}
 		return this.strValue;
 	}
-	private String strValue;
+
+	// 下面是对绑定信息的处理
+
+	static List<BindingError> autoBind(Class<?> c, PropertiesManager manager)
+	{
+		List<BindingError> result = new LinkedList<BindingError>();
+		if (c == null)
+		{
+			return result;
+		}
+		self.micromagic.util.annotation.Config config;
+		Field[] fields = c.getDeclaredFields();
+		for (int i = 0; i < fields.length; i++)
+		{
+			Field f = fields[i];
+			config = f.getAnnotation(self.micromagic.util.annotation.Config.class);
+			if (config != null)
+			{
+				int mod = f.getModifiers();
+				if (!Modifier.isStatic(mod))
+				{
+					result.add(new BindingError(c, f, "bindingError.static",
+							"The field must be static."));
+					continue;
+				}
+				if (Modifier.isFinal(mod))
+				{
+					result.add(new BindingError(c, f, "bindingError.final",
+							"The field can't be final."));
+					continue;
+				}
+				try
+				{
+					if (StringTool.isEmpty(config.defaultValue()))
+					{
+						manager.addFieldPropertyManager(config.name(), c, f.getName());
+					}
+					else
+					{
+						manager.addFieldPropertyManager(config.name(), c, f.getName(),
+								config.defaultValue());
+					}
+				}
+				catch (Throwable ex)
+				{
+					result.add(new BindingError(c, f, "bindingError.error", ex.getMessage()));
+				}
+			}
+		}
+		Method[] methods = c.getDeclaredMethods();
+		for (int i = 0; i < methods.length; i++)
+		{
+			Method m = methods[i];
+			config = m.getAnnotation(self.micromagic.util.annotation.Config.class);
+			if (config != null)
+			{
+				int mod = m.getModifiers();
+				if (!Modifier.isStatic(mod))
+				{
+					result.add(new BindingError(c, m, "bindingError.static",
+							"The method must be static."));
+					continue;
+				}
+				Class<?>[] types = m.getParameterTypes();
+				if (types.length != 1 || types[0] != String.class)
+				{
+					result.add(new BindingError(c, m, "bindingError.param",
+							"The method parameter must be String."));
+					continue;
+				}
+				try
+				{
+					if (StringTool.isEmpty(config.defaultValue()))
+					{
+						manager.addMethodPropertyManager(config.name(), c, m.getName());
+					}
+					else
+					{
+						manager.addMethodPropertyManager(config.name(), c, m.getName(),
+								config.defaultValue());
+					}
+				}
+				catch (Throwable ex)
+				{
+					result.add(new BindingError(c, m, "bindingError.error", ex.getMessage()));
+				}
+			}
+		}
+		return result;
+	}
+
+	static List<BindingInfo> listBindingInfo(Map<String, PropertyManager[]> managerMap,
+			PropertiesManager manager)
+	{
+		List<BindingInfo> result = new LinkedList<BindingInfo>();
+		Iterator<Map.Entry<String, PropertyManager[]>> itr
+				= managerMap.entrySet().iterator();
+		while (itr.hasNext())
+		{
+			Map.Entry<String, PropertyManager[]> entry = itr.next();
+			String key = entry.getKey();
+			String value = manager.getProperty(key, "<null>");
+			PropertyManager[] pms = entry.getValue();
+			for (int i = 0; i < pms.length; i++)
+			{
+				PropertyManager pm = pms[i];
+				Class<?> c = pm.getBaseClass();
+				if (c == null)
+				{
+					continue;
+				}
+				try
+				{
+					Member m = pm.getOptMember();
+					if (m != null)
+					{
+						self.micromagic.util.annotation.Config config;
+						if (pm.isFieldMember())
+						{
+							config = ((Field) m).getAnnotation(
+									self.micromagic.util.annotation.Config.class);
+						}
+						else
+						{
+							config = ((Method) m).getAnnotation(
+									self.micromagic.util.annotation.Config.class);
+						}
+						String desc = "";
+						String defaultValue = null;
+						if (config != null)
+						{
+							desc = config.description();
+							if (!StringTool.isEmpty(config.defaultValue()))
+							{
+								defaultValue = config.defaultValue();
+							}
+						}
+						result.add(new BindingInfo(c, m, key, value, desc, defaultValue));
+					}
+				}
+				catch (Throwable ex) {}
+			}
+		}
+		return result;
+	}
 
 }
