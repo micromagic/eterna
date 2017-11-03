@@ -215,7 +215,8 @@ public class QueryHelper
 		else
 		{
 			int maxRows = this.getMaxRows();
-			result = new ArrayList(maxRows == -1 ? 32 : maxRows);
+			// 设置了读取的最大记录数, 且数值不太大的情况, 才以此值作为初始化参数
+			result = new ArrayList(maxRows <= -1 || maxRows > 100 ? 32 : maxRows);
 			if (maxRows == -1)
 			{
 				while (rs.next())
@@ -392,9 +393,9 @@ abstract class SpecialQueryHelper extends QueryHelper
 		{
 			try
 			{
-				if (this.oldPreparedScript != preparedScript 
+				if (this.oldPreparedScript != preparedScript
 						|| this.nowStartRow != query.getStartRow()
-						|| this.nowMaxRows != query.getMaxCount() 
+						|| this.nowMaxRows != query.getMaxCount()
 						|| this.nowTotalCount != query.getTotalCountModel()
 						|| !Utility.objectEquals(this.nowTotalCountExt, query.getTotalCountInfo()))
 				{
