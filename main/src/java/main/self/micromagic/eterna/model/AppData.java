@@ -45,6 +45,7 @@ import self.micromagic.util.FormatTool;
 import self.micromagic.util.Utility;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.container.ThreadCache;
+import self.micromagic.util.container.ValueContainerMap;
 import self.micromagic.util.logging.TimeLogger;
 
 /**
@@ -652,7 +653,21 @@ public class AppData
 	 */
 	public Map getRequestParameterMap()
 	{
-		return this.maps[REQUEST_PARAMETER_MAP];
+		Map map =  this.maps[REQUEST_PARAMETER_MAP];
+		if (map == null)
+		{
+			try
+			{
+				HttpServletRequest req = this.getHttpServletRequest();
+				if (req != null)
+				{
+					map = RequestParameterMap.create(req, false);
+					this.maps[REQUEST_PARAMETER_MAP] = map;
+				}
+			}
+			catch (Throwable ex) {}
+		}
+		return map;
 	}
 
 	/**
@@ -660,7 +675,21 @@ public class AppData
 	 */
 	public Map getRequestAttributeMap()
 	{
-		return this.maps[REQUEST_ATTRIBUTE_MAP];
+		Map map = this.maps[REQUEST_ATTRIBUTE_MAP];
+		if (map == null)
+		{
+			try
+			{
+				HttpServletRequest req = this.getHttpServletRequest();
+				if (req != null)
+				{
+					map = ValueContainerMap.createRequestAttributeMap(req);
+					this.maps[REQUEST_ATTRIBUTE_MAP] = map;
+				}
+			}
+			catch (Throwable ex) {}
+		}
+		return map;
 	}
 
 	/**
@@ -668,7 +697,21 @@ public class AppData
 	 */
 	public Map getSessionAttributeMap()
 	{
-		return this.maps[SESSION_ATTRIBUTE_MAP];
+		Map map = this.maps[SESSION_ATTRIBUTE_MAP];
+		if (map == null)
+		{
+			try
+			{
+				HttpServletRequest req = this.getHttpServletRequest();
+				if (req != null)
+				{
+					map = ValueContainerMap.createSessionAttributeMap(req);
+					this.maps[SESSION_ATTRIBUTE_MAP] = map;
+				}
+			}
+			catch (Throwable ex) {}
+		}
+		return map;
 	}
 
 	public HttpServletRequest getHttpServletRequest()
