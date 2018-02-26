@@ -110,6 +110,30 @@
 				</readers>
 			</query>
 
+			<query name="testParamWithName2">
+				<prepared-sql>
+					#param(b|1)[begin ]where a1 = #param(a)#param(b|1)[ and b1 = ?] and user = #param(a)#param(b|2)[ or tmp = ?]
+				</prepared-sql>
+				<parameters>
+					<parameter name="b" type="String"/>
+					<parameter name="a" type="String"/>
+				</parameters>
+				<readers>
+					<reader name="a" type="string" colName="name"/>
+					<reader name="b" type="int" colName="value"/>
+				</readers>
+				<attribute name="paramBindWithName" value="true"/>
+			</query>
+			<update name="testParamWithName1">
+				<prepared-sql>
+					#param(n1) #sub #auto[and;5] #sub #auto[and,dynamic;2,6]
+				</prepared-sql>
+				<parameters>
+					<entity-ref entityName="e_bind"/>
+				</parameters>
+				<attribute name="paramBindWithName" value="true"/>
+			</update>
+
 			<object name="log1" generator="self.micromagic.eterna.dao.impl.TestDaoLogger"/>
 			<object name="log2" generator="self.micromagic.eterna.dao.impl.TestDaoLogger"/>
 

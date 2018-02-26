@@ -1100,6 +1100,7 @@ public class DaoManager
 			pm = new ParameterManager(ParameterManager.NORMAL_PARAMETER,
 					getParamNameFromGroup(group).intern());
 			paramList.add(pm);
+			partList.add(new NormalScript("?"));
 			return dealedScript;
 		}
 		pm = (ParameterManager) paramMap.get(group);

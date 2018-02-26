@@ -32,21 +32,27 @@ import tool.ConnectionTool;
 
 public class DaoTest extends TestBase
 {
-	public void testBindWithName()
+	public void testBindWithName2()
 			throws Exception
 	{
-		EntityRefImpl ref = new EntityRefImpl();
-		ref.setEntityName("e_bind");
-		UpdateImpl u = new UpdateImpl();
-		u.setAttribute(Dao.PARAM_BIND_WITH_NAME_FLAG, "1");
-		u.setName("b_t_03");
-		u.addEntityRef(ref);
-		u.setPreparedSQL("#param(n1) #sub #auto[and;5] #sub #auto[and,dynamic;2,6]");
-		u.setFactory(f);
-		f.registerObject(u);
-
 		Object[] results;
-		Update update = f.createUpdate("b_t_03");
+		Query q = f.createQuery("testParamWithName2");
+		q.setString("a", "a");
+		q.setIgnore("b");
+		assertEquals("where a1 = ? and user = ?", q.getPreparedScript());
+		results = new Object[]{"a", "a"};
+		q.prepareValues(new PreparerChecker(results));
+		q.setString("b", "b");
+		assertEquals("begin where a1 = ? and b1 = ? and user = ? or tmp = ?", q.getPreparedScript());
+		results = new Object[]{"a", "b", "a", "b"};
+		q.prepareValues(new PreparerChecker(results));
+	}
+
+	public void testBindWithName1()
+			throws Exception
+	{
+		Object[] results;
+		Update update = f.createUpdate("testParamWithName1");
 		update.setSubScript(1, "");
 		update.setSubScript(2, "");
 		update.setString("n1", "a");
@@ -56,6 +62,8 @@ public class DaoTest extends TestBase
 		update.setString("n5", "e");
 		update.setString("n6", "f");
 		update.setString("n7", "g");
+		assertEquals("?  col5 = ? and col6 = ? and col7 = ?   and col5 = ? and col6 = ?",
+				update.getPreparedScript());
 		results = new Object[]{"a", "e", "f", "g", "e", "f"};
 		update.prepareValues(new PreparerChecker(results));
 
@@ -75,6 +83,8 @@ public class DaoTest extends TestBase
 		pm.setValuePreparer(vp);
 		update.setSubScript(2, "? ?", pm);;
 		update.setObject("n3", Utility.INTEGER_10);
+		assertEquals("? ? col5 = ? and col6 = ? and col7 = ? ? ?  and col3 = ? and col5 = ? and col6 = ?",
+				update.getPreparedScript());
 		results = new Object[]{
 			"a", Utility.INTEGER_1, "e", "f", "g",
 			Utility.INTEGER_2, Utility.INTEGER_3, "10", "e", "f"
