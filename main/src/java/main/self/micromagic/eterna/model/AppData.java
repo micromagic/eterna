@@ -113,7 +113,7 @@ public class AppData
 	public static final int DATA_MAP = 3;
 	public static final String HEADER_MAP_NAME = "request-header";
 	public static final int HEADER_MAP = 4;
-	public static final String COOKIE_MAP_NAME = "header";
+	public static final String COOKIE_MAP_NAME = "cookie";
 	public static final int COOKIE_MAP = 5;
 
 	public static final String[] MAP_NAMES = {
