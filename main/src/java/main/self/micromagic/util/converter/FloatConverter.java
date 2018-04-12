@@ -16,6 +16,7 @@
 
 package self.micromagic.util.converter;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
@@ -53,7 +54,7 @@ public class FloatConverter extends AbstractNumericalConverter
 	{
 		if (value == null)
 		{
-			return 0;
+			return 0.0f;
 		}
 		if (value instanceof Number)
 		{
@@ -68,7 +69,7 @@ public class FloatConverter extends AbstractNumericalConverter
 		{
 			return ((Float) tmpObj).floatValue();
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToFloat(str);

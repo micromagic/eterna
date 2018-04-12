@@ -31,6 +31,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.model.AppData;
@@ -438,7 +439,7 @@ public class SearchManagerImpl extends AbstractGenerator
 					log.error(msg);
 				}
 			}
-			else if (obj instanceof Object[])
+			else if (ClassGenerator.isArray(obj.getClass()))
 			{
 				StringRef tmpOpt = new StringRef();
 				String tmpScript = this.makeConditionScript((Object[]) obj,

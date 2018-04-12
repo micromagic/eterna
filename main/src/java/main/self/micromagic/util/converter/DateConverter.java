@@ -19,6 +19,7 @@ package self.micromagic.util.converter;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
@@ -64,11 +65,7 @@ public class DateConverter extends AbstractNumericalConverter
 
 	public java.sql.Date convertToDate(Object value, DateFormat format)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof java.sql.Date)
+		if (value == null || value instanceof java.sql.Date)
 		{
 			return (java.sql.Date) value;
 		}
@@ -89,7 +86,7 @@ public class DateConverter extends AbstractNumericalConverter
 		{
 			return (java.sql.Date) tmpObj;
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToDate(str, format);

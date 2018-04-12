@@ -29,6 +29,7 @@ import java.util.Map;
 import org.apache.commons.collections.iterators.EnumerationIterator;
 import org.dom4j.Element;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.ResultIterator;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.eterna.model.AppData;
@@ -378,18 +379,14 @@ public class TransExecute extends AbstractExecute
 			{
 				return null;
 			}
-			if (value instanceof String[])
-			{
-				String[] strs = (String[]) value;
-				if (strs.length > 0)
-				{
-					return strs[0];
-				}
-				return null;
-			}
 			if (value instanceof String)
 			{
 				return value;
+			}
+			if (value instanceof String[])
+			{
+				String[] strs = (String[]) value;
+				return strs.length > 0 ? strs[0] : null;
 			}
 			throw new EternaException("Error Object type:" + value.getClass() + ".");
 		}
@@ -425,7 +422,7 @@ public class TransExecute extends AbstractExecute
 			{
 				return new PreFetchIterator(((Collection) value).iterator());
 			}
-			else if (value instanceof Object[])
+			else if (ClassGenerator.isArray(value.getClass()))
 			{
 				return new PreFetchIterator(Arrays.asList((Object[]) value).iterator());
 			}

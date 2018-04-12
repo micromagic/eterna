@@ -18,6 +18,7 @@ package self.micromagic.util.converter;
 
 import java.text.NumberFormat;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
@@ -68,7 +69,7 @@ public class DoubleConverter extends AbstractNumericalConverter
 	{
 		if (value == null)
 		{
-			return 0;
+			return 0.0;
 		}
 		if (value instanceof Number)
 		{
@@ -83,7 +84,7 @@ public class DoubleConverter extends AbstractNumericalConverter
 		{
 			return ((Double) tmpObj).doubleValue();
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToDouble(str, format);

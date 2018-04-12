@@ -19,7 +19,7 @@ package self.micromagic.eterna.model.impl;
 import java.sql.SQLException;
 import java.util.Map;
 
-import self.micromagic.eterna.share.EternaException;
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.ResultIterator;
@@ -31,10 +31,11 @@ import self.micromagic.eterna.model.Model;
 import self.micromagic.eterna.model.ParamBind;
 import self.micromagic.eterna.model.ParamBindGenerator;
 import self.micromagic.eterna.model.ParamSetManager;
-import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.search.Search;
 import self.micromagic.eterna.search.SearchManager;
+import self.micromagic.eterna.search.SearchResult;
 import self.micromagic.eterna.share.AbstractGenerator;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 
@@ -305,7 +306,7 @@ public class ParamBindImpl extends AbstractGenerator
 							psm.setParams(ritr.nextRow(), this.names);
 						}
 					}
-					else if (tempValue instanceof Object[])
+					else if (ClassGenerator.isArray(tempValue.getClass()))
 					{
 						Object[] objs = (Object[]) tempValue;
 						if (objs.length == this.names.length)

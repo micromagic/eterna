@@ -16,6 +16,7 @@
 
 package self.micromagic.util.converter;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
@@ -68,7 +69,7 @@ public class ByteConverter extends AbstractNumericalConverter
 		{
 			return ((Byte) tmpObj).byteValue();
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToByte(str);

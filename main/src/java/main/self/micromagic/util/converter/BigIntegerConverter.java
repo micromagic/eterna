@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.NumberFormat;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
@@ -65,11 +66,7 @@ public class BigIntegerConverter extends AbstractNumericalConverter
 
 	public BigInteger convertToBigInteger(Object value, NumberFormat format)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof BigInteger)
+		if (value == null || value instanceof BigInteger)
 		{
 			return (BigInteger) value;
 		}
@@ -90,7 +87,7 @@ public class BigIntegerConverter extends AbstractNumericalConverter
 		{
 			return (BigInteger) tmpObj;
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToBigInteger(str, format);

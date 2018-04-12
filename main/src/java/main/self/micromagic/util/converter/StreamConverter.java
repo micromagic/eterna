@@ -61,11 +61,7 @@ public class StreamConverter extends ObjectConverter
 
 	public InputStream convertToStream(Object value, String charset)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof InputStream)
+		if (value == null || value instanceof InputStream)
 		{
 			return (InputStream) value;
 		}

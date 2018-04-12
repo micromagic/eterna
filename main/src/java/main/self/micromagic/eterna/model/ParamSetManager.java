@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.Dao;
 import self.micromagic.eterna.dao.Parameter;
 import self.micromagic.eterna.dao.ResultIterator;
@@ -207,11 +208,10 @@ public class ParamSetManager
 					if (value instanceof String[])
 					{
 						String[] strs = (String[]) value;
-						if (strs.length == 0)
+						if (strs.length > 0)
 						{
-							continue;
+							preparerValue(this.dao, param, strs[0]);
 						}
-						preparerValue(this.dao, param, strs[0]);
 					}
 					else
 					{
@@ -255,7 +255,7 @@ public class ParamSetManager
 				Object value = values.get(names[i].srcName);
 				if (value != null)
 				{
-					if (value instanceof Object[])
+					if (ClassGenerator.isArray(value.getClass()))
 					{
 						array = (Object[]) value;
 						arrays[i] = array;
@@ -302,11 +302,10 @@ public class ParamSetManager
 				if (value instanceof String[])
 				{
 					String[] strs = (String[]) value;
-					if (strs.length == 0)
+					if (strs.length > 0)
 					{
-						continue;
+						preparerValue(this.dao, param, strs[0]);
 					}
-					preparerValue(this.dao, param, strs[0]);
 				}
 				else
 				{

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import self.micromagic.cg.BeanMap;
 import self.micromagic.cg.BeanTool;
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.ResultRow;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.ValueContainerMap;
@@ -107,7 +108,7 @@ public class MapConverter extends ObjectConverter
 		{
 			return (Map) tmpObj;
 		}
-		if (value instanceof Object[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			Object[] arr = (Object[]) value;
 			Map result = new HashMap();

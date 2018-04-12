@@ -40,6 +40,10 @@ public class StringConverter extends ObjectConverter
 
 	public Object convert(Object value)
 	{
+		if (value == null || value instanceof String)
+		{
+			return value;
+		}
 		if (value instanceof String[])
 		{
 			return StringTool.linkStringArr((String[]) value, ",");

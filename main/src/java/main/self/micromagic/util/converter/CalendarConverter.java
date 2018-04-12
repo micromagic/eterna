@@ -20,6 +20,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
@@ -75,11 +76,7 @@ public class CalendarConverter extends AbstractNumericalConverter
 
 	public Calendar convertToCalendar(Object value, DateFormat[] formats)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof Calendar)
+		if (value == null || value instanceof Calendar)
 		{
 			return (Calendar) value;
 		}
@@ -104,7 +101,7 @@ public class CalendarConverter extends AbstractNumericalConverter
 		{
 			return (Calendar) tmpObj;
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToCalendar(str, formats);

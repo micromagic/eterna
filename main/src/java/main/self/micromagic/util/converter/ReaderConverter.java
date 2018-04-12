@@ -53,11 +53,7 @@ public class ReaderConverter extends ObjectConverter
 
 	public Reader convertToReader(Object value)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof Reader)
+		if (value == null || value instanceof Reader)
 		{
 			return (Reader) value;
 		}

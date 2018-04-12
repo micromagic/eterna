@@ -25,6 +25,7 @@ import java.util.Set;
 
 import javax.servlet.ServletRequest;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.util.Utility;
 
 public class RequestParameterMap extends AbstractContainerSetting
@@ -100,7 +101,7 @@ public class RequestParameterMap extends AbstractContainerSetting
 			String[] arr = (String[]) obj;
 			return arr.length > 0 ? arr[0] : null;
 		}
-		if (obj instanceof Object[])
+		if (ClassGenerator.isArray(obj.getClass()))
 		{
 			Object[] arr = (Object[]) obj;
 			return arr.length > 0 ? getFirstParam(arr[0]) : null;
@@ -216,7 +217,7 @@ public class RequestParameterMap extends AbstractContainerSetting
 				{
 					return new String[]{(String) value};
 				}
-				if (value instanceof Object[])
+				if (ClassGenerator.isArray(value.getClass()))
 				{
 					// 如果是个对象数组这里将其变成Collection
 					// 在下一个判断条件中处理

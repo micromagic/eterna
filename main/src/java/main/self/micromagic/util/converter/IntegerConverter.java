@@ -18,6 +18,7 @@ package self.micromagic.util.converter;
 
 import java.text.NumberFormat;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
@@ -93,7 +94,7 @@ public class IntegerConverter extends AbstractNumericalConverter
 		{
 			return ((Integer) tmpObj).intValue();
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToInt(str, format);

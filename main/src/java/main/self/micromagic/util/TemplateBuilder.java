@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.dao.impl.DaoManager;
 import self.micromagic.eterna.dao.impl.PartScript;
 import self.micromagic.eterna.dao.preparer.PreparerCreater;
@@ -486,7 +487,7 @@ public class TemplateBuilder extends AbstractGenerator
 		Object[] values;
 		if (!this.arrayParam)
 		{
-			if (value instanceof Object[])
+			if (value != null && ClassGenerator.isArray(value.getClass()))
 			{
 				values = (Object[]) value;
 			}
@@ -498,7 +499,7 @@ public class TemplateBuilder extends AbstractGenerator
 		}
 		else
 		{
-			if (value instanceof Object[])
+			if (value != null && ClassGenerator.isArray(value.getClass()))
 			{
 				values = (Object[]) value;
 			}

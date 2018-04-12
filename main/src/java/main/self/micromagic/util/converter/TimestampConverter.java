@@ -19,6 +19,7 @@ package self.micromagic.util.converter;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
@@ -64,11 +65,7 @@ public class TimestampConverter extends AbstractNumericalConverter
 
 	public java.sql.Timestamp convertToTimestamp(Object value, DateFormat format)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof java.sql.Timestamp)
+		if (value == null || value instanceof java.sql.Timestamp)
 		{
 			return (java.sql.Timestamp) value;
 		}
@@ -89,7 +86,7 @@ public class TimestampConverter extends AbstractNumericalConverter
 		{
 			return (java.sql.Timestamp) tmpObj;
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToTimestamp(str, format);

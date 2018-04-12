@@ -18,11 +18,12 @@ package self.micromagic.util.converter;
 
 import java.util.Locale;
 
+import self.micromagic.cg.ClassGenerator;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
-import self.micromagic.eterna.share.TypeManager;
 
 public class LocaleConverter extends ObjectConverter
 {
@@ -37,11 +38,7 @@ public class LocaleConverter extends ObjectConverter
 
 	public Locale convertToLocale(Object value)
 	{
-		if (value == null)
-		{
-			return null;
-		}
-		if (value instanceof Locale)
+		if (value == null || value instanceof Locale)
 		{
 			return (Locale) value;
 		}
@@ -54,7 +51,7 @@ public class LocaleConverter extends ObjectConverter
 		{
 			return (Locale) tmpObj;
 		}
-		if (value instanceof String[])
+		if (ClassGenerator.isArray(value.getClass()))
 		{
 			String str = RequestParameterMap.getFirstParam(value);
 			return this.convertToLocale(str);
