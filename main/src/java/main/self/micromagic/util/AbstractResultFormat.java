@@ -27,6 +27,10 @@ import self.micromagic.eterna.share.EternaFactory;
 public abstract class AbstractResultFormat extends AbstractGenerator
 		implements ResultFormat
 {
+	protected EternaFactory factory;
+	protected String type;
+	protected String pattern;
+
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
@@ -37,7 +41,6 @@ public abstract class AbstractResultFormat extends AbstractGenerator
 		}
 		return true;
 	}
-	protected EternaFactory factory;
 
 	public boolean useEmptyString()
 	{
@@ -54,12 +57,10 @@ public abstract class AbstractResultFormat extends AbstractGenerator
 	{
 		this.type = type;
 	}
-	protected String type;
 
 	public void setPattern(String pattern)
 	{
 		this.pattern = pattern;
 	}
-	protected String pattern;
 
 }

@@ -20,7 +20,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,11 @@ import java.util.Map;
  */
 public class BindingInfo
 {
+	/**
+	 * 数据为空的标识值.
+	 */
+	private static final String NULL_VALUE = "<NULL>";
+
 	private final Class<?> c;
 	private final Member m;
 	private final String configName;
@@ -124,6 +128,14 @@ public class BindingInfo
 	public String getConfigValue()
 	{
 		return this.configValue;
+	}
+
+	/**
+	 * 判断配置的值是否为null.
+	 */
+	public boolean isNullConfigValue()
+	{
+		return this.configValue == NULL_VALUE;
 	}
 
 	/**
@@ -258,18 +270,15 @@ public class BindingInfo
 		return result;
 	}
 
-	static List<BindingInfo> listBindingInfo(Map<String, PropertyManager[]> managerMap,
+	static List<BindingInfo> listBindingInfo(Map.Entry<?, ?>[] propertyManagers,
 			PropertiesManager manager)
 	{
 		List<BindingInfo> result = new LinkedList<BindingInfo>();
-		Iterator<Map.Entry<String, PropertyManager[]>> itr
-				= managerMap.entrySet().iterator();
-		while (itr.hasNext())
+		for (Map.Entry<?, ?> entry : propertyManagers)
 		{
-			Map.Entry<String, PropertyManager[]> entry = itr.next();
-			String key = entry.getKey();
-			String value = manager.getProperty(key, "<null>");
-			PropertyManager[] pms = entry.getValue();
+			String key = (String) entry.getKey();
+			String value = manager.getProperty(key, NULL_VALUE);
+			PropertyManager[] pms = (PropertyManager[]) entry.getValue();
 			for (int i = 0; i < pms.length; i++)
 			{
 				PropertyManager pm = pms[i];

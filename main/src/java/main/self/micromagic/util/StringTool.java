@@ -50,6 +50,9 @@ public class StringTool
 
 	public static final int MAX_INTERN_SIZE = 1024 * 8;
 
+	private static StringAppenderCreater stringBufferCreater = new StringTool$StringBufferCreater();
+	private static StringAppenderCreater stringAppendCreater;
+
 	private StringTool()
 	{
 	}
@@ -860,9 +863,6 @@ public class StringTool
 		}
 		return sa;
 	}
-
-	private static StringAppenderCreater stringBufferCreater = new StringTool$StringBufferCreater();
-	private static StringAppenderCreater stringAppendCreater;
 
 	private static StringAppenderCreater createStringBuilderCreater()
 	{

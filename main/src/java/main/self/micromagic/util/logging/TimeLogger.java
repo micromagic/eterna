@@ -18,8 +18,6 @@ package self.micromagic.util.logging;
 
 /**
  * 时间记录器.
- *
- * @author micromagic@sina.com
  */
 public class TimeLogger
 {
@@ -32,6 +30,22 @@ public class TimeLogger
 	 * 起始时间, 格式化时将减去此时间再输出.
 	 */
 	private long beginTime;
+
+	private static TimeGetter instance;
+
+	static
+	{
+		try
+		{
+			System.class.getMethod("nanoTime", new Class[0]);
+			String nanoClassName = "self.micromagic.util.logging.TimeLogger$NanoTime";
+			instance = (TimeGetter) Class.forName(nanoClassName).newInstance();
+		}
+		catch (Throwable ex)
+		{
+			instance = new MillionSecond();
+		}
+	}
 
 	/**
 	 * 构造一个时间记录器.
@@ -131,22 +145,6 @@ public class TimeLogger
 	public static long getPassTime(long time)
 	{
 		return instance.getMillionSecond(time);
-	}
-
-	private static TimeGetter instance;
-
-	static
-	{
-		try
-		{
-			System.class.getMethod("nanoTime", new Class[0]);
-			String nanoClassName = "self.micromagic.util.logging.TimeLogger$NanoTime";
-			instance = (TimeGetter) Class.forName(nanoClassName).newInstance();
-		}
-		catch (Throwable ex)
-		{
-			instance = new MillionSecond();
-		}
 	}
 
 	/**

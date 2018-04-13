@@ -29,6 +29,11 @@ import self.micromagic.eterna.share.EternaFactory;
 public abstract class AbstractPreparerCreater extends AbstractGenerator
 		implements PreparerCreater
 {
+	private EternaFactory factory;
+	private PreparerCreater baseCreater;
+	protected String type;
+	protected String pattern;
+
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
 	{
@@ -41,8 +46,6 @@ public abstract class AbstractPreparerCreater extends AbstractGenerator
 		}
 		return true;
 	}
-	private EternaFactory factory;
-	private PreparerCreater baseCreater;
 
 	public Object create()
 			throws EternaException
@@ -60,13 +63,11 @@ public abstract class AbstractPreparerCreater extends AbstractGenerator
 	{
 		this.type = type;
 	}
-	protected String type;
 
 	public void setPattern(String pattern)
 	{
 		this.pattern = pattern;
 	}
-	protected String pattern;
 
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException

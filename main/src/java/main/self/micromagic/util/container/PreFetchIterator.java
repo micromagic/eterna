@@ -24,15 +24,13 @@ import self.micromagic.util.ref.BooleanRef;
 
 /**
  * 可预取的迭代器.
- *
- * @author micromagic@sina.com
  */
 public class PreFetchIterator
 		implements Iterator
 {
 	private List preFetchList;
-	private Iterator itr;
-	private boolean modifiable;
+	private final Iterator itr;
+	private final boolean modifiable;
 
 	/**
 	 * 通过一个Iterator创建PreFetchIterator.
@@ -123,4 +121,3 @@ public class PreFetchIterator
 	}
 
 }
-

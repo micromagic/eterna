@@ -82,6 +82,11 @@ public class TemplateBuilder extends AbstractGenerator
 	 */
 	private static final String DEFAULT_COLUMN_NAME_FLAG = "[C]";
 
+	protected EternaFactory factory;
+	private String caption;
+	private String prepareName;
+	private PreparerCreater prepare;
+
 	private String template;
 	private int[] indexs;
 	private int maxIndex;
@@ -143,30 +148,28 @@ public class TemplateBuilder extends AbstractGenerator
 		}
 		return true;
 	}
-	protected EternaFactory factory;
 
 	public String getCaption()
 	{
 		return this.caption;
 	}
+
 	public void setCaption(String caption)
 	{
 		this.caption = caption;
 	}
-	private String caption;
 
 	public void setPrepare(String prepare)
 			throws EternaException
 	{
 		this.prepareName = prepare;
 	}
-	private String prepareName;
+
 	public PreparerCreater getPreparerCreater()
 			throws EternaException
 	{
 		return this.prepare;
 	}
-	private PreparerCreater prepare;
 
 	public void setOperator(String operator)
 	{
@@ -534,13 +537,14 @@ public class TemplateBuilder extends AbstractGenerator
  */
 class SubFlagTemplate
 {
+	private final String beginStr;
+	private final String endStr;
+
 	public SubFlagTemplate(String begin, String end)
 	{
 		this.beginStr = begin;
 		this.endStr = end;
 	}
-	private final String beginStr;
-	private final String endStr;
 
 	public String getSub(Object value, TemplateBuilder builder, ConditionProperty cp,
 			String[] colNames, ObjectRef valueOut)

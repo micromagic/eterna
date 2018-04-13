@@ -37,7 +37,7 @@ import self.micromagic.util.logging.Jdk14Factory;
 import self.micromagic.util.ref.StringRef;
 
 /**
- * @author micromagic@sina.com
+ * 工具类.
  */
 public class Utility
 {
@@ -92,6 +92,19 @@ public class Utility
 	 * 在处理文本的动态属性时, 是否要显示处理失败的信息
 	 */
 	static boolean SHOW_RDP_FAIL = false;
+
+	/**
+	 * 构造DataSource时的属性名称及类型.
+	 */
+	private static final String[] DATASOURCE_PROPERTIES = {
+		"description", "String", "driverClass", "String", "maxCount", "int", "minCount", "int",
+		"url", "String", "user", "String", "password", "String", "autoCommit", "boolean"
+	};
+
+	/**
+	 * 单个String类型的参数.
+	 */
+	static Class[] STR_PARAM = {String.class};
 
 	private static PropertiesManager propertiesManager;
 	private static DataSource dataSource;
@@ -631,15 +644,6 @@ public class Utility
 			return dataSource = tmpDS;
 		}
 	}
-
-	private static final String[] DATASOURCE_PROPERTIES = {
-		"description", "String", "driverClass", "String", "maxCount", "int", "minCount", "int",
-		"url", "String", "user", "String", "password", "String", "autoCommit", "boolean"
-	};
-	/**
-	 * 单个String类型的参数.
-	 */
-	static Class[] STR_PARAM = {String.class};
 
 	private static void setDataSourceProperties(DataSource dataSource, PropertiesManager prop)
 			throws Exception

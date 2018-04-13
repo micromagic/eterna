@@ -16,19 +16,16 @@
 
 package self.micromagic.util;
 
-import java.io.Writer;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.io.Writer;
 import java.util.Iterator;
-
-import self.micromagic.util.MemoryChars;
-import self.micromagic.util.Utility;
+import java.util.LinkedList;
 
 public class DelayWriter extends Writer
 {
 	private Writer out;
-	private Writer realOut;
-	private LinkedList delayBlocks = new LinkedList();
+	private final Writer realOut;
+	private final LinkedList delayBlocks = new LinkedList();
 
 	public DelayWriter(Writer out)
 	{
@@ -119,7 +116,7 @@ public class DelayWriter extends Writer
 	{
 		private boolean setOver = false;
 		private String value;
-		private MemoryChars memoryBuf;
+		private final MemoryChars memoryBuf;
 
 		public DelayBlock(MemoryChars memoryBuf)
 		{

@@ -18,8 +18,6 @@ package self.micromagic.util;
 
 /**
  * 字符串连接器, 用于对字符串进行添加操作的接口.
- *
- * @author micromagic@sina.com
  */
 public interface StringAppender extends CharSequence
 {

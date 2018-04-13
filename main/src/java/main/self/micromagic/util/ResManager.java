@@ -38,6 +38,7 @@ public class ResManager
 	private static final int INDENT_SIZE = 3;
 	private static final char[] INDENT_BUF = {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
 
+	private boolean skipEmptyLine = true;
 	private String charset = "UTF-8";
 	private final Map resCache = new HashMap();
 
@@ -163,7 +164,6 @@ public class ResManager
 	{
 		this.skipEmptyLine = b;
 	}
-	private boolean skipEmptyLine = true;
 
 	/**
 	 * 从输入流中载入配置值.

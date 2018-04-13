@@ -44,8 +44,50 @@ import self.micromagic.eterna.share.FactoryContainer;
 public class BeanEntity extends AbstractGenerator
 		implements Entity
 {
+	/**
+	 * 不需要持久化的标注.
+	 */
+	private static Class<? extends Annotation> TRANSIENT_ANNOTATION;
+	/**
+	 * 列配置的标注.
+	 */
+	private static Class<? extends Annotation> COLUMN_ANNOTATION;
+
+	/**
+	 * 类型到类型名称的字典表.
+	 */
+	private static Map<Class<?>, String> typeDictionary
+			= new HashMap<Class<?>, String>();
+
 	private boolean initialized;
+	private String beanClass;
 	private final EntityImpl base = new EntityImpl();
+
+	static
+	{
+		typeDictionary.put(String.class, "String");
+		typeDictionary.put(boolean.class, "boolean");
+		typeDictionary.put(Boolean.class, "boolean");
+		typeDictionary.put(byte.class, "byte");
+		typeDictionary.put(Byte.class, "byte");
+		typeDictionary.put(short.class, "short");
+		typeDictionary.put(Short.class, "short");
+		typeDictionary.put(int.class, "int");
+		typeDictionary.put(Integer.class, "int");
+		typeDictionary.put(long.class, "long");
+		typeDictionary.put(Long.class, "long");
+		typeDictionary.put(float.class, "float");
+		typeDictionary.put(Float.class, "float");
+		typeDictionary.put(double.class, "double");
+		typeDictionary.put(Double.class, "double");
+		typeDictionary.put(byte[].class, "Bytes");
+		typeDictionary.put(java.sql.Date.class, "Date");
+		typeDictionary.put(java.sql.Time.class, "Time");
+		typeDictionary.put(java.sql.Timestamp.class, "Datetime");
+		typeDictionary.put(java.util.Date.class, "Datetime");
+		typeDictionary.put(java.io.InputStream.class, "Stream");
+		typeDictionary.put(java.io.Reader.class, "Reader");
+	}
 
 	public boolean initialize(EternaFactory factory)
 			throws EternaException
@@ -132,38 +174,6 @@ public class BeanEntity extends AbstractGenerator
 			throw new EternaException(ex);
 		}
 		return this.base.initialize(factory);
-	}
-
-	/**
-	 * 类型到类型名称的字典表.
-	 */
-	@SuppressWarnings("rawtypes")
-	private static Map<Class, String> typeDictionary
-			= new HashMap<Class, String>();
-	static
-	{
-		typeDictionary.put(String.class, "String");
-		typeDictionary.put(boolean.class, "boolean");
-		typeDictionary.put(Boolean.class, "boolean");
-		typeDictionary.put(byte.class, "byte");
-		typeDictionary.put(Byte.class, "byte");
-		typeDictionary.put(short.class, "short");
-		typeDictionary.put(Short.class, "short");
-		typeDictionary.put(int.class, "int");
-		typeDictionary.put(Integer.class, "int");
-		typeDictionary.put(long.class, "long");
-		typeDictionary.put(Long.class, "long");
-		typeDictionary.put(float.class, "float");
-		typeDictionary.put(Float.class, "float");
-		typeDictionary.put(double.class, "double");
-		typeDictionary.put(Double.class, "double");
-		typeDictionary.put(byte[].class, "Bytes");
-		typeDictionary.put(java.sql.Date.class, "Date");
-		typeDictionary.put(java.sql.Time.class, "Time");
-		typeDictionary.put(java.sql.Timestamp.class, "Datetime");
-		typeDictionary.put(java.util.Date.class, "Datetime");
-		typeDictionary.put(java.io.InputStream.class, "Stream");
-		typeDictionary.put(java.io.Reader.class, "Reader");
 	}
 
 	/**
@@ -255,7 +265,6 @@ public class BeanEntity extends AbstractGenerator
 	{
 		this.beanClass = beanClass;
 	}
-	private String beanClass;
 
 	/**
 	 * 从列标注中获取列名.
@@ -264,14 +273,5 @@ public class BeanEntity extends AbstractGenerator
 	{
 		return "";
 	}
-
-	/**
-	 * 不需要持久化的标注.
-	 */
-	private static Class<? extends Annotation> TRANSIENT_ANNOTATION;
-	/**
-	 * 列配置的标注.
-	 */
-	private static Class<? extends Annotation> COLUMN_ANNOTATION;
 
 }

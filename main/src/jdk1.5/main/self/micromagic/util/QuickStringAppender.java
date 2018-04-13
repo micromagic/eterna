@@ -20,12 +20,25 @@ import java.lang.reflect.Constructor;
 
 /**
  * 一个快速的字符串拼接工具.
- *
- * @author micromagic.sina.com
  */
 class QuickStringAppender
 		implements StringAppender, StringTool.StringAppenderCreater
 {
+	/**
+	 * 当字符在200以上时, 使用反射调用不复制字符串的构造函数会比复制字符串更快.
+	 */
+	private static final int REFLECT_CREATE_GAP = 200;
+
+	/**
+	 * 最大浪费空间的字节数, 如果超过这个数, 则使用复制字符串的方式.
+	 */
+	private static final int MAX_WASTE_COUNT = 512;
+
+	/**
+	 * 不需要复制字符串数组的String构造函数.
+	 */
+	private static Constructor<String> strConstructor;
+
 	/**
 	 * 用于存储字符.
 	 */
@@ -35,6 +48,20 @@ class QuickStringAppender
 	 * 字符的个数.
 	 */
 	private int count;
+
+	static
+	{
+		try
+		{
+			strConstructor = String.class.getDeclaredConstructor(
+					new Class[]{int.class, int.class, char[].class});
+			strConstructor.setAccessible(true);
+		}
+		catch (Throwable ex)
+		{
+			System.err.println("Error in get string constructor: [" + ex + "].");
+		}
+	}
 
 	QuickStringAppender()
 	{
@@ -266,32 +293,6 @@ class QuickStringAppender
 	public CharSequence subSequence(int start, int end)
 	{
 		return this.substring(start, end);
-	}
-
-
-	/**
-	 * 当字符在200以上时, 使用反射调用不复制字符串的构造函数会比复制字符串更快.
-	 */
-	private static final int REFLECT_CREATE_GAP = 200;
-
-	/**
-	 * 最大浪费空间的字节数, 如果超过这个数, 则使用复制字符串的方式.
-	 */
-	private static final int MAX_WASTE_COUNT = 512;
-
-	private static Constructor<String> strConstructor;
-	static
-	{
-		try
-		{
-			strConstructor = String.class.getDeclaredConstructor(
-					new Class[]{int.class, int.class, char[].class});
-			strConstructor.setAccessible(true);
-		}
-		catch (Throwable ex)
-		{
-			System.err.println("Error in get string constructor: [" + ex + "].");
-		}
 	}
 
 	private String createString(int offset, int count, char[] chars)

@@ -16,14 +16,14 @@
 
 package self.micromagic.util.container;
 
-import java.util.Iterator;
 import java.util.Enumeration;
+import java.util.Iterator;
 
 import org.apache.commons.collections.iterators.EmptyIterator;
 import org.apache.commons.collections.iterators.IteratorEnumeration;
 
 /**
- * @author micromagic@sina.com
+ * 不可修改的迭代器.
  */
 public class UnmodifiableIterator
 		implements Iterator
@@ -31,7 +31,7 @@ public class UnmodifiableIterator
 	public static final Iterator EMPTY_ITERATOR = EmptyIterator.INSTANCE;
 	public static final Enumeration EMPTY_ENUMERATION = new IteratorEnumeration(EmptyIterator.INSTANCE);
 
-	private Iterator itr;
+	private final Iterator itr;
 
 	public UnmodifiableIterator(Iterator itr)
 	{

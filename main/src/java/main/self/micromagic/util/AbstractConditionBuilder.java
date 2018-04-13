@@ -30,6 +30,12 @@ import self.micromagic.eterna.share.EternaFactory;
 public abstract class AbstractConditionBuilder extends AbstractGenerator
 		implements ConditionBuilder
 {
+	protected EternaFactory factory;
+	protected String caption;
+	protected String operator;
+	private String prepareName;
+	private PreparerCreater prepare;
+
 	public boolean initialize(EternaFactory factory)
 	{
 		if (this.factory == null)
@@ -43,23 +49,21 @@ public abstract class AbstractConditionBuilder extends AbstractGenerator
 		}
 		return true;
 	}
-	protected EternaFactory factory;
 
 	public String getCaption()
 	{
 		return this.caption;
 	}
+
 	public void setCaption(String caption)
 	{
 		this.caption = caption;
 	}
-	protected String caption;
 
 	public void setOperator(String operator)
 	{
 		this.operator = operator;
 	}
-	protected String operator;
 
 	/**
 	 * 构造一个值准备器.
@@ -88,13 +92,12 @@ public abstract class AbstractConditionBuilder extends AbstractGenerator
 	{
 		this.prepareName = prepare;
 	}
-	private String prepareName;
+
 	public PreparerCreater getPreparerCreater()
 			throws EternaException
 	{
 		return this.prepare;
 	}
-	private PreparerCreater prepare;
 
 	public Object create()
 			throws EternaException

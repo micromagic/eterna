@@ -17,7 +17,7 @@
 package self.micromagic.util;
 
 /**
- * @author micromagic.sina.com
+ * 基于StringBuilder的StringAppender实现.
  */
 public class StringTool$StringBuilderCreater
 		implements StringAppender, StringTool.StringAppenderCreater

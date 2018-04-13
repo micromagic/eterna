@@ -39,6 +39,7 @@ public class TemplateFormat extends AbstractGenerator
 {
 	public static final String DEFAULT_INSERT_VALUE_TAG = "[v]";
 
+	protected EternaFactory factory;
 	protected String pattern;
 	protected String[] patterns;
 
@@ -57,7 +58,6 @@ public class TemplateFormat extends AbstractGenerator
 		}
 		return true;
 	}
-	protected EternaFactory factory;
 
 	public Object format(Object obj, ResultRow row, ResultReader reader, Permission permission)
 			throws EternaException

@@ -29,8 +29,6 @@ import javax.servlet.http.HttpSession;
  * 其主要作用就是将存入的对象包装成<code>Property</code>, 当需要序列化时,
  * 会检查被包装的对象是否可序列化, 如果是无法被序列化的对象, 则不会对其进
  * 行序列化, 在反序列化时将其作为null.
- *
- * @author micromagic@sina.com
  */
 public class SessionCache
 {
@@ -179,6 +177,8 @@ public class SessionCache
 	private static class PropertyImpl
 			implements Property, Serializable
 	{
+		private static final long serialVersionUID = 1L;
+
 		private final int propertyVersion;
 		private transient Object value;
 
@@ -240,8 +240,6 @@ public class SessionCache
 			boolean canSerialize = s.readBoolean();
 			this.value = canSerialize ? s.readObject() : null;
 		}
-
-		private static final long serialVersionUID = 1L;
 
 	}
 

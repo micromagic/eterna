@@ -23,11 +23,17 @@ import java.util.List;
 
 /**
  * 多行的文本对象.
- *
- * @author micromagic@sina.com
  */
 public class MultiLineText
 {
+	static final char NEW_LINE = '\n';
+
+	private final List elements = new ArrayList();
+	private int count = 0;
+	private CharElement preElement = null;
+	private String cacheStr = null;
+	private String cacheTrim = null;
+
 	/**
 	 * 清除文本起始部分和结束部分的空行.
 	 */
@@ -62,14 +68,6 @@ public class MultiLineText
 		}
 		return text.substring(begin, end);
 	}
-
-	static final char NEW_LINE = '\n';
-
-	private final List elements = new ArrayList();
-	private int count = 0;
-	private CharElement preElement = null;
-	private String cacheStr = null;
-	private String cacheTrim = null;
 
 	/**
 	 * 添加一段字符块.

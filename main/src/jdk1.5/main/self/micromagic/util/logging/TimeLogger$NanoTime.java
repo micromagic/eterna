@@ -18,12 +18,12 @@ package self.micromagic.util.logging;
 
 /**
  * 纳秒的获取工具.
- *
- * @author micromagic@sina.com
  */
 class TimeLogger$NanoTime
 		implements TimeLogger.TimeGetter
 {
+	private static final String ZERO_NANO = "000000";
+
 	public long getTime()
 	{
 		return System.nanoTime();
@@ -65,6 +65,5 @@ class TimeLogger$NanoTime
 		}
 		return lastPos > 0 ? result.concat(".".concat(nanoStr.substring(0, lastPos))) : result;
 	}
-	private static final String ZERO_NANO = "000000";
 
 }
