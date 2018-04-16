@@ -613,12 +613,12 @@ public abstract class AbstractDao extends AbstractGenerator
 	 */
 	protected boolean getBooleanAttr(String name, boolean defaultValue)
 	{
-		String boolStr = (String) this.getAttribute(name);
-		if (boolStr == null)
+		Object boolObj = this.getAttribute(name);
+		if (boolObj == null)
 		{
-			boolStr = (String) this.getFactory().getAttribute(name);
+			boolObj = this.getFactory().getAttribute(name);
 		}
-		return boolStr == null ? defaultValue : BooleanConverter.toBoolean(boolStr);
+		return boolObj == null ? defaultValue : BooleanConverter.toBoolean(boolObj);
 	}
 
 	public void destroy()
