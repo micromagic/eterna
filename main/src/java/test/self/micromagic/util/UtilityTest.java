@@ -212,18 +212,18 @@ public class UtilityTest extends TestCase
 		String propName = "test.addSame.value1";
 		Object propsManager = PrivateAccessor.get(Utility.class, "propertiesManager");
 		Object defaultPL = PrivateAccessor.get(propsManager, "defaultPL");
-		Map propertyMap = (Map) PrivateAccessor.get(defaultPL, "propertyMap");
-		Object[] arr = (Object[]) propertyMap.get(propName);
+		Map managerMap = (Map) PrivateAccessor.get(defaultPL, "managerMap");
+		Object[] arr = (Object[]) managerMap.get(propName);
 		assertNull(arr);
 
 		Utility.addFieldPropertyManager(propName, this.getClass(), "TP1");
-		arr = (Object[]) propertyMap.get(propName);
+		arr = (Object[]) managerMap.get(propName);
 		assertEquals(1, arr.length);
 		Utility.addFieldPropertyManager(propName, this.getClass(), "TP1_2");
-		arr = (Object[]) propertyMap.get(propName);
+		arr = (Object[]) managerMap.get(propName);
 		assertEquals(2, arr.length);
 		Utility.addFieldPropertyManager(propName, this.getClass(), "TP1");
-		arr = (Object[]) propertyMap.get(propName);
+		arr = (Object[]) managerMap.get(propName);
 		assertEquals(2, arr.length);
 	}
 
@@ -242,8 +242,8 @@ public class UtilityTest extends TestCase
 		String propName = "test.release.value1";
 		Object propsManager = PrivateAccessor.get(Utility.class, "propertiesManager");
 		Object defaultPL = PrivateAccessor.get(propsManager, "defaultPL");
-		Map propertyMap = (Map) PrivateAccessor.get(defaultPL, "propertyMap");
-		Object[] arr = (Object[]) propertyMap.get(propName);
+		Map managerMap = (Map) PrivateAccessor.get(defaultPL, "managerMap");
+		Object[] arr = (Object[]) managerMap.get(propName);
 		assertNull(arr);
 
 		ResManager res = new ResManager();
@@ -260,14 +260,14 @@ public class UtilityTest extends TestCase
 		ClassLoader cl = new ReleaseTestClassLoader(this.getClass().getClassLoader());
 		cg.setClassLoader(cl);
 		cg.createClass().newInstance();
-		arr = (Object[]) propertyMap.get(propName);
+		arr = (Object[]) managerMap.get(propName);
 		assertEquals(1, arr.length);
 		cl = null;
 		cg = null;
 		System.gc();
 		Thread.sleep(2000L);
 		Utility.setProperty(propName, "5");
-		arr = (Object[]) propertyMap.get(propName);
+		arr = (Object[]) managerMap.get(propName);
 		assertNull(arr);
 	}
 
@@ -385,6 +385,14 @@ public class UtilityTest extends TestCase
 			return this.i1;
 		}
 
+		public String makeNoneWarn()
+		{
+			Private2 p = new Private2();
+			p.setD(1.0);
+			p.noneWarn();
+			return this.s1;
+		}
+
 	}
 
 	private static class Private2 extends Private1
@@ -394,6 +402,11 @@ public class UtilityTest extends TestCase
 		protected void setD(double num)
 		{
 			this.d1 = num;
+		}
+
+		public double noneWarn()
+		{
+			return this.d1;
 		}
 
 	}
