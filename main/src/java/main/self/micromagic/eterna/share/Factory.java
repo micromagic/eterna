@@ -39,6 +39,12 @@ public interface Factory
 			throws EternaException;
 
 	/**
+	 * 判断当前工厂是否有效. <p>
+	 * 已销毁的工厂为无效工厂.
+	 */
+	boolean isValid() throws EternaException;
+
+	/**
 	 * 设置工厂的名称.
 	 */
 	void setName(String name) throws EternaException;

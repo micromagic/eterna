@@ -25,8 +25,8 @@ abstract class ObjectContainer
 
 	protected ObjectContainer(int id)
 	{
-		// 编号的最低位用于保存是否已初始化
-		this.id = id << 1;
+		// 编号的最低位用于保存是否已初始化, 第二位用于保存是否有效
+		this.id = id << 2;
 	}
 
 	/**
@@ -34,7 +34,32 @@ abstract class ObjectContainer
 	 */
 	public int getId()
 	{
-		return this.id >> 1;
+		return this.id >> 2;
+	}
+
+	/**
+	 * 将对象标记为无效.
+	 */
+	public void markInvalid()
+	{
+		this.id |= 2;
+	}
+
+	/**
+	 * 当前对象是否有效.
+	 */
+	public boolean isValid()
+	{
+		return (this.id & 2) == 0;
+	}
+
+	protected void checkValid()
+	{
+		if (!this.isValid())
+		{
+			throw new EternaException("The object [" + this.getName()
+					+ "] is invalid, maybe initialize fail.");
+		}
 	}
 
 	/**
@@ -182,8 +207,9 @@ class EternaObjectCon extends ObjectContainer
 	{
 		if (needInit && !this.isInitialized(false))
 		{
-			EternaFactoryImpl.initObject(true, factory, this);
+			EternaFactoryImpl.initObject(factory, this);
 		}
+		this.checkValid();
 		return this.obj;
 	}
 
@@ -235,8 +261,9 @@ class EternaCreaterCon extends ObjectContainer
 	{
 		if (needInit && !this.isInitialized(false))
 		{
-			EternaFactoryImpl.initObject(true, factory, this);
+			EternaFactoryImpl.initObject(factory, this);
 		}
+		this.checkValid();
 		return this.obj.create();
 	}
 

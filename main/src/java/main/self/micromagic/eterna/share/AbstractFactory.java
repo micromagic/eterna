@@ -49,6 +49,11 @@ public abstract class AbstractFactory
 		return false;
 	}
 
+	public boolean isValid()
+	{
+		return this.factoryContainer != null;
+	}
+
 	/**
 	 * 获取工厂的名称.
 	 */
@@ -136,6 +141,7 @@ public abstract class AbstractFactory
 	 */
 	public void destroy()
 	{
+		this.factoryContainer = null;
 	}
 
 }

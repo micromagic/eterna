@@ -87,7 +87,17 @@ public class EternaFactoryImpl extends AbstractFactory
 	private EternaFactory shareEternaFactory;
 	private UserManager userManager;
 	private DataSourceManager dataSourceManager;
+	private PermissionSetGenerator permissionSetGenerator;
+	private DaoLoggerConfig daoLoggerConfig;
+	private SearchManagerGenerator searchManagerGenerator;
+	private ModelCaller modelCaller;
+	private String viewGlobalSetting;
 
+	// 存放对象的容器
+	private Map objectMap = new HashMap();
+	private List objectList = new ArrayList();
+	// 列表中是否有空余位置, 如注销了对象之后
+	private boolean hasEmptyPosition;
 
 	//----------------------------------  初始化及公共  --------------------------------------
 
@@ -160,7 +170,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.permissionSetGenerator = tmp;
 		}
 	}
-	private PermissionSetGenerator permissionSetGenerator;
 
 	public DataSourceManager getDataSourceManager()
 			throws EternaException
@@ -387,20 +396,23 @@ public class EternaFactoryImpl extends AbstractFactory
 
 	public void destroy()
 	{
-		int size = this.objectList.size();
-		ObjectContainer container;
-		for (int i = 0; i < size; i++)
+		List list = this.objectList;
+		if (list != null)
 		{
-			container = (ObjectContainer) this.objectList.get(i);
-			if (container != null)
+			this.objectList = null;
+			this.objectMap = null;
+			super.destroy();
+			int size = list.size();
+			for (int i = 0; i < size; i++)
 			{
-				container.destroy();
+				ObjectContainer container = (ObjectContainer) list.get(i);
+				if (container != null)
+				{
+					container.destroy();
+				}
 			}
 		}
-		this.objectList.clear();
-		this.objectMap.clear();
 	}
-
 
 	//----------------------------------  dao  --------------------------------------
 
@@ -455,7 +467,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.daoLoggerConfig = tmp.daoLoggerConfig;
 		}
 	}
-	private DaoLoggerConfig daoLoggerConfig;
 
 	public DaoLogger getDaoLogger(int index)
 			throws EternaException
@@ -583,7 +594,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.searchManagerGenerator = tmp;
 		}
 	}
-	private SearchManagerGenerator searchManagerGenerator;
 
 	public ConditionBuilder getConditionBuilder(String name)
 			throws EternaException
@@ -661,7 +671,6 @@ public class EternaFactoryImpl extends AbstractFactory
 			this.modelCaller = tmp.modelCaller;
 		}
 	}
-	private ModelCaller modelCaller;
 
 	public String getModelNameTag()
 			throws EternaException
@@ -702,8 +711,6 @@ public class EternaFactoryImpl extends AbstractFactory
 
 
 	//----------------------------------  view  --------------------------------------
-
-	private String viewGlobalSetting;
 
 	public String getViewGlobalSetting() throws EternaException
 	{
@@ -863,7 +870,7 @@ public class EternaFactoryImpl extends AbstractFactory
 		this.objectMap.put(name, container);
 		if (this.initFlag > INIT_FLAG_NONE)
 		{
-			initObject(true, this, container);
+			initObject(this, container);
 		}
 	}
 
@@ -892,25 +899,24 @@ public class EternaFactoryImpl extends AbstractFactory
 	 * @param factory    对象所属的工厂
 	 * @param container  对象所在的容器
 	 */
-	static void initObject(boolean newEnv, EternaFactory factory, ObjectContainer container)
+	static void initObject(EternaFactory factory, ObjectContainer container)
 	{
-		if (newEnv)
-		{
-			String tmpName = factory.getFactoryContainer().getId() + "," + container.getName()
-					+ "(" + container.getType().getName() + ")";
-			Object old = ParseException.changeContextInfo(tmpName);
-			try
-			{
-				container.initialize(factory);
-			}
-			finally
-			{
-				ParseException.changeContextInfo(old);
-			}
-		}
-		else
+		boolean success = false;
+		String tmpName = factory.getFactoryContainer().getId() + "," + container.getName()
+				+ "(" + container.getType().getName() + ")";
+		Object old = ParseException.changeContextInfo(tmpName);
+		try
 		{
 			container.initialize(factory);
+			success = true;
+		}
+		finally
+		{
+			ParseException.changeContextInfo(old);
+			if (!success)
+			{
+				container.markInvalid();
+			}
 		}
 	}
 
@@ -1135,12 +1141,6 @@ public class EternaFactoryImpl extends AbstractFactory
 		return this.objectMap.size();
 	}
 
-	// 存放对象的容器
-	private final Map objectMap = new HashMap();
-	private List objectList = new ArrayList();
-	// 列表中是否有空余位置, 如注销了对象之后
-	private boolean hasEmptyPosition;
-
 }
 
 /**
@@ -1148,13 +1148,14 @@ public class EternaFactoryImpl extends AbstractFactory
  */
 class DaoLoggerConfig
 {
+	final Map daoLoggerIndexMap;
+	final DaoLogger[] daoLoggers;
+
 	public DaoLoggerConfig(Map daoLoggerIndexMap, DaoLogger[] daoLoggers)
 	{
 		this.daoLoggerIndexMap = daoLoggerIndexMap;
 		this.daoLoggers = daoLoggers;
 	}
-	final Map daoLoggerIndexMap;
-	final DaoLogger[] daoLoggers;
 
 	public int getDaoLoggerIndex(String name)
 	{

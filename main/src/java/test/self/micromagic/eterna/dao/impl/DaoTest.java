@@ -26,12 +26,25 @@ import self.micromagic.eterna.dao.Update;
 import self.micromagic.eterna.dao.preparer.PreparerManager;
 import self.micromagic.eterna.dao.preparer.ValuePreparer;
 import self.micromagic.eterna.share.EternaException;
+import self.micromagic.eterna.share.EternaFactory;
+import self.micromagic.eterna.share.FactoryContainer;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.Utility;
+import self.micromagic.util.ref.StringRef;
 import tool.ConnectionTool;
 
 public class DaoTest extends TestBase
 {
+	public void testReInit()
+	{
+		FactoryContainer factoryContainer = f.getFactoryContainer();
+		StringRef ref = new StringRef();
+		factoryContainer.reInit(ref);
+		assertEquals("", ref.getString());
+		assertFalse(f.isValid());
+		f = (EternaFactory) factoryContainer.getFactory();
+	}
+
 	public void testBindWithName2()
 			throws Exception
 	{
