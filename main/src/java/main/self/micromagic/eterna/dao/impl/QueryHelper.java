@@ -46,6 +46,14 @@ public class QueryHelper
 	 */
 	public static final String ORACLE_ROW_NUM = "eterna_oracle_rowNum";
 
+	private final Query query;
+
+	protected int recordCount;
+	protected int realRecordCount;
+	protected boolean realRecordCountAvailable;
+	protected boolean hasMoreRecord;
+	protected boolean needCount;
+
 	/**
 	 * 获取一个查询辅助工具的实例.
 	 *
@@ -82,8 +90,6 @@ public class QueryHelper
 		return oldHelper != null && DB_NAME_COMMON.equals(oldHelper.getType()) ?
 				oldHelper : new QueryHelper(query);
 	}
-
-	private final Query query;
 
 	/**
 	 * 构造函数.
@@ -215,8 +221,7 @@ public class QueryHelper
 		else
 		{
 			int maxRows = this.getMaxRows();
-			// 设置了读取的最大记录数, 且数值不太大的情况, 才以此值作为初始化参数
-			result = new ArrayList(maxRows <= -1 || maxRows > 100 ? 32 : maxRows);
+			result = new ArrayList(getInitSize(maxRows));
 			if (maxRows == -1)
 			{
 				while (rs.next())
@@ -303,6 +308,15 @@ public class QueryHelper
 	}
 
 	/**
+	 * 获取初始化的大小.
+	 * 根据读取的最大记录数, 在数值不太大的情况, 才以此值作为初始化参数.
+	 */
+	protected static int getInitSize(int maxRows)
+	{
+		return maxRows <= -1 || maxRows > 2000 ? 512 : maxRows;
+	}
+
+	/**
 	 * 当totalCount为0-N时设置总记录数等信息.
 	 */
 	protected void setTotalCountInfo(int totalCount, Query.TotalCountInfo ext)
@@ -315,12 +329,6 @@ public class QueryHelper
 			this.realRecordCountAvailable = ext.totalCountAvailable;
 		}
 	}
-
-	protected int recordCount;
-	protected int realRecordCount;
-	protected boolean realRecordCountAvailable;
-	protected boolean hasMoreRecord;
-	protected boolean needCount;
 
 	/**
 	 * 本次读取结果中的记录数.
@@ -451,7 +459,7 @@ abstract class SpecialQueryHelper extends QueryHelper
 		this.needCount = false;
 
 		Query query = this.getQueryAdapter();
-		ArrayList result = new ArrayList(this.nowMaxRows == -1 ? 32 : this.nowMaxRows);
+		ArrayList result = new ArrayList(getInitSize(this.nowMaxRows));
 		if (this.nowMaxRows == -1)
 		{
 			// 没有限制获取的记录数时的处理
