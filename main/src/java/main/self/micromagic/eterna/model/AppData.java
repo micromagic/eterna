@@ -437,18 +437,7 @@ public class AppData
 			}
 			else
 			{
-				Attribute _time = node.attribute("_time");
-				if (_time != null)
-				{
-					try
-					{
-						String beginTimeStr = _time.getValue();
-						node.remove(_time);
-						long beginTime = Long.parseLong(beginTimeStr);
-						node.addAttribute("usedTime", TimeLogger.formatPassTime(TimeLogger.getTime() - beginTime));
-					}
-					catch (Exception ex) {}
-				}
+				checkUsedTime(node);
 			}
 		}
 		else
@@ -461,15 +450,7 @@ public class AppData
 	private static synchronized void logNode(Element node)
 	{
 		node.addAttribute("endTime", FormatTool.formatDatetime(new Date(System.currentTimeMillis())));
-		try
-		{
-			Attribute _time = node.attribute("_time");
-			String beginTimeStr = _time.getValue();
-			node.remove(_time);
-			long beginTime = Long.parseLong(beginTimeStr);
-			node.addAttribute("usedTime", TimeLogger.formatPassTime(TimeLogger.getTime() - beginTime));
-		}
-		catch (Exception ex) {}
+		checkUsedTime(node);
 		Element logs;
 		if (logDocument == null)
 		{
@@ -514,6 +495,22 @@ public class AppData
 			}
 		}
 		logs.add(node);
+	}
+
+	private static void checkUsedTime(Element node)
+	{
+		Attribute time = node.attribute("_time");
+		if (time != null)
+		{
+			try
+			{
+				String beginTimeStr = time.getValue();
+				node.remove(time);
+				long beginTime = Long.parseLong(beginTimeStr);
+				node.addAttribute("usedTime", TimeLogger.formatPassTime(TimeLogger.getTime() - beginTime));
+			}
+			catch (Exception ex) {}
+		}
 	}
 
 	/**
