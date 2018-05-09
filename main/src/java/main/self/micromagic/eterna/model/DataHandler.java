@@ -118,6 +118,11 @@ public class DataHandler
 	 */
 	private static boolean logVarChanged;
 
+	/**
+	 * 存放名称与AppData中map索引值的对应表.
+	 */
+	private static final Map mapNameIndex = new HashMap();
+
 	static
 	{
 		try
@@ -128,6 +133,22 @@ public class DataHandler
 					DataHandler.class, "logVarChanged");
 		}
 		catch (Exception ex) {}
+
+		MapGetter paramGetter = new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP);
+		MapGetter attrGetter = new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP);
+		MapGetter sessionGetter = new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP);
+		mapNameIndex.put(AppData.REQUEST_PARAMETER_MAP_NAME, paramGetter);
+		mapNameIndex.put(AppData.REQUEST_ATTRIBUTE_MAP_NAME, attrGetter);
+		mapNameIndex.put(AppData.SESSION_ATTRIBUTE_MAP_NAME, sessionGetter);
+		mapNameIndex.put(AppData.DATA_MAP_NAME, new BaseMapGetter(AppData.DATA_MAP));
+		mapNameIndex.put("param", paramGetter);
+		mapNameIndex.put("attr", attrGetter);
+		mapNameIndex.put("session", sessionGetter);
+		mapNameIndex.put("RP", paramGetter);
+		mapNameIndex.put("RA", attrGetter);
+		mapNameIndex.put("SA", sessionGetter);
+		mapNameIndex.put("header", new HeaderGetter());
+		mapNameIndex.put("cookie", new CookieGetter());
 	}
 
 	/**
@@ -793,27 +814,6 @@ public class DataHandler
 			return mapNameIndex.put(name, getter) != null;
 		}
 		return false;
-	}
-
-	/**
-	 * 存放名称与AppData中map索引值的对应表.
-	 */
-	private static final Map mapNameIndex = new HashMap();
-
-	static
-	{
-		mapNameIndex.put(AppData.REQUEST_PARAMETER_MAP_NAME, new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
-		mapNameIndex.put(AppData.REQUEST_ATTRIBUTE_MAP_NAME, new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP));
-		mapNameIndex.put(AppData.SESSION_ATTRIBUTE_MAP_NAME, new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
-		mapNameIndex.put(AppData.DATA_MAP_NAME, new BaseMapGetter(AppData.DATA_MAP));
-		mapNameIndex.put("param", new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
-		mapNameIndex.put("attr", new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP));
-		mapNameIndex.put("session", new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
-		mapNameIndex.put("RP", new BaseMapGetter(AppData.REQUEST_PARAMETER_MAP));
-		mapNameIndex.put("RA", new BaseMapGetter(AppData.REQUEST_ATTRIBUTE_MAP));
-		mapNameIndex.put("SA", new BaseMapGetter(AppData.SESSION_ATTRIBUTE_MAP));
-		mapNameIndex.put("header", new HeaderGetter());
-		mapNameIndex.put("cookie", new CookieGetter());
 	}
 
 }
