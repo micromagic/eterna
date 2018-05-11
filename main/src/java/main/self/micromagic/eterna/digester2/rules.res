@@ -141,7 +141,7 @@ log:{name}
 create:{generator,${query}}
 attr:{
 	name,logType(m=0,i=0):logTypeName,forwardOnly(m=0,i=0),
-	orderIndex(m=0,i=0),$body(body=prepared-sql,m=0):preparedSQL
+	orderIndex(m=0,i=0),$body(body=prepared-sql,m=0):preparedScript
 }
 sub:{readers,parameters,attribute}
 stack:{registerObject,n:0,g:0}
@@ -152,7 +152,7 @@ update
 same:{name}
 log:{name}
 create:{generator,${update}}
-attr:{name,logType(m=0,i=0):logTypeName,$body(body=prepared-sql,m=0):preparedSQL}
+attr:{name,logType(m=0,i=0):logTypeName,$body(body=prepared-sql,m=0):preparedScript}
 sub:{parameters,attribute}
 stack:{registerObject,n:0,g:0}
 

@@ -113,7 +113,7 @@ public class DaoTest extends TestBase
 		UpdateImpl u = new UpdateImpl();
 		u.setName("b_t_02");
 		u.addEntityRef(ref);
-		u.setPreparedSQL("insert into T (#auto[insertN;1,2] #auto[insertN,d;3])"
+		u.setPreparedScript("insert into T (#auto[insertN;1,2] #auto[insertN,d;3])"
 				+ " values (#auto[insertV;1,2] #auto[insertV,d;3])");
 		u.setFactory(f);
 		f.registerObject(u);
@@ -141,7 +141,7 @@ public class DaoTest extends TestBase
 		UpdateImpl u = new UpdateImpl();
 		u.setName("b_t_01");
 		u.addEntityRef(ref);
-		u.setPreparedSQL("? #sub #auto[and,dynamic;2,5] #sub #auto[and;6]");
+		u.setPreparedScript("? #sub #auto[and,dynamic;2,5] #sub #auto[and;6]");
 		u.setFactory(f);
 		f.registerObject(u);
 
@@ -189,7 +189,7 @@ public class DaoTest extends TestBase
 		UpdateImpl u = new UpdateImpl();
 		u.setName("b_t_err");
 		u.addEntityRef(ref);
-		u.setPreparedSQL("? #sub #auto[insertN,dynamic;2,5] #sub #auto[and;2]");
+		u.setPreparedScript("? #sub #auto[insertN,dynamic;2,5] #sub #auto[and;2]");
 		u.setFactory(f);
 		try
 		{

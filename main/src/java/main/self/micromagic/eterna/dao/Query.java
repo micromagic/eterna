@@ -63,12 +63,12 @@ public interface Query extends Dao
 
 	/**
 	 * 获得原始的查询语句.
-	 * 当调用<code>getPreparedSQL</code>, 获取的SQL有可能是被转换过的,
+	 * 当调用<code>getPreparedScript</code>, 获取的SQL有可能是被转换过的,
 	 * 如: 当设置了startRow和maxRows时, 会添加获取记录数限制的语句等.
 	 *
-	 * @see #getPreparedSQL
+	 * @see #getPreparedScript()
 	 */
-	String getPrimitiveQuerySQL() throws EternaException;
+	String getPrimitiveQueryScript() throws EternaException;
 
 	/**
 	 * 获得ResultReader的排序方式字符串.

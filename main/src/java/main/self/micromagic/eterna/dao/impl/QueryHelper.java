@@ -120,10 +120,10 @@ public class QueryHelper
 	/**
 	 * 根据原始语句, 生成处理后的, 带记录数限制的查询语句.
 	 */
-	public String getQueryScript(String preparedSQL)
+	public String getQueryScript(String preparedScript)
 			throws EternaException
 	{
-		return preparedSQL;
+		return preparedScript;
 	}
 
 	/**

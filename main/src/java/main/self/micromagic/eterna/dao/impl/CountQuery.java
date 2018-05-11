@@ -165,7 +165,7 @@ class CountQuery
 	public String getPreparedScript()
 			throws EternaException
 	{
-		String tmpSQL = this.query.getPrimitiveQuerySQL();
+		String tmpSQL = this.query.getPrimitiveQueryScript();
 		if (this.oldSQL == tmpSQL)
 		{
 			return this.cacheSQL;
@@ -180,10 +180,10 @@ class CountQuery
 		return this.cacheSQL;
 	}
 
-	public String getPrimitiveQuerySQL()
+	public String getPrimitiveQueryScript()
 			throws EternaException
 	{
-		return this.query.getPrimitiveQuerySQL();
+		return this.query.getPrimitiveQueryScript();
 	}
 
 	public ResultReaderManager getReaderManager()

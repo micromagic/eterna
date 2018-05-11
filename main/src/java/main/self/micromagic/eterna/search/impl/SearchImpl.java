@@ -587,7 +587,7 @@ public class SearchImpl extends AbstractGenerator
 			log.debug("Search SQL:" + query.getPreparedScript());
 			log.debug("End prepare query:" + System.currentTimeMillis());
 		}
-		//System.out.println("Search SQL:" + query.getPreparedSQL());
+		//System.out.println("Search SQL:" + query.getPreparedScript());
 		ResultIterator countRitr = null;
 		ResultIterator ritr;
 		if ("1".equals(raMap.get(HOLD_CONNECTION)) && !onlySearch)

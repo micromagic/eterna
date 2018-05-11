@@ -292,14 +292,14 @@ public abstract class AbstractDao extends AbstractGenerator
 	/**
 	 * 根据临时设置的子句获取预备SQL.
 	 */
-	String getTempPreparedSQL(int[] indexs, String[] subParts)
+	String getTempPreparedScript(int[] indexs, String[] subParts)
 			throws EternaException
 	{
 		this.checkInitialized();
 		return this.daoManager.getTempPreparedScript(indexs, subParts);
 	}
 
-	public void setPreparedSQL(String sql)
+	public void setPreparedScript(String script)
 			throws EternaException
 	{
 		if (this.preparedScript != null)
@@ -307,11 +307,11 @@ public abstract class AbstractDao extends AbstractGenerator
 			throw new EternaException("You can't set prepared sql twice at "
 					+ this.getType() + " [" + this.getName() + "].");
 		}
-		if (sql == null)
+		if (script == null)
 		{
 			throw new NullPointerException();
 		}
-		this.preparedScript = sql;
+		this.preparedScript = script;
 	}
 
 	public void setSubScript(int index, String subPart)

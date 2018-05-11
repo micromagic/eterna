@@ -333,7 +333,7 @@ public abstract class AbstractQuery extends BaseDao
 				: this.queryHelper.getQueryScript(preparedScript);
 	}
 
-	public String getPrimitiveQuerySQL()
+	public String getPrimitiveQueryScript()
 			throws EternaException
 	{
 		return super.getPreparedScript();
