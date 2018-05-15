@@ -21,12 +21,18 @@ import self.micromagic.eterna.share.EternaException;
 public interface ModifiableResultRow extends ResultRow
 {
 	/**
-	 * 判断当前行<code>ResultRow</code>对象是否被修改过.
+	 * 判断当前行<code>ResultRow</code>对象是否被修改过. <p>
+	 * 只有修改值才会返回true, 修改行号或格式化后的值不会改变是否修改的标识.
 	 */
 	boolean isModified() throws EternaException;
 
 	/**
-	 * 在当前行<code>ResultRow</code>对象中指定列的值.
+	 * 设置当前<code>ResultRow</code>在结果中的位置.
+	 */
+	void setRowNum(int num) throws EternaException;
+
+	/**
+	 * 设置当前行<code>ResultRow</code>对象中指定列的值.
 	 *
 	 * @param columnIndex  第一列数是1, 第二列是2, ...
 	 * @param v            要设置的值
@@ -34,11 +40,27 @@ public interface ModifiableResultRow extends ResultRow
 	void setValue(int columnIndex, Object v) throws EternaException;
 
 	/**
-	 * 在当前行<code>ResultRow</code>对象中指定列的值.
+	 * 设置当前行<code>ResultRow</code>对象中指定列的值.
 	 *
 	 * @param columnName  列的名称
 	 * @param v           要设置的值
 	 */
 	void setValue(String columnName, Object v) throws EternaException;
+
+	/**
+	 * 设置当前行<code>ResultRow</code>对象中指定列的格式化后的值.
+	 *
+	 * @param columnIndex  第一列数是1, 第二列是2, ...
+	 * @param v            要设置的格式化后的值
+	 */
+	void setFormated(int columnIndex, Object v) throws EternaException;
+
+	/**
+	 * 设置当前行<code>ResultRow</code>对象中指定列的格式化后的值.
+	 *
+	 * @param columnName  列的名称
+	 * @param v           要设置的格式化后的值
+	 */
+	void setFormated(String columnName, Object v) throws EternaException;
 
 }

@@ -34,13 +34,14 @@ import self.micromagic.eterna.share.EternaException;
 class ResultRowWrapper
 		implements ResultRow
 {
+	private final ResultIterator ritr;
+	private final ResultRow base;
+
 	public ResultRowWrapper(ResultIterator ritr, ResultRow base)
 	{
 		this.ritr = ritr;
 		this.base = base;
 	}
-	private final ResultIterator ritr;
-	private final ResultRow base;
 
 	public ResultIterator getResultIterator()
 	{
@@ -292,17 +293,24 @@ class ResultRowWrapper
 class ModifiableResultRowWrapper extends ResultRowWrapper
 		implements ModifiableResultRow
 {
+	private final ModifiableResultRow base;
+
 	public ModifiableResultRowWrapper(ResultIterator ritr, ModifiableResultRow base)
 	{
 		super(ritr, base);
 		this.base = base;
 	}
-	private final ModifiableResultRow base;
 
 	public boolean isModified()
 			throws EternaException
 	{
 		return this.base.isModified();
+	}
+
+	public void setRowNum(int num)
+			throws EternaException
+	{
+		this.base.setRowNum(num);
 	}
 
 	public void setValue(int columnIndex, Object v)
@@ -315,6 +323,18 @@ class ModifiableResultRowWrapper extends ResultRowWrapper
 			throws EternaException
 	{
 		this.base.setValue(columnName, v);
+	}
+
+	public void setFormated(int columnIndex, Object v)
+			throws EternaException
+	{
+		this.base.setFormated(columnIndex, v);
+	}
+
+	public void setFormated(String columnName, Object v)
+			throws EternaException
+	{
+		this.base.setFormated(columnName, v);
 	}
 
 }

@@ -53,13 +53,13 @@ public class ResultRowImpl implements ModifiableResultRow
 	private static final Object NULL_FLAG = new Object();
 
 	private final Object[] values;
+	private final Object[] formateds;
 	private final Permission permission;
 	private final ResultMetaData metaData;
 	private final ResultIterator resultIterator;
-	private final int rowNum;
 
+	private int rowNum;
 	private Object[] oldValues;
-	private final Object[] formateds;
 	private boolean wasNull;
 
 	public ResultRowImpl(Object[] values, ResultIterator resultIterator, int rowNum, Permission permission)
@@ -98,6 +98,11 @@ public class ResultRowImpl implements ModifiableResultRow
 	public int getRowNum()
 	{
 		return this.rowNum;
+	}
+
+	public void setRowNum(int num)
+	{
+		this.rowNum = num;
 	}
 
 	public boolean isModified()
@@ -156,6 +161,17 @@ public class ResultRowImpl implements ModifiableResultRow
 	{
 		int index = this.metaData.findColumn(columnName, false);
 		this.setValue(index, v);
+	}
+
+	public void setFormated(int columnIndex, Object v)
+	{
+		this.formateds[columnIndex - 1] = v;
+	}
+
+	public void setFormated(String columnName, Object v)
+	{
+		int index = this.metaData.findColumn(columnName, false);
+		this.setFormated(index, v);
 	}
 
 	public Object getSmartValue(int columnIndex)
