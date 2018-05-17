@@ -800,7 +800,7 @@ abstract class InternalPropertiesManager
 		{
 			return;
 		}
-		ConfigResource res = this.checkDynamicRes(cName, allProps, false, baseRes, delayMap, props);
+		ConfigResource res = this.checkDynamicRes(cName, allProps, true, baseRes, delayMap, props);
 		if (res == null)
 		{
 			return;
