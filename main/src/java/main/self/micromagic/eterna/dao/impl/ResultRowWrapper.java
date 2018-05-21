@@ -325,6 +325,12 @@ class ModifiableResultRowWrapper extends ResultRowWrapper
 		this.base.setValue(columnName, v);
 	}
 
+	public boolean hasFormated(int columnIndex)
+			throws EternaException
+	{
+		return this.base.hasFormated(columnIndex);
+	}
+
 	public void setFormated(int columnIndex, Object v)
 			throws EternaException
 	{

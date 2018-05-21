@@ -48,6 +48,13 @@ public interface ModifiableResultRow extends ResultRow
 	void setValue(String columnName, Object v) throws EternaException;
 
 	/**
+	 * 判断当前行<code>ResultRow</code>对象中指定列是否已有格式化后的值.
+	 *
+	 * @param columnIndex  第一列数是1, 第二列是2, ...
+	 */
+	boolean hasFormated(int columnIndex) throws EternaException;
+
+	/**
 	 * 设置当前行<code>ResultRow</code>对象中指定列的格式化后的值.
 	 *
 	 * @param columnIndex  第一列数是1, 第二列是2, ...

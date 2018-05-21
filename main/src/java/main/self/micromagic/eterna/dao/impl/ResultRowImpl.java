@@ -163,6 +163,11 @@ public class ResultRowImpl implements ModifiableResultRow
 		this.setValue(index, v);
 	}
 
+	public boolean hasFormated(int columnIndex)
+	{
+		return this.formateds[columnIndex - 1] != null;
+	}
+
 	public void setFormated(int columnIndex, Object v)
 	{
 		this.formateds[columnIndex - 1] = v;
