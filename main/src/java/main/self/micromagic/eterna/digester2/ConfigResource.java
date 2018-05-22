@@ -337,9 +337,13 @@ class AbstractResource
 class ClassPathResource extends AbstractResource
 		implements ConfigResource
 {
+	private String prefix;
+	private URL url;
+	private String path;
+	private ClassLoader loader;
+
 	public ConfigResource create(String config, FactoryContainer container)
 	{
-		this.container = container;
 		ClassLoader loader = (ClassLoader) container.getAttribute(
 				FactoryContainer.CLASSLOADER_FLAG);
 		int index = config.indexOf(':');
@@ -361,11 +365,6 @@ class ClassPathResource extends AbstractResource
 		res.init(config, container, res.url);
 		return res;
 	}
-
-	private String prefix;
-	private URL url;
-	private String path;
-	private ClassLoader loader;
 
 	public String getURI()
 	{
@@ -794,6 +793,11 @@ class FileResource extends AbstractResource
 class WebResource extends AbstractResource
 		implements ConfigResource
 {
+	private String prefix;
+	private URL url;
+	private String path;
+	private javax.servlet.ServletContext context;
+
 	public ConfigResource create(String config, FactoryContainer container)
 	{
 		int index = config.indexOf(':');
@@ -824,11 +828,6 @@ class WebResource extends AbstractResource
 		res.init(config, container, res.url);
 		return res;
 	}
-
-	private String prefix;
-	private URL url;
-	private String path;
-	private javax.servlet.ServletContext context;
 
 	public String getURI()
 	{
@@ -911,6 +910,8 @@ class WebResource extends AbstractResource
 class UrlResource extends AbstractResource
 		implements ConfigResource
 {
+	private URL url;
+
 	public ConfigResource create(String config, FactoryContainer container)
 	{
 		UrlResource res = new UrlResource();
@@ -925,8 +926,6 @@ class UrlResource extends AbstractResource
 		res.init(config, container, res.url);
 		return res;
 	}
-
-	private URL url;
 
 	public String getURI()
 	{
