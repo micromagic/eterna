@@ -153,7 +153,7 @@ public class TR extends ComponentImpl
 	public Iterator getSubComponents()
 			throws EternaException
 	{
-		if (this.baseComponent != null && this.componentList.size() == 0)
+		if (this.baseComponent != null && this.componentList.isEmpty())
 		{
 			return this.baseComponent.getSubComponents();
 		}

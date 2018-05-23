@@ -203,7 +203,7 @@ public class OrderManager
 			{
 				// 不是名称分隔符, 添加对象名称
 				ObjContainer oc = new ObjContainer(str.trim(),
-						currentObjs.size() == 0 ? currentObjs : null);
+						currentObjs.isEmpty() ? currentObjs : null);
 				if (nameCache.containsKey(oc.name))
 				{
 					String msg = "Duplicate item name [" + oc.name + "] in order config ["

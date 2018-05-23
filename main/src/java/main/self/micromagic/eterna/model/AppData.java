@@ -230,6 +230,7 @@ public class AppData
 	{
 		int oldType = this.logType;
 		this.logType = 0;
+		this.nodeStack = null;
 		return oldType;
 	}
 
@@ -262,7 +263,7 @@ public class AppData
 		{
 			return null;
 		}
-		if (this.nodeStack == null || this.nodeStack.size() == 0)
+		if (this.nodeStack == null || this.nodeStack.isEmpty())
 		{
 			return null;
 		}
@@ -295,7 +296,7 @@ public class AppData
 			// 如果日志处于关闭状态不做记录
 			return;
 		}
-		if (this.nodeStack == null || this.nodeStack.size() == 0)
+		if (this.nodeStack == null || this.nodeStack.isEmpty())
 		{
 			// 节点堆栈为空不做记录
 			return;
@@ -362,7 +363,7 @@ public class AppData
 			// 如果日志处于关闭状态且节点堆栈为空的状态才返回null不做记录
 			return null;
 		}
-		if (this.nodeStack == null || this.nodeStack.size() == 0)
+		if (this.nodeStack == null || this.nodeStack.isEmpty())
 		{
 			log.error("You haven't begined a node in this app.");
 			return null;
@@ -376,7 +377,7 @@ public class AppData
 		{
 			node.addAttribute("export", export.getName());
 		}
-		if (this.nodeStack.size() == 0)
+		if (this.nodeStack.isEmpty())
 		{
 			logNode(node);
 		}
@@ -397,7 +398,7 @@ public class AppData
 			// 如果日志处于关闭状态且节点堆栈为空的状态才返回null不做记录
 			return null;
 		}
-		if (this.nodeStack == null || this.nodeStack.size() == 0)
+		if (this.nodeStack == null || this.nodeStack.isEmpty())
 		{
 			log.error("You haven't begined a node in this app.");
 			return null;
@@ -431,7 +432,7 @@ public class AppData
 			{
 				node.addAttribute("export", export.getName());
 			}
-			if (this.nodeStack.size() == 0)
+			if (this.nodeStack.isEmpty())
 			{
 				logNode(node);
 			}

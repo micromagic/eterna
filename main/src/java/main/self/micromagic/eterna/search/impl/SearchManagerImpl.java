@@ -746,7 +746,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			throws EternaException
 	{
 		List cons = this.getConditions();
-		if (cons.size() == 0)
+		if (cons.isEmpty())
 		{
 			return null;
 		}
@@ -775,7 +775,7 @@ public class SearchManagerImpl extends AbstractGenerator
 			throws EternaException
 	{
 		Map consMap = this.prepareCondition(search);
-		if (consMap == null || consMap.size() == 0)
+		if (consMap == null || consMap.isEmpty())
 		{
 			return new Object[]{"", null};
 		}

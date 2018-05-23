@@ -97,7 +97,7 @@ public class ModifiableViewResImpl
 	{
 		if (this.functionMap == null)
 		{
-			if (fnMap == null || fnMap.size() == 0)
+			if (fnMap == null || fnMap.isEmpty())
 			{
 				return;
 			}

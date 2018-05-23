@@ -25,20 +25,20 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 
-import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.model.AppData;
+import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.view.Component;
 import self.micromagic.eterna.view.ModifiableViewRes;
 import self.micromagic.eterna.view.Replacement;
 import self.micromagic.eterna.view.ReplacementGenerator;
 import self.micromagic.eterna.view.View;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.container.MultiIterator;
-import self.micromagic.util.container.UnmodifiableIterator;
 import self.micromagic.util.container.PreFetchIterator;
+import self.micromagic.util.container.UnmodifiableIterator;
 import self.micromagic.util.ref.IntegerRef;
 import self.micromagic.util.ref.StringRef;
-import self.micromagic.util.StringTool;
 
 /**
  * @author micromagic@sina.com
@@ -206,7 +206,7 @@ public class ReplacementImpl extends ComponentImpl
 
 		this.hasSpecialEvent = this.eventList.size() > 0;
 		this.linkTypical = this.componentParam == null && this.beforeInit == null
-				&& this.initScript == null && this.componentList.size() == 0
+				&& this.initScript == null && this.componentList.isEmpty()
 				&& !this.ignoreGlobalSetted;
 		this.checkLinkTypical = this.linkTypical && this.directMatchMap != null;
 

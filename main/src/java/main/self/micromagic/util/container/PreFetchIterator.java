@@ -110,7 +110,7 @@ public class PreFetchIterator
 
 	public void remove()
 	{
-		if (this.modifiable && (this.preFetchList == null || this.preFetchList.size() == 0))
+		if (this.modifiable && (this.preFetchList == null || this.preFetchList.isEmpty()))
 		{
 			this.itr.remove();
 		}
