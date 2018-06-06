@@ -304,7 +304,6 @@ public class VersionManager
 		}
 		finally
 		{
-			c.destroy();
 			if (success)
 			{
 				if (log.isInfoEnabled())
@@ -321,6 +320,7 @@ public class VersionManager
 				}
 			}
 			this.addVersionLog(conn, vName, version, errMsg, f);
+			c.destroy();
 		}
 	}
 	private boolean upperVersion0(Connection conn, String config, String vName,
@@ -597,32 +597,38 @@ public class VersionManager
 	 */
 	private void addVersionLog(Connection conn, String vName, int version,
 			String errInfo, Factory factory)
-			throws SQLException
 	{
-		Integer v = Utility.createInteger(version);
-		Update u;
-		if (version == 1 && this.currentEternaVersion <= V2)
+		try
 		{
-			u = (Update) factory.createObject("addVersionValue");
-		}
-		else
-		{
-			u = (Update) factory.createObject("setVersionValue");
-		}
-		if (this.currentEternaVersion <= V2 || errInfo != null)
-		{
-			// 大于2版本时, 版本信息已记录, 只有出错时才需要修改
+			Integer v = Utility.createInteger(version);
+			Update u;
+			if (version == 1 && this.currentEternaVersion <= V2)
+			{
+				u = (Update) factory.createObject("addVersionValue");
+			}
+			else
+			{
+				u = (Update) factory.createObject("setVersionValue");
+			}
+			if (this.currentEternaVersion <= V2 || errInfo != null)
+			{
+				// 大于2版本时, 版本信息已记录, 只有出错时才需要修改
+				u.setString("versionName", vName);
+				u.setString("errInfo", errInfo);
+				u.setObject("versionValue", v);
+				u.executeUpdate(conn);
+			}
+			u = (Update) factory.createObject("addVersionLog");
 			u.setString("versionName", vName);
 			u.setString("errInfo", errInfo);
 			u.setObject("versionValue", v);
 			u.executeUpdate(conn);
+			conn.commit();
 		}
-		u = (Update) factory.createObject("addVersionLog");
-		u.setString("versionName", vName);
-		u.setString("errInfo", errInfo);
-		u.setObject("versionValue", v);
-		u.executeUpdate(conn);
-		conn.commit();
+		catch (Exception ex)
+		{
+			log.error("Error in add version log.", ex);
+		}
 	}
 
 	/**
