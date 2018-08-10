@@ -17,6 +17,7 @@
 package self.micromagic.eterna.dao.impl;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -78,6 +79,14 @@ public abstract class AbstractResultIterator
 			String name = this.readerManager == null ? "<unknow>" : this.readerManager.getName();
 			throw new EternaException("The result iterator [" + name + "] hasn't initialized.");
 		}
+	}
+
+	/**
+	 * 获取所有的ResultRow.
+	 */
+	public List getResult()
+	{
+		return Collections.unmodifiableList(this.result);
 	}
 
 	public ResultMetaData getMetaData()
