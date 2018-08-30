@@ -19,7 +19,7 @@
 dbVersion
 log:{$dbVersion}
 create:{,${factory},1}
-sub:{table,index,script,config,eterna,data,ignore,check}
+sub:{table,index,script,config,eterna,data,ignore,check,special}
 
 
 ## ignore
@@ -34,6 +34,15 @@ log:{$check}
 attr:{tableName(i=0),columnName(m=0,i=0),indexName(m=0,i=0),exists(m=0,i=0):existsFlag}
 stack:{popStack,t:1,o:0,n:0,g:0,begin:1}
 sub:{table,index,script,ignore,check,data}
+
+
+## special
+special
+log:{$special}
+create:{generator}
+attr:{$serial(pattern=DBVM000000):name,$element:element,dataBase(m=0,i=0)}
+sub:{attribute}
+stack:{registerObject,n:0,g:0}
 
 
 ## script
@@ -98,7 +107,7 @@ method:{addRefColumn,name(i=0)}
 
 ## eterna
 eterna
-sub:{constant,query,update,entity}
+sub:{constant,query,update,entity,object}
 
 
 ## config
