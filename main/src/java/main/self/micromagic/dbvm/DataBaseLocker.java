@@ -288,7 +288,7 @@ public class DataBaseLocker
 		modify.setIgnore("lockValue1");
 		modify.setIgnore("lockValue2");
 		modify.setString("lockName", lockName);
-		if (tryGetLock(conn, modify, null))
+		if (!tryGetLock(conn, modify, null))
 		{
 			// 如果没有获取到锁, 那可能记录或表不存在
 			lock(conn, lockName, userId, false);
