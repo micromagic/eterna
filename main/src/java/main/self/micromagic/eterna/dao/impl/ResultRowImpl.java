@@ -170,7 +170,7 @@ public class ResultRowImpl implements ModifiableResultRow
 
 	public void setFormated(int columnIndex, Object v)
 	{
-		this.formateds[columnIndex - 1] = v;
+		this.formateds[columnIndex - 1] = v == null ? NULL_FLAG : v;
 	}
 
 	public void setFormated(String columnName, Object v)
