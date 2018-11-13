@@ -36,6 +36,18 @@ public class DoubleBufferList<T>
 	 * 是否要触发监听的动作.
 	 */
 	private boolean needFire;
+	/**
+	 * 一级容量限制.
+	 */
+	private int limit1 = 1024 * 12;
+	/**
+	 * 二级容量限制.
+	 */
+	private int limit2;
+	/**
+	 * 是否需要唤醒等待的线程.
+	 */
+	private boolean needNotify;
 
 	/**
 	 * 构造一个双缓冲列表.
@@ -72,6 +84,18 @@ public class DoubleBufferList<T>
 	}
 
 	/**
+	 * 设置容量限制.
+	 *
+	 * @param limit1  一级容量限制, 超过此值只是减慢添加的速度
+	 * @param limit2  二级容量限制, 超过此值将进入等待
+	 */
+	public void setLimit(int limit1, int limit2)
+	{
+		this.limit1 = limit1;
+		this.limit2 = limit2;
+	}
+
+	/**
 	 * 向列表中添加一个对象.
 	 *
 	 * @param obj  需要添加的对象
@@ -93,6 +117,7 @@ public class DoubleBufferList<T>
 		{
 			this.fireAction();
 		}
+		this.checkAndWait();
 	}
 
 	/**
@@ -121,6 +146,7 @@ public class DoubleBufferList<T>
 		{
 			this.fireAction();
 		}
+		this.checkAndWait();
 	}
 
 	/**
@@ -137,6 +163,48 @@ public class DoubleBufferList<T>
 			/// 如果监听动作触发出错, 需要重置触发标识
 			this.needFire = true;
 			throw ex;
+		}
+	}
+
+	/**
+	 * 检查接受列表中存放的数量并判断是否要等待.
+	 */
+	private void checkAndWait()
+	{
+		int count = this.receiverList.size();
+		if (this.limit2 > 0 && count > this.limit2)
+		{
+			this.checkAndWait0(this.limit2, true);
+		}
+		else if (this.limit1 > 0 && count > this.limit1)
+		{
+			this.checkAndWait0(this.limit1, false);
+		}
+	}
+
+	/**
+	 * 在同步状态下检查并判断是否要等待.
+	 */
+	private void checkAndWait0(int limit, boolean level2)
+	{
+		synchronized (this)
+		{
+			if (this.receiverList.size() > limit)
+			{
+				this.needNotify = true;
+				try
+				{
+					if (level2)
+					{
+						this.wait();
+					}
+					else
+					{
+						 this.wait(71L);
+					}
+				}
+				catch (InterruptedException ex) {}
+			}
 		}
 	}
 
@@ -163,6 +231,11 @@ public class DoubleBufferList<T>
 			this.exporterList = this.receiverList;
 			tmp.clear();
 			this.receiverList = tmp;
+			if (this.needNotify)
+			{
+				this.needNotify = false;
+				this.notifyAll();
+			}
 			return this.exporterList;
 		}
 	}
