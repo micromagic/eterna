@@ -23,55 +23,66 @@ public class CodeOutputStream extends OutputStream
 {
 	private final int BLOCK_SIZE = 64;
 
-	private OutputStream out;
-	private Coder coder;
+	private final OutputStream out;
+	private final Coder coder;
+	private final boolean encodeFlag;
 
-	private byte[] oneByteBuf = new byte[1];
+	private final byte[] oneByteBuf = new byte[1];
 
 	/**
 	 * 读取时，coders使用的顺序是从前到后
 	 */
 	public CodeOutputStream(Coder[] coders, OutputStream out)
 	{
-		this.out = out;
-		this.coder = new MultiCoder(coders);
+		this(new MultiCoder(coders), out, true);
 	}
 
 	public CodeOutputStream(Coder coder, OutputStream out)
 	{
-		this.out = out;
-		this.coder = coder;
+		this(coder, out, true);
 	}
 
-	public void write(int b) throws IOException
+	/**
+	 * @param encodeFlag  是否使用编码模式, 如果为false, 则使用解码模式
+	 */
+	public CodeOutputStream(Coder coder, OutputStream out, boolean encodeFlag)
+	{
+		this.out = out;
+		this.coder = coder;
+		this.encodeFlag = encodeFlag;
+	}
+
+	public void write(int b)
+			throws IOException
 	{
 		this.oneByteBuf[0] = (byte) b;
 		this.write(this.oneByteBuf);
 	}
 
-	public void write(byte b[]) throws IOException
+	public void write(byte b[])
+			throws IOException
 	{
 		if (b == null)
 		{
 			throw new NullPointerException();
 		}
-
-		byte[] result = null;
-		result = this.coder.encode(b, false);
+		byte[] result = this.encodeFlag ? this.coder.encode(b, false)
+				: this.coder.decode(b, false);
 		if (result.length > 0)
 		{
 			this.out.write(result);
 		}
 	}
 
-	public void write(byte b[], int off, int len) throws IOException
+	public void write(byte b[], int off, int len)
+			throws IOException
 	{
 		if (b == null)
 		{
 			throw new NullPointerException();
 		}
-		else if ((off < 0) || (off > b.length) || (len < 0) ||
-				((off + len) > b.length) || ((off + len) < 0))
+		else if ((off < 0) || (off > b.length) || (len < 0)
+				|| ((off + len) > b.length) || ((off + len) < 0))
 		{
 			throw new IndexOutOfBoundsException();
 		}
@@ -79,13 +90,11 @@ public class CodeOutputStream extends OutputStream
 		{
 			return;
 		}
-
 		if (off == 0 && len == b.length)
 		{
 			this.write(b);
 			return;
 		}
-
 		int leftCount = len;
 		int copyPos = off;
 		byte[] temp = new byte[BLOCK_SIZE];
@@ -109,18 +118,20 @@ public class CodeOutputStream extends OutputStream
 		}
 	}
 
-	public void flush() throws IOException
+	public void flush()
+			throws IOException
 	{
 		this.out.flush();
 	}
 
-	public void close() throws IOException
+	public void close()
+			throws IOException
 	{
-		byte[] result = null;
-		result = this.coder.encode(Coder.EMPTY_BYTE_ARRAY, true);
-		if (result.length > 0)
+		byte[] tmp = this.encodeFlag ? this.coder.encode(Coder.EMPTY_BYTE_ARRAY, true)
+				: this.coder.decode(Coder.EMPTY_BYTE_ARRAY, true);
+		if (tmp.length > 0)
 		{
-			this.out.write(result);
+			this.out.write(tmp);
 		}
 		this.out.close();
 	}

@@ -16,21 +16,22 @@
 
 package self.micromagic.coder;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class CodeInputStream extends InputStream
 {
 	private final int BLOCK_SIZE = 64;
 
-	private InputStream in;
-	private Coder coder;
+	private final InputStream in;
+	private final Coder coder;
 
-	private byte[] oneByteBuf = new byte[1];
+	private final byte[] oneByteBuf = new byte[1];
 	private byte[] outBuf;
 	private int outByteCount = 0;
 	private int outByteOffset = 0;
-	private byte[] readBuf = new byte[128];
+	private final byte[] readBuf = new byte[128];
+	private final boolean decodeFlag;
 	private boolean readOver = false;
 
 	/**
@@ -38,14 +39,22 @@ public class CodeInputStream extends InputStream
 	 */
 	public CodeInputStream(Coder[] coders, InputStream in)
 	{
-		this.coder = new MultiCoder(coders);
-		this.in = in;
+		this(new MultiCoder(coders), in, true);
 	}
 
 	public CodeInputStream(Coder coder, InputStream in)
 	{
+		this(coder, in, true);
+	}
+
+	/**
+	 * @param decodeFlag  是否使用解码模式, 如果为false, 则使用编码模式
+	 */
+	public CodeInputStream(Coder coder, InputStream in, boolean decodeFlag)
+	{
 		this.coder = coder;
 		this.in = in;
+		this.decodeFlag = decodeFlag;
 	}
 
 	public int read()
@@ -71,14 +80,12 @@ public class CodeInputStream extends InputStream
 			return -1;
 		}
 		int hasCount = this.outByteCount - this.outByteOffset;
-
 		if (hasCount > b.length)
 		{
 			System.arraycopy(this.outBuf, this.outByteOffset, b, 0, b.length);
 			this.outByteOffset += b.length;
 			return b.length;
 		}
-
 		int sum = 0;
 		int leftCount = b.length;
 		int copyPos = 0;
@@ -92,7 +99,6 @@ public class CodeInputStream extends InputStream
 				}
 			}
 			hasCount = this.outByteCount - this.outByteOffset;
-
 			if (hasCount >= leftCount)
 			{
 				System.arraycopy(this.outBuf, this.outByteOffset, b, copyPos, leftCount);
@@ -121,34 +127,32 @@ public class CodeInputStream extends InputStream
 		{
 			if (!this.readOver)
 			{
-				byte[] result = null;
-				result = this.coder.decode(Coder.EMPTY_BYTE_ARRAY, true);
+				byte[] emptyBuf = Coder.EMPTY_BYTE_ARRAY;
+				byte[] tmp = this.decodeFlag ? this.coder.decode(emptyBuf, true)
+						: this.coder.encode(emptyBuf, true);
 				this.outByteOffset = 0;
-				this.outByteCount = result.length;
-				this.outBuf = result;
+				this.outByteCount = tmp.length;
+				this.outBuf = tmp;
 				this.readOver = true;
-				return result.length > 0;
+				return tmp.length > 0;
 			}
 			this.outByteCount = -1;
 			this.outByteOffset = 0;
 			this.outBuf = null;
 			return false;
 		}
-
 		byte[] rbuf;
-		boolean over = count < this.readBuf.length;
-		if (!over)
-		{
-			rbuf = this.readBuf;
-		}
-		else
+		if (count < this.readBuf.length)
 		{
 			rbuf = new byte[count];
 			System.arraycopy(this.readBuf, 0, rbuf, 0, count);
-			this.readOver = true;
 		}
-		byte[] result = null;
-		result = this.coder.decode(rbuf, over);
+		else
+		{
+			rbuf = this.readBuf;
+		}
+		byte[] result = this.decodeFlag ? this.coder.decode(rbuf, false)
+				: this.coder.encode(rbuf, false);
 		this.outByteOffset = 0;
 		this.outByteCount = result.length;
 		this.outBuf = result;
@@ -162,8 +166,8 @@ public class CodeInputStream extends InputStream
 		{
 			throw new NullPointerException();
 		}
-		else if ((off < 0) || (off > b.length) || (len < 0) ||
-				((off + len) > b.length) || ((off + len) < 0))
+		else if ((off < 0) || (off > b.length) || (len < 0)
+				|| ((off + len) > b.length) || ((off + len) < 0))
 		{
 			throw new IndexOutOfBoundsException();
 		}
@@ -171,12 +175,10 @@ public class CodeInputStream extends InputStream
 		{
 			return 0;
 		}
-
 		if (off == 0 && len == b.length)
 		{
 			return this.read(b);
 		}
-
 		int sum = 0;
 		int leftCount = len;
 		int nowCount = 0;
@@ -213,16 +215,20 @@ public class CodeInputStream extends InputStream
 		return sum;
 	}
 
-	public int available()
-			throws IOException
-	{
-		return this.in.available();
-	}
-
 	public void close()
 			throws IOException
 	{
-		this.coder.decode(Coder.EMPTY_BYTE_ARRAY, true);
+		if (!this.readOver)
+		{
+			if (this.decodeFlag)
+			{
+				this.coder.decode(Coder.EMPTY_BYTE_ARRAY, true);
+			}
+			else
+			{
+				this.coder.encode(Coder.EMPTY_BYTE_ARRAY, true);
+			}
+		}
 		this.in.close();
 	}
 

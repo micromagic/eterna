@@ -1,10 +1,12 @@
 
 package self.micromagic.coder;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Writer;
 
 import junit.framework.TestCase;
+import self.micromagic.util.StringTool;
 
 public class StringCoderTest extends TestCase
 {
@@ -41,6 +43,16 @@ public class StringCoderTest extends TestCase
 		src = coder.decodeString(dest, 3);
 		assertEquals(dest.length(), coder.getTotalIndex());
 		assertEquals("123\n5\"67\7x\"xd", src);
+	}
+
+	public void testBase64()
+			throws Exception
+	{
+		byte[] buf = {1, 2, 3, 4, 5, 6, 7};
+		CodeInputStream in = new CodeInputStream(
+				new Base64(), new ByteArrayInputStream(buf), false);
+		System.out.println(StringTool.toString(in, "8859_1"));
+		in.close();
 	}
 
 }
