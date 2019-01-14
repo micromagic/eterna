@@ -7,11 +7,15 @@ import self.micromagic.eterna.share.EternaFactory;
 public abstract class AbstractPreparerCreater
 		implements PreparerCreater
 {
+	private final String name;
+	private AttributeManager attributes = new AttributeManager();
+	private EternaFactory factory;
+	private NullCreater nullCreater;
+
 	public AbstractPreparerCreater(String name)
 	{
 		this.name = name;
 	}
-	private final String name;
 
 	public String getName()
 	{
@@ -22,7 +26,6 @@ public abstract class AbstractPreparerCreater
 	{
 		this.attributes = attributes;
 	}
-	private AttributeManager attributes = new AttributeManager();
 
 	public Object getAttribute(String name)
 	{
@@ -45,8 +48,6 @@ public abstract class AbstractPreparerCreater
 		}
 		return true;
 	}
-	private EternaFactory factory;
-	private NullCreater nullCreater;
 
 	/**
 	 * 构造一个null数据的值准备器.

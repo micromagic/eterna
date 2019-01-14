@@ -19,7 +19,6 @@ package self.micromagic.util.converter;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
@@ -52,7 +51,7 @@ public class ByteConverter extends AbstractNumericalConverter
 
 	public byte convertToByte(Object value)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return 0;
 		}
@@ -99,7 +98,7 @@ public class ByteConverter extends AbstractNumericalConverter
 
 	public byte convertToByte(String value)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return 0;
 		}
@@ -118,13 +117,13 @@ public class ByteConverter extends AbstractNumericalConverter
 
 	public Object convert(Object value)
 	{
+		if (this.isNull(value))
+		{
+			return null;
+		}
 		if (value instanceof Byte)
 		{
 			return value;
-		}
-		if (this.emptyToNull && StringTool.isEmpty(value))
-		{
-			return null;
 		}
 		try
 		{
@@ -149,7 +148,7 @@ public class ByteConverter extends AbstractNumericalConverter
 
 	public Object convert(String value)
 	{
-		if (this.emptyToNull && StringTool.isEmpty(value))
+		if (this.isNull(value))
 		{
 			return null;
 		}

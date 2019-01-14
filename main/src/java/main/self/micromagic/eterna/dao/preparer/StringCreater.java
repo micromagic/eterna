@@ -28,16 +28,17 @@ import self.micromagic.util.converter.StringConverter;
 
 class StringCreater extends AbstractPreparerCreater
 {
-	public StringCreater(String name)
-	{
-		super(name);
-	}
 	private static final StringConverter convert = new StringConverter();
 	String beginStr = "";
 	String endStr = "";
 	int appendLength = 0;
 	int caseType = 0;
 	boolean emptyToNull = true;
+
+	public StringCreater(String name)
+	{
+		super(name);
+	}
 
 	public void setPattern(String pattern)
 	{

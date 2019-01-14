@@ -66,7 +66,11 @@ public class BigIntegerConverter extends AbstractNumericalConverter
 
 	public BigInteger convertToBigInteger(Object value, NumberFormat format)
 	{
-		if (value == null || value instanceof BigInteger)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof BigInteger)
 		{
 			return (BigInteger) value;
 		}
@@ -118,7 +122,7 @@ public class BigIntegerConverter extends AbstractNumericalConverter
 
 	public BigInteger convertToBigInteger(String value, NumberFormat format)
 	{
-		if (value == null || (this.emptyToNull && value.length() == 0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

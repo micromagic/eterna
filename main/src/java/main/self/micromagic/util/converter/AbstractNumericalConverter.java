@@ -19,6 +19,7 @@ package self.micromagic.util.converter;
 import org.apache.commons.logging.Log;
 
 import self.micromagic.util.PropertiesManager;
+import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 
 public class AbstractNumericalConverter extends ObjectConverter
@@ -39,6 +40,8 @@ public class AbstractNumericalConverter extends ObjectConverter
 	 */
 	private static boolean NUMERICAL_EMPTY_TO_NULL;
 
+	protected boolean emptyToNull;
+
 	static
 	{
 		try
@@ -55,7 +58,6 @@ public class AbstractNumericalConverter extends ObjectConverter
 	{
 		this.emptyToNull = NUMERICAL_EMPTY_TO_NULL;
 	}
-	protected boolean emptyToNull;
 
 	public boolean isEmptyToNull()
 	{
@@ -65,6 +67,16 @@ public class AbstractNumericalConverter extends ObjectConverter
 	public void setEmptyToNull(boolean emptyToNull)
 	{
 		this.emptyToNull = emptyToNull;
+	}
+
+	public boolean isNull(String value)
+	{
+		return value == null || (this.emptyToNull && StringTool.isEmpty(value));
+	}
+
+	public boolean isNull(Object value)
+	{
+		return value == null || (this.emptyToNull && StringTool.isEmpty(value));
 	}
 
 	/**

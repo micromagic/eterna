@@ -65,7 +65,11 @@ public class DateConverter extends AbstractNumericalConverter
 
 	public java.sql.Date convertToDate(Object value, DateFormat format)
 	{
-		if (value == null || value instanceof java.sql.Date)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof java.sql.Date)
 		{
 			return (java.sql.Date) value;
 		}
@@ -105,7 +109,7 @@ public class DateConverter extends AbstractNumericalConverter
 
 	public java.sql.Date convertToDate(String value, DateFormat format)
 	{
-		if (value == null || (this.emptyToNull && value.length() ==  0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

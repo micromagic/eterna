@@ -22,7 +22,6 @@ import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
@@ -67,7 +66,7 @@ public class DoubleConverter extends AbstractNumericalConverter
 
 	public double convertToDouble(Object value, NumberFormat format)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return 0.0;
 		}
@@ -115,9 +114,9 @@ public class DoubleConverter extends AbstractNumericalConverter
 
 	public double convertToDouble(String value, NumberFormat format)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
-			return 0;
+			return 0.0;
 		}
 		try
 		{
@@ -141,13 +140,13 @@ public class DoubleConverter extends AbstractNumericalConverter
 
 	public Object convert(Object value)
 	{
+		if (this.isNull(value))
+		{
+			return null;
+		}
 		if (value instanceof Double)
 		{
 			return value;
-		}
-		if (this.emptyToNull && StringTool.isEmpty(value))
-		{
-			return null;
 		}
 		try
 		{
@@ -172,7 +171,7 @@ public class DoubleConverter extends AbstractNumericalConverter
 
 	public Object convert(String value)
 	{
-		if (this.emptyToNull && StringTool.isEmpty(value))
+		if (this.isNull(value))
 		{
 			return null;
 		}

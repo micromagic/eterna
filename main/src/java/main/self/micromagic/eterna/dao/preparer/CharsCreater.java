@@ -31,11 +31,12 @@ import self.micromagic.util.converter.ReaderConverter;
 
 class CharsCreater extends AbstractPreparerCreater
 {
+	private static final ReaderConverter convert = new ReaderConverter();
+
 	public CharsCreater(String name)
 	{
 		super(name);
 	}
-	private static final ReaderConverter convert = new ReaderConverter();
 
 	public Object convertValue(Object value)
 	{

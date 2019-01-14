@@ -29,16 +29,16 @@ import self.micromagic.util.ref.StringRef;
 
 abstract class AbstractDateCreater extends AbstractPreparerCreater
 {
+	protected String typeName;
+	protected DateFormat[] formats;
+	protected Locale[] locales;
+	protected TimeZone timeZone = null;
+
 	public AbstractDateCreater(String name, String type)
 	{
 		super(name);
 		this.typeName = type;
 	}
-
-	protected String typeName;
-	protected DateFormat[] formats;
-	protected Locale[] locales;
-	protected TimeZone timeZone = null;
 
 	public void setPattern(String pattern)
 	{

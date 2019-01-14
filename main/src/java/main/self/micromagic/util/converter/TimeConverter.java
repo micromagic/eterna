@@ -65,7 +65,11 @@ public class TimeConverter extends AbstractNumericalConverter
 
 	public java.sql.Time convertToTime(Object value, DateFormat format)
 	{
-		if (value == null || value instanceof java.sql.Time)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof java.sql.Time)
 		{
 			return (java.sql.Time) value;
 		}
@@ -105,7 +109,7 @@ public class TimeConverter extends AbstractNumericalConverter
 
 	public java.sql.Time convertToTime(String value, DateFormat format)
 	{
-		if (value == null || (this.emptyToNull && value.length() == 0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

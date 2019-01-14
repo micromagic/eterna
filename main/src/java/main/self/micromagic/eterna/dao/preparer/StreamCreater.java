@@ -31,12 +31,13 @@ import self.micromagic.util.converter.StreamConverter;
 
 class StreamCreater extends AbstractPreparerCreater
 {
+	private static final StreamConverter convert = new StreamConverter();
+	String charset = "UTF-8";
+
 	public StreamCreater(String name)
 	{
 		super(name);
 	}
-	private static final StreamConverter convert = new StreamConverter();
-	String charset = "UTF-8";
 
 	public void setCharset(String charset)
 	{

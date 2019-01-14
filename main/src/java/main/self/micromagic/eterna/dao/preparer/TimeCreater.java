@@ -26,11 +26,12 @@ import self.micromagic.util.converter.TimeConverter;
 
 class TimeCreater extends AbstractDateCreater
 {
+	private static final TimeConverter convert = new TimeConverter();
+
 	public TimeCreater(String name)
 	{
 		super(name, "Time");
 	}
-	private static final TimeConverter convert = new TimeConverter();
 
 	protected Object convertValue(Object value, DateFormat format)
 	{

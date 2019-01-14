@@ -76,7 +76,11 @@ public class CalendarConverter extends AbstractNumericalConverter
 
 	public Calendar convertToCalendar(Object value, DateFormat[] formats)
 	{
-		if (value == null || value instanceof Calendar)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof Calendar)
 		{
 			return (Calendar) value;
 		}
@@ -125,7 +129,7 @@ public class CalendarConverter extends AbstractNumericalConverter
 
 	public Calendar convertToCalendar(String value, DateFormat[] formats)
 	{
-		if (value == null || (this.emptyToNull && value.length() == 0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

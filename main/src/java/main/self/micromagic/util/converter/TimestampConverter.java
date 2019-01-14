@@ -65,7 +65,11 @@ public class TimestampConverter extends AbstractNumericalConverter
 
 	public java.sql.Timestamp convertToTimestamp(Object value, DateFormat format)
 	{
-		if (value == null || value instanceof java.sql.Timestamp)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof java.sql.Timestamp)
 		{
 			return (java.sql.Timestamp) value;
 		}
@@ -105,7 +109,7 @@ public class TimestampConverter extends AbstractNumericalConverter
 
 	public java.sql.Timestamp convertToTimestamp(String value, DateFormat format)
 	{
-		if (value == null || (this.emptyToNull && value.length() == 0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

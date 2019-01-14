@@ -25,26 +25,35 @@ import self.micromagic.util.converter.IntegerConverter;
 
 class ByteCreater extends AbstractNumberCreater
 {
+	private static final IntegerConverter convert = new IntegerConverter();
+
 	public ByteCreater(String name)
 	{
 		super(name);
 	}
-	private static final IntegerConverter convert = new IntegerConverter();
 
 	public Object convertValue(Object value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return new Byte((byte) convert.convertToInt(value, this.format));
 	}
 
 	public Object convertValue(String value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return new Byte((byte) convert.convertToInt(value, this.format));
 	}
 
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.TINYINT);
 		}
@@ -54,7 +63,7 @@ class ByteCreater extends AbstractNumberCreater
 	public ValuePreparer createPreparer(String value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.TINYINT);
 		}

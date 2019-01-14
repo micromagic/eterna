@@ -25,26 +25,35 @@ import self.micromagic.util.converter.LongConverter;
 
 class LongCreater extends AbstractNumberCreater
 {
+	private static final LongConverter convert = new LongConverter();
+
 	public LongCreater(String name)
 	{
 		super(name);
 	}
-	private static final LongConverter convert = new LongConverter();
 
 	public Object convertValue(Object value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return new Long(convert.convertToLong(value, this.format));
 	}
 
 	public Object convertValue(String value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return new Long(convert.convertToLong(value, this.format));
 	}
 
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.BIGINT);
 		}
@@ -54,7 +63,7 @@ class LongCreater extends AbstractNumberCreater
 	public ValuePreparer createPreparer(String value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.BIGINT);
 		}

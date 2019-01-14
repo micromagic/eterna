@@ -26,12 +26,12 @@ import self.micromagic.util.ref.StringRef;
 
 abstract class AbstractNumberCreater extends AbstractPreparerCreater
 {
+	protected NumberFormat format = null;
+
 	public AbstractNumberCreater(String name)
 	{
 		super(name);
 	}
-
-	protected NumberFormat format = null;
 
 	public void setPattern(String pattern)
 	{

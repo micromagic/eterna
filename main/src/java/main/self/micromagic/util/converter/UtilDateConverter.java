@@ -75,7 +75,11 @@ public class UtilDateConverter extends AbstractNumericalConverter
 
 	public java.util.Date convertToDate(Object value, DateFormat[] formats)
 	{
-		if (value == null || value instanceof java.util.Date)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof java.util.Date)
 		{
 			return (java.util.Date) value;
 		}
@@ -116,7 +120,7 @@ public class UtilDateConverter extends AbstractNumericalConverter
 
 	public java.util.Date convertToDate(String value, DateFormat[] formats)
 	{
-		if (value == null || (this.emptyToNull && value.length() == 0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

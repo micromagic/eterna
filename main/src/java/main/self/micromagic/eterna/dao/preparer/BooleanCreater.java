@@ -26,12 +26,13 @@ import self.micromagic.util.converter.BooleanConverter;
 
 class BooleanCreater extends AbstractPreparerCreater
 {
+	private static final BooleanConverter convert = new BooleanConverter();
+	private String[] trueValues = null;
+
 	public BooleanCreater(String name)
 	{
 		super(name);
 	}
-	private static final BooleanConverter convert = new BooleanConverter();
-	private String[] trueValues = null;
 
 	public void setPattern(String pattern)
 	{
@@ -40,18 +41,26 @@ class BooleanCreater extends AbstractPreparerCreater
 
 	public Object convertValue(Object value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return convert.convertToBoolean(value, this.trueValues) ? Boolean.TRUE : Boolean.FALSE;
 	}
 
 	public Object convertValue(String value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return convert.convertToBoolean(value, this.trueValues) ? Boolean.TRUE : Boolean.FALSE;
 	}
 
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.BOOLEAN);
 		}
@@ -61,7 +70,7 @@ class BooleanCreater extends AbstractPreparerCreater
 	public ValuePreparer createPreparer(String value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.BOOLEAN);
 		}

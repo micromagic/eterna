@@ -24,12 +24,13 @@ import self.micromagic.util.converter.BytesConverter;
 
 class BytesCreater extends AbstractPreparerCreater
 {
+	private static final BytesConverter convert = new BytesConverter();
+	String charset = "UTF-8";
+
 	public BytesCreater(String name)
 	{
 		super(name);
 	}
-	private static final BytesConverter convert = new BytesConverter();
-	String charset = "UTF-8";
 
 	public void setCharset(String charset)
 	{

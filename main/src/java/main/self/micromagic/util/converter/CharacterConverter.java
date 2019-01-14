@@ -18,7 +18,6 @@ package self.micromagic.util.converter;
 
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.ref.StringRef;
 
 public class CharacterConverter extends AbstractNumericalConverter
@@ -50,7 +49,7 @@ public class CharacterConverter extends AbstractNumericalConverter
 
 	public char convertToChar(Object value)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return DEFAULT_VALUE.charValue();
 		}
@@ -69,7 +68,7 @@ public class CharacterConverter extends AbstractNumericalConverter
 
 	public char convertToChar(String value)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return DEFAULT_VALUE.charValue();
 		}
@@ -87,13 +86,13 @@ public class CharacterConverter extends AbstractNumericalConverter
 
 	public Object convert(Object value)
 	{
+		if (this.isNull(value))
+		{
+			return null;
+		}
 		if (value instanceof Character)
 		{
 			return value;
-		}
-		if (this.emptyToNull && StringTool.isEmpty(value))
-		{
-			return null;
 		}
 		try
 		{
@@ -118,7 +117,7 @@ public class CharacterConverter extends AbstractNumericalConverter
 
 	public Object convert(String value)
 	{
-		if (this.emptyToNull && StringTool.isEmpty(value))
+		if (this.isNull(value))
 		{
 			return null;
 		}

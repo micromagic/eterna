@@ -19,7 +19,6 @@ package self.micromagic.util.converter;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
@@ -87,7 +86,7 @@ public class BooleanConverter extends AbstractNumericalConverter
 
 	public boolean convertToBoolean(Object value, String[] trueValues)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return false;
 		}
@@ -143,7 +142,7 @@ public class BooleanConverter extends AbstractNumericalConverter
 
 	public boolean convertToBoolean(String value, String[] trueValues)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return false;
 		}
@@ -168,13 +167,13 @@ public class BooleanConverter extends AbstractNumericalConverter
 
 	public Object convert(Object value)
 	{
+		if (this.isNull(value))
+		{
+			return null;
+		}
 		if (value instanceof Boolean)
 		{
 			return value;
-		}
-		if (this.emptyToNull && StringTool.isEmpty(value))
-		{
-			return null;
 		}
 		try
 		{
@@ -199,7 +198,7 @@ public class BooleanConverter extends AbstractNumericalConverter
 
 	public Object convert(String value)
 	{
-		if (this.emptyToNull && StringTool.isEmpty(value))
+		if (this.isNull(value))
 		{
 			return null;
 		}

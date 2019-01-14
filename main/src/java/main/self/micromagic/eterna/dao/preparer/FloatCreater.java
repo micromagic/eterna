@@ -25,26 +25,35 @@ import self.micromagic.util.converter.DoubleConverter;
 
 class FloatCreater extends AbstractNumberCreater
 {
+	private static final DoubleConverter convert = new DoubleConverter();
+
 	public FloatCreater(String name)
 	{
 		super(name);
 	}
-	private static final DoubleConverter convert = new DoubleConverter();
 
 	public Object convertValue(Object value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return new Float((float) convert.convertToDouble(value, this.format));
 	}
 
 	public Object convertValue(String value)
 	{
+		if (convert.isNull(value))
+		{
+			return null;
+		}
 		return new Float((float) convert.convertToDouble(value, this.format));
 	}
 
 	public ValuePreparer createPreparer(Object value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.FLOAT);
 		}
@@ -54,7 +63,7 @@ class FloatCreater extends AbstractNumberCreater
 	public ValuePreparer createPreparer(String value)
 			throws EternaException
 	{
-		if (value == null)
+		if (convert.isNull(value))
 		{
 			return this.createNull(Types.FLOAT);
 		}

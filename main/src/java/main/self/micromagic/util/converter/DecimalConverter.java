@@ -66,7 +66,11 @@ public class DecimalConverter extends AbstractNumericalConverter
 
 	public BigDecimal convertToDecimal(Object value, NumberFormat format)
 	{
-		if (value == null || value instanceof BigDecimal)
+		if (this.isNull(value))
+		{
+			return null;
+		}
+		if (value instanceof BigDecimal)
 		{
 			return (BigDecimal) value;
 		}
@@ -118,7 +122,7 @@ public class DecimalConverter extends AbstractNumericalConverter
 
 	public BigDecimal convertToDecimal(String value, NumberFormat format)
 	{
-		if (value == null || (this.emptyToNull && value.length() == 0))
+		if (this.isNull(value))
 		{
 			return null;
 		}

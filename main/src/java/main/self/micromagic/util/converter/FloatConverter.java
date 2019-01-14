@@ -19,7 +19,6 @@ package self.micromagic.util.converter;
 import self.micromagic.cg.ClassGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.TypeManager;
-import self.micromagic.util.StringTool;
 import self.micromagic.util.container.RequestParameterMap;
 import self.micromagic.util.ref.ObjectRef;
 import self.micromagic.util.ref.StringRef;
@@ -52,7 +51,7 @@ public class FloatConverter extends AbstractNumericalConverter
 
 	public float convertToFloat(Object value)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
 			return 0.0f;
 		}
@@ -99,9 +98,9 @@ public class FloatConverter extends AbstractNumericalConverter
 
 	public float convertToFloat(String value)
 	{
-		if (value == null)
+		if (this.isNull(value))
 		{
-			return 0;
+			return 0.0f;
 		}
 		Object tmpObj = this.changeByPropertyEditor(value);
 		if (tmpObj instanceof Float)
@@ -118,13 +117,13 @@ public class FloatConverter extends AbstractNumericalConverter
 
 	public Object convert(Object value)
 	{
+		if (this.isNull(value))
+		{
+			return null;
+		}
 		if (value instanceof Float)
 		{
 			return value;
-		}
-		if (this.emptyToNull && StringTool.isEmpty(value))
-		{
-			return null;
 		}
 		try
 		{
@@ -149,7 +148,7 @@ public class FloatConverter extends AbstractNumericalConverter
 
 	public Object convert(String value)
 	{
-		if (this.emptyToNull && StringTool.isEmpty(value))
+		if (this.isNull(value))
 		{
 			return null;
 		}

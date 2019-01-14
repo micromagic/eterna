@@ -24,11 +24,13 @@ import self.micromagic.eterna.share.EternaFactory;
 
 class NullCreater implements PreparerCreater
 {
+	private final String name;
+	private EternaFactory factory;
+
 	public NullCreater(String name)
 	{
 		this.name = name;
 	}
-	private final String name;
 
 	public String getName()
 	{
@@ -53,7 +55,6 @@ class NullCreater implements PreparerCreater
 		}
 		return true;
 	}
-	private EternaFactory factory;
 
 	public EternaFactory getFactory() throws EternaException
 	{
