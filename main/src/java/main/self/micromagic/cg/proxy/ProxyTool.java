@@ -38,8 +38,18 @@ import self.micromagic.util.Utility;
  */
 public class ProxyTool
 {
+	private static int METHOD_PROXY_ID = 1;
+
 	private ProxyTool()
 	{
+	}
+
+	/**
+	 * 获取基本类型的默认值.
+	 */
+	public static Object getPrimitiveDefaultValue(Class type)
+	{
+		return primitiveDefaults.get(type);
 	}
 
 	/**
@@ -263,7 +273,6 @@ public class ProxyTool
 		}
 		return proxy;
 	}
-	private static int METHOD_PROXY_ID = 1;
 
 	/**
 	 * 判断所给出的类是否为自动生成的类.
@@ -347,59 +356,6 @@ public class ProxyTool
 	private static ClassKeyCache methodProxyCache = ClassKeyCache.getInstance();
 
 	/**
-	 * 方法调用代理存放的键值.
-	 */
-	static class MethodProxyKey
-	{
-		private final String methodName;
-		private final boolean paramCheck;
-		private final Class[] params;
-		public MethodProxyKey(String methodName, boolean paramCheck, Class[] params)
-		{
-			this.methodName = methodName;
-			this.paramCheck = paramCheck;
-			this.params = params;
-		}
-
-		public boolean equals(Object obj)
-		{
-			if (obj instanceof MethodProxyKey)
-			{
-				MethodProxyKey key = (MethodProxyKey) obj;
-				if (this.methodName.equals(key.methodName) && this.paramCheck == key.paramCheck)
-				{
-					Class[] params1 = this.params;
-					Class[] params2 = key.params;
-					if (params1.length == params2.length)
-					{
-						for (int i = 0; i < params1.length; i++)
-						{
-							if (params1[i] != params2[i])
-							{
-								return false;
-							}
-						}
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		public int hashCode()
-		{
-			if (this.hash == -1)
-			{
-				this.hash = ("method:".concat(this.methodName).hashCode()) ^ (this.params.length << 12)
-						^ (this.paramCheck ? 1231 : 1237);
-			}
-			return this.hash;
-		}
-		private int hash = -1;
-
-	}
-
-	/**
 	 * 用于记录日志.
 	 */
 	static final Log log = Utility.createLog("eterna.dc");
@@ -408,6 +364,11 @@ public class ProxyTool
 	 * 基本类型需要检查的类型的对应表.
 	 */
 	static final Map primitiveCheckCache = new HashMap();
+
+	/**
+	 * 基本类型需要检查的类型的对应表.
+	 */
+	static final Map primitiveDefaults = new HashMap();
 
 	/**
 	 * 代码段资源.
@@ -435,6 +396,70 @@ public class ProxyTool
 		primitiveCheckCache.put("long", new String[]{"long", "int", "char", "short", "byte"});
 		primitiveCheckCache.put("float", new String[]{"float", "int", "long", "char", "short", "byte"});
 		primitiveCheckCache.put("double", new String[]{"double", "float", "int", "long", "char", "short", "byte"});
+
+		primitiveDefaults.put(boolean.class, Boolean.FALSE);
+		primitiveDefaults.put(char.class, new Character((char) 0));
+		primitiveDefaults.put(byte.class, new Byte((byte) 0));
+		primitiveDefaults.put(short.class, new Short((short) 0));
+		primitiveDefaults.put(int.class, Utility.INTEGER_0);
+		primitiveDefaults.put(long.class, new Long(0L));
+		primitiveDefaults.put(float.class, new Float(0.0f));
+		primitiveDefaults.put(double.class, new Double(0.0));
+	}
+
+}
+
+
+/**
+ * 方法调用代理存放的键值.
+ */
+class MethodProxyKey
+{
+	private final String methodName;
+	private final boolean paramCheck;
+	private final Class[] params;
+	private int hash = -1;
+
+	public MethodProxyKey(String methodName, boolean paramCheck, Class[] params)
+	{
+		this.methodName = methodName;
+		this.paramCheck = paramCheck;
+		this.params = params;
+	}
+
+	public boolean equals(Object obj)
+	{
+		if (obj instanceof MethodProxyKey)
+		{
+			MethodProxyKey key = (MethodProxyKey) obj;
+			if (this.methodName.equals(key.methodName) && this.paramCheck == key.paramCheck)
+			{
+				Class[] params1 = this.params;
+				Class[] params2 = key.params;
+				if (params1.length == params2.length)
+				{
+					for (int i = 0; i < params1.length; i++)
+					{
+						if (params1[i] != params2[i])
+						{
+							return false;
+						}
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public int hashCode()
+	{
+		if (this.hash == -1)
+		{
+			this.hash = ("method:".concat(this.methodName).hashCode()) ^ (this.params.length << 12)
+					^ (this.paramCheck ? 1231 : 1237);
+		}
+		return this.hash;
 	}
 
 }

@@ -40,6 +40,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 
 import self.micromagic.cg.ClassGenerator;
+import self.micromagic.cg.proxy.ProxyTool;
 import self.micromagic.eterna.digester2.ConfigResource;
 import self.micromagic.eterna.digester2.ContainerManager;
 import self.micromagic.eterna.digester2.FactoryContainerImpl;
@@ -1309,18 +1310,23 @@ class PropertyManager
 		{
 			Object objValue = value;
 			Field theField = (Field) member;
-			if (theField.getType() != String.class)
+			Class fType = theField.getType();
+			if (fType != String.class)
 			{
 				try
 				{
-					objValue = ConverterFinder.findConverter(theField.getType(), false).convert(value);
+					objValue = ConverterFinder.findConverter(fType, false).convert(value);
+					if (objValue == null && fType.isPrimitive())
+					{
+						objValue = ProxyTool.getPrimitiveDefaultValue(fType);
+					}
 				}
 				catch (Throwable ex)
 				{
 					Class theClass = (Class) this.baseClass.get();
 					if (theClass != null)
 					{
-						String typeName = ClassGenerator.getClassName(theField.getType());
+						String typeName = ClassGenerator.getClassName(fType);
 						String msg = "Type convert error for value:[" + value + "] to [" + typeName
 								+ "] in class:[" + ClassGenerator.getClassName(theClass)
 								+ "] field:[" + this.optMemberName + "].";
