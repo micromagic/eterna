@@ -200,7 +200,7 @@ public class DoubleBufferList<T>
 					}
 					else
 					{
-						 this.wait(71L);
+						this.wait(71L);
 					}
 				}
 				catch (InterruptedException ex) {}

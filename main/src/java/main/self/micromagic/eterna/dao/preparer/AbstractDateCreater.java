@@ -32,7 +32,7 @@ abstract class AbstractDateCreater extends AbstractPreparerCreater
 	protected String typeName;
 	protected DateFormat[] formats;
 	protected Locale[] locales;
-	protected TimeZone timeZone = null;
+	protected TimeZone timeZone;
 
 	public AbstractDateCreater(String name, String type)
 	{

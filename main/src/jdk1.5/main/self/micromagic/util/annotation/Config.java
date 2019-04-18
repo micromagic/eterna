@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 /**
  * 将类中的一个静态变量或静态方法与配置中的值进行
  * 绑定的标注.
- * 
+ *
  * @see self.micromagic.util.PropertiesManager#autoBind(Class)
  */
 @Retention(RetentionPolicy.RUNTIME)
