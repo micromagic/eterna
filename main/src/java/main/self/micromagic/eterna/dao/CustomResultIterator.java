@@ -58,7 +58,7 @@ public class CustomResultIterator extends AbstractResultIterator
 	public ResultRow createRow(Object[] values)
 			throws EternaException
 	{
-		if (values.length != this.readerManager.getReaderCount())
+		if (values.length != this.readerList.size())
 		{
 			throw new EternaException("The values count must same as the ResultReaderManager's readers count.");
 		}
