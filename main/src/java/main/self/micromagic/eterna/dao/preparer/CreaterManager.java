@@ -60,7 +60,7 @@ public class CreaterManager extends AbstractGenerator
 		typeClassMap.put("Time", TimeCreater.class);
 		typeClassMap.put("Datetime", TimestampCreater.class);
 		typeClassMap.put("Timestamp", TimestampCreater.class);
-		typeClassMap.put("BigString", StringCreater.class);
+		typeClassMap.put("BigString", BigStringCreater.class);
 		typeClassMap.put("Stream", StreamCreater.class);
 		typeClassMap.put("Chars", CharsCreater.class);
 		typeClassMap.put("Blob", BlobCreater.class);

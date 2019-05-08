@@ -49,6 +49,7 @@ import self.micromagic.eterna.model.AppData;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Factory;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.FormatTool;
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
@@ -475,7 +476,10 @@ class PreparedValueReader
 		Element parameter = this.paramsRoot.addElement("parameter");
 		this.addParameterName(parameter, parameterName);
 		parameter.addAttribute("index", Integer.toString(parameterIndex));
-		parameter.addAttribute("sqlType", sqlType + "");
+		int type = TypeManager.transSQLType(sqlType);
+		String typeName = Integer.toString(sqlType).concat(",")
+				.concat(TypeManager.getTypeName(type));
+		parameter.addAttribute("typeName", typeName);
 		parameter.addAttribute("isNull", "true");
 	}
 

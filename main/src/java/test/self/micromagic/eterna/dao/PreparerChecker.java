@@ -23,6 +23,7 @@ import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Calendar;
 
 import junit.framework.Assert;
@@ -34,15 +35,27 @@ public class PreparerChecker
 		implements PreparedStatementWrap
 {
 	private final Object[] values;
+	private final int sqlType;
 
 	public PreparerChecker(Object[] values)
 	{
 		this.values = values;
+		this.sqlType = Types.NULL;
+	}
+
+	public PreparerChecker(int sqlType)
+	{
+		this.values = new Object[]{null};
+		this.sqlType = sqlType;
 	}
 
 	public void setNull(String parameterName, int index, int sqlType)
 	{
 		Assert.assertEquals("i-" + index, values[index - 1], null);
+		if (this.sqlType != Types.NULL)
+		{
+			Assert.assertEquals("i-" + index, this.sqlType, sqlType);
+		}
 	}
 
 	public void setBoolean(String parameterName, int index, boolean x)

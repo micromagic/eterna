@@ -17,23 +17,27 @@
 package self.micromagic.eterna.dao.preparer;
 
 import java.sql.SQLException;
+import java.sql.Types;
 
 import self.micromagic.eterna.dao.PreparedStatementWrap;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.Tool;
+import self.micromagic.eterna.share.TypeManager;
 import self.micromagic.util.StringAppender;
 import self.micromagic.util.StringTool;
+import self.micromagic.util.Utility;
 import self.micromagic.util.converter.StringConverter;
 
 class StringCreater extends AbstractPreparerCreater
 {
 	private static final StringConverter convert = new StringConverter();
-	String beginStr = "";
-	String endStr = "";
-	int appendLength = 0;
-	int caseType = 0;
-	boolean emptyToNull = true;
+
+	private String beginStr = "";
+	private String endStr = "";
+	private int appendLength = 0;
+	private int caseType = 0;
+	private boolean emptyToNull = true;
 
 	public StringCreater(String name)
 	{
@@ -120,7 +124,66 @@ class StringCreater extends AbstractPreparerCreater
 
 	public ValuePreparer createPreparer(String value)
 	{
-		return new StringPreparer(this, (String) this.convertValue(value));
+		return new StringPreparer(this, (String) this.convertValue(value), Types.VARCHAR);
+	}
+
+}
+
+class BigStringCreater extends StringCreater
+{
+	/**
+	 * 系统日志时是否仅仅输出语句.
+	 */
+	private static int sqlType = Types.CLOB;
+
+	static
+	{
+		try
+		{
+			Utility.addMethodPropertyManager("eterna.dao.bigString.sqlType",
+					BigStringCreater.class, "setBigStringSqlType");
+		}
+		catch (Throwable ex)
+		{
+			Tool.log.warn("Error in init big string sql type.", ex);
+		}
+	}
+
+	public BigStringCreater(String name)
+	{
+		super(name);
+	}
+
+	static void setBigStringSqlType(String type)
+	{
+		if (type == null)
+		{
+			sqlType = Types.CLOB;
+		}
+		else
+		{
+			int typeId = TypeManager.getTypeId(type);
+			if (typeId != TypeManager.TYPE_NONE)
+			{
+				sqlType = TypeManager.getSQLType(typeId);
+			}
+			else
+			{
+				try
+				{
+					sqlType = Integer.parseInt(type);
+				}
+				catch (NumberFormatException ex)
+				{
+					sqlType = Types.CLOB;
+				}
+			}
+		}
+	}
+
+	public ValuePreparer createPreparer(String value)
+	{
+		return new StringPreparer(this, (String) this.convertValue(value), sqlType);
 	}
 
 }
@@ -128,17 +191,26 @@ class StringCreater extends AbstractPreparerCreater
 class StringPreparer extends AbstractValuePreparer
 {
 	private final String value;
+	private final int sqlType;
 
-	public StringPreparer(PreparerCreater creater, String value)
+	public StringPreparer(PreparerCreater creater, String value, int nullType)
 	{
 		super(creater);
 		this.value = value;
+		this.sqlType = nullType;
 	}
 
 	public void setValueToStatement(int index, PreparedStatementWrap stmtWrap)
 			throws SQLException
 	{
-		stmtWrap.setString(this.getName(), index, this.value);
+		if (this.value == null)
+		{
+			stmtWrap.setNull(this.getName(), index, this.sqlType);
+		}
+		else
+		{
+			stmtWrap.setString(this.getName(), index, this.value);
+		}
 	}
 
 }
