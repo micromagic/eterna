@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.apache.commons.logging.Log;
+
 import self.micromagic.util.StringTool;
 import self.micromagic.util.Utility;
 
@@ -28,6 +30,11 @@ import self.micromagic.util.Utility;
  */
 class AbstractContainerSetting
 {
+	/**
+	 * 用于记录日志.
+	 */
+	protected static final Log log = Utility.createLog("self.micromagic.util.container");
+
 	/**
 	 * 进行URL编解码时使用的默认字符集.
 	 */
@@ -111,7 +118,9 @@ class AbstractContainerSetting
 		}
 		catch (UnsupportedEncodingException ex)
 		{
-			throw new IllegalArgumentException("Error charset:[" + charset + "], " + ex);
+			String msg = "Error in encode [" + value
+					+ "] with charset [" + charset + "], " + ex;
+			throw new IllegalArgumentException(msg);
 		}
 	}
 
@@ -132,9 +141,12 @@ class AbstractContainerSetting
 			}
 			return URLDecoder.decode(value, charset);
 		}
-		catch (UnsupportedEncodingException ex)
+		catch (Exception ex)
 		{
-			throw new IllegalArgumentException("Error charset:[" + charset + "], " + ex);
+			String msg = "Error in decoder [" + value
+					+ "] with charset [" + charset + "].";
+			log.error(msg, ex);
+			return value;
 		}
 	}
 
