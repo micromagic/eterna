@@ -68,8 +68,18 @@ class DatePreparer extends AbstractValuePreparer
 	public DatePreparer(PreparerCreater creater, Date value, Calendar calendar)
 	{
 		super(creater);
-		this.value = value;
+		if (value != null)
+		{
+			Calendar tmp = calendar == null ? Calendar.getInstance() : calendar;
+			tmp.setTimeInMillis(value.getTime());
+			tmp.set(Calendar.HOUR_OF_DAY, 0);
+			tmp.set(Calendar.MINUTE, 0);
+			tmp.set(Calendar.SECOND, 0);
+			tmp.set(Calendar.MILLISECOND, 0);
+			value.setTime(tmp.getTimeInMillis());
+		}
 		this.calendar = calendar;
+		this.value = value;
 	}
 
 	public void setValueToStatement(int index, PreparedStatementWrap stmtWrap)
