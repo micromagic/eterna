@@ -331,6 +331,10 @@ public class CookieContainer extends AbstractContainerSetting
 		}
 		if (cookie != null)
 		{
+			if (this.checkSecure())
+			{
+				cookie.setSecure(true);
+			}
 			this.response.addCookie(cookie);
 			if (cookie.getMaxAge() == 0)
 			{
@@ -341,6 +345,16 @@ public class CookieContainer extends AbstractContainerSetting
 				this.cookieMap.put(name, cookie);
 			}
 		}
+	}
+
+	private boolean checkSecure()
+	{
+		if ("https".equalsIgnoreCase(this.request.getScheme()))
+		{
+			return true;
+		}
+		String scheme = this.request.getHeader("X-Forwarded-Proto");
+		return "https".equalsIgnoreCase(scheme);
 	}
 
 	public void removeValue(Object key)
