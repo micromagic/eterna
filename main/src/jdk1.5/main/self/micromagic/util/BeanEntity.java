@@ -37,6 +37,8 @@ import self.micromagic.eterna.share.AbstractGenerator;
 import self.micromagic.eterna.share.EternaException;
 import self.micromagic.eterna.share.EternaFactory;
 import self.micromagic.eterna.share.FactoryContainer;
+import self.micromagic.util.annotation.Column;
+import self.micromagic.util.annotation.Transient;
 
 /**
  * 将一个bo对象解析为Entity对象.
@@ -47,11 +49,11 @@ public class BeanEntity extends AbstractGenerator
 	/**
 	 * 不需要持久化的标注.
 	 */
-	private static Class<? extends Annotation> TRANSIENT_ANNOTATION;
+	private static Class<? extends Annotation> TRANSIENT_ANNOTATION = Transient.class;
 	/**
 	 * 列配置的标注.
 	 */
-	private static Class<? extends Annotation> COLUMN_ANNOTATION;
+	private static Class<? extends Annotation> COLUMN_ANNOTATION = Column.class;
 
 	/**
 	 * 类型到类型名称的字典表.
@@ -239,26 +241,26 @@ public class BeanEntity extends AbstractGenerator
 	public int getItemCount()
 			throws EternaException
 	{
-		return this.getItemCount();
+		return this.base.getItemCount();
 	}
 
 	public EntityItem getItem(String name)
 			throws EternaException
 	{
-		return this.getItem(name);
+		return this.base.getItem(name);
 	}
 
 	public EntityItem getItem(int index)
 			throws EternaException
 	{
-		return this.getItem(index);
+		return this.base.getItem(index);
 	}
 
 	@SuppressWarnings("rawtypes")
 	public Iterator getItemIterator()
 			throws EternaException
 	{
-		return this.getItemIterator();
+		return this.base.getItemIterator();
 	}
 
 	public void setBeanClass(String beanClass)
@@ -271,7 +273,7 @@ public class BeanEntity extends AbstractGenerator
 	 */
 	private static String getColumnName(Annotation column)
 	{
-		return "";
+		return ((Column) column).value();
 	}
 
 }
